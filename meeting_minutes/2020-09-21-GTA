@@ -1,0 +1,35 @@
+# MM 2020-09-21 GTA Meeting
+
+## Tasks Accomplished Last Week
+Talked with client about TRI and PubChem data
+Went over data with client
+Decided data to pull
+
+## What Does the Data Look Like?
+Yearly CSV files back to 1997
+Location, toxicant information, spill information, company information
+
+Convert from csv to json
+
+## Overview of Visualization
+Geographically first, color coded by hazard presented by chemical
+
+
+##What is needed for first prototype
+Core function should be complete.
+Should be able to visualize location of toxicants.
+Must contain map to visualize data.
+
+Prototype is essecntially the final product with UI and other elements stripped down
+
+For this prototype: include map with some kind of visualization on it (dots for spill types, etc.)
+OR pick a single entry and visualize that.
+
+Think about which of these atributes should be displayed on the map (location and type of toxicant)
+Search, sort, filter by toxicants can be prototype 2.
+
+
+
+## Action Items
+Also talk to professor Sayed about the scope of prototype 1.
+Also talk about this with the client (ask what he expects from prototype 1)
