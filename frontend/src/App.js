@@ -1,33 +1,17 @@
 /* eslint-disable import/first */
 
 require('dotenv').config();
-import React, { Component } from 'react';
-import { Map, GoogleApiWrapper } from 'google-maps-react';
-import './App.css';
+const React = require('react');
+import MapContainer from './maps/MapContainer'
 
-const mapStyles = {
-  width: '100%',
-  height: '100%'
-};
-
-export class MapContainer extends Component {
+class App extends React.Component {
   render() {
     return (
-      <Map
-        google={this.props.google}
-        zoom={14}
-        style={mapStyles}
-        initialCenter={
-          {
-            lat: -1.2884,
-            lng: 36.8233
-          }
-        }
-      />
+      <div className="App">
+        <MapContainer apiKey={process.env.REACT_APP_GOOGLE_API_KEY}></MapContainer>
+      </div>
     );
   }
 }
 
-export default GoogleApiWrapper({
-  apiKey: process.env.REACT_APP_GOOGLE_API_KEY
-})(MapContainer);
+export default App;
