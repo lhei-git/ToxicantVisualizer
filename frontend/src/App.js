@@ -2,10 +2,21 @@
 
 require('dotenv').config();
 const React = require('react');
-import MapContainer from './maps/MapContainer'
+const axios = require('./axios/index');
+import MapContainer from './maps/MapContainer';
 import './App.css';
 
 class App extends React.Component {
+  componentDidMount(){
+    axios.get('/_healthz')
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+  }
+
   render() {
     return (
       <div className="App">
