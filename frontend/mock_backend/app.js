@@ -11,12 +11,14 @@ app.get('/_healthz', (req, res) => {
 });
 
 app.get('/search', (req, res) => {
-    const zip = req.query.zip || 48208;
+    console.log(req.query);
     const points = [
         { lat: 42.3314, lng: -83.0458 },
-        { lat: 42.3314, lng: -83.05 }
+        { lat: 42.3314, lng: -83.05 },
+        { lat: 42.0, lng: -83.05 },
     ]
     res.json(points);
+
 });
 
 app.use((error, req, res, next) => {

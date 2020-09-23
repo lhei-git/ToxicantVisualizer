@@ -10,14 +10,29 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      points: []
+      points: [],
+      bounds: {
+        northeast: null,
+        southwest: null,
+      },
     }
+
+    this.fetchPoints = this.fetchPoints.bind(this);
+    this.viewportUpdated = this.viewportUpdated.bind(this);
   }
 
-  componentDidMount(){
-    axios.get('/search')
+  fetchPoints() {
+    if(this.state.bounds.northeast === null) return;
+
+    const vm = this;
+    vm.setState({
+      points: []
+    })
+    const ne = this.state.bounds.northeast;
+    const sw = this.state.bounds.southwest;
+    axios.get(`/search?northeast=${ne}&southwest=${sw}`)
       .then((res) => {
-        this.setState({
+        vm.setState({
           points: res.data
         })
       })
@@ -26,11 +41,30 @@ class App extends React.Component {
       })
   }
 
+  componentDidMount() {
+    this.fetchPoints();
+  }
+
+  viewportUpdated(mapProps, map) {
+    const bounds = map.getBounds();
+    this.setState({
+      bounds: {
+        northeast: bounds.getNorthEast(),
+        southwest: bounds.getSouthWest(),
+      }
+    });
+    this.fetchPoints();
+  }
+
   render() {
     return (
       <div className="App">
         <div className="map">
-          <MapContainer points={this.state.points} apiKey={process.env.REACT_APP_GOOGLE_API_KEY}></MapContainer>
+          <MapContainer
+            onIdle={this.viewportUpdated}
+            points={this.state.points}
+            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}>
+          </MapContainer>
         </div>
       </div>
     );

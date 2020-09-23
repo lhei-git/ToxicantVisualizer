@@ -23,8 +23,11 @@ class MapContainer extends Component {
 
     return (
       <Map className="map"
+        onReady={this.props.onReady}
+        onIdle={this.props.onIdle}
         google={this.props.google}
         zoom={14}
+        streetViewControl={false}
         styles={mapStyles}
         initialCenter={initialCenter}
       >
