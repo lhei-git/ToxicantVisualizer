@@ -13,7 +13,14 @@ const initialCenter = {
 }
 
 class MapContainer extends Component {
+
   render() {
+    const markers = this.props.points.map((point, i) => {
+      return (
+        <Marker name={"point " + i} key={"point-"+i} position={point} />
+      )
+    })
+
     return (
       <Map className="map"
         google={this.props.google}
@@ -21,10 +28,7 @@ class MapContainer extends Component {
         styles={mapStyles}
         initialCenter={initialCenter}
       >
-        <Marker
-          title={'The marker`s title will appear as a tooltip.'}
-          name={'SOMA'}
-          position={{ lat: 42.3314, lng: -83.0458 }} />
+        {markers}
       </Map>
     );
   }
