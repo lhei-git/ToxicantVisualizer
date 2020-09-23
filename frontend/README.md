@@ -5,6 +5,7 @@
 1. Create a .env variable with the following:
 ```sh
 REACT_APP_GOOGLE_API_KEY=<your key>
+REACT_APP_API_URL=http://localhost:8000
 ```
 additional variables need to be prefixed with `REACT_APP_` to be usable in the app.
 
