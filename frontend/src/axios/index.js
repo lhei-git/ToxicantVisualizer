@@ -1,3 +1,4 @@
+/* Main HTTP request controller for our application's API */
 require("dotenv").config();
 const axios = require("axios");
 
