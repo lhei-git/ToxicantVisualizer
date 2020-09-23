@@ -44,13 +44,8 @@ module.exports = [
     },
     {
       featureType: 'transit',
-      elementType: 'geometry',
-      stylers: [{color: '#2f3948'}]
-    },
-    {
-      featureType: 'transit.station',
-      elementType: 'labels.text.fill',
-      stylers: [{color: '#d59563'}]
+      elementType: 'all',
+      stylers: [{visibility: 'off'}]
     },
     {
       featureType: 'water',

@@ -6,6 +6,12 @@ const Component = React.Component;
 const { Map, Marker, GoogleApiWrapper } = require('google-maps-react');
 const mapStyles = require('./styles');
 
+/* Detroit, MI */
+const initialCenter = {
+  lat: 42.3314,
+  lng: -83.0458
+}
+
 class MapContainer extends Component {
   render() {
     return (
@@ -13,13 +19,7 @@ class MapContainer extends Component {
         google={this.props.google}
         zoom={14}
         styles={mapStyles}
-        /* Detroit, MI */
-        initialCenter={
-          {
-            lat: 42.3314,
-            lng: -83.0458
-          }
-        }
+        initialCenter={initialCenter}
       >
         <Marker
           title={'The marker`s title will appear as a tooltip.'}
