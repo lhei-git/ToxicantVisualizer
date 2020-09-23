@@ -9,6 +9,8 @@ import './App.css';
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    // high-level app state held here
     this.state = {
       points: [],
       bounds: {
@@ -17,10 +19,12 @@ class App extends React.Component {
       },
     }
 
+    // binding required when sending callbacks to child components
     this.fetchPoints = this.fetchPoints.bind(this);
     this.viewportUpdated = this.viewportUpdated.bind(this);
   }
 
+  // get all data points within current map bounds
   fetchPoints() {
     if(this.state.bounds.northeast === null) return;
 
@@ -41,10 +45,12 @@ class App extends React.Component {
       })
   }
 
+  // run methods when component is first fully rendered
   componentDidMount() {
     this.fetchPoints();
   }
 
+  // update map markers when map bounds change
   viewportUpdated(mapProps, map) {
     const bounds = map.getBounds();
     this.setState({
