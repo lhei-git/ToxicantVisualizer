@@ -12,9 +12,11 @@ const initialCenter = {
   lng: -83.0458
 }
 
+// Wrapping class around Google Maps react object
 class MapContainer extends Component {
 
   render() {
+    // create a marker for every point that is passed to the map
     const markers = this.props.points.map((point, i) => {
       return (
         <Marker name={"point " + i} key={"point-"+i} position={point} />

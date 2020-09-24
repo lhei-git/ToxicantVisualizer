@@ -9,7 +9,13 @@ REACT_APP_API_URL=http://localhost:8000
 ```
 additional variables need to be prefixed with `REACT_APP_` to be usable in the app.
 
-2. start the app
+2. Install dependencies
+
+```sh
+npm install
+```
+
+3. Start the app
 ```sh
 npm start
 ```

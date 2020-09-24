@@ -1,3 +1,4 @@
+/* This is where the style of the map is customized */
 module.exports = [
     {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
     {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
