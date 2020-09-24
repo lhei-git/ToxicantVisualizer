@@ -1,10 +1,10 @@
 /* eslint-disable import/first */
 
-require('dotenv').config();
-const React = require('react');
-const axios = require('./axios/index');
-import MapContainer from './maps/MapContainer';
-import './App.css';
+require("dotenv").config();
+const React = require("react");
+const axios = require("./axios/index");
+import MapContainer from "./maps/MapContainer";
+import "./App.css";
 
 class App extends React.Component {
   constructor(props) {
@@ -17,7 +17,7 @@ class App extends React.Component {
         northeast: null,
         southwest: null,
       },
-    }
+    };
 
     // binding required when sending callbacks to child components
     this.fetchPoints = this.fetchPoints.bind(this);
@@ -26,23 +26,24 @@ class App extends React.Component {
 
   // get all data points within current map bounds
   fetchPoints() {
-    if(this.state.bounds.northeast === null) return;
+    if (this.state.bounds.northeast === null) return;
 
     const vm = this;
     vm.setState({
-      points: []
-    })
+      points: [],
+    });
     const ne = this.state.bounds.northeast;
     const sw = this.state.bounds.southwest;
-    axios.get(`/search?northeast=${ne}&southwest=${sw}`)
+    axios
+      .get(`/search?northeast=${ne}&southwest=${sw}`)
       .then((res) => {
         vm.setState({
-          points: res.data
-        })
+          points: res.data,
+        });
       })
       .catch((err) => {
         console.log(err);
-      })
+      });
   }
 
   // run methods when component is first fully rendered
@@ -57,20 +58,33 @@ class App extends React.Component {
       bounds: {
         northeast: bounds.getNorthEast(),
         southwest: bounds.getSouthWest(),
-      }
+      },
     });
     this.fetchPoints();
   }
 
   render() {
     return (
-      <div className="App">
-        <div className="map">
+      <div className="app">
+        <div className="banner">
+          VET
+        </div>
+        <div className="filler">
+          <div className="navigation">
+            <ul>
+              <li className="active">Detroit</li>
+              <li>NYC</li>
+              <li>Chicago</li>
+            </ul>
+          </div>
+          <div className="header">Visualizing Environmental Toxicants</div>
+          </div>
+        <div className="map-wrapper">
           <MapContainer
             onIdle={this.viewportUpdated}
             points={this.state.points}
-            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}>
-          </MapContainer>
+            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+          ></MapContainer>
         </div>
       </div>
     );
