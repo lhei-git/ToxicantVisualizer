@@ -4,6 +4,7 @@ require('dotenv').config();
 const React = require('react');
 const axios = require('./axios/index');
 import MapContainer from './maps/MapContainer';
+import Sidebar from './sidebar/Sidebar';
 import './App.css';
 
 class App extends React.Component {
@@ -15,6 +16,7 @@ class App extends React.Component {
         northeast: null,
         southwest: null,
       },
+      zipCode: null,
     }
 
     this.fetchPoints = this.fetchPoints.bind(this);
@@ -56,9 +58,13 @@ class App extends React.Component {
     this.fetchPoints();
   }
 
+
   render() {
     return (
       <div className="App">
+      <Sidebar
+        onSearch={ () => {this.setState({zipCode: document.getElementById("searchField").value})}}>
+      </Sidebar>
         <div className="map">
           <MapContainer
             onIdle={this.viewportUpdated}
