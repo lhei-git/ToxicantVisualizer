@@ -3,6 +3,7 @@
 require("dotenv").config();
 const React = require("react");
 const axios = require("./axios/index");
+const geocoder = require("./geocoder/index");
 import MapContainer from "./maps/MapContainer";
 import Sidebar from "./sidebar/Sidebar";
 import "./App.css";
@@ -19,12 +20,17 @@ class App extends React.Component {
         northeast: null,
         southwest: null,
       },
+      searchedCenter: {
+        lat: null,
+        lng: null,
+      },
       zipCode: null,
     };
 
     // binding required when sending callbacks to child components
     this.fetchPoints = this.fetchPoints.bind(this);
     this.viewportUpdated = this.viewportUpdated.bind(this);
+    this.onSearch = this.onSearch.bind(this);
   }
 
   // get all data points within current map bounds
@@ -54,6 +60,21 @@ class App extends React.Component {
     this.fetchPoints();
   }
 
+  onSearch(address) {
+    geocoder
+      .get(`/json?address=${address}`)
+      .then((res) => {
+        console.log(res);
+        if (res.status === 200)
+          this.setState({
+            searchedCenter: res.data.results[0].geometry.location,
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   // update map markers when map bounds change
   viewportUpdated(mapProps, map) {
     const bounds = map.getBounds();
@@ -70,13 +91,7 @@ class App extends React.Component {
     return (
       <div className="App">
         <div className="banner">
-          <Sidebar
-            onSearch={() => {
-              this.setState({
-                zipCode: document.getElementById("searchField").value,
-              });
-            }}
-          ></Sidebar>
+          <Sidebar onSearch={this.onSearch}></Sidebar>
         </div>
         <div className="filler">
           {/* <div className="navigation">
@@ -93,6 +108,7 @@ class App extends React.Component {
             onIdle={this.viewportUpdated}
             points={this.state.points}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+            searchedCenter={this.state.searchedCenter}
           ></MapContainer>
         </div>
       </div>

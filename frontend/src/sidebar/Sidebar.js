@@ -1,14 +1,14 @@
 import "./Sidebar.css";
 import "../index.css";
 const React = require("react");
-const axios = require('axios');
+const axios = require("axios");
 const Component = React.Component;
 
 class Sidebar extends Component {
-  render(props) {
+  render() {
     return (
       <div className="container">
-        <SearchField onSearch={() => this.props.onSearch()} />
+        <SearchField onSearch={this.props.onSearch} />
         <PubChemFields />
       </div>
     );
@@ -35,7 +35,7 @@ class PubChemFields extends Component {
     this.setState(state);
   }
 
-  render(props) {
+  render() {
     return (
       <div className="pubChemFields">
         {this.state.chemName != null}
@@ -203,21 +203,39 @@ class PubChemFields extends Component {
 
 //search button and text box
 class SearchField extends Component {
-  render(props) {
+  constructor(props) {
+    super(props);
+    this.state = {
+      searchField: "",
+    };
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange({ target }) {
+    this.setState({
+      [target.name]: target.value,
+    });
+  }
+
+  render() {
     return (
       <div className="searchField">
         <input
           type="text"
           name="searchField"
+          value={this.state.searchField}
+          onChange={this.handleChange}
           id="searchField"
           onKeyDown={(event) => {
             if (event.key === "Enter") {
-              this.props.onSearch();
+              this.props.onSearch(this.state.searchField);
             }
           }}
-          placeholder="Enter a Zip Code"
+          placeholder="Enter an address, zip code, city"
         />
-        <button onClick={() => this.props.onSearch()}>Search</button>
+        <button onClick={() => this.props.onSearch(this.state.searchField)}>
+          Search
+        </button>
       </div>
     );
   }
