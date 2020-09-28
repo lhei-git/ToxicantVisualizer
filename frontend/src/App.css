@@ -35,3 +35,9 @@
 .banner div {
   display: inline-block;
 }
+
+.pubchem  {
+  position: relative;
+  padding: 10px;
+  overflow: hidden;
+}

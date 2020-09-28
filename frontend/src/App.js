@@ -2,10 +2,11 @@
 
 require("dotenv").config();
 const React = require("react");
-const axios = require("./axios/index");
-const geocoder = require("./geocoder/index");
-import MapContainer from "./maps/MapContainer";
-import Sidebar from "./sidebar/Sidebar";
+const axios = require("./api/axios/index");
+const geocoder = require("./api/geocoder/index");
+import MapContainer from "./MapContainer";
+import SearchField from "./SearchField";
+import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
 
@@ -15,6 +16,9 @@ class App extends React.Component {
 
     // high-level app state held here
     this.state = {
+      activeMarker: {
+        chemical: "",
+      },
       points: [],
       bounds: {
         northeast: null,
@@ -25,12 +29,14 @@ class App extends React.Component {
         lng: null,
       },
       zipCode: null,
+      zoom: 14,
     };
 
     // binding required when sending callbacks to child components
     this.fetchPoints = this.fetchPoints.bind(this);
     this.viewportUpdated = this.viewportUpdated.bind(this);
     this.onSearch = this.onSearch.bind(this);
+    this.onMarkerClick = this.onMarkerClick.bind(this);
   }
 
   // get all data points within current map bounds
@@ -61,13 +67,14 @@ class App extends React.Component {
   }
 
   onSearch(address) {
+    if (address === null || address === "") return;
     geocoder
       .get(`/json?address=${address}`)
       .then((res) => {
-        console.log(res);
         if (res.status === 200)
           this.setState({
             searchedCenter: res.data.results[0].geometry.location,
+            zoom: this.state.zoom,
           });
       })
       .catch((err) => {
@@ -87,11 +94,17 @@ class App extends React.Component {
     this.fetchPoints();
   }
 
+  onMarkerClick(marker) {
+    this.setState({
+      activeMarker: marker,
+    });
+  }
+
   render() {
     return (
       <div className="App">
         <div className="banner">
-          <Sidebar onSearch={this.onSearch}></Sidebar>
+          <SearchField onSearch={this.onSearch}></SearchField>
         </div>
         <div className="filler">
           {/* <div className="navigation">
@@ -105,11 +118,18 @@ class App extends React.Component {
         </div>
         <div className="map-wrapper">
           <MapContainer
+            zoom={this.state.zoom}
             onIdle={this.viewportUpdated}
             points={this.state.points}
             apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
             searchedCenter={this.state.searchedCenter}
+            onMarkerClick={this.onMarkerClick}
           ></MapContainer>
+        </div>
+        <div className="pubchem">
+          <PubChemFields
+            chemName={this.state.activeMarker.chemical}
+          ></PubChemFields>
         </div>
       </div>
     );
