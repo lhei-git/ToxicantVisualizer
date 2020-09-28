@@ -3,7 +3,7 @@
 require("dotenv").config();
 const React = require("react");
 const Component = React.Component;
-const { Map, Marker, GoogleApiWrapper } = require("google-maps-react");
+const { Map, Marker, LatLng, GoogleApiWrapper } = require("google-maps-react");
 const mapStyles = require("./styles");
 import "./MapContainer.css";
 
@@ -22,6 +22,23 @@ const containerStyle = {
 
 // Wrapping class around Google Maps react object
 class MapContainer extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      bounds: {
+        northeast: null,
+        southwest: null,
+      },
+    };
+  }
+
+  // componentDidUpdate() {
+  //   let newBounds = this.props.bounds;
+  //   this.setState({
+  //     bounds: newBounds,
+  //   });
+  // }
+
   render() {
     // create a marker for every point that is passed to the map
     const markers = this.props.points.map((point, i) => {
@@ -38,6 +55,7 @@ class MapContainer extends Component {
           streetViewControl={false}
           styles={mapStyles}
           initialCenter={initialCenter}
+          center={this.props.searchedCenter}
           containerStyle={containerStyle}
         >
           {markers}
