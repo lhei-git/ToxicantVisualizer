@@ -13,9 +13,9 @@ app.get('/_healthz', (req, res) => {
 app.get('/search', (req, res) => {
     console.log(req.query);
     const points = [
-        { lat: 42.3314, lng: -83.0458 },
-        { lat: 42.3314, lng: -83.05 },
-        { lat: 42.0, lng: -83.05 },
+        { latitude: 42.3314, longitude: -83.0458, chemical: 'CHROMIUM'},
+        { latitude: 42.3314, longitude: -83.05, chemical: 'LEAD'},
+        { latitude: 42.0, longitude: -83.05, chemical: 'CHROMIUM'},
     ]
     res.json(points);
 
