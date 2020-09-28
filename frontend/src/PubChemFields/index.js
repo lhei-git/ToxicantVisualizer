@@ -1,25 +1,12 @@
-import "./Sidebar.css";
 import "../index.css";
-const React = require("react");
 const axios = require("axios");
+const React = require("react");
 const Component = React.Component;
-
-class Sidebar extends Component {
-  render() {
-    return (
-      <div className="container">
-        <SearchField onSearch={this.props.onSearch} />
-        <PubChemFields />
-      </div>
-    );
-  }
-}
 
 class PubChemFields extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      chemName: null,
       cid: null,
       formula: null,
       pharmacology: null,
@@ -28,90 +15,33 @@ class PubChemFields extends Component {
       toxicityHeader: null,
       pictograms: [],
     };
-    this.updateItem = this.updateItem.bind(this);
   }
 
   updateItem(state) {
     this.setState(state);
   }
 
-  render() {
-    return (
-      <div className="pubChemFields">
-        {this.state.chemName != null}
-        {
-          <div>
-            <h1>{this.state.chemName}</h1>
-            {this.state.formula}
-          </div>
-        }
-
-        {this.state.pharmacology != null && (
-          <div>
-            <h2>Pharmacology</h2>
-            {this.state.pharmacology}
-          </div>
-        )}
-
-        {this.state.hazardStatements[0] != null && (
-          <div>
-            <h2>Hazard Statements</h2>
-            {this.state.hazardStatements.map((v, i) => {
-              return <ul key={i}>{v}</ul>;
-            })}
-          </div>
-        )}
-        {this.state.pictograms[0] != null && (
-          <div>
-            {this.state.pictograms.map((v, i) => {
-              return <img src={v}></img>;
-            })}
-          </div>
-        )}
-
-        {this.state.toxicityHeader != null && (
-          <div>
-            <h2>{this.state.toxicityHeader}</h2>
-            {this.state.toxicity.map((v, i) => {
-              return <ul key={i + 1}>{v}</ul>;
-            })}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  //populates state with pubChem data and updates sidebar
-  async populateFields(props) {
-    //DEBUG
-    //chemName = "benzene"
-
-    await this.getPugRestData(props.chemName);
-    await this.getPugViewData();
-  }
-
   //gets chemical CID and molecular formula from PUG REST data
-  async getPugRestData(chemName) {
-    await axios
+  getPugRestData(chemName) {
+    axios
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/" +
           chemName +
           "/property/MolecularFormula/JSON"
       )
-      .then((response) =>
+      .then((response) => {
         this.setState({
           cid: response.data.PropertyTable.Properties[0].CID,
           formula: response.data.PropertyTable.Properties[0].MolecularFormula,
-        })
-      );
-
-    this.setState({ chemName: chemName });
+        });
+        this.getPugViewData();
+      });
   }
 
   //gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data
-  async getPugViewData() {
+  getPugViewData() {
     //PHARMACOLOGY
-    await axios
+    axios
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
           this.state.cid +
@@ -127,7 +57,7 @@ class PubChemFields extends Component {
       .catch((response) => this.setState({ pharmacology: null }));
 
     //HAZARD STATEMENTS AND PICTOGRAMS
-    await axios
+    axios
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
           this.state.cid +
@@ -137,7 +67,7 @@ class PubChemFields extends Component {
       .catch((response) => this.setState({ hazardStatement: null }));
 
     //TOXICITY
-    await axios
+    axios
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
           this.state.cid +
@@ -199,46 +129,64 @@ class PubChemFields extends Component {
 
     this.setState({ pictograms: pictograms, hazardStatements: statements });
   }
-}
 
-//search button and text box
-class SearchField extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchField: "",
-    };
-    this.handleChange = this.handleChange.bind(this);
+  componentDidMount() {
+    if (this.props.chemName !== "") this.getPugRestData(this.props.chemName);
   }
 
-  handleChange({ target }) {
-    this.setState({
-      [target.name]: target.value,
-    });
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.chemName !== "" &&
+      prevProps.chemName !== this.props.chemName
+    )
+      this.getPugRestData(this.props.chemName);
   }
 
   render() {
     return (
-      <div className="searchField">
-        <input
-          type="text"
-          name="searchField"
-          value={this.state.searchField}
-          onChange={this.handleChange}
-          id="searchField"
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              this.props.onSearch(this.state.searchField);
-            }
-          }}
-          placeholder="Enter an address, zip code, city"
-        />
-        <button onClick={() => this.props.onSearch(this.state.searchField)}>
-          Search
-        </button>
+      <div className="pubChemFields">
+        {this.props.chemName != null}
+        {
+          <div>
+            <h1>{this.props.chemName}</h1>
+            {this.state.formula}
+          </div>
+        }
+
+        {this.state.pharmacology != null && (
+          <div>
+            <h2>Pharmacology</h2>
+            {this.state.pharmacology}
+          </div>
+        )}
+
+        {this.state.hazardStatements[0] != null && (
+          <div>
+            <h2>Hazard Statements</h2>
+            {this.state.hazardStatements.map((v, i) => {
+              return <ul key={i}>{v}</ul>;
+            })}
+          </div>
+        )}
+        {this.state.pictograms[0] != null && (
+          <div>
+            {this.state.pictograms.map((v, i) => {
+              return <img src={v} alt=""></img>;
+            })}
+          </div>
+        )}
+
+        {this.state.toxicityHeader != null && (
+          <div>
+            <h2>{this.state.toxicityHeader}</h2>
+            {this.state.toxicity.map((v, i) => {
+              return <ul key={i + 1}>{v}</ul>;
+            })}
+          </div>
+        )}
       </div>
     );
   }
 }
 
-export default Sidebar;
+export default PubChemFields;
