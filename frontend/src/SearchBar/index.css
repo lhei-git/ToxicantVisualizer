@@ -4,22 +4,17 @@
   width: 100%;
 }
 
-.searchField {
+.search-bar {
   width: 100%;
   height: 70px;
   line-height: 70px;
   box-sizing: border-box;
+  display: flex;
+  padding: 10px 5px;
 }
 
-.searchField .inputArea,
-.searchField .logo {
-  height: 100%;
-  width: 50%;
-  flex: 1;
-}
-
-.searchField input,
-.searchField button {
+.search-bar input,
+.search-bar button {
   display: inline-block;
   background-color: #fff;
   color: #000;
@@ -27,27 +22,29 @@
   font-size: 16px;
   padding: 10px;
   border: 2px solid #6c757d54;
+  margin: 0 10px;
 }
 
-.searchField input[type="text"] {
+.search-bar input[type="text"] {
+  flex: 1;
   box-shadow: none;
-  margin: 0 10px;
   min-width: 250px;
 }
 
-.searchField button {
+.search-bar button {
+  flex: 1;
+  max-width: 120px;
   color: black;
   text-align: center;
   text-decoration: none;
-  min-width: 80px;
   cursor: pointer;
 }
 
-.searchField button:hover,
-.searchField input:focus {
+.search-bar button:hover,
+.search-bar input:focus {
   border: 2px solid rgb(53, 124, 255);
 }
 
-.searchField button:hover {
+.search-bar button:hover {
   background-color: #f6f8fa;
 }

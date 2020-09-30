@@ -4,11 +4,11 @@ const React = require("react");
 const Component = React.Component;
 
 //search button and text box
-class SearchField extends Component {
+class SearchBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchField: "",
+      searchBar: "",
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -21,21 +21,21 @@ class SearchField extends Component {
 
   render() {
     return (
-      <div className="searchField">
+      <div className="search-bar">
         <input
           type="text"
-          name="searchField"
-          value={this.state.searchField}
+          name="searchBar"
+          value={this.state.searchBar}
           onChange={this.handleChange}
-          id="searchField"
+          id="searchBar"
           onKeyDown={(event) => {
             if (event.key === "Enter") {
-              this.props.onSearch(this.state.searchField);
+              this.props.onSearch(this.state.searchBar);
             }
           }}
           placeholder="Enter an address, zip code, city"
         />
-        <button onClick={() => this.props.onSearch(this.state.searchField)}>
+        <button onClick={() => this.props.onSearch(this.state.searchBar)}>
           Search
         </button>
       </div>
@@ -43,4 +43,4 @@ class SearchField extends Component {
   }
 }
 
-export default SearchField;
+export default SearchBar;

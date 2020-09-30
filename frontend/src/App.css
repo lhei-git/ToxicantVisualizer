@@ -1,34 +1,6 @@
-.searchContainer {
-  display: flex;
-}
-
-.side {
-  position: relative;
-  max-height: 100%;
-}
-
-.side.one {
-  flex: 1;
-  height: calc(100vh - 65px);
-}
-
-.side.two {
-  flex: 2;
-}
-
-.navigation li {
-  display: inline;
-  opacity: 0.5;
-  margin: 10px;
-}
-
-.navigation li.active {
-  opacity: 1;
-}
-
 .banner {
-  border-bottom: 3px solid var(--green);
-  padding: 0 30px;
+  display: flex;
+  border-bottom: 3px solid var(--orange);
   position: relative;
   z-index: 2;
   background-color: #fff;
@@ -42,10 +14,52 @@
   font-style: italic;
   font-weight: bold;
   font-size: 30px;
+  margin: 0 30px;
+  flex: 1;
+}
+
+.banner .navigation {
+  font-size: 18px;
+  height: 100%;
+  flex: 1;
+}
+
+.banner .navigation ul {
+  margin: 0;
+  padding: 0;
+}
+
+.banner .navigation li {
+  cursor: pointer;
+  display: inline;
+  padding: 0 20px;
+}
+
+.container {
+  display: flex;
+}
+
+.side {
+  position: relative;
+  max-height: 100%;
+}
+
+.side.one {
+  flex: 1;
+  padding: 5px 10px 0px 10px;
+  box-sizing: border-box;
+  height: calc(100vh - 65px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+}
+
+.side.two {
+  flex: 2;
 }
 
 .pubchem {
   position: relative;
-  padding: 10px;
+  /* padding: 10px; */
   overflow: hidden;
 }
