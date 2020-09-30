@@ -5,3 +5,7 @@ h1 {
 ul {
   list-style-type: square;
 }
+
+.pictograms {
+  margin: 10px 0;
+}
