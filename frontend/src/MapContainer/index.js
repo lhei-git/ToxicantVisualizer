@@ -1,7 +1,7 @@
 /* eslint-disable import/first */
 require("dotenv").config();
 import "./index.css";
-import mapStyles from "./styles";
+import mapStyles from "./darkmode";
 const React = require("react");
 const Component = React.Component;
 const {
@@ -85,7 +85,7 @@ class MapContainer extends Component {
           google={this.props.google}
           zoom={this.props.zoom || 14}
           streetViewControl={false}
-          styles={mapStyles}
+          styles={[]}
           initialCenter={initialCenter}
           center={this.props.searchedCenter}
           containerStyle={containerStyle}
