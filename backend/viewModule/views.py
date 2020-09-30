@@ -30,7 +30,7 @@ def points(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     data = szs.serialize('json',tri.objects.filter(Q(latitude__lt=ne_lat)&Q(latitude__gt=sw_lat)
                                                    &Q(longitude__lt=ne_lng)&Q(longitude__gt=sw_lng)))
-    return JsonResponse(data, safe=False)
+    return HttpResponse(data, content_type='application/json')
 
 def demo(request, tri_attr=int(-9999)):
     if tri_attr == -9999:
