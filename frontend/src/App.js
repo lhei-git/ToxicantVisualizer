@@ -50,10 +50,12 @@ class App extends React.Component {
     const ne = this.state.bounds.northeast;
     const sw = this.state.bounds.southwest;
     axios
-      .get(`/search?northeast=${ne}&southwest=${sw}`)
+      .get(
+        `/points?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
+      )
       .then((res) => {
         vm.setState({
-          points: res.data,
+          points: res.data.map(d => d.fields),
         });
       })
       .catch((err) => {
