@@ -55,7 +55,7 @@ class App extends React.Component {
       )
       .then((res) => {
         vm.setState({
-          points: res.data.map(d => d.fields),
+          points: res.data.map((d) => d.fields),
         });
       })
       .catch((err) => {
@@ -108,21 +108,25 @@ class App extends React.Component {
         <div className="banner">
           <div className="logo">VET</div>
         </div>
-        <SearchField onSearch={this.onSearch}></SearchField>
-        <div className="map-wrapper">
-          <MapContainer
-            zoom={this.state.zoom}
-            onIdle={this.viewportUpdated}
-            points={this.state.points}
-            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-            searchedCenter={this.state.searchedCenter}
-            onMarkerClick={this.onMarkerClick}
-          ></MapContainer>
-        </div>
-        <div className="pubchem">
-          <PubChemFields
-            chemName={this.state.activeMarker.chemical}
-          ></PubChemFields>
+        <div className="searchContainer">
+          <div className="side one">
+            <SearchField onSearch={this.onSearch}></SearchField>
+            <div className="pubchem">
+              <PubChemFields
+                chemName={this.state.activeMarker.chemical}
+              ></PubChemFields>
+            </div>
+          </div>
+          <div className="side two">
+            <MapContainer
+              zoom={this.state.zoom}
+              onIdle={this.viewportUpdated}
+              points={this.state.points}
+              apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+              searchedCenter={this.state.searchedCenter}
+              onMarkerClick={this.onMarkerClick}
+            ></MapContainer>
+          </div>
         </div>
       </div>
     );
