@@ -3,6 +3,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 const cors = require('cors');
+const points = require('./points');
 
 app.use('*', cors());
 
@@ -12,11 +13,6 @@ app.get('/_healthz', (req, res) => {
 
 app.get('/search', (req, res) => {
     console.log(req.query);
-    const points = [
-        { lat: 42.3314, lng: -83.0458 },
-        { lat: 42.3314, lng: -83.05 },
-        { lat: 42.0, lng: -83.05 },
-    ]
     res.json(points);
 
 });
