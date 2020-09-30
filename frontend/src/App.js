@@ -5,7 +5,7 @@ const React = require("react");
 const axios = require("./api/axios/index");
 const geocoder = require("./api/geocoder/index");
 import MapContainer from "./MapContainer";
-import SearchField from "./SearchField";
+import SearchBar from "./SearchBar";
 import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
@@ -16,9 +16,7 @@ class App extends React.Component {
 
     // high-level app state held here
     this.state = {
-      activeMarker: {
-        chemical: "",
-      },
+      activeMarker: null,
       points: [],
       bounds: {
         northeast: null,
@@ -50,10 +48,12 @@ class App extends React.Component {
     const ne = this.state.bounds.northeast;
     const sw = this.state.bounds.southwest;
     axios
-      .get(`/search?northeast=${ne}&southwest=${sw}`)
+      .get(
+        `/points?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
+      )
       .then((res) => {
         vm.setState({
-          points: res.data,
+          points: res.data.map((d) => d.fields),
         });
       })
       .catch((err) => {
@@ -100,36 +100,46 @@ class App extends React.Component {
     });
   }
 
+  refreshPage() {
+    window.location.reload(false);
+  }
+
   render() {
     return (
-      <div className="App">
+      <div className="app">
         <div className="banner">
-          <SearchField onSearch={this.onSearch}></SearchField>
-        </div>
-        <div className="filler">
-          {/* <div className="navigation">
+          <div className="navigation">
             <ul>
-              <li className="active">Detroit</li>
-              <li>NYC</li>
-              <li>Chicago</li>
+              <li>MAPS</li>
+              <li>GRAPHS</li>
+              <li>ABOUT</li>
             </ul>
-          </div> */}
-          <div className="header">Visualizing Environmental Toxicants</div>
+          </div>
+          <div className="logo" onClick={this.refreshPage}>
+            VET
+          </div>
         </div>
-        <div className="map-wrapper">
-          <MapContainer
-            zoom={this.state.zoom}
-            onIdle={this.viewportUpdated}
-            points={this.state.points}
-            apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-            searchedCenter={this.state.searchedCenter}
-            onMarkerClick={this.onMarkerClick}
-          ></MapContainer>
-        </div>
-        <div className="pubchem">
-          <PubChemFields
-            chemName={this.state.activeMarker.chemical}
-          ></PubChemFields>
+        <div className="container">
+          <div className="side one">
+            <SearchBar onSearch={this.onSearch}></SearchBar>
+            <div className="pubchem">
+              {this.state.activeMarker !== null && (
+                <PubChemFields
+                  chemName={this.state.activeMarker.meta.chemical}
+                ></PubChemFields>
+              )}
+            </div>
+          </div>
+          <div className="side two">
+            <MapContainer
+              zoom={this.state.zoom}
+              onIdle={this.viewportUpdated}
+              points={this.state.points}
+              apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+              searchedCenter={this.state.searchedCenter}
+              onMarkerClick={this.onMarkerClick}
+            ></MapContainer>
+          </div>
         </div>
       </div>
     );
