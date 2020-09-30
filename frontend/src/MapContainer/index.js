@@ -29,9 +29,7 @@ class MapContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeMarker: {
-        chemical: null,
-      },
+      activeMarker: null,
       showingInfoWindow: false,
       bounds: {
         northeast: null,
@@ -70,7 +68,7 @@ class MapContainer extends Component {
           name={"point " + i}
           key={"point-" + i}
           position={{ lat: point.latitude, lng: point.longitude }}
-          chemical={this.chemicalToTitle(point.chemical)}
+          meta={point}
           onClick={this.onMarkerClick}
         />
       );
@@ -96,7 +94,9 @@ class MapContainer extends Component {
             visible={this.state.showingInfoWindow}
           >
             <div>
-              <div>{this.state.activeMarker.chemical}</div>
+              {this.state.activeMarker !== null && (
+                <div>{this.state.activeMarker.meta.facilityname}</div>
+              )}
             </div>
           </InfoWindow>
         </Map>

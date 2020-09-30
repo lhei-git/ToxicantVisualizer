@@ -5,7 +5,7 @@ const React = require("react");
 const axios = require("./api/axios/index");
 const geocoder = require("./api/geocoder/index");
 import MapContainer from "./MapContainer";
-import SearchField from "./SearchField";
+import SearchBar from "./SearchBar";
 import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
@@ -16,9 +16,7 @@ class App extends React.Component {
 
     // high-level app state held here
     this.state = {
-      activeMarker: {
-        chemical: "",
-      },
+      activeMarker: null,
       points: [],
       bounds: {
         northeast: null,
@@ -102,19 +100,34 @@ class App extends React.Component {
     });
   }
 
+  refreshPage() {
+    window.location.reload(false);
+  }
+
   render() {
     return (
       <div className="app">
         <div className="banner">
-          <div className="logo">VET</div>
+          <div className="navigation">
+            <ul>
+              <li>MAPS</li>
+              <li>GRAPHS</li>
+              <li>ABOUT</li>
+            </ul>
+          </div>
+          <div className="logo" onClick={this.refreshPage}>
+            VET
+          </div>
         </div>
-        <div className="searchContainer">
+        <div className="container">
           <div className="side one">
-            <SearchField onSearch={this.onSearch}></SearchField>
+            <SearchBar onSearch={this.onSearch}></SearchBar>
             <div className="pubchem">
-              <PubChemFields
-                chemName={this.state.activeMarker.chemical}
-              ></PubChemFields>
+              {this.state.activeMarker !== null && (
+                <PubChemFields
+                  chemName={this.state.activeMarker.meta.chemical}
+                ></PubChemFields>
+              )}
             </div>
           </div>
           <div className="side two">
