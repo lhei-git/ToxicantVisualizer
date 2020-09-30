@@ -102,20 +102,11 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="App">
+      <div className="app">
         <div className="banner">
-          <SearchField onSearch={this.onSearch}></SearchField>
+          <div className="logo">VET</div>
         </div>
-        <div className="filler">
-          {/* <div className="navigation">
-            <ul>
-              <li className="active">Detroit</li>
-              <li>NYC</li>
-              <li>Chicago</li>
-            </ul>
-          </div> */}
-          <div className="header">Visualizing Environmental Toxicants</div>
-        </div>
+        <SearchField onSearch={this.onSearch}></SearchField>
         <div className="map-wrapper">
           <MapContainer
             zoom={this.state.zoom}

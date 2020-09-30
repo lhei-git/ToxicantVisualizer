@@ -24,19 +24,24 @@
 }
 
 .banner {
-  background-color: #393c3e;
-  padding: 5px 20px;
+  border-bottom: 3px solid var(--green);
+  padding: 0 30px;
+  position: relative;
+  z-index: 2;
+  background-color: #fff;
   font-size: 20px;
   line-height: 60px;
-  box-shadow: 0 0 transparent, 0 0 transparent, 1px 3px 6px #00000026;
-  margin-bottom: 10px;
+  box-shadow: 1px 3px 6px #00000026;
 }
 
-.banner div {
-  display: inline-block;
+.banner .logo {
+  text-align: right;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 30px;
 }
 
-.pubchem  {
+.pubchem {
   position: relative;
   padding: 10px;
   overflow: hidden;
