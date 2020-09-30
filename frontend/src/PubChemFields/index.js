@@ -51,26 +51,22 @@ class PubChemFields extends Component {
         //   formula: response.data.PropertyTable.Properties[0].MolecularFormula,
         // });
         cid = response.data.PropertyTable.Properties[0].CID;
-        state = Object.assign(
-          {},
-          {
-            cid,
-            formula: response.data.PropertyTable.Properties[0].MolecularFormula,
-          }
+        state = {
+          cid,
+          formula: response.data.PropertyTable.Properties[0].MolecularFormula,
+        };
+        return axios.get(
+          "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" +
+            cid +
+            "/Description/JSON"
         );
-        return axios
-          .get(
-            "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" +
-              cid +
-              "/Description/JSON"
-          )
-          .then((response) => {
-            if (response.data.InformationList.Information > 1)
-              state.description =
-                response.data.InformationList.Information[1].Description;
-            this.setState(state);
-            this.getPugViewData();
-          });
+      })
+      .then((response) => {
+        if (response.data.InformationList.Information.length > 1)
+          state.description =
+            response.data.InformationList.Information[1].Description;
+        this.setState(state);
+        return this.getPugViewData();
       })
       .catch((err) => {
         this.setState({
@@ -206,8 +202,10 @@ class PubChemFields extends Component {
           {props.chemName != "" && (
             <div className="name">
               <h1>{props.chemName}</h1>
-              {this.state.description}
             </div>
+          )}
+          {this.state.description !== null && (
+            <div>{this.state.description}</div>
           )}
           {this.state.pictograms[0] != null && (
             <div className="pictograms">
