@@ -1,43 +1,65 @@
-.map-wrapper {
-  position: relative;
-  width: 100vw;
-  height: 700px;
-}
-
-.filler {
-  margin: 30px;
-  text-align: center;
-}
-
-.filler .header {
-  font-size: 50px;
-}
-
-.navigation li {
-  display: inline;
-  opacity: 0.5;
-  margin: 10px;
-}
-
-.navigation li.active {
-  opacity: 1;
-}
-
 .banner {
-  background-color: #393c3e;
-  padding: 5px 20px;
+  display: flex;
+  border-bottom: 3px solid var(--orange);
+  position: relative;
+  z-index: 2;
+  background-color: #fff;
   font-size: 20px;
   line-height: 60px;
-  box-shadow: 0 0 transparent, 0 0 transparent, 1px 3px 6px #00000026;
-  margin-bottom: 10px;
+  box-shadow: 1px 3px 6px #00000026;
 }
 
-.banner div {
-  display: inline-block;
+.banner .logo {
+  text-align: right;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 30px;
+  margin: 0 30px;
+  flex: 1;
 }
 
-.pubchem  {
+.banner .navigation {
+  font-size: 18px;
+  height: 100%;
+  flex: 1;
+}
+
+.banner .navigation ul {
+  margin: 0;
+  padding: 0;
+}
+
+.banner .navigation li {
+  cursor: pointer;
+  display: inline;
+  padding: 0 20px;
+}
+
+.container {
+  display: flex;
+}
+
+.side {
   position: relative;
-  padding: 10px;
+  max-height: 100%;
+}
+
+.side.one {
+  flex: 1;
+  padding: 5px 10px 0px 10px;
+  box-sizing: border-box;
+  height: calc(100vh - 65px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+}
+
+.side.two {
+  flex: 2;
+}
+
+.pubchem {
+  position: relative;
+  /* padding: 10px; */
   overflow: hidden;
 }
