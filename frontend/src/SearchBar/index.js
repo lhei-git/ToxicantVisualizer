@@ -33,7 +33,7 @@ class SearchBar extends Component {
               this.props.onSearch(this.state.searchBar);
             }
           }}
-          placeholder="Enter an address, zip code, city"
+          placeholder="Enter an address, zip code, city, or chemical"
         />
         <button onClick={() => this.props.onSearch(this.state.searchBar)}>
           Search
