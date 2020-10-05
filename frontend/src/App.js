@@ -120,7 +120,7 @@ class App extends React.Component {
           </div>
         </div>
         <div className="container">
-          <div className="side one">
+          <div className="panel one">
             <SearchBar onSearch={this.onSearch}></SearchBar>
             <div className="pubchem">
               {this.state.activeMarker !== null && (
@@ -130,7 +130,7 @@ class App extends React.Component {
               )}
             </div>
           </div>
-          <div className="side two">
+          <div className="panel two">
             <MapContainer
               zoom={this.state.zoom}
               onIdle={this.viewportUpdated}
@@ -140,6 +140,7 @@ class App extends React.Component {
               onMarkerClick={this.onMarkerClick}
             ></MapContainer>
           </div>
+          <div className="panel three"></div>
         </div>
       </div>
     );

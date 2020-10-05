@@ -39,23 +39,28 @@
   display: flex;
 }
 
-.side {
+.panel {
   position: relative;
   max-height: 100%;
 }
 
-.side.one {
+.panel.one {
   flex: 1;
   padding: 5px 10px 0px 10px;
   box-sizing: border-box;
   height: calc(100vh - 65px);
   overflow-y: auto;
   overflow-x: hidden;
-
 }
 
-.side.two {
+.panel.two {
   flex: 2;
+  border-left: 3px solid var(--blue);
+  border-right: 3px solid var(--blue);
+}
+
+.panel.three {
+  flex: 1;
 }
 
 .pubchem {
