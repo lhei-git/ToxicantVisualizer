@@ -2,6 +2,7 @@
 require("dotenv").config();
 import "./index.css";
 // import mapStyles from "./darkmode";
+import mapStyles from "./standard";
 const React = require("react");
 const Component = React.Component;
 const {
@@ -73,9 +74,11 @@ class MapContainer extends Component {
   };
 
   onZoomChanged(mapProps, map) {
-    this.setState({
-      zoom: map.zoom,
-    });
+    const state = this.state;
+    if (state.zoom > map.zoom)
+      this.setState({
+        zoom: map.zoom,
+      });
   }
 
   chemicalToTitle(chem) {
@@ -118,7 +121,7 @@ class MapContainer extends Component {
           google={this.props.google}
           zoom={this.state.zoom}
           streetViewControl={false}
-          styles={[]}
+          styles={mapStyles}
           center={this.state.center}
           initialCenter={INITIAL_CENTER}
           containerStyle={containerStyle}
