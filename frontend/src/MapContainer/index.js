@@ -37,6 +37,8 @@ class MapContainer extends Component {
         southwest: null,
       },
     };
+
+    this.onZoomChanged = this.onZoomChanged.bind(this);
   }
 
   componentDidMount() {
@@ -59,7 +61,9 @@ class MapContainer extends Component {
     });
   };
 
-  onMapClick = () => {
+  onMapClick = (mapProps, map) => {
+    this.props.viewportUpdated(mapProps, map);
+    console.log(this.state.showingInfoWindow);
     if (this.state.showingInfoWindow) {
       this.setState({
         showingInfoWindow: false,
@@ -67,6 +71,12 @@ class MapContainer extends Component {
       });
     }
   };
+
+  onZoomChanged(mapProps, map) {
+    this.setState({
+      zoom: map.zoom,
+    });
+  }
 
   chemicalToTitle(chem) {
     return chem.charAt(0) + chem.slice(1).toLowerCase();
@@ -102,10 +112,11 @@ class MapContainer extends Component {
       <div className="map">
         <Map
           onReady={this.props.onReady}
-          onClicked={this.onMapClick}
-          onIdle={this.props.onIdle}
+          onClick={this.onMapClick}
+          onZoomChanged={this.onZoomChanged}
+          onDragend={this.props.viewportUpdated}
           google={this.props.google}
-          zoom={14}
+          zoom={this.state.zoom}
           streetViewControl={false}
           styles={[]}
           center={this.state.center}
