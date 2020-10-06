@@ -9,6 +9,7 @@ import SearchBar from "./SearchBar";
 import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
+import Graph from "./Graph";
 
 class App extends React.Component {
   constructor(props) {
@@ -52,8 +53,9 @@ class App extends React.Component {
         `/points?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
       )
       .then((res) => {
+        // console.log(points);
         vm.setState({
-          points: res.data.map((d) => d.fields),
+          points: res.data.map(d => d.fields),
         });
       })
       .catch((err) => {
@@ -120,7 +122,7 @@ class App extends React.Component {
           </div>
         </div>
         <div className="container">
-          <div className="side one">
+          <div className="panel one">
             <SearchBar onSearch={this.onSearch}></SearchBar>
             <div className="pubchem">
               {this.state.activeMarker !== null && (
@@ -130,7 +132,7 @@ class App extends React.Component {
               )}
             </div>
           </div>
-          <div className="side two">
+          <div className="panel two">
             <MapContainer
               zoom={this.state.zoom}
               onIdle={this.viewportUpdated}
@@ -139,6 +141,9 @@ class App extends React.Component {
               searchedCenter={this.state.searchedCenter}
               onMarkerClick={this.onMarkerClick}
             ></MapContainer>
+          </div>
+          <div className="panel three">
+            <Graph points={this.state.points}></Graph>
           </div>
         </div>
       </div>
