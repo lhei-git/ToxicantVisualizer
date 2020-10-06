@@ -62,7 +62,19 @@ class MapContainer extends Component {
 
   render() {
     // create a marker for every point that is passed to the map
-    const markers = this.props.points.map((point, i) => {
+
+    /* TODO this function removes multiple-chemical release values. Remove once backend combines chemicals for the same location */
+
+    const points = this.props.points.filter((e, i, arr) => {
+      if (
+        i > 0 &&
+        e.latitude === arr[i - 1].latitude &&
+        e.longitude === arr[i - 1].longitude
+      )
+        return false;
+      return true;
+    });
+    const markers = points.map((point, i) => {
       return (
         <Marker
           name={"point " + i}
