@@ -1,5 +1,6 @@
 import "./index.css";
 import "../index.css";
+import UserControlPanel from '../UserControlPanel/index.js'
 const React = require("react");
 const Component = React.Component;
 
@@ -21,6 +22,7 @@ class SearchBar extends Component {
 
   render() {
     return (
+    <>
       <div className="search-bar">
         <input
           type="text"
@@ -39,6 +41,10 @@ class SearchBar extends Component {
           Search
         </button>
       </div>
+      <div>
+        <UserControlPanel />
+      </div>
+    </>
     );
   }
 }
