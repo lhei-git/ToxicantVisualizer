@@ -55,6 +55,12 @@
 
 .panel.two {
   flex: 2;
+  border-left: 3px solid var(--blue);
+  border-right: 3px solid var(--blue);
+}
+
+.panel.three {
+  flex: 1;
 }
 
 .panel.three {

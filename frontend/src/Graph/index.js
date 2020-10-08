@@ -10,7 +10,7 @@ import {
 require("dotenv").config();
 const React = require("react");
 
-var Chart = (props) => {
+var TopToxicants = (props) => {
   const data = [];
   for (const p of props.points) {
     const index = data.findIndex((d) => d.name === p.chemical);
@@ -35,7 +35,7 @@ var Chart = (props) => {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" />
         <YAxis />
-        <Tooltip />
+        {/* <Tooltip /> */}
         <Legend />
         <Bar dataKey="uv" fill="#82ca9d" />
       </BarChart>
@@ -64,7 +64,7 @@ class Graph extends React.Component {
   render() {
     return (
       <div className="container">
-        <Chart points={this.state.points} />
+        <TopToxicants points={this.state.points} />
       </div>
     );
   }

@@ -199,7 +199,7 @@ class PubChemFields extends Component {
     } else {
       return (
         <div className="pubChemFields">
-          {props.chemName != "" && (
+          {props.chemName !== "" && (
             <div className="name">
               <h1>{props.chemName}</h1>
             </div>
@@ -207,20 +207,20 @@ class PubChemFields extends Component {
           {this.state.description !== null && (
             <div>{this.state.description}</div>
           )}
-          {this.state.pictograms[0] != null && (
+          {this.state.pictograms[0] !== null && (
             <div className="pictograms">
               {this.state.pictograms.map((v, i) => {
                 return <img src={v} alt="" key={v + "-" + i}></img>;
               })}
             </div>
           )}
-          {this.state.pharmacology != null && (
+          {this.state.pharmacology !== null && (
             <div className="pharmacology">
               <h2>Pharmacology</h2>
               {this.state.pharmacology}
             </div>
           )}
-          {this.state.hazardStatements[0] != null && (
+          {this.state.hazardStatements[0] !== null && (
             <div className="hazards">
               <h2>Hazard Statements</h2>
               {this.state.hazardStatements.map((v, i) => {
@@ -232,14 +232,14 @@ class PubChemFields extends Component {
               })}
             </div>
           )}
-          {this.state.toxicityHeader != null &&
+          {this.state.toxicityHeader !== null &&
             this.state.toxicity.length !== 0 && (
               <div className="toxicity">
                 <h2>{this.state.toxicityHeader}</h2>
                 {this.state.toxicity.map((v, i) => {
                   return (
                     <ul>
-                      <li key={"toxicity-" + (i + 1)}>{v}</li>
+                      <li key={"toxicity-" + i}>{v}</li>
                     </ul>
                   );
                 })}

@@ -135,7 +135,7 @@ class App extends React.Component {
           <div className="panel two">
             <MapContainer
               zoom={this.state.zoom}
-              onIdle={this.viewportUpdated}
+              viewportUpdated={this.viewportUpdated}
               points={this.state.points}
               apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
               searchedCenter={this.state.searchedCenter}
