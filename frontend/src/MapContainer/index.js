@@ -11,10 +11,10 @@ const {
   GoogleApiWrapper,
 } = require("google-maps-react");
 
-/* Detroit, MI */
+/* Los Angeles */
 const initialCenter = {
-  lat: 42.3314,
-  lng: -83.0458,
+  lat: 34.0522,
+  lng: -118.2437,
 };
 
 const containerStyle = {
