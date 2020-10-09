@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from .models import Tri2018 as tri
 
-
-# this class converts the quried tri class object to a dict instance
+# this class converts the queried tri class object to a dict instance
 class Tri2018Serializer(serializers.Serializer):
     year = serializers.IntegerField()
     facilityname = serializers.CharField()
