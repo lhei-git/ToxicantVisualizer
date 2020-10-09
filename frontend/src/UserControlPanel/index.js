@@ -2,6 +2,7 @@ import "./index.css";
 import "../index.css";
 import ChemTypeSelector from './ChemTypeSelector.js'
 import DropDownSelector from './DropDownSelector.js'
+import YearDropdown from './YearDropdown.js'
 const React = require("react");
 const Component = React.Component;
 
@@ -17,6 +18,8 @@ class UserControlPanel extends Component {
         air: true,
         ground: true,
         water: true,
+        startYear: null,
+        endYear: null,
 
         // temporary array of chemicals to populate list
         tempChemicalButtons : [{title:"Ammonia", returnVal:"ammonia", selected:true},
@@ -54,9 +57,13 @@ class UserControlPanel extends Component {
                 {this.state.open ? (
                 <div className="content">
                 {/* Collapsing Search Bar Content*/}
-                <ChemTypeSelector title="Carcinogens" attribute="carcinogens" defaultChecked={this.state.carcinogens} onClick={this.onChemTypeChange}/>
-                <ChemTypeSelector title="Dioxins" attribute="dioxins" defaultChecked={this.state.dioxins} onClick={this.onChemTypeChange}/>
-                <ChemTypeSelector title="Other Chemicals" attribute="otherChems" defaultChecked={this.state.otherChems} onClick={this.onChemTypeChange}/>
+                <YearDropdown title="Filter by Year" onChange={this.onChemTypeChange}/>
+                <DropDownSelector title="Filter by Toxicant Type"
+                                onClick={this.onChemTypeChange}
+                                buttons={[
+                                {title:"Dioxins", returnVal:"dioxins", selected:this.state.air},
+                                {title:"Carcinogens", returnVal:"carcinogens", selected:this.state.ground},
+                                {title:"Other Toxicants", returnVal:"otherChems", selected:this.state.water}]}/>
                 <DropDownSelector title="Filter by Spill Type"
                                 onClick={this.onChemTypeChange}
                                 buttons={[
@@ -66,6 +73,7 @@ class UserControlPanel extends Component {
                 <DropDownSelector title="Filter by Toxicant"
                                 onClick={this.onChemTypeChange}
                                 buttons={this.state.tempChemicalButtons} />
+
         </div>
             ) : null}
     </div>);
