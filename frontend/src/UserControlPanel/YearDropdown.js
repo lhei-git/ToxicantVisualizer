@@ -25,14 +25,15 @@ class YearDropdown extends Component {
   render() {
     return (
       <div>
-            <label for="fromYear">Beginning Year:</label>
+            <div>{this.props.title}</div>
+            <label for="fromYear">Beginning Year:  </label>
             <select name="fromYear" id="fromYear"
                 onChange={(event)=> this.props.onChange({attribute:"startYear", value:event.target.value})}>
                   {this.state.years.map((year) => (
                                   <option value={year}>{year}</option>
                   ))}
             </select>
-            <label for="toYear">End Year:</label>
+            <label for="toYear">     End Year:  </label>
             <select name="toYear" id="toYear"
                 onChange={(event)=> this.props.onChange({attribute:"endYear", value:event.target.value})}>
                   {this.state.years.map((year) => (
