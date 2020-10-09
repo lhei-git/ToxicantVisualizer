@@ -1,6 +1,7 @@
 import "./index.css";
 import "../index.css";
 import ChemTypeSelector from './ChemTypeSelector.js'
+import DropDownSelector from './DropDownSelector.js'
 const React = require("react");
 const Component = React.Component;
 
@@ -13,7 +14,20 @@ class UserControlPanel extends Component {
         dioxins: true,
         carcinogens: true,
         otherChems: true,
+        air: true,
+        ground: true,
+        water: true,
+
+        // temporary array of chemicals to populate list
+        tempChemicalButtons : [{title:"Ammonia", returnVal:"ammonia", selected:true},
+                               {title:"Styrene", returnVal:"styrene", selected:true},
+                               {title:"Florine", returnVal:"florine", selected:true},
+                               {title:"Benzene", returnVal:"benzene", selected:true},
+                               {title:"Formaldehyde", returnVal:"formaldehyde", selected:true},
+                               {title:"Toxaphene", returnVal:"toxaphene", selected:true}]
     };
+
+
 
     this.onChemTypeChange = this.onChemTypeChange.bind(this);
     this.togglePanel = this.togglePanel.bind(this);
@@ -43,6 +57,15 @@ class UserControlPanel extends Component {
                 <ChemTypeSelector title="Carcinogens" attribute="carcinogens" defaultChecked={this.state.carcinogens} onClick={this.onChemTypeChange}/>
                 <ChemTypeSelector title="Dioxins" attribute="dioxins" defaultChecked={this.state.dioxins} onClick={this.onChemTypeChange}/>
                 <ChemTypeSelector title="Other Chemicals" attribute="otherChems" defaultChecked={this.state.otherChems} onClick={this.onChemTypeChange}/>
+                <DropDownSelector title="Filter by Spill Type"
+                                onClick={this.onChemTypeChange}
+                                buttons={[
+                                {title:"Air", returnVal:"air", selected:this.state.air},
+                                {title:"Ground", returnVal:"ground", selected:this.state.ground},
+                                {title:"Water", returnVal:"water", selected:this.state.water}]}/>
+                <DropDownSelector title="Filter by Toxicant"
+                                onClick={this.onChemTypeChange}
+                                buttons={this.state.tempChemicalButtons} />
         </div>
             ) : null}
     </div>);
