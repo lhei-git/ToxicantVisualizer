@@ -2,16 +2,17 @@ import "./index.css";
 const React = require("react");
 
 function Home(props) {
-
-  React.useEffect(() => {
-    localStorage.setItem("searchedLocation", "");
-  });
+  let [searchValue, setSearchValue] = React.useState("");
 
   function onSearchChange(event) {
+    setSearchValue(event.target.value);
     props.onSearchChange(event.target.value);
   }
 
   function onSearchSubmit(event) {
+    if (searchValue === "") {
+      localStorage.setItem("searchedLocation", "");
+    }
     event.preventDefault();
     props.onSearchSubmit();
   }

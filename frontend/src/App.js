@@ -10,15 +10,17 @@ import "./App.css";
 import "./index.css";
 
 const App = () => {
-  const [searchValue, setSearchValue] = React.useState(localStorage.getItem('searchedLocation') || "");
+  const [location, setLocation] = React.useState(
+    localStorage.getItem("searchedLocation") || ""
+  );
 
   function handleSearchChange(text) {
-    setSearchValue(text);
+    setLocation(text);
   }
 
   React.useEffect(() => {
-    localStorage.setItem("searchedLocation", searchValue);
-  }, [searchValue]);
+    localStorage.setItem("searchedLocation", location);
+  }, [location]);
 
   function handleSearchSubmit() {
     history.push("/map");
