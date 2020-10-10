@@ -12,10 +12,9 @@ const {
   GoogleApiWrapper,
 } = require("google-maps-react");
 
-/* Detroit, MI */
 const INITIAL_CENTER = {
-  lat: 42.3314,
-  lng: -83.0458,
+  lat: 39.8283,
+  lng: -98.5795,
 };
 
 const containerStyle = {
@@ -55,22 +54,19 @@ class MapContainer extends Component {
     this.map.setZoom(14);
   }
 
-  geocodeLocation() {
+  geocodeLocation(location) {
     return new Promise((resolve, reject) => {
-      const location = localStorage.getItem("searchedLocation") || null;
-      if (location) {
-        geocoder
-          .get(`/json?address=${location}`)
-          .then((res) => {
-            this.setState({
-              isLoading: false,
-              center: res.data.results[0].geometry.location,
-              viewport: res.data.results[0].geometry.viewport,
-            });
-          })
-          .then(resolve)
-          .catch(reject);
-      }
+      geocoder
+        .get(`/json?address=${location}`)
+        .then((res) => {
+          this.setState({
+            isLoading: false,
+            center: res.data.results[0].geometry.location,
+            viewport: res.data.results[0].geometry.viewport,
+          });
+        })
+        .then(resolve)
+        .catch(reject);
     });
   }
 
@@ -109,9 +105,11 @@ class MapContainer extends Component {
 
   handleMount(mapProps, map) {
     this.map = map;
-    this.geocodeLocation().then(() => {
-      this.adjustMap(mapProps, map);
-    });
+    const location = localStorage.getItem("searchedLocation") || "";
+    if (location !== "")
+      this.geocodeLocation(location).then(() => {
+        this.adjustMap(mapProps, map);
+      });
   }
 
   adjustMap(mapProps, map) {
@@ -159,6 +157,7 @@ class MapContainer extends Component {
             streetViewControl={false}
             styles={mapStyles}
             draggable={false}
+            zoom={5}
             center={this.state.center}
             initialCenter={INITIAL_CENTER}
             containerStyle={containerStyle}
