@@ -30,6 +30,7 @@ class MapContainer extends Component {
     super(props);
     this.state = {
       activeMarker: null,
+      markers: [],
       points: [],
       showingInfoWindow: false,
       center: INITIAL_CENTER,
@@ -42,6 +43,7 @@ class MapContainer extends Component {
     this.handleMount = this.handleMount.bind(this);
     this.adjustMap = this.adjustMap.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
+    this.MarkerSet = this.MarkerSet.bind(this);
   }
 
   onMarkerClick(props, marker) {
@@ -80,6 +82,7 @@ class MapContainer extends Component {
       .then((res) => {
         this.setState({
           points: res.data.map((d) => d.fields),
+          markers: this.MarkerSet(res.data.map((d) => d.fields)),
         });
       })
       .catch((err) => {
@@ -134,9 +137,10 @@ class MapContainer extends Component {
     }
   }
 
-  render() {
+  MarkerSet(points) {
+    console.log("creating markers");
     // create a marker for every point that is passed to the map
-    const markers = this.state.points.map((point, i) => {
+    const markers = points.map((point, i) => {
       return (
         <Marker
           name={"point " + i}
@@ -147,7 +151,10 @@ class MapContainer extends Component {
         />
       );
     });
+    return markers;
+  }
 
+  render() {
     return (
       <div className="map-container">
         <div className="map">
@@ -162,7 +169,7 @@ class MapContainer extends Component {
             initialCenter={INITIAL_CENTER}
             containerStyle={containerStyle}
           >
-            {markers}
+            {this.state.markers}
             <InfoWindow
               marker={this.state.activeMarker}
               visible={this.state.showingInfoWindow}

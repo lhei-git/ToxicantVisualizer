@@ -28,23 +28,48 @@ const App = () => {
 
   return (
     <Router history={history}>
-      <div class="app-container">
+      <div className="app-container">
         <nav className="navbar">
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/map">Map</Link>
-            </li>
-          </ul>
+          <div>
+            <ul>
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/map">Map</Link>
+              </li>
+              <li>
+                <Link to="/graphs">Graphs</Link>
+              </li>
+            </ul>
+          </div>
+          {location !== "" && window.location.pathname === "/map" && (
+            <div className="query">
+              Search: <span>{location}</span>
+            </div>
+          )}
         </nav>
 
         {/* A <Switch> looks through its children <Route>s and
               renders the first one that matches the current URL. */}
         <Switch>
           <Route path="/map">
-            <MapContainer apiKey={process.env.REACT_APP_GOOGLE_API_KEY} />
+            <div className="title">
+              Visualizer of Environmental Toxicants (VET)
+            </div>
+            <div className="map-view">
+              <div className="filter-wrapper">
+                <div className="filters">
+                  
+                </div>
+              </div>
+              <div className="map-wrapper">
+                <MapContainer apiKey={process.env.REACT_APP_GOOGLE_API_KEY} />
+              </div>
+            </div>
+          </Route>
+          <Route path="/graphs">
+            <div>graphs go here</div>
           </Route>
           <Route path="/">
             <Home
