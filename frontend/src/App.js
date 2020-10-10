@@ -28,6 +28,8 @@ class App extends React.Component {
       },
       zipCode: null,
       zoom: 14,
+      mapFilters: {},
+      filters: []
     };
 
     // binding required when sending callbacks to child components
@@ -35,6 +37,7 @@ class App extends React.Component {
     this.viewportUpdated = this.viewportUpdated.bind(this);
     this.onSearch = this.onSearch.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
+    this.onFilter = this.onFilter.bind(this);
   }
 
   // get all data points within current map bounds
@@ -53,7 +56,8 @@ class App extends React.Component {
       )
       .then((res) => {
         vm.setState({
-          points: res.data.map((d) => d.fields),
+          // flat map allows you to skip null and false values
+          points: res.data.flatMap((d) => this.filterPoints(d) ? d.fields : [])
         });
       })
       .catch((err) => {
@@ -61,9 +65,27 @@ class App extends React.Component {
       });
   }
 
+  filterPoints(d)
+  {
+    //temporary array of conditions to filter by
+    const conditions = [{year:2018}, {cleanairact:"YES"}]
+
+    var returnVal = true;
+
+
+    this.state.filters.map((value, index) =>{
+            if(d.fields[Object.keys(value)[0]] !== Object.values(value)[0])
+                returnVal = false;
+                }
+    )
+
+
+    return returnVal;
+  }
+
   // run methods when component is first fully rendered
   componentDidMount() {
-    this.fetchPoints();
+    this.fetchPoints(null);
   }
 
   onSearch(address) {
@@ -94,6 +116,12 @@ class App extends React.Component {
     this.fetchPoints();
   }
 
+  // update map markers when filters change
+  onFilter()
+  {
+    this.fetchPoints();
+  }
+
   onMarkerClick(marker) {
     this.setState({
       activeMarker: marker,
@@ -121,7 +149,8 @@ class App extends React.Component {
         </div>
         <div className="container">
           <div className="side one">
-            <SearchBar onSearch={this.onSearch}></SearchBar>
+            <SearchBar onSearch={this.onSearch}
+                       onFilter={this.onFilter}></SearchBar>
             <div className="pubchem">
               {this.state.activeMarker !== null && (
                 <PubChemFields

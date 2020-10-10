@@ -12,6 +12,7 @@ class UserControlPanel extends Component {
     super(props);
     this.state = {
         open: false,
+        newFilters: false,
         dioxins: true,
         carcinogens: true,
         otherChems: true,
@@ -36,9 +37,19 @@ class UserControlPanel extends Component {
     this.togglePanel = this.togglePanel.bind(this);
   }
 
+  componentDidUpdate()
+  {
+    if(this.state.newFilters)
+    {
+        this.setState({newFilters:false})
+        this.props.onFilter()
+        }
+  }
+
   onChemTypeChange(event) {
     this.setState({
       [event.attribute]: event.value,
+      newFilters:true,
     });
   }
 

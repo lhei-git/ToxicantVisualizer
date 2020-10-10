@@ -42,7 +42,7 @@ class SearchBar extends Component {
         </button>
       </div>
       <div>
-        <UserControlPanel />
+        <UserControlPanel onFilter={this.props.onFilter}/>
       </div>
     </>
     );
