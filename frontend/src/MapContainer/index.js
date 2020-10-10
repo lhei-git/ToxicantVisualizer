@@ -1,7 +1,8 @@
 /* eslint-disable import/first */
 require("dotenv").config();
 import "./index.css";
-import mapStyles from "./darkmode";
+// import mapStyles from "./darkmode";
+import mapStyles from "./standard";
 const React = require("react");
 const Component = React.Component;
 const {
@@ -11,10 +12,10 @@ const {
   GoogleApiWrapper,
 } = require("google-maps-react");
 
-/* Detroit, MI */
-const initialCenter = {
-  lat: 42.3314,
-  lng: -83.0458,
+/* Los Angeles */
+const INITIAL_CENTER = {
+  lat: 34.0522,
+  lng: -118.2437,
 };
 
 const containerStyle = {
@@ -31,11 +32,20 @@ class MapContainer extends Component {
     this.state = {
       activeMarker: null,
       showingInfoWindow: false,
+      center: INITIAL_CENTER,
       bounds: {
         northeast: null,
         southwest: null,
       },
     };
+
+    this.onZoomChanged = this.onZoomChanged.bind(this);
+  }
+
+  componentDidMount() {
+    this.setState({
+      center: INITIAL_CENTER,
+    });
   }
 
   onMarkerClick = (props, marker) => {
@@ -44,10 +54,17 @@ class MapContainer extends Component {
       selectedPlace: props,
       activeMarker: marker,
       showingInfoWindow: true,
+      zoom: 14,
+      center: {
+        lat: marker.position.lat(),
+        lng: marker.position.lng(),
+      },
     });
   };
 
-  onMapClicked = () => {
+  onMapClick = (mapProps, map) => {
+    this.props.viewportUpdated(mapProps, map);
+    console.log(this.state.showingInfoWindow);
     if (this.state.showingInfoWindow) {
       this.setState({
         showingInfoWindow: false,
@@ -56,13 +73,45 @@ class MapContainer extends Component {
     }
   };
 
+  onZoomChanged(mapProps, map) {
+    const state = this.state;
+    if (state.zoom > map.zoom)
+      this.setState({
+        zoom: map.zoom,
+      });
+  }
+
   chemicalToTitle(chem) {
     return chem.charAt(0) + chem.slice(1).toLowerCase();
   }
 
+  getCenter() {
+    let state = this.state;
+    if (state.activeMarker) {
+      return {
+        lat: this.state.activeMarker.position.lat(),
+        lng: this.state.activeMarker.position.lng(),
+      };
+    } else {
+      return this.props.searchedCenter || INITIAL_CENTER;
+    }
+  }
+
   render() {
     // create a marker for every point that is passed to the map
-    const markers = this.props.points.map((point, i) => {
+
+    /* TODO this function removes multiple-chemical release values. Remove once backend combines chemicals for the same location */
+
+    const points = this.props.points.filter((e, i, arr) => {
+      if (
+        i > 0 &&
+        e.latitude === arr[i - 1].latitude &&
+        e.longitude === arr[i - 1].longitude
+      )
+        return false;
+      return true;
+    });
+    const markers = points.map((point, i) => {
       return (
         <Marker
           name={"point " + i}
@@ -78,14 +127,15 @@ class MapContainer extends Component {
       <div className="map">
         <Map
           onReady={this.props.onReady}
-          onClicked={this.onMapClicked}
-          onIdle={this.props.onIdle}
+          onClick={this.onMapClick}
+          onZoomChanged={this.onZoomChanged}
+          onDragend={this.props.viewportUpdated}
           google={this.props.google}
-          zoom={this.props.zoom || 14}
+          zoom={this.state.zoom}
           streetViewControl={false}
-          styles={[]}
-          initialCenter={initialCenter}
-          center={this.props.searchedCenter}
+          styles={mapStyles}
+          center={this.state.center}
+          initialCenter={INITIAL_CENTER}
           containerStyle={containerStyle}
         >
           {markers}
