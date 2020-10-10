@@ -1,9 +1,9 @@
 /* eslint-disable import/first */
-require("dotenv").config();
 import "./index.css";
-// import mapStyles from "./darkmode";
 import mapStyles from "./standard";
 const React = require("react");
+const geocoder = require("../api/geocoder/index");
+const axios = require("../api/axios/index");
 const Component = React.Component;
 const {
   Map,
@@ -31,53 +31,63 @@ class MapContainer extends Component {
     super(props);
     this.state = {
       activeMarker: null,
+      points: [],
       showingInfoWindow: false,
       center: INITIAL_CENTER,
-      bounds: {
-        northeast: null,
-        southwest: null,
-      },
+      isLoading: true,
+      viewport: null,
+      map: null,
     };
 
-    this.onZoomChanged = this.onZoomChanged.bind(this);
+    this.fetchPoints = this.fetchPoints.bind(this);
+    this.handleMount = this.handleMount.bind(this);
+    this.adjustMap = this.adjustMap.bind(this);
+    this.onMarkerClick = this.onMarkerClick.bind(this);
   }
 
-  componentDidMount() {
+  onMarkerClick(props, marker) {
     this.setState({
-      center: INITIAL_CENTER,
-    });
-  }
-
-  onMarkerClick = (props, marker) => {
-    this.props.onMarkerClick(marker);
-    this.setState({
-      selectedPlace: props,
       activeMarker: marker,
       showingInfoWindow: true,
-      zoom: 14,
-      center: {
-        lat: marker.position.lat(),
-        lng: marker.position.lng(),
-      },
     });
-  };
 
-  onMapClick = (mapProps, map) => {
-    this.props.viewportUpdated(mapProps, map);
-    console.log(this.state.showingInfoWindow);
-    if (this.state.showingInfoWindow) {
-      this.setState({
-        showingInfoWindow: false,
-        activeMarker: null,
-      });
-    }
-  };
+    this.map.setCenter(marker.position);
+    this.map.setZoom(14);
+  }
 
-  onZoomChanged(mapProps, map) {
-    const state = this.state;
-    if (state.zoom > map.zoom)
-      this.setState({
-        zoom: map.zoom,
+  geocodeLocation() {
+    return new Promise((resolve, reject) => {
+      const location = localStorage.getItem("searchedLocation") || null;
+      if (location) {
+        geocoder
+          .get(`/json?address=${location}`)
+          .then((res) => {
+            this.setState({
+              isLoading: false,
+              center: res.data.results[0].geometry.location,
+              viewport: res.data.results[0].geometry.viewport,
+            });
+          })
+          .then(resolve)
+          .catch(reject);
+      }
+    });
+  }
+
+  fetchPoints(map) {
+    const ne = map.getBounds().getNorthEast();
+    const sw = map.getBounds().getSouthWest();
+    axios
+      .get(
+        `/points?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
+      )
+      .then((res) => {
+        this.setState({
+          points: res.data.map((d) => d.fields),
+        });
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }
 
@@ -97,9 +107,38 @@ class MapContainer extends Component {
     }
   }
 
+  handleMount(mapProps, map) {
+    this.map = map;
+    this.geocodeLocation().then(() => {
+      this.adjustMap(mapProps, map);
+    });
+  }
+
+  adjustMap(mapProps, map) {
+    const mapsApi = this.props.google.maps;
+    const viewport = this.state.viewport;
+    if (viewport) {
+      try {
+        const n = new mapsApi.LatLng(
+          viewport.northeast.lat,
+          viewport.northeast.lng
+        );
+        const s = new mapsApi.LatLng(
+          viewport.southwest.lat,
+          viewport.southwest.lng
+        );
+        const b = new mapsApi.LatLngBounds(s, n);
+        map.fitBounds(b);
+        mapsApi.event.addListenerOnce(map, "idle", () => this.fetchPoints(map));
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+
   render() {
     // create a marker for every point that is passed to the map
-    const markers = this.props.points.map((point, i) => {
+    const markers = this.state.points.map((point, i) => {
       return (
         <Marker
           name={"point " + i}
@@ -112,32 +151,32 @@ class MapContainer extends Component {
     });
 
     return (
-      <div className="map">
-        <Map
-          onReady={this.props.onReady}
-          onClick={this.onMapClick}
-          onZoomChanged={this.onZoomChanged}
-          onDragend={this.props.viewportUpdated}
-          google={this.props.google}
-          zoom={this.state.zoom}
-          streetViewControl={false}
-          styles={mapStyles}
-          center={this.state.center}
-          initialCenter={INITIAL_CENTER}
-          containerStyle={containerStyle}
-        >
-          {markers}
-          <InfoWindow
-            marker={this.state.activeMarker}
-            visible={this.state.showingInfoWindow}
+      <div className="map-container">
+        <div className="map">
+          <Map
+            onReady={this.handleMount}
+            google={this.props.google}
+            streetViewControl={false}
+            styles={mapStyles}
+            draggable={false}
+            center={this.state.center}
+            initialCenter={INITIAL_CENTER}
+            containerStyle={containerStyle}
           >
-            <div>
-              {this.state.activeMarker !== null && (
-                <div>{this.state.activeMarker.meta.facilityname}</div>
-              )}
-            </div>
-          </InfoWindow>
-        </Map>
+            {markers}
+            <InfoWindow
+              marker={this.state.activeMarker}
+              visible={this.state.showingInfoWindow}
+            >
+              <div>
+                {this.state.activeMarker !== null && (
+                  <div>{this.state.activeMarker.meta.facilityname}</div>
+                )}
+              </div>
+            </InfoWindow>
+          </Map>
+        </div>
+        )
       </div>
     );
   }
