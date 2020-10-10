@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import demo, points, p_count, attr
+from viewModule.views import demo, points, p_count, attr, facilities
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('attr/<slug:attribute>', attr),
     path('points', points),
     path('trends/count', p_count),
+    path('facilities', facilities),
 ]
