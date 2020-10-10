@@ -2,26 +2,15 @@
 
 require("dotenv").config();
 const React = require("react");
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useHistory,
-  withRouter,
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
-const axios = require("./api/axios/index");
-const geocoder = require("./api/geocoder/index");
 import "./App.css";
 import "./index.css";
 
 const App = () => {
-  const [searchValue, setSearchValue] = React.useState(
-    localStorage.getItem("searchedLocation") || ""
-  );
+  const [searchValue, setSearchValue] = React.useState(localStorage.getItem('searchedLocation') || "");
 
   function handleSearchChange(text) {
     setSearchValue(text);
@@ -37,7 +26,7 @@ const App = () => {
 
   return (
     <Router history={history}>
-      <div>
+      <div class="app-container">
         <nav className="navbar">
           <ul>
             <li>
@@ -62,6 +51,10 @@ const App = () => {
             />
           </Route>
         </Switch>
+        <div className="footer">
+          © VET was developed in 2020 for the Lab for Health and Environmental
+          Information
+        </div>
       </div>
     </Router>
   );
