@@ -72,9 +72,10 @@ def p_count(request):
 
 def state_total_releases(request):
     state = str(request.GET.get('state')).upper()
-    t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite = 0,0,0,0,0,0,0
+    t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
     if state != 'None':
+        t_facilitycount = int(tri.objects.filter(st=state).values('facilityname').distinct().count())
         tri_set = tri.objects.filter(st=state)
         for t in tri_set:
             if t.classification == 'Dioxin': # exclude dioxin stats in other categories
@@ -90,7 +91,8 @@ def state_total_releases(request):
                 t_water += t.totalreleasewater
                 t_land += t.totalreleaseland
         result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
-                  'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc}
+                  'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
+                  'numtrifacilities':t_facilitycount}
         return JsonResponse(result)
 
 
