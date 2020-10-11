@@ -1,13 +1,14 @@
 /* eslint-disable import/first */
-
-require("dotenv").config();
-const React = require("react");
+require("dotenv").config(); 
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
+import GraphView from "./GraphView";
 import "./App.css";
 import "./index.css";
+import UserControlPanel from "./UserControlPanel";
+const React = require("react");
 
 const App = () => {
   const [location, setLocation] = React.useState(
@@ -60,7 +61,7 @@ const App = () => {
             <div className="map-view">
               <div className="filter-wrapper">
                 <div className="filters">
-                  
+                  <UserControlPanel></UserControlPanel>
                 </div>
               </div>
               <div className="map-wrapper">
@@ -69,7 +70,7 @@ const App = () => {
             </div>
           </Route>
           <Route path="/graphs">
-            <div>graphs go here</div>
+            <GraphView></GraphView>
           </Route>
           <Route path="/">
             <Home
