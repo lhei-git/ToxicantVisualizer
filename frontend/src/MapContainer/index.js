@@ -1,6 +1,12 @@
 /* eslint-disable import/first */
 import "./index.css";
 import mapStyles from "./standard";
+// import Icon1 from "./../../src/assets/marker-1.png";
+// import Icon2 from "./../../src/assets/marker-2.png";
+// import Icon3 from "./../../src/assets/marker-3.png";
+// import Icon4 from "./../../src/assets/marker-4.png";
+// import Icon5 from "./../../src/assets/marker-5.png";
+// const Icon6 = require("./../../src/assets/marker-6.png");
 const React = require("react");
 const geocoder = require("../api/geocoder/index");
 const axios = require("../api/axios/index");
@@ -147,6 +153,12 @@ class MapContainer extends Component {
           key={"point-" + i}
           position={{ lat: point.latitude, lng: point.longitude }}
           meta={point}
+          icon={{
+            url: require(`./../../src/assets/marker-${
+              Math.floor(Math.random() * 6) + 1
+            }.png`),
+            scaledSize: new this.props.google.maps.Size(20, 20),
+          }}
           onClick={this.onMarkerClick}
         />
       );
