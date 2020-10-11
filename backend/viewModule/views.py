@@ -54,16 +54,21 @@ def points(request):
     return HttpResponse(data, content_type='application/json')
 
 def p_count(request):
+    state = str(request.GET.get('state')).upper()
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     start = int(request.GET.get('start', default=2018))
     end = int(request.GET.get('end', default=2018))
-    count = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                               & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)
-                               & Q(year__lte=end) & Q(year__gte=start)).count()
-    return HttpResponse(int(count), content_type='application/json')
+    if state != 'None':
+        count = tri.objects.filter(st=state).count()
+        return HttpResponse(int(count), content_type='application/json')
+    else:
+        count = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                   & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)
+                                   & Q(year__lte=end) & Q(year__gte=start)).count()
+        return HttpResponse(int(count), content_type='application/json')
 
 def facilities(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
