@@ -65,20 +65,17 @@ class App extends React.Component {
       });
   }
 
+  //filters points out of map data based on filter criteria
   filterPoints(d)
   {
     //temporary array of conditions to filter by
-    const conditions = [{year:2018}, {cleanairact:"YES"}]
-
     var returnVal = true;
-
 
     this.state.filters.map((value, index) =>{
             if(d.fields[Object.keys(value)[0]] !== Object.values(value)[0])
                 returnVal = false;
                 }
     )
-
 
     return returnVal;
   }
@@ -117,8 +114,9 @@ class App extends React.Component {
   }
 
   // update map markers when filters change
-  onFilter()
+  onFilter(filters)
   {
+    this.setState({filters:filters})
     this.fetchPoints();
   }
 
