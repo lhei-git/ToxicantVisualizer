@@ -61,7 +61,7 @@ def p_count(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     start = int(request.GET.get('start', default=2018))
     end = int(request.GET.get('end', default=2018))
-    if state != 'None':
+    if state != 'None' and ne_lat==0.0 and sw_lng==0.0 and ne_lng==0.0 and sw_lat==0.0:
         count = tri.objects.filter(st=state).count()
         return HttpResponse(int(count), content_type='application/json')
     else:
@@ -70,14 +70,43 @@ def p_count(request):
                                    & Q(year__lte=end) & Q(year__gte=start)).count()
         return HttpResponse(int(count), content_type='application/json')
 
+def state_total_releases(request):
+    state = str(request.GET.get('state')).upper()
+    t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite = 0,0,0,0,0,0,0
+    result = {}
+    if state != 'None':
+        tri_set = tri.objects.filter(st=state)
+        for t in tri_set:
+            if t.classification == 'Dioxin': # exclude dioxin stats in other categories
+                t_dioxin += t.totalreleases
+                if t.carcinogen == 'YES':
+                    t_carc += t.totalreleases
+            else:
+                if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
+                    t_carc += t.totalreleases
+                t_onsite += t.on_sitereleasetotal
+                t_offsite += t.off_sitereleasetotal
+                t_air += t.totalreleaseair
+                t_water += t.totalreleasewater
+                t_land += t.totalreleaseland
+        result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
+                  'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc}
+        return JsonResponse(result)
+
+
 def facilities(request):
+    state = str(request.GET.get('state')).upper()
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    data = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                            & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)).values('facilityname').distinct()
-    return HttpResponse(data, content_type='application/json')
+    if state!='None' and ne_lat==0.0 and sw_lng==0.0 and ne_lng==0.0 and sw_lat==0.0:
+        data = tri.objects.filter(st=state).values('facilityname').distinct()
+        return HttpResponse(data, content_type='application/json')
+    else:
+        data = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                  & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)).values('facilityname').distinct()
+        return HttpResponse(data, content_type='application/json')
 
 def demo(request, tri_attr=int(-9999)):
     if tri_attr == -9999:
