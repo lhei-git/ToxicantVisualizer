@@ -3,8 +3,8 @@
 from django.http import HttpResponse, JsonResponse
 # from django.shortcuts import render # return render(request, template, context)
 from django.db.models import Q
-from viewModule.models import Tri2018 as tri
-from viewModule.serializers import Tri2018Serializer as t_szr
+from viewModule.models import Tri as tri
+from viewModule.serializers import TriSerializer as t_szr
 from django.core import serializers as szs
 
 # SAMPLE coords-> /points?ne_lat=13.3950&sw_lat=13.3948&sw_lng=144.7070&ne_lng=144.7072 ==> 6 results in GUAM (2018)
