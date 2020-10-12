@@ -65,13 +65,19 @@ class MapContainer extends Component {
 
   onMarkerClick(props, marker) {
     this.props.setChemical(marker.meta.chemical);
-    this.setState({
-      activeMarker: marker,
-      showingInfoWindow: true,
-    });
-    console.log(marker.meta);
-    this.map.setCenter(marker.position);
-    this.map.setZoom(14);
+    const showing = this.state.showingInfoWindow;
+    if (!showing || this.state.activeMarker !== marker) {
+      this.setState({
+        activeMarker: marker,
+        showingInfoWindow: true,
+      });
+      this.map.setCenter(marker.position);
+      this.map.setZoom(14);
+    } else {
+      this.setState({
+        showingInfoWindow: false,
+      });
+    }
   }
 
   geocodeLocation(location) {
@@ -166,9 +172,8 @@ class MapContainer extends Component {
       .filter((p, i, arr) => {
         if (this.props.filters.carcinogens && p.carcinogen === "NO") {
           return false;
-        }
-         else if (this.props.filters.dioxins && !p.dioxin) {
-            return false;
+        } else if (this.props.filters.dioxins && !p.dioxin) {
+          return false;
         } else if (
           this.props.filters.releaseType === "air" &&
           p.totalreleaseair === 0
@@ -247,6 +252,13 @@ class MapContainer extends Component {
                     <p>
                       Industry: {this.state.activeMarker.meta.industrysector}
                     </p>
+                    <p>
+                      Amount:{" "}
+                      {this.state.activeMarker.meta.totalreleases
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}{" "}
+                      lbs
+                    </p>{" "}
                     <p>Carcinogen: {this.state.activeMarker.meta.carcinogen}</p>
                   </div>
                 )}

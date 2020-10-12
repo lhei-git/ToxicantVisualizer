@@ -1,3 +1,7 @@
+.pubChemFields {
+  padding: 20px;
+}
+
 h1 {
   border-bottom: 2px solid var(--blue);
 }

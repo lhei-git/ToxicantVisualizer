@@ -23,10 +23,14 @@
   font-size: 18px;
 }
 
+.control-container .content div {
+  margin: 10px 0;
+}
+
 .control-container .content input[type="checkbox"] {
   position: relative;
   top: 3px;
-  margin: 5px;
+  margin: 5px 10px;
 }
 
 .control-container .content .type-selector select {
