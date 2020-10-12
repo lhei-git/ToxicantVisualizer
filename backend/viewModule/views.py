@@ -95,6 +95,12 @@ def state_total_releases(request):
                   'numtrifacilities':t_facilitycount}
         return JsonResponse(result)
 
+def top_parentco_releases(request):
+    state = str(request.GET.get('state')).upper()
+    if state != 'None':
+        queryset = tri.objects.filter(unitofmeasure='Pounds', st=state).order_by('-totalreleases')[:10]
+        data = szs.serialize('json', queryset)
+        return HttpResponse(data, content_type='application/json')
 
 def facilities(request):
     state = str(request.GET.get('state')).upper()

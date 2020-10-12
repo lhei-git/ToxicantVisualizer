@@ -1,12 +1,10 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import demo, points, p_count, attr, facilities, state_total_releases
+from viewModule.views import demo, points, p_count, attr, facilities, state_total_releases, top_parentco_releases
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('demo/', demo),
     path('', admin.site.urls),
-    path('demo/<slug:tri_attr>', demo),
     path('attr/<slug:attribute>', attr),
     # return all reports within: window coords
     path('points', points),
@@ -16,4 +14,7 @@ urlpatterns = [
     path('facilities', facilities),
     # return total amount stats released by: state
     path('statestats', state_total_releases),
+    # top 10 parent Cos in total release by: state
+    path('topcos', top_parentco_releases),
 ]
+#  top stats have repetitions, FIXME ~ flatten somewhere
