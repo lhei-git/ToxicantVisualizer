@@ -1,10 +1,11 @@
 /* eslint-disable import/first */
-require("dotenv").config(); 
+require("dotenv").config();
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
 import GraphView from "./GraphView";
+import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
@@ -14,18 +15,39 @@ const App = () => {
   const [location, setLocation] = React.useState(
     localStorage.getItem("searchedLocation") || ""
   );
+  const [chemical, setChemical] = React.useState("");
+  const [totalReleases, setTotalReleases] = React.useState(0);
+  const [filters, setFilters] = React.useState({
+    open: true,
+    dioxins: false,
+    carcinogens: false,
+    otherChems: false,
+    releaseType: "any",
+  });
+
+  function onChemTypeChange(filters) {
+    setFilters(filters);
+  }
 
   function handleSearchChange(text) {
     setLocation(text);
   }
 
+  function handleSearchSubmit() {
+    history.push("/map");
+  }
+
+  function onMapUpdate(num){
+    setTotalReleases(num);
+  }
+  
   React.useEffect(() => {
     localStorage.setItem("searchedLocation", location);
   }, [location]);
 
-  function handleSearchSubmit() {
-    history.push("/map");
-  }
+  React.useEffect(() => {
+    console.log(totalReleases);
+  }, [totalReleases]);
 
   return (
     <Router history={history}>
@@ -61,11 +83,21 @@ const App = () => {
             <div className="map-view">
               <div className="filter-wrapper">
                 <div className="filters">
-                  <UserControlPanel></UserControlPanel>
+                  <UserControlPanel
+                    filters={filters}
+                    totalReleases={totalReleases}
+                    onChemTypeChange={onChemTypeChange}
+                  ></UserControlPanel>
+                  <PubChemFields chemName={chemical}></PubChemFields>
                 </div>
               </div>
               <div className="map-wrapper">
-                <MapContainer apiKey={process.env.REACT_APP_GOOGLE_API_KEY} />
+                <MapContainer
+                  filters={filters}
+                  setChemical={setChemical}
+                  onUpdate={onMapUpdate}
+                  apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                />
               </div>
             </div>
           </Route>
@@ -79,10 +111,10 @@ const App = () => {
             />
           </Route>
         </Switch>
-        <div className="footer">
+        {/* <div className="footer">
           © VET was developed in 2020 for the Lab for Health and Environmental
           Information
-        </div>
+        </div> */}
       </div>
     </Router>
   );

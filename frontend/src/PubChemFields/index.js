@@ -207,7 +207,7 @@ class PubChemFields extends Component {
           {this.state.description !== null && (
             <div>{this.state.description}</div>
           )}
-          {this.state.pictograms[0] !== null && (
+          {this.state.pictograms.length > 0 && (
             <div className="pictograms">
               {this.state.pictograms.map((v, i) => {
                 return <img src={v} alt="" key={v + "-" + i}></img>;
@@ -220,7 +220,7 @@ class PubChemFields extends Component {
               {this.state.pharmacology}
             </div>
           )}
-          {this.state.hazardStatements[0] !== null && (
+          {this.state.hazardStatements.length > 0 && (
             <div className="hazards">
               <h2>Hazard Statements</h2>
               {this.state.hazardStatements.map((v, i) => {
