@@ -1,9 +1,7 @@
 from rest_framework import serializers
-from .models import Tri2018 as tri
 
-
-# this class converts the quried tri class object to a dict instance
-class Tri2018Serializer(serializers.Serializer):
+# this class converts the queried tri class object to a dict instance
+class TriSerializer(serializers.Serializer):
     year = serializers.IntegerField()
     facilityname = serializers.CharField()
     streetaddress = serializers.CharField()
@@ -13,10 +11,21 @@ class Tri2018Serializer(serializers.Serializer):
     zip = serializers.IntegerField()
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
-    parentco = serializers.CharField()
+    parentconame = serializers.CharField()
     industrysector = serializers.CharField()
     chemical = serializers.CharField()
-    cleanairact = serializers.CharField()
+    cleanairactchemical = serializers.CharField()
+    classification = serializers.CharField()
+    carcinogen = serializers.CharField()
+    unitofmeasure = serializers.CharField()
+    fugitiveair = serializers.IntegerField()
+    stackair = serializers.IntegerField()
+    totalreleaseair = serializers.IntegerField()
+    totalreleasewater = serializers.IntegerField()
+    totalreleaseland = serializers.IntegerField()
+    on_sitereleasetotal = serializers.IntegerField()
+    off_sitereleasetotal = serializers.IntegerField()
+    totalreleases = serializers.IntegerField()
+    one_timerelease = serializers.CharField()
     id = serializers.IntegerField()
-
 # NOTE - serializers don't have access to all django model fields
