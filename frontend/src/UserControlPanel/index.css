@@ -3,24 +3,33 @@
   width: 100%;
 }
 
-.header {
+.control-container .header {
   margin: 0;
   padding: 0;
   cursor: pointer;
   border: solid 1px #f2f2f2;
   padding: 6px;
-  background-color: #f4a259;
-  color: #fff;
-  font-family: verdana;
+  background-color: #b0d490;
+  color: black;
 }
 
-.content {
+.control-container .content {
   cursor: pointer;
   border-left: solid 1px #f2f2f2;
   border-right: solid 1px #f2f2f2;
   border-bottom: solid 1px #f2f2f2;
   border-radius: 0 0 5px 5px;
   padding: 15px;
-  font-family: verdana;
-  font-size: 14px;
+  font-size: 18px;
+}
+
+.control-container .content input[type="checkbox"] {
+  position: relative;
+  top: 3px;
+  margin: 5px;
+}
+
+.control-container .content .type-selector select {
+  margin: 0 10px;
+  font: "Roboto";
 }

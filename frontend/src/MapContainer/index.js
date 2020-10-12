@@ -52,12 +52,24 @@ class MapContainer extends Component {
     this.MarkerSet = this.MarkerSet.bind(this);
   }
 
+  componentDidUpdate(prevProps) {
+    if (
+      JSON.stringify(prevProps.filters) !== JSON.stringify(this.props.filters)
+    ) {
+      const oldPoints = this.state.points;
+      this.setState({
+        markers: this.MarkerSet(oldPoints),
+      });
+    }
+  }
+
   onMarkerClick(props, marker) {
+    this.props.setChemical(marker.meta.chemical);
     this.setState({
       activeMarker: marker,
       showingInfoWindow: true,
     });
-
+    console.log(marker.meta);
     this.map.setCenter(marker.position);
     this.map.setZoom(14);
   }
@@ -72,6 +84,10 @@ class MapContainer extends Component {
             center: res.data.results[0].geometry.location,
             viewport: res.data.results[0].geometry.viewport,
           });
+          localStorage.setItem(
+            "viewport",
+            JSON.stringify(res.data.results[0].geometry.viewport)
+          );
         })
         .then(resolve)
         .catch(reject);
@@ -83,7 +99,7 @@ class MapContainer extends Component {
     const sw = map.getBounds().getSouthWest();
     axios
       .get(
-        `/points?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
+        `/facilities?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
       )
       .then((res) => {
         this.setState({
@@ -146,23 +162,54 @@ class MapContainer extends Component {
   MarkerSet(points) {
     console.log("creating markers");
     // create a marker for every point that is passed to the map
-    const markers = points.map((point, i) => {
-      return (
-        <Marker
-          name={"point " + i}
-          key={"point-" + i}
-          position={{ lat: point.latitude, lng: point.longitude }}
-          meta={point}
-          icon={{
-            url: require(`./../../src/assets/marker-${
-              Math.floor(Math.random() * 6) + 1
-            }.png`),
-            scaledSize: new this.props.google.maps.Size(20, 20),
-          }}
-          onClick={this.onMarkerClick}
-        />
-      );
-    });
+    const markers = points
+      .filter((p, i, arr) => {
+        if (this.props.filters.carcinogens && p.carcinogen === "NO") {
+          return false;
+        }
+         else if (this.props.filters.dioxins && !p.dioxin) {
+            return false;
+        } else if (
+          this.props.filters.releaseType === "air" &&
+          p.totalreleaseair === 0
+        )
+          return false;
+        else if (
+          this.props.filters.releaseType === "water" &&
+          p.totalreleasewater === 0
+        )
+          return false;
+        else if (
+          this.props.filters.releaseType === "land" &&
+          p.totalreleaseland === 0
+        )
+          return false;
+        return i > 0 && p.facilityname !== arr[i - 1].facilityname;
+      })
+      .map((point, i) => {
+        let color = 1;
+        if (point.totalreleases < 100) color = 1;
+        else if (point.totalreleases < 100) color = 2;
+        else if (point.totalreleases < 10000) color = 3;
+        else if (point.totalreleases < 100000) color = 4;
+        else if (point.totalreleases < 1000000) color = 5;
+        else color = 6;
+        return (
+          <Marker
+            name={"point " + i}
+            key={"point-" + i}
+            position={{ lat: point.latitude, lng: point.longitude }}
+            meta={point}
+            icon={{
+              url: require(`./../../src/assets/marker-${color}.png`),
+              scaledSize: new this.props.google.maps.Size(20, 20),
+            }}
+            onClick={this.onMarkerClick}
+          />
+        );
+      });
+    this.props.onUpdate(markers.length);
+
     return markers;
   }
 
@@ -186,9 +233,22 @@ class MapContainer extends Component {
               marker={this.state.activeMarker}
               visible={this.state.showingInfoWindow}
             >
-              <div>
+              <div class="info-window">
                 {this.state.activeMarker !== null && (
-                  <div>{this.state.activeMarker.meta.facilityname}</div>
+                  <div>
+                    <h2>{this.state.activeMarker.meta.facilityname}</h2>
+                    <p>
+                      {this.state.activeMarker.meta.streetaddress} <br></br>
+                      {this.state.activeMarker.meta.city},{" "}
+                      {this.state.activeMarker.meta.st}{" "}
+                      {this.state.activeMarker.meta.zip}
+                    </p>
+                    <p>Chemical: {this.state.activeMarker.meta.chemical}</p>
+                    <p>
+                      Industry: {this.state.activeMarker.meta.industrysector}
+                    </p>
+                    <p>Carcinogen: {this.state.activeMarker.meta.carcinogen}</p>
+                  </div>
                 )}
               </div>
             </InfoWindow>

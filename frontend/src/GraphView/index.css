@@ -1,21 +1,63 @@
-.graph-dropdown {
+.graph-container {
+  overflow-x: hidden;
+}
+
+.graph-container .graph-dropdown {
   position: relative;
   width: 100%;
+  margin-bottom: 2px;
+}
+
+.graph-container .header {
+  cursor: pointer;
   height: 70px;
   line-height: 70px;
-  background: rgb(255, 108, 108);
+  background: rgb(255, 115, 115);
   text-align: left;
   padding-left: 20px;
   box-sizing: border-box;
   font-size: 24px;
-  color: #FFF;
-  margin-bottom: 2px;
+  color: #fff;
 }
 
-.dropdown-icon {
+.graph-container .dropdown-icon {
   position: absolute;
   top: 10px;
   right: 0;
   margin-right: 20px;
+}
 
+.graph-container .dropdown-icon.active {
+  transform: rotate(180deg);
+  transform-origin: 60% 50%;
+}
+
+.graph-container .graph {
+  background: #fff;
+  min-height: 100px;
+  width: 100%;
+}
+
+.graph-container .summary {
+  width: 100%;
+}
+
+/* .graph-container .summary table, */
+.graph-container .summary th,
+.graph-container .summary td {
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.graph-container .summary tr {
+  min-height: 30px;
+}
+
+.graph-container .summary table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.graph-container .top-ten {
+  position: relative;
 }

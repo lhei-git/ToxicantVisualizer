@@ -9,38 +9,38 @@
 
 /* HEADER */
 
-.header {
+.home-container .header {
   font-size: 36px;
   margin: 20px 0;
 }
 
 /* CAPTION */
 
-.caption {
+.home-container .caption {
   font-size: 18px;
   font-style: italic;
   margin: 40px 20px;
 }
 
-.search-bar {
+.home-container .search-bar {
   display: block;
   text-align: center;
 }
 
-.search-bar form {
+.home-container .search-bar form {
   display: inline-block;
   margin: 0 auto;
 }
 
-.search-bar form label {
+.home-container .search-bar form label {
   font-size: 24px;
 }
 
-.search-bar form label:nth-of-type(2) {
+.home-container .search-bar form label:nth-of-type(2) {
   opacity: 0.5;
 }
 
-.search-bar form input{
+.home-container .search-bar form input {
   display: block;
   width: 100%;
   padding: 0 10px;
@@ -51,7 +51,7 @@
   border: 2px solid var(--blue);
 }
 
-.search-bar form button {
+.home-container .search-bar form button {
   margin: 5px auto;
   display: block;
   padding: 10px 40px;

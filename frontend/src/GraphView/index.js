@@ -1,37 +1,207 @@
 import "./index.css";
+const axios = require("../api/axios");
 const React = require("react");
+const {
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Bar,
+  ResponsiveContainer,
+} = require("recharts");
 
-function DropdownIcon() {
+function DropdownIcon(props) {
   return (
     <svg
-    className="dropdown-icon"
+      className={`dropdown-icon ${!props.hidden ? "active" : ""}`}
       height="50px"
       viewBox="0 0 400 400"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M 100 100 L 400 100 L 250 300 z"
-        fill="#FFF"
-      />
+      <path d="M 100 100 L 400 100 L 250 300 z" fill="#FFF" />
     </svg>
   );
+}
+
+function GraphDropdown(props) {
+  let [hidden, setHidden] = React.useState(
+    JSON.parse(localStorage.getItem(props.name)) || true
+  );
+  let [graph, setGraph] = React.useState(null);
+  let [viewport] = React.useState(localStorage.getItem("viewport") || {});
+
+  React.useEffect(() => {
+    async function fetchData() {
+      if (!props.graph) return;
+      const g = await props.graph(viewport);
+
+      setGraph(g);
+    }
+    fetchData();
+  }, [props, viewport]);
+
+  React.useEffect(() => {
+    localStorage.setItem(props.name, hidden);
+    console.log(JSON.parse(localStorage.getItem(props.name)));
+  }, [hidden, props.name]);
+
+  const renderGraph = () => {
+    setHidden(!hidden);
+  };
+
+  return (
+    <div className="graph-dropdown">
+      <div className="header" onClick={renderGraph}>
+        {props.title}
+      </div>
+      <DropdownIcon hidden={hidden} />
+      {hidden ? null : <div className="graph">{graph}</div>}
+    </div>
+  );
+}
+
+async function GraphSummary(viewport) {
+  try {
+    const ne = JSON.parse(viewport).northeast;
+    const sw = JSON.parse(viewport).southwest;
+    const res = await axios.get(
+      `/stats/location/summary?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+    );
+    let rows = Object.keys(res.data).map((row, i) => (
+      <tr key={i}>
+        <td>{row.replace("_", " ")}</td>
+        <td>{res.data[row]}</td>
+      </tr>
+    ));
+    return (
+      <div className="summary">
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Current Location</th>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return <div>ERROR: Summary statistics could not be found.</div>;
+  }
+}
+
+async function GraphTopTenFacilities(viewport) {
+  try {
+    const ne = JSON.parse(viewport).northeast;
+    const sw = JSON.parse(viewport).southwest;
+    const res = await axios.get(
+      `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+    );
+    const data = Object.keys(res.data)
+      .map((key, i) => {
+        return {
+          name: key,
+          pv: res.data[key],
+        };
+      })
+      .sort((a, b) => b.pv - a.pv)
+      .slice(0, 10);
+    return (
+      <div className="top-ten facilities">
+        <ResponsiveContainer width="60%" aspect={16 / 9}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{
+              top: 30,
+              right: 30,
+              left: 50,
+              bottom: 10,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <YAxis dataKey="name" type="category" orientation="right" dx={10} />
+            <XAxis type="number" unit="lbs" />
+            <Tooltip />
+            <Legend />
+            <Bar name="release amount (lbs)" dataKey="pv" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return <div></div>;
+  }
+}
+
+async function GraphTopTenParents(viewport) {
+  try {
+    const ne = JSON.parse(viewport).northeast;
+    const sw = JSON.parse(viewport).southwest;
+    const res = await axios.get(
+      `/stats/location/parent_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+    );
+    const data = Object.keys(res.data)
+      .map((key, i) => {
+        return {
+          name: key,
+          pv: res.data[key],
+        };
+      })
+      .sort((a, b) => b.pv - a.pv)
+      .slice(0, 10);
+    return (
+      <div className="top-ten parents">
+        <ResponsiveContainer width="60%" aspect={16 / 9}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{
+              top: 30,
+              right: 30,
+              left: 50,
+              bottom: 10,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <YAxis dataKey="name" type="category" orientation="right" dx={10} />
+            <XAxis type="number" unit="lbs" />
+            <Tooltip />
+            <Legend />
+            <Bar name="release amount (lbs)" dataKey="pv" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return <div></div>;
+  }
 }
 
 function GraphView() {
   return (
     <div className="graph-container">
-      <div className="graph-dropdown">
-        Summary
-        <DropdownIcon />
-      </div>
-      <div className="graph-dropdown">
-        Total releases (on-site+off-site) for top 10 facilities (in lbs)
-        <DropdownIcon />
-      </div>
-      <div className="graph-dropdown">
-        Total Releases for the top 10 parent companies (in lbs)
-        <DropdownIcon />
-      </div>
+      <GraphDropdown
+        name="summary"
+        graph={GraphSummary}
+        title="Summary"
+      ></GraphDropdown>
+      <GraphDropdown
+        name="total_facilities"
+        graph={GraphTopTenFacilities}
+        title="Total releases (on-site+off-site) for top 10 facilities (in lbs)"
+      ></GraphDropdown>
+      <GraphDropdown
+        name="total_parents"
+        graph={GraphTopTenParents}
+        title="Total Releases for the top 10 parent companies (in lbs)"
+      ></GraphDropdown>
     </div>
   );
 }
