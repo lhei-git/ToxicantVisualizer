@@ -5,7 +5,7 @@ from viewModule.views import demo, points, p_count, attr, facilities, state_tota
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('demo/', demo),
-    path('', demo),
+    path('', admin.site.urls),
     path('demo/<slug:tri_attr>', demo),
     path('attr/<slug:attribute>', attr),
     # return all reports within: window coords
