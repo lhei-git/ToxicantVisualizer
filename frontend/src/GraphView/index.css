@@ -45,7 +45,7 @@
 /* .graph-container .summary table, */
 .graph-container .summary th,
 .graph-container .summary td {
-  border: 1px solid black;
+  border: 2px solid var(--blue);
   padding: 5px;
 }
 
@@ -55,6 +55,7 @@
 
 .graph-container .summary table {
   width: 100%;
+  border-collapse: collapse;
   table-layout: fixed;
 }
 
