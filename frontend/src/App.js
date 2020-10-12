@@ -37,10 +37,10 @@ const App = () => {
     history.push("/map");
   }
 
-  function onMapUpdate(num){
+  function onMapUpdate(num) {
     setTotalReleases(num);
   }
-  
+
   React.useEffect(() => {
     localStorage.setItem("searchedLocation", location);
   }, [location]);
@@ -58,12 +58,16 @@ const App = () => {
               <li>
                 <Link to="/">Home</Link>
               </li>
-              <li>
-                <Link to="/map">Map</Link>
-              </li>
-              <li>
-                <Link to="/graphs">Graphs</Link>
-              </li>
+              {location && (
+                <li>
+                  <Link to="/map">Map</Link>
+                </li>
+              )}
+              {location && (
+                <li>
+                  <Link to="/graphs">Graphs</Link>
+                </li>
+              )}
             </ul>
           </div>
           {location !== "" && window.location.pathname === "/map" && (
