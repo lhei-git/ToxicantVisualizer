@@ -6,8 +6,15 @@ from django.db.models import Q
 from viewModule.models import Tri as tri
 from viewModule.serializers import TriSerializer as t_szr
 from django.core import serializers as szs
+import json
+import re
 
 # SAMPLE coords-> /points?ne_lat=13.3950&sw_lat=13.3948&sw_lng=144.7070&ne_lng=144.7072 ==> 6 results in GUAM (2018)
+
+
+def clean_chemical_name(str):
+  pattern = re.compile(r'\([^)]*\)|compounds|\"| and.*', re.IGNORECASE)
+  return pattern.sub("", str).strip()
 
 def attr(request, attribute=str()):
     attr = str(attribute).upper()
@@ -49,9 +56,108 @@ def points(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    data = szs.serialize('json', tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                                    & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)))
-    return HttpResponse(data, content_type='application/json')
+    # data = szs.serialize('json', tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+    #                                                 & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)))
+    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                    & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
+
+    # rows = list(map(lambda e: e.__dict__, list(raw)))
+    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+
+
+def location_summary(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    
+    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                    & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
+  
+    rows = list(map(lambda e: e.__dict__, list(raw)))
+    summary = {}
+    summary['num_facilities'] = len(set(list(map(lambda r: r['facilityname'], rows))))
+    summary['num_distinct_chemicals'] = len(set(list(map(lambda r: clean_chemical_name(r['chemical']), rows))))
+    summary['total_disposal'] = 0
+    summary['total_on_site'] = 0
+    summary['total_off_site'] = 0
+    summary['total_air'] = 0
+    summary['total_water'] = 0
+    summary['total_land'] = 0
+    summary['total_carcinogen'] = 0
+
+    # TODO - make calculations based on unit of measure. Currently assumes everything is in pounds
+    for r in rows: 
+      summary['total_disposal'] += r['totalreleases']
+      summary['total_on_site'] += r['on_sitereleasetotal']
+      summary['total_off_site'] += r['off_sitereleasetotal']
+      summary['total_air'] += r['totalreleaseair']
+      summary['total_water'] += r['totalreleasewater']
+      summary['total_land'] += r['totalreleaseland']
+      summary['total_carcinogen'] += r['totalreleases'] if r['carcinogen'] == 'YES' else 0
+
+    response = json.dumps(summary)
+    return HttpResponse(response, content_type='application/json')
+
+
+def location_releases_by_facility(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+
+    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                    & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
+
+    rows = list(map(lambda e: e.__dict__, list(raw)))
+    facilities = {}
+    for r in rows:
+      f = r['facilityname']
+      if f in facilities:
+          facilities[f] += r['totalreleases']
+      else:
+          facilities[f] = 0
+    return HttpResponse(json.dumps(facilities), content_type='application/json')
+
+def location_releases_by_parent(request):
+  ne_lat = float(request.GET.get('ne_lat', default=0.0))
+  ne_lng = float(request.GET.get('ne_lng', default=0.0))
+  sw_lat = float(request.GET.get('sw_lat', default=0.0))
+  sw_lng = float(request.GET.get('sw_lng', default=0.0))
+
+  raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                  & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
+
+  rows = list(map(lambda e: e.__dict__, list(raw)))
+  parents = {}
+  for r in rows:
+    f = r['parentconame']
+    if f in parents:
+        parents[f] += r['totalreleases']
+    else:
+        parents[f] = 0
+  return HttpResponse(json.dumps(parents), content_type='application/json')
+
+def chem_counts(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    
+    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                    & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
+    
+
+    rows = map(lambda e: e.__dict__, list(raw))
+    top_chems = dict()
+    for r in rows:
+      chem = clean_chemical_name(r['chemical'])
+      if not chem in top_chems:
+        top_chems[chem] = 1
+      else:
+        top_chems[chem] = top_chems[chem] + 1
+    return HttpResponse(json.dumps(top_chems), content_type='application/json')
+    
 
 def p_count(request):
     state = str(request.GET.get('state')).upper()
