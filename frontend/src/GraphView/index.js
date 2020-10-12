@@ -128,7 +128,7 @@ async function GraphTopTenFacilities(viewport) {
             <XAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend />
-            <Bar name="release amount (lbs)" dataKey="pv" fill="#8884d8" />
+            <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -173,7 +173,52 @@ async function GraphTopTenParents(viewport) {
             <XAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend />
-            <Bar name="release amount (lbs)" dataKey="pv" fill="#8884d8" />
+            <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return <div></div>;
+  }
+}
+
+async function GraphTopChemicals(viewport) {
+  try {
+    const ne = JSON.parse(viewport).northeast;
+    const sw = JSON.parse(viewport).southwest;
+    const res = await axios.get(
+      `/stats/location/chem_counts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+    );
+    const data = Object.keys(res.data)
+      .map((key, i) => {
+        return {
+          name: key,
+          pv: res.data[key],
+        };
+      })
+      .sort((a, b) => b.pv - a.pv)
+      .slice(0, 10);
+    return (
+      <div className="top-ten parents">
+        <ResponsiveContainer width="60%" aspect={16 / 9}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{
+              top: 30,
+              right: 30,
+              left: 50,
+              bottom: 10,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <YAxis dataKey="name" type="category" orientation="right" dx={10} />
+            <XAxis type="number" />
+            <Tooltip />
+            <Legend />
+            <Bar name="Occurrances" dataKey="pv" fill="#5b8e7d" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -201,6 +246,11 @@ function GraphView() {
         name="total_parents"
         graph={GraphTopTenParents}
         title="Total Releases for the top 10 parent companies (in lbs)"
+      ></GraphDropdown>
+      <GraphDropdown
+        name="top_graphs"
+        graph={GraphTopChemicals}
+        title="Top Ten Chemicals (in # occurrances)"
       ></GraphDropdown>
     </div>
   );
