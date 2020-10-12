@@ -26,9 +26,7 @@ function DropdownIcon(props) {
 }
 
 function GraphDropdown(props) {
-  let [hidden, setHidden] = React.useState(
-    JSON.parse(localStorage.getItem(props.name)) || true
-  );
+  let [hidden, setHidden] = React.useState(props.hidden !== undefined ? props.hidden : true);
   let [graph, setGraph] = React.useState(null);
   let [viewport] = React.useState(localStorage.getItem("viewport") || {});
 
@@ -41,11 +39,6 @@ function GraphDropdown(props) {
     }
     fetchData();
   }, [props, viewport]);
-
-  React.useEffect(() => {
-    localStorage.setItem(props.name, hidden);
-    console.log(JSON.parse(localStorage.getItem(props.name)));
-  }, [hidden, props.name]);
 
   const renderGraph = () => {
     setHidden(!hidden);
@@ -70,9 +63,9 @@ async function GraphSummary(viewport) {
       `/stats/location/summary?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     let rows = Object.keys(res.data).map((row, i) => (
-      <tr key={i}>
+      <tr key={row}>
         <td>{row.replace("_", " ")}</td>
-        <td>{res.data[row]}</td>
+        <td>{+res.data[row].toFixed(2)}</td>
       </tr>
     ));
     return (
@@ -234,6 +227,7 @@ function GraphView() {
     <div className="graph-container">
       <GraphDropdown
         name="summary"
+        hidden={false}
         graph={GraphSummary}
         title="Summary"
       ></GraphDropdown>
