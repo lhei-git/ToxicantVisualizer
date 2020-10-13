@@ -1,5 +1,6 @@
 import "./index.css";
 import "../index.css";
+import UserControlPanel from '../UserControlPanel/index.js'
 const React = require("react");
 const Component = React.Component;
 
@@ -21,6 +22,7 @@ class SearchBar extends Component {
 
   render() {
     return (
+    <>
       <div className="search-bar">
         <input
           type="text"
@@ -33,12 +35,16 @@ class SearchBar extends Component {
               this.props.onSearch(this.state.searchBar);
             }
           }}
-          placeholder="Enter an address, zip code, city"
+          placeholder="Enter an address, zip code, city, or chemical"
         />
         <button onClick={() => this.props.onSearch(this.state.searchBar)}>
           Search
         </button>
       </div>
+      <div>
+        <UserControlPanel />
+      </div>
+    </>
     );
   }
 }
