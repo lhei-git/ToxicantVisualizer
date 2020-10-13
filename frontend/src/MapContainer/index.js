@@ -238,7 +238,7 @@ class MapContainer extends Component {
               marker={this.state.activeMarker}
               visible={this.state.showingInfoWindow}
             >
-              <div class="info-window">
+              <div className="info-window">
                 {this.state.activeMarker !== null && (
                   <div>
                     <h2>{this.state.activeMarker.meta.facilityname}</h2>
