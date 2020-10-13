@@ -74,7 +74,7 @@ class UserControlPanel extends Component {
               defaultChecked={this.state.otherChems}
               onClick={this.onChemTypeChange}
             /> */}
-            <div class="type-selector">
+            <div className="type-selector">
               <label for="type">Release Type</label>
               <select name="type" onChange={this.onSelectChange} id="">
               <option value="any">Any</option>
