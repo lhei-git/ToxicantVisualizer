@@ -1,154 +1,127 @@
 /* eslint-disable import/first */
-
 require("dotenv").config();
-const React = require("react");
-const axios = require("./api/axios/index");
-const geocoder = require("./api/geocoder/index");
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import history from "./history";
+import Home from "./Home";
 import MapContainer from "./MapContainer";
-import SearchBar from "./SearchBar";
+import GraphView from "./GraphView";
 import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
-import Graph from "./Graph";
+import UserControlPanel from "./UserControlPanel";
+const React = require("react");
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
+const App = () => {
+  const [location, setLocation] = React.useState(
+    localStorage.getItem("searchedLocation") || ""
+  );
+  const [chemical, setChemical] = React.useState("");
+  const [totalReleases, setTotalReleases] = React.useState(0);
+  const [filters, setFilters] = React.useState({
+    open: true,
+    dioxins: false,
+    carcinogens: false,
+    otherChems: false,
+    releaseType: "any",
+  });
 
-    // high-level app state held here
-    this.state = {
-      activeMarker: null,
-      points: [],
-      bounds: {
-        northeast: null,
-        southwest: null,
-      },
-      searchedCenter: {
-        lat: null,
-        lng: null,
-      },
-      zipCode: null,
-      zoom: 14,
-    };
-
-    // binding required when sending callbacks to child components
-    this.fetchPoints = this.fetchPoints.bind(this);
-    this.viewportUpdated = this.viewportUpdated.bind(this);
-    this.onSearch = this.onSearch.bind(this);
-    this.onMarkerClick = this.onMarkerClick.bind(this);
+  function onChemTypeChange(filters) {
+    setFilters(filters);
   }
 
-  // get all data points within current map bounds
-  fetchPoints() {
-    if (this.state.bounds.northeast === null) return;
-
-    const vm = this;
-    vm.setState({
-      points: [],
-    });
-    const ne = this.state.bounds.northeast;
-    const sw = this.state.bounds.southwest;
-    axios
-      .get(
-        `/points?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
-      )
-      .then((res) => {
-        // console.log(points);
-        vm.setState({
-          points: res.data.map(d => d.fields),
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  function handleSearchChange(text) {
+    setLocation(text);
   }
 
-  // run methods when component is first fully rendered
-  componentDidMount() {
-    this.fetchPoints();
+  function handleSearchSubmit() {
+    history.push("/map");
   }
 
-  onSearch(address) {
-    if (address === null || address === "") return;
-    geocoder
-      .get(`/json?address=${address}`)
-      .then((res) => {
-        if (res.status === 200)
-          this.setState({
-            searchedCenter: res.data.results[0].geometry.location,
-            zoom: this.state.zoom,
-          });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  function onMapUpdate(num) {
+    setTotalReleases(num);
   }
 
-  // update map markers when map bounds change
-  viewportUpdated(mapProps, map) {
-    const bounds = map.getBounds();
-    this.setState({
-      bounds: {
-        northeast: bounds.getNorthEast(),
-        southwest: bounds.getSouthWest(),
-      },
-    });
-    this.fetchPoints();
-  }
+  React.useEffect(() => {
+    localStorage.setItem("searchedLocation", location);
+  }, [location]);
 
-  onMarkerClick(marker) {
-    this.setState({
-      activeMarker: marker,
-    });
-  }
+  React.useEffect(() => {
+    console.log(totalReleases);
+  }, [totalReleases]);
 
-  refreshPage() {
-    window.location.reload(false);
-  }
-
-  render() {
-    return (
-      <div className="app">
-        <div className="banner">
-          <div className="navigation">
+  return (
+    <Router history={history}>
+      <div className="app-container">
+        <nav className="navbar">
+          <div>
             <ul>
-              <li>MAPS</li>
-              <li>GRAPHS</li>
-              <li>ABOUT</li>
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+              {location && (
+                <li>
+                  <Link to="/map">Map</Link>
+                </li>
+              )}
+              {location && (
+                <li>
+                  <Link to="/graphs">Graphs</Link>
+                </li>
+              )}
             </ul>
           </div>
-          <div className="logo" onClick={this.refreshPage}>
-            VET
-          </div>
-        </div>
-        <div className="container">
-          <div className="panel one">
-            <SearchBar onSearch={this.onSearch}></SearchBar>
-            <div className="pubchem">
-              {this.state.activeMarker !== null && (
-                <PubChemFields
-                  chemName={this.state.activeMarker.meta.chemical}
-                ></PubChemFields>
-              )}
+          {location !== "" && window.location.pathname === "/map" && (
+            <div className="query">
+              Search: <span>{location}</span>
             </div>
-          </div>
-          <div className="panel two">
-            <MapContainer
-              zoom={this.state.zoom}
-              viewportUpdated={this.viewportUpdated}
-              points={this.state.points}
-              apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-              searchedCenter={this.state.searchedCenter}
-              onMarkerClick={this.onMarkerClick}
-            ></MapContainer>
-          </div>
-          <div className="panel three">
-            <Graph points={this.state.points}></Graph>
-          </div>
-        </div>
+          )}
+        </nav>
+
+        {/* A <Switch> looks through its children <Route>s and
+              renders the first one that matches the current URL. */}
+        <Switch>
+          <Route path="/map">
+            <div className="title">
+              Visualizer of Environmental Toxicants (VET)
+            </div>
+            <div className="map-view">
+              <div className="filter-wrapper">
+                <div className="filters">
+                  <UserControlPanel
+                    filters={filters}
+                    totalReleases={totalReleases}
+                    onChemTypeChange={onChemTypeChange}
+                  ></UserControlPanel>
+                  <PubChemFields chemName={chemical}></PubChemFields>
+                </div>
+              </div>
+              <div className="map-wrapper">
+                <MapContainer
+                  filters={filters}
+                  setChemical={setChemical}
+                  onUpdate={onMapUpdate}
+                  apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                />
+              </div>
+            </div>
+          </Route>
+          <Route path="/graphs">
+            <GraphView></GraphView>
+          </Route>
+          <Route path="/">
+            <Home
+              onSearchChange={handleSearchChange}
+              onSearchSubmit={handleSearchSubmit}
+            />
+          </Route>
+        </Switch>
+        {/* <div className="footer">
+          © VET was developed in 2020 for the Lab for Health and Environmental
+          Information
+        </div> */}
       </div>
-    );
-  }
-}
+    </Router>
+  );
+};
 
 export default App;
