@@ -1,14 +1,16 @@
-const sample = require('./sample.json');
-
 module.exports = (data) => {
-  let entries = data.map((d) => d.fields);
+  let entries = data;
   const unique = [];
 
-  entries = entries.sort((a, b) => a.facilityname.localeCompare(b.facilityname));
+  entries = entries.sort((a, b) =>
+    a.facilityname.localeCompare(b.facilityname)
+  );
 
   entries.forEach((e) => {
     /* found new unique facility */
-    if (!unique.some((u) => u.facilityname.localeCompare(e.facilityname) === 0)) {
+    if (
+      !unique.some((u) => u.facilityname.localeCompare(e.facilityname) === 0)
+    ) {
       const newEntry = e;
       newEntry.chemicals = [];
 
@@ -48,7 +50,9 @@ module.exports = (data) => {
 
       unique.push(newEntry);
     } else {
-      const existing = unique.find((u) => u.facilityname.localeCompare(e.facilityname) === 0);
+      const existing = unique.find(
+        (u) => u.facilityname.localeCompare(e.facilityname) === 0
+      );
       existing.chemicals.push({
         name: e.chemical,
         cleanairactchemical: e.cleanairactchemical,
