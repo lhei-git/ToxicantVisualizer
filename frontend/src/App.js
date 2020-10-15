@@ -1,6 +1,12 @@
 /* eslint-disable import/first */
 require("dotenv").config();
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  withRouter,
+} from "react-router-dom";
 import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
@@ -9,45 +15,44 @@ import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
+import { useReducer } from "react";
 const React = require("react");
 
-const App = () => {
-  const [location, setLocation] = React.useState(
-    localStorage.getItem("searchedLocation") || ""
-  );
-  const [chemical, setChemical] = React.useState("");
-  const [totalReleases, setTotalReleases] = React.useState(0);
-  const [filters, setFilters] = React.useState({
-    open: true,
+const initialState = {
+  location: localStorage.getItem("searchedLocation") || "",
+  numReleases: 0,
+  chemical: "",
+  filters: {
     dioxins: false,
     carcinogens: false,
-    otherChems: false,
     releaseType: "any",
-  });
+  },
+};
 
-  function onChemTypeChange(filters) {
-    setFilters(filters);
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "setLocation":
+      return { ...state, location: action.payload };
+    case "setNumReleases":
+      return { ...state, numReleases: action.payload };
+    case "setFilters":
+      return { ...state, filters: action.payload };
+    default:
+      throw new Error();
   }
+};
 
-  function handleSearchChange(text) {
-    setLocation(text);
-  }
+const setLocation = (location) => ({ type: "setLocation", payload: location });
+const setNumReleases = (num) => ({ type: "setNumReleases", payload: num });
+const setFilters = (filters) => ({ type: "setFilters", payload: filters });
+
+const App = (props) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   function handleSearchSubmit() {
+    localStorage.setItem("searchedLocation", state.location);
     history.push("/map");
   }
-
-  function onMapUpdate(num) {
-    setTotalReleases(num);
-  }
-
-  React.useEffect(() => {
-    localStorage.setItem("searchedLocation", location);
-  }, [location]);
-
-  React.useEffect(() => {
-    console.log(totalReleases);
-  }, [totalReleases]);
 
   return (
     <Router history={history}>
@@ -55,30 +60,27 @@ const App = () => {
         <nav className="navbar">
           <div>
             <ul>
-              <li>
-                <Link to="/">Home</Link>
-              </li>
-              {location && (
+              {props.location.pathname !== "/" && (
+                <li>
+                  <Link to="/">Home</Link>
+                </li>
+              )}
+              {props.location.pathname !== "/" && (
                 <li>
                   <Link to="/map">Map</Link>
                 </li>
               )}
-              {location && (
-                <li>
-                  <Link to="/graphs">Graphs</Link>
-                </li>
-              )}
+              <li>
+                <Link to="/graphs">Graphs</Link>
+              </li>
             </ul>
           </div>
-          {location !== "" && window.location.pathname === "/map" && (
+          {state.location !== "" && props.location.pathname === "map" && (
             <div className="query">
-              Search: <span>{location}</span>
+              Search: <span>{state.location}</span>
             </div>
           )}
         </nav>
-
-        {/* A <Switch> looks through its children <Route>s and
-              renders the first one that matches the current URL. */}
         <Switch>
           <Route path="/map">
             <div className="title">
@@ -88,18 +90,19 @@ const App = () => {
               <div className="filter-wrapper">
                 <div className="filters">
                   <UserControlPanel
-                    filters={filters}
-                    totalReleases={totalReleases}
-                    onChemTypeChange={onChemTypeChange}
+                    filters={Object.assign({}, state.filters)}
+                    numReleases={state.numReleases}
+                    onFilterChange={(filters) => {
+                      dispatch(setFilters(filters));
+                    }}
                   ></UserControlPanel>
-                  <PubChemFields chemName={chemical}></PubChemFields>
+                  {/* <PubChemFields chemName={chemical}></PubChemFields> */}
                 </div>
               </div>
               <div className="map-wrapper">
                 <MapContainer
-                  filters={filters}
-                  setChemical={setChemical}
-                  onUpdate={onMapUpdate}
+                  filters={Object.assign({}, state.filters)}
+                  onUpdate={(num) => dispatch(setNumReleases(num))}
                   apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                 />
               </div>
@@ -110,18 +113,14 @@ const App = () => {
           </Route>
           <Route path="/">
             <Home
-              onSearchChange={handleSearchChange}
+              onSearchChange={(search) => dispatch(setLocation(search))}
               onSearchSubmit={handleSearchSubmit}
             />
           </Route>
         </Switch>
-        {/* <div className="footer">
-          © VET was developed in 2020 for the Lab for Health and Environmental
-          Information
-        </div> */}
       </div>
     </Router>
   );
 };
 
-export default App;
+export default withRouter(App);
