@@ -21,7 +21,10 @@ const React = require("react");
 const initialState = {
   location: localStorage.getItem("searchedLocation") || "",
   numReleases: 0,
+  refreshed: false,
   chemical: "",
+  showingPubchem: false,
+  chemicals: [],
   filters: {
     dioxins: false,
     carcinogens: false,
@@ -37,6 +40,13 @@ const reducer = (state, action) => {
       return { ...state, numReleases: action.payload };
     case "setFilters":
       return { ...state, filters: action.payload };
+    case "togglePubchem":
+      return { ...state, showingPubchem: action.payload };
+    case "setChemicals":
+      return { ...state, chemicals: action.payload };
+    case "refresh":
+      const old = state.refreshed;
+      return { ...state, refreshed: !old };
     default:
       throw new Error();
   }
@@ -45,6 +55,15 @@ const reducer = (state, action) => {
 const setLocation = (location) => ({ type: "setLocation", payload: location });
 const setNumReleases = (num) => ({ type: "setNumReleases", payload: num });
 const setFilters = (filters) => ({ type: "setFilters", payload: filters });
+const refresh = () => ({ type: "refresh" });
+const setChemicals = (chemicals) => ({
+  type: "setChemicals",
+  payload: chemicals,
+});
+const togglePubchem = (value) => ({
+  type: "togglePubchem",
+  payload: value,
+});
 
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -52,6 +71,17 @@ const App = (props) => {
   function handleSearchSubmit() {
     localStorage.setItem("searchedLocation", state.location);
     history.push("/map");
+  }
+
+  function renderChemicals(chemicals) {
+    if (chemicals.length === 0) return <div></div>;
+
+    const listItems = chemicals.map((c) => <li key={c.name}>{c.name}</li>);
+    return (
+      <div>
+        <ul>{listItems}</ul>
+      </div>
+    );
   }
 
   return (
@@ -92,20 +122,27 @@ const App = (props) => {
                   <UserControlPanel
                     filters={Object.assign({}, state.filters)}
                     numReleases={state.numReleases}
-                    onFilterChange={(filters) => {
-                      dispatch(setFilters(filters));
-                    }}
+                    onFilterChange={(filters) => dispatch(setFilters(filters))}
+                    onRefresh={() => dispatch(refresh())}
                   ></UserControlPanel>
-                  {/* <PubChemFields chemName={chemical}></PubChemFields> */}
+                  {renderChemicals(state.chemicals)}
                 </div>
               </div>
-              <div className="map-wrapper">
-                <MapContainer
-                  filters={Object.assign({}, state.filters)}
-                  onUpdate={(num) => dispatch(setNumReleases(num))}
-                  apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-                />
-              </div>
+              {state.showingPubchem ? (
+                <div></div>
+              ) : (
+                <div className="map-wrapper">
+                  <MapContainer
+                    filters={Object.assign({}, state.filters)}
+                    apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                    onUpdate={(num) => dispatch(setNumReleases(num))}
+                    refreshed={state.refreshed}
+                    onMarkerClick={(chemicals) =>
+                      dispatch(setChemicals(chemicals))
+                    }
+                  />
+                </div>
+              )}
             </div>
           </Route>
           <Route path="/graphs">
