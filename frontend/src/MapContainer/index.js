@@ -67,14 +67,14 @@ class MapContainer extends Component {
     this.handleMount = this.handleMount.bind(this);
     this.adjustMap = this.adjustMap.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
-    this.MarkerSet = this.MarkerSet.bind(this);
+    this.createMarkers = this.createMarkers.bind(this);
   }
 
   componentDidUpdate(prevProps) {
-    if (!shallowEqual(prevProps.filters, this.props.filters)) {
+    if (!shallowEqual(prevProps.filters, this.props.filters) || prevProps.refreshed !== this.props.refreshed) {
       const oldPoints = this.state.points;
       this.setState({
-        markers: this.MarkerSet(oldPoints),
+        markers: this.createMarkers(oldPoints),
       });
 
       const mapsApi = this.props.google.maps;
@@ -107,6 +107,7 @@ class MapContainer extends Component {
       });
       this.map.setCenter(marker.position);
       this.map.setZoom(14);
+      this.props.onMarkerClick(marker.meta.chemicals);
     } else {
       this.setState({
         showingInfoWindow: false,
@@ -144,7 +145,7 @@ class MapContainer extends Component {
         const points = flatten(res.data.map((d) => d.fields));
         this.setState({
           points,
-          markers: this.MarkerSet(points),
+          markers: this.createMarkers(points),
         });
       })
       .catch((err) => {
@@ -236,7 +237,7 @@ class MapContainer extends Component {
       .filter((f) => f !== null);
   }
 
-  MarkerSet(points) {
+  createMarkers(points) {
     console.log("creating markers");
     const facilities = this.filterFacilities(points);
     // create a marker for every point that is passed to the map

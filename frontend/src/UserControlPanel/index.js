@@ -11,7 +11,7 @@ function UserControlPanel(props) {
     props.onFilterChange(filters);
   }
 
-  function onSelectChange(event){
+  function onSelectChange(event) {
     const filters = props.filters;
     filters[event.target.name] = event.target.value;
     props.onFilterChange(filters);
@@ -25,6 +25,9 @@ function UserControlPanel(props) {
       </div>
       <div className="content">
         {/* Collapsing Search Bar Content*/}
+        <div className="refresh" onClick={props.onRefresh}>
+          <img alt="" src={require("../assets/refresh.png")}></img>
+        </div>
         <ChemTypeSelector
           title="Only Show Carcinogens"
           attribute="carcinogens"
