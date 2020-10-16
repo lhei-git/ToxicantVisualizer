@@ -16,6 +16,7 @@ class PubChemFields extends Component {
       toxicity: [],
       toxicityHeader: null,
       pictograms: [],
+      pictLabels: [],
       chemicalNotFound: false,
     };
     this.Content = this.Content.bind(this);
@@ -141,6 +142,7 @@ class PubChemFields extends Component {
 
   parseGHSData(response) {
     var pictograms = [];
+    var labels = [];
     var statements = [];
 
     //grab the first 3 pictograms
@@ -154,6 +156,17 @@ class PubChemFields extends Component {
             .Value.StringWithMarkup[0].Markup[i].URL
         );
 
+    //grab labels for the first 3 pictograms
+    for (var i = 0; i < 3; i++)
+      if (
+        typeof response.data.Record.Section[0].Section[0].Section[0]
+          .Information[0].Value.StringWithMarkup[0].Markup[i].Extra !== undefined
+      )
+        pictograms.push(
+          response.data.Record.Section[0].Section[0].Section[0].Information[0]
+            .Value.StringWithMarkup[0].Markup[i].Extra
+        );
+
     //grab the first 4 GHS hazard statements
     for (i = 0; i < 4; i++)
       if (
@@ -165,7 +178,7 @@ class PubChemFields extends Component {
             .Value.StringWithMarkup[i].String
         );
 
-    this.setState({ pictograms: pictograms, hazardStatements: statements });
+    this.setState({ pictograms: pictograms, hazardStatements: statements, pictLabels:labels});
   }
 
   componentDidMount() {
@@ -210,7 +223,7 @@ class PubChemFields extends Component {
           {this.state.pictograms.length > 0 && (
             <div className="pictograms">
               {this.state.pictograms.map((v, i) => {
-                return <img src={v} alt="" key={v + "-" + i}></img>;
+                return <div><img src={v} alt="" key={v + "-" + i}></img> {this.state.pictLabels[i]} </div>;
               })}
             </div>
           )}
