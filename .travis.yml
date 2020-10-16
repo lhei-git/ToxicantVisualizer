@@ -1,9 +1,12 @@
 language: node_js
+branches:
+  - master
 node_js:
   - 14
 before_script:
   - cd frontend/
   - npm install
-script:
-  - npm run lint
-  - npm test
+after_success:
+  - npm run build
+  - pip install awscli --upgrade --user 
+  - aws s3 sync --delete  build/ "s3://$S3_BUCKET" --acl public-read
