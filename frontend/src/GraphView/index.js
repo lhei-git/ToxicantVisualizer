@@ -222,6 +222,87 @@ async function GraphTopChemicals(viewport) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+async function GraphAllFacilities(viewport) {
+  try {
+    const ne = JSON.parse(viewport).northeast;
+    const sw = JSON.parse(viewport).southwest;
+    const res = await axios.get(
+      `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+    );
+    const data = Object.keys(res.data)
+      .map((key, i) => {
+        return {
+          name: key,
+          pv: res.data[key],
+        };
+      })
+      .sort((a, b) => b.pv - a.pv)
+    return (
+      <div className="all facilities">
+        <ResponsiveContainer width="60%" aspect={16 / 9}>
+          <BarChart
+            data={data}
+            layout="horizontal"
+            margin={{
+              top: 30,
+              right: 30,
+              left: 50,
+              bottom: 10,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <YAxis dataKey="name" type="category" orientation="right" dx={10} />
+            <XAxis type="number" unit="lbs" />
+            <Tooltip />
+            <Legend />
+            <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return <div></div>;
+  }
+}
+
+async function tableAllFacilities(viewport) {
+  try {
+    const ne = JSON.parse(viewport).northeast;
+    const sw = JSON.parse(viewport).southwest;
+    const res = await axios.get(
+      `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+    );
+    let rows = Object.keys(res.data).map((row, i) => (
+      <tr key={row}>
+        <td>{row.replace("_", " ")}</td>        //fac. name
+        <td>{row.totalreleaseair}</td>          //total  air
+        <td>{row.totalreleasewater}</td>        //total  water
+        <td>{row.totalreleaseland}</td>         //total  land
+        <td>{row.off_sitereleasetotal}</td>     //total  offsite
+      </tr>
+    ));
+    return (
+      <div className="tableAllFacilities">
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Current Location</th>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return <div>ERROR: Summary statistics could not be found.</div>;
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 function GraphView() {
   return (
     <div className="graph-container">
@@ -245,6 +326,16 @@ function GraphView() {
         name="top_graphs"
         graph={GraphTopChemicals}
         title="Top Ten Chemicals (in # occurrances)"
+      ></GraphDropdown>
+        <GraphDropdown
+        name="all_facilities"
+        graph={GraphAllFacilities}
+        title="All Facilities (in lbs)"
+      ></GraphDropdown>
+        <GraphDropdown
+        name="all_facilities"
+        graph={tableAllFacilities}
+        title="All Facilities (in lbs)"
       ></GraphDropdown>
     </div>
   );

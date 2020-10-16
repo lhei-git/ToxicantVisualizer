@@ -27,6 +27,10 @@
   margin-right: 20px;
 }
 
+.graph-container .all_facilities{
+    overflow: scroll;
+}
+
 .graph-container .dropdown-icon.active {
   transform: rotate(180deg);
   transform-origin: 60% 50%;
