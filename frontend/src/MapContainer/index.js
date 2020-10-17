@@ -71,11 +71,14 @@ class MapContainer extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (!shallowEqual(prevProps.filters, this.props.filters) || prevProps.refreshed !== this.props.refreshed) {
-      const oldPoints = this.state.points;
-      this.setState({
-        markers: this.createMarkers(oldPoints),
-      });
+    const newState = {};
+    const refeshed = prevProps.refreshed !== this.props.refreshed;
+    const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
+    if (refeshed || refiltered) {
+      if (refiltered) {
+        const oldPoints = this.state.points;
+        newState.markers = this.createMarkers(oldPoints);
+      }
 
       const mapsApi = this.props.google.maps;
       const viewport = this.state.viewport;
@@ -95,6 +98,8 @@ class MapContainer extends Component {
           console.log(err);
         }
       }
+      newState.showingInfoWindow = false;
+      this.setState(newState);
     }
   }
 
@@ -134,14 +139,14 @@ class MapContainer extends Component {
     });
   }
 
-  fetchPoints(map) {
-    const ne = map.getBounds().getNorthEast();
-    const sw = map.getBounds().getSouthWest();
+  fetchPoints(ne, sw) {
+    console.log("fetching...");
     axios
       .get(
-        `/facilities?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
+        `/facilities?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
       )
       .then((res) => {
+        console.log("flattening...");
         const points = flatten(res.data.map((d) => d.fields));
         this.setState({
           points,
@@ -193,7 +198,11 @@ class MapContainer extends Component {
         );
         const b = new mapsApi.LatLngBounds(s, n);
         map.fitBounds(b);
-        mapsApi.event.addListenerOnce(map, "idle", () => this.fetchPoints(map));
+        // const ne = map.getBounds().getNorthEast();
+        // const sw = map.getBounds().getSouthWest();
+        mapsApi.event.addListenerOnce(map, "idle", () =>
+          this.fetchPoints(viewport.northeast, viewport.southwest)
+        );
       } catch (err) {
         console.log(err);
       }
@@ -241,6 +250,8 @@ class MapContainer extends Component {
     console.log("creating markers");
     const facilities = this.filterFacilities(points);
     // create a marker for every point that is passed to the map
+    console.log(this.map.getZoom());
+    // const dimension = this.map.getZoom() <= 7 ? 15 : 20;
     const markers = facilities.map((facility, i) => {
       return (
         <Marker
@@ -250,7 +261,7 @@ class MapContainer extends Component {
           meta={facility}
           icon={{
             url: require(`./../../src/assets/marker-${facility.color}.png`),
-            scaledSize: new this.props.google.maps.Size(20, 20),
+            scaledSize: new this.props.google.maps.Size(18, 18),
           }}
           onClick={this.onMarkerClick}
         />
