@@ -35,7 +35,7 @@ function UserControlPanel(props) {
           onClick={onFilterChange}
         />
         <ChemTypeSelector
-          title="Only Show Dioxins"
+          title="Only Show PBTs"
           attribute="dioxins"
           defaultChecked={false}
           onClick={onFilterChange}
@@ -43,7 +43,7 @@ function UserControlPanel(props) {
         <div className="type-selector">
           <label htmlFor="releaseType">Release Type</label>
           <select name="releaseType" onChange={onSelectChange} id="">
-            <option value="any">Any</option>
+            <option value="all">All</option>
             <option value="air">Air</option>
             <option value="water">Water</option>
             <option value="land">Land</option>

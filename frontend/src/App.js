@@ -28,7 +28,7 @@ const initialState = {
   filters: {
     dioxins: false,
     carcinogens: false,
-    releaseType: "any",
+    releaseType: "all",
   },
 };
 
@@ -46,7 +46,7 @@ const reducer = (state, action) => {
       return { ...state, chemicals: action.payload };
     case "refresh":
       const old = state.refreshed;
-      return { ...state, refreshed: !old };
+      return { ...state, refreshed: !old, chemicals: [] };
     default:
       throw new Error();
   }
@@ -76,7 +76,13 @@ const App = (props) => {
   function renderChemicals(chemicals) {
     if (chemicals.length === 0) return <div></div>;
 
-    const listItems = chemicals.map((c) => <li key={c.name}>{c.name}</li>);
+    const listItems = chemicals
+      .sort((a, b) => b.totalreleases - a.totalreleases)
+      .map((c) => (
+        <li key={c.name + " " + c.totalreleases}>
+          {c.name}: {c.totalreleases} lbs
+        </li>
+      ));
     return (
       <div>
         <ul>{listItems}</ul>
