@@ -84,15 +84,7 @@ class MapContainer extends Component {
       const viewport = this.state.viewport;
       if (viewport) {
         try {
-          const n = new mapsApi.LatLng(
-            viewport.northeast.lat,
-            viewport.northeast.lng
-          );
-          const s = new mapsApi.LatLng(
-            viewport.southwest.lat,
-            viewport.southwest.lng
-          );
-          const b = new mapsApi.LatLngBounds(s, n);
+          const b = this.createLatLngBounds(viewport, mapsApi);
           this.map.fitBounds(b);
         } catch (err) {
           console.log(err);
@@ -188,18 +180,8 @@ class MapContainer extends Component {
     const viewport = this.state.viewport;
     if (viewport) {
       try {
-        const n = new mapsApi.LatLng(
-          viewport.northeast.lat,
-          viewport.northeast.lng
-        );
-        const s = new mapsApi.LatLng(
-          viewport.southwest.lat,
-          viewport.southwest.lng
-        );
-        const b = new mapsApi.LatLngBounds(s, n);
+        const b = this.createLatLngBounds(viewport, mapsApi);
         map.fitBounds(b);
-        // const ne = map.getBounds().getNorthEast();
-        // const sw = map.getBounds().getSouthWest();
         mapsApi.event.addListenerOnce(map, "idle", () =>
           this.fetchPoints(viewport.northeast, viewport.southwest)
         );
@@ -207,6 +189,12 @@ class MapContainer extends Component {
         console.log(err);
       }
     }
+  }
+
+  createLatLngBounds(viewport, api) {
+    const n = new api.LatLng(viewport.northeast.lat, viewport.northeast.lng);
+    const s = new api.LatLng(viewport.southwest.lat, viewport.southwest.lng);
+    return new api.LatLngBounds(s, n);
   }
 
   filterChemicalList(list, filters) {
