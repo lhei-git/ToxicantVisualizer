@@ -25,7 +25,7 @@ SECRET_KEY = 'yb#re#b*nmjvxnxmno9qk-2owmi&b)77&8xm+=izl4v*w%i8^r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1","visualizing-environmental-toxicants-dev.us-east-2.elasticbeanstalk.com"]
+ALLOWED_HOSTS = ["127.0.0.1","visualizing-environmental-toxicants-dev.us-east-1.elasticbeanstalk.com"]
 
 
 # Application definition
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,7 +52,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
 
