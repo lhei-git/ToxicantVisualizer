@@ -7,6 +7,7 @@ before_script:
   - cd frontend/
   - npm install
 after_success:
+  - echo "REACT_APP_GOOGLE_API_KEY=${REACT_APP_GOOGLE_API_KEY}" >> .env
   - npm run build
   - pip install awscli --upgrade --user 
   - aws s3 sync --delete  build/ "s3://$S3_BUCKET" --acl public-read
