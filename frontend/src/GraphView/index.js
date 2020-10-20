@@ -26,7 +26,9 @@ function DropdownIcon(props) {
 }
 
 function GraphDropdown(props) {
-  let [hidden, setHidden] = React.useState(props.hidden !== undefined ? props.hidden : true);
+  let [hidden, setHidden] = React.useState(
+    props.hidden !== undefined ? props.hidden : true
+  );
   let [graph, setGraph] = React.useState(null);
   let [viewport] = React.useState(localStorage.getItem("viewport") || {});
 
