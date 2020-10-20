@@ -2,7 +2,9 @@ import "./index.css";
 const React = require("react");
 
 function Home(props) {
-  let [searchValue, setSearchValue] = React.useState(localStorage.getItem("searchedLocation") || "");
+  let [searchValue, setSearchValue] = React.useState(
+    localStorage.getItem("searchedLocation") || ""
+  );
 
   function onSearchChange(event) {
     setSearchValue(event.target.value);
@@ -10,9 +12,6 @@ function Home(props) {
   }
 
   function onSearchSubmit(event) {
-    if (searchValue === "") {
-      localStorage.setItem("searchedLocation", "");
-    }
     event.preventDefault();
     props.onSearchSubmit();
   }
@@ -35,7 +34,12 @@ function Home(props) {
           <label htmlFor="search">
             Enter a zip code; a city, state combination; or a state.
           </label>
-          <input type="text" id="search" value={searchValue} onChange={onSearchChange} />
+          <input
+            type="text"
+            id="search"
+            value={searchValue}
+            onChange={onSearchChange}
+          />
           <label htmlFor="search">Blank box defaults to entire U.S.</label>
           <button type="submit">Submit</button>
         </form>
