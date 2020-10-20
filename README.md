@@ -1,4 +1,6 @@
 # ToxicantVisualizer
+[![Build Status](https://travis-ci.com/ejdejesu/ToxicantVisualizer.svg?token=MTaqyrMFvgPVyLmcZyoK&branch=master)](https://travis-ci.com/ejdejesu/ToxicantVisualizer)
+
 Fall 2020 Capstone Project
 
 ## Development
