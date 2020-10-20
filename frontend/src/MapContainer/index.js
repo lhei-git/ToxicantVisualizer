@@ -1,4 +1,3 @@
-/* eslint-disable import/first */
 import "./index.css";
 import mapStyles from "./standard";
 // import Icon1 from "./../../src/assets/marker-1.png";
@@ -10,6 +9,7 @@ import mapStyles from "./standard";
 const React = require("react");
 const geocoder = require("../api/geocoder/index");
 const axios = require("../api/axios/index");
+const flatten = require("./flatten");
 const Component = React.Component;
 const {
   Map,
@@ -30,6 +30,24 @@ const containerStyle = {
   width: "100%",
 };
 
+function shallowEqual(obj1, obj2) {
+  // console.log(obj1, obj2);
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+
+  for (let key of keys1) {
+    if (obj1[key] !== obj2[key]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Wrapping class around Google Maps react object
 class MapContainer extends Component {
   constructor(props) {
@@ -49,22 +67,35 @@ class MapContainer extends Component {
     this.handleMount = this.handleMount.bind(this);
     this.adjustMap = this.adjustMap.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
-    this.MarkerSet = this.MarkerSet.bind(this);
+    this.createMarkers = this.createMarkers.bind(this);
   }
 
   componentDidUpdate(prevProps) {
-    if (
-      JSON.stringify(prevProps.filters) !== JSON.stringify(this.props.filters)
-    ) {
-      const oldPoints = this.state.points;
-      this.setState({
-        markers: this.MarkerSet(oldPoints),
-      });
+    const newState = {};
+    const refeshed = prevProps.refreshed !== this.props.refreshed;
+    const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
+    if (refeshed || refiltered) {
+      if (refiltered) {
+        const oldPoints = this.state.points;
+        newState.markers = this.createMarkers(oldPoints);
+      }
+
+      const mapsApi = this.props.google.maps;
+      const viewport = this.state.viewport;
+      if (viewport) {
+        try {
+          const b = this.createLatLngBounds(viewport, mapsApi);
+          this.map.fitBounds(b);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      newState.showingInfoWindow = false;
+      this.setState(newState);
     }
   }
 
   onMarkerClick(props, marker) {
-    this.props.setChemical(marker.meta.chemical);
     const showing = this.state.showingInfoWindow;
     if (!showing || this.state.activeMarker !== marker) {
       this.setState({
@@ -73,6 +104,7 @@ class MapContainer extends Component {
       });
       this.map.setCenter(marker.position);
       this.map.setZoom(14);
+      this.props.onMarkerClick(marker.meta.chemicals);
     } else {
       this.setState({
         showingInfoWindow: false,
@@ -86,7 +118,6 @@ class MapContainer extends Component {
         .get(`/json?address=${location}`)
         .then((res) => {
           this.setState({
-            isLoading: false,
             center: res.data.results[0].geometry.location,
             viewport: res.data.results[0].geometry.viewport,
           });
@@ -100,17 +131,18 @@ class MapContainer extends Component {
     });
   }
 
-  fetchPoints(map) {
-    const ne = map.getBounds().getNorthEast();
-    const sw = map.getBounds().getSouthWest();
+  fetchPoints(ne, sw) {
+    console.log("fetching...");
     axios
       .get(
-        `/facilities?ne_lat=${ne.lat()}&ne_lng=${ne.lng()}&sw_lat=${sw.lat()}&sw_lng=${sw.lng()}`
+        `/facilities?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
       )
       .then((res) => {
+        console.log("flattening...");
+        const points = flatten(res.data.map((d) => d.fields));
         this.setState({
-          points: res.data.map((d) => d.fields),
-          markers: this.MarkerSet(res.data.map((d) => d.fields)),
+          points,
+          markers: this.createMarkers(points),
         });
       })
       .catch((err) => {
@@ -148,73 +180,83 @@ class MapContainer extends Component {
     const viewport = this.state.viewport;
     if (viewport) {
       try {
-        const n = new mapsApi.LatLng(
-          viewport.northeast.lat,
-          viewport.northeast.lng
-        );
-        const s = new mapsApi.LatLng(
-          viewport.southwest.lat,
-          viewport.southwest.lng
-        );
-        const b = new mapsApi.LatLngBounds(s, n);
+        const b = this.createLatLngBounds(viewport, mapsApi);
         map.fitBounds(b);
-        mapsApi.event.addListenerOnce(map, "idle", () => this.fetchPoints(map));
+        mapsApi.event.addListenerOnce(map, "idle", () =>
+          this.fetchPoints(viewport.northeast, viewport.southwest)
+        );
       } catch (err) {
         console.log(err);
       }
     }
   }
 
-  MarkerSet(points) {
-    console.log("creating markers");
-    // create a marker for every point that is passed to the map
-    const markers = points
-      .filter((p, i, arr) => {
-        if (this.props.filters.carcinogens && p.carcinogen === "NO") {
-          return false;
-        } else if (this.props.filters.dioxins && !p.dioxin) {
-          return false;
-        } else if (
-          this.props.filters.releaseType === "air" &&
-          p.totalreleaseair === 0
-        )
-          return false;
-        else if (
-          this.props.filters.releaseType === "water" &&
-          p.totalreleasewater === 0
-        )
-          return false;
-        else if (
-          this.props.filters.releaseType === "land" &&
-          p.totalreleaseland === 0
-        )
-          return false;
-        return i > 0 && p.facilityname !== arr[i - 1].facilityname;
-      })
-      .map((point, i) => {
-        let color = 1;
-        if (point.totalreleases < 100) color = 1;
-        else if (point.totalreleases < 100) color = 2;
-        else if (point.totalreleases < 10000) color = 3;
-        else if (point.totalreleases < 100000) color = 4;
-        else if (point.totalreleases < 1000000) color = 5;
-        else color = 6;
-        return (
-          <Marker
-            name={"point " + i}
-            key={"point-" + i}
-            position={{ lat: point.latitude, lng: point.longitude }}
-            meta={point}
-            icon={{
-              url: require(`./../../src/assets/marker-${color}.png`),
-              scaledSize: new this.props.google.maps.Size(20, 20),
-            }}
-            onClick={this.onMarkerClick}
-          />
-        );
-      });
-    this.props.onUpdate(markers.length);
+  createLatLngBounds(viewport, api) {
+    const n = new api.LatLng(viewport.northeast.lat, viewport.northeast.lng);
+    const s = new api.LatLng(viewport.southwest.lat, viewport.southwest.lng);
+    return new api.LatLngBounds(s, n);
+  }
 
+  filterChemicalList(list, filters) {
+    const newList = [];
+    list.forEach((chemical) => {
+      if (
+        (filters.carcinogens && chemical.carcinogen === "NO") ||
+        (filters.releaseType === "air" && chemical.totalreleaseair === 0) ||
+        (filters.releaseType === "water" && chemical.totalreleasewater === 0) ||
+        (filters.releaseType === "land" && chemical.totalreleaseland === 0)
+      ) {
+      } else newList.push(chemical);
+    });
+    return newList;
+  }
+
+  filterFacilities(facilities) {
+    return facilities
+      .map((f, i) => {
+        const totalFacilityReleases = this.filterChemicalList(
+          f.chemicals,
+          this.props.filters
+        ).reduce((acc, cur) => acc + cur.totalreleases, 0);
+        if (totalFacilityReleases === 0) return null;
+        let color = 1;
+
+        if (totalFacilityReleases < 100) color = 1;
+        else if (totalFacilityReleases < 100) color = 2;
+        else if (totalFacilityReleases < 10000) color = 3;
+        else if (totalFacilityReleases < 100000) color = 4;
+        else if (totalFacilityReleases < 1000000) color = 5;
+        else color = 6;
+
+        f.color = color;
+        return f;
+      })
+      .filter((f) => f !== null);
+  }
+
+  createMarkers(points) {
+    console.log("creating markers");
+    const facilities = this.filterFacilities(points);
+    // create a marker for every point that is passed to the map
+    console.log(this.map.getZoom());
+    // const dimension = this.map.getZoom() <= 7 ? 15 : 20;
+    const markers = facilities.map((facility, i) => {
+      return (
+        <Marker
+          name={"point " + i}
+          key={"point-" + i}
+          position={{ lat: facility.latitude, lng: facility.longitude }}
+          meta={facility}
+          icon={{
+            url: require(`./../../src/assets/marker-${facility.color}.png`),
+            scaledSize: new this.props.google.maps.Size(18, 18),
+          }}
+          onClick={this.onMarkerClick}
+        />
+      );
+    });
+    this.setState({ isLoading: false });
+    this.props.onUpdate(markers.length);
     return markers;
   }
 
@@ -233,7 +275,7 @@ class MapContainer extends Component {
             initialCenter={INITIAL_CENTER}
             containerStyle={containerStyle}
           >
-            {this.state.markers}
+            {!this.state.isLoading && this.state.markers}
             <InfoWindow
               marker={this.state.activeMarker}
               visible={this.state.showingInfoWindow}
@@ -248,25 +290,25 @@ class MapContainer extends Component {
                       {this.state.activeMarker.meta.st}{" "}
                       {this.state.activeMarker.meta.zip}
                     </p>
-                    <p>Chemical: {this.state.activeMarker.meta.chemical}</p>
                     <p>
                       Industry: {this.state.activeMarker.meta.industrysector}
                     </p>
                     <p>
-                      Amount:{" "}
-                      {this.state.activeMarker.meta.totalreleases
-                        .toString()
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}{" "}
+                      Total Amount Released:{" "}
+                      {
+                        +this.state.activeMarker.meta.chemicals
+                          .reduce((acc, cur) => acc + cur.totalreleases, 0)
+                          .toFixed(2)
+                      }{" "}
                       lbs
-                    </p>{" "}
-                    <p>Carcinogen: {this.state.activeMarker.meta.carcinogen}</p>
+                    </p>
                   </div>
                 )}
               </div>
             </InfoWindow>
           </Map>
+          )
         </div>
-        )
       </div>
     );
   }
