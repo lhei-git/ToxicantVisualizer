@@ -8,29 +8,35 @@ class ChemTypeSelector extends Component {
   constructor(props) {
     super(props);
     this.state = {
-        attribute:null,
-        title:null,
-        defaultChecked:null,
+      attribute: null,
+      title: null,
+      defaultChecked: null,
     };
-        this.state.title = this.props.title;
-        this.state.attribute = this.props.attribute;
-        this.state.defaultChecked = this.props.defaultChecked;
+    this.state.title = this.props.title;
+    this.state.attribute = this.props.attribute;
+    this.state.defaultChecked = this.props.defaultChecked;
   }
 
- render() {
+  render() {
     return (
+      <div>
         <div>
-            <div>
-                {this.state.title}
-                <input
-                    type="checkbox"
-                    attribute={this.props.attribute}
-                    defaultChecked={this.state.defaultChecked}
-                    onClick={(event) => this.props.onClick
-                        ({attribute:this.state.attribute, value:event.target.checked})}/>
-            </div>
-        </div>);
-    }
+          {this.state.title}
+          <input
+            type="checkbox"
+            attribute={this.props.attribute}
+            defaultChecked={this.state.defaultChecked}
+            onClick={(event) =>
+              this.props.onClick({
+                attribute: this.state.attribute,
+                value: event.target.checked,
+              })
+            }
+          />
+        </div>
+      </div>
+    );
+  }
 }
 
 export default ChemTypeSelector;
