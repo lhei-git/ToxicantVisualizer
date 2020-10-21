@@ -2,7 +2,7 @@ import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import { act } from "react-dom/test-utils";
 
-import App from "./App";
+import MapContainer from "./index";
 
 let container = null;
 beforeEach(() => {
@@ -19,9 +19,7 @@ afterEach(() => {
 });
 
 it("Renders site correctly", () => {
-  const history = { push: jest.fn() };
-
   act(() => {
-    render(<App.WrappedComponent history={history} />, container);
+    render(<MapContainer />, container);
   });
 });
