@@ -36,6 +36,20 @@ def dist_fac(request):
     data = json.dumps(list(qs))
     return HttpResponse(data, content_type='application/json')
 
+#
+def points(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    y = int(request.GET.get('year', default=2018))
+    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                    & Q(longitude__lt=ne_lng)
+                                                    & Q(longitude__gt=sw_lng)
+                                                    & Q(year=y))
+
+    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+
 # stats/state/summary
 def state_total_releases(request):
     state = str(request.GET.get('state')).upper()
