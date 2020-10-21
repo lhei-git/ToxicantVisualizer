@@ -1,8 +1,10 @@
+branches:
+  only:
+  - master
+
 jobs:
   include:
   - language: node_js
-    branches:
-    - master
     node_js: 14
     before_install:
     - cd frontend/
@@ -26,7 +28,7 @@ jobs:
       app: visualizing-environmental-toxicants
       env: visualizing-environmental-toxicants-dev
       bucket_name: elasticbeanstalk-us-east-1-211778834029
-      skip_cleanup: true
+      cleanup: false
 env:
   global:
   - secure: zLRi/hYB/6kmcKUD7UyJdnM/SUnW+fPcPF2x4HkKZkHhJUP4nBX4XR6ZaWjZ3aYzD2UHiUUrFXjIw9jhH+DmO8U9kU/SvEd0RyJyJkClJ2oxMb2IaQ027BD+qOL93w+VrqkKbaWVfuOt6ofCelbYIKWpVQFLQLwT3Nt07lQ+6j/EkCkwQenQaQCtM6PJyPDZY1tQhjKEmJFk7VQ2z51pvf0/RHSG3NIm/oYNLvStaZuHNpKQ3gYcoKRzDStMEFruz01Wfy6jMAH8o+L5rmp9dKffLF0ccOJ85L6cG5FnKLBiBjLHgUMGNZHApJdBuGdkrD4Fe+rDNQ0UHU7jiuYzkN0p9kgpSqS689ZUZMuEJACVwZqF375qyQ6khllfOenKr9u71yotUCCg1Hl+jjhHOpLQshvDQNz7Hze1EJr3w208EQieEL2d6yq2sFacIanNhF0enYEenvpKgq9Eb6UQekbLCAg4m6g4TS7aH9RPAHKb7ZJdni7omuqifXL6N5Dp+mKdjqqFw62V+5nO8ruuwETGi7jLsFtUyoFNZ5TEEDRnynZJaA1tqSc3EGmK8coo9QHmkmdIbeT94l/xTYUajgTb0zdEtHGCQeLEjLkiMw/nD4m7Cka+AvgjM+jeFR3GUrw8rCeCPV4l57XAmwPw4P52n6nz5WaPNoWId9dO4WQ=
