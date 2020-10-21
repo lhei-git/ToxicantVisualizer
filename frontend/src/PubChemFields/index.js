@@ -1,5 +1,6 @@
 import "../index.css";
 import "./index.css";
+const { getChemical } = require("../helpers");
 const axios = require("axios");
 const React = require("react");
 const Component = React.Component;
@@ -25,18 +26,9 @@ class PubChemFields extends Component {
     this.setState(state);
   }
 
-  // cleans up string format and removes unsearchable words
-  getChemical(entry) {
-    let trimmed = entry.toLowerCase().replace(/ *\([^)]*\) */g, "");
-    const i = trimmed.search(/\band|compounds\b/);
-    if (i !== -1) trimmed = trimmed.slice(0, i);
-    trimmed = trimmed.replace(/\b\w/g, (l) => l.toUpperCase());
-    return trimmed;
-  }
-
   //gets chemical CID and molecular formula from PUG REST data
   getPugRestData(chemName) {
-    chemName = this.getChemical(chemName);
+    chemName = getChemical(chemName);
     let state = {};
     let cid = null;
     axios
@@ -253,7 +245,7 @@ class PubChemFields extends Component {
   render() {
     return (
       <this.Content
-        chemName={this.getChemical(this.props.chemName)}
+        chemName={getChemical(this.props.chemName)}
         notFound={this.state.chemicalNotFound}
       ></this.Content>
     );
