@@ -96,11 +96,11 @@ async function GraphTopTenFacilities(viewport) {
     const res = await axios.get(
       `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
-    const data = Object.keys(res.data)
-      .map((key, i) => {
+    const data = res.data
+      .map((d, i) => {
         return {
-          name: key,
-          pv: res.data[key],
+          name: d.fields.facilityname,
+          pv: d.fields.totalreleases,
         };
       })
       .sort((a, b) => b.pv - a.pv)
@@ -141,11 +141,11 @@ async function GraphTopTenParents(viewport) {
     const res = await axios.get(
       `/stats/location/parent_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
-    const data = Object.keys(res.data)
-      .map((key, i) => {
+    const data = res.data
+      .map((d, i) => {
         return {
-          name: key,
-          pv: res.data[key],
+          name: d.fields.facilityname,
+          pv: d.fields.totalreleases,
         };
       })
       .sort((a, b) => b.pv - a.pv)
@@ -184,7 +184,7 @@ async function GraphTopChemicals(viewport) {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
     const res = await axios.get(
-      `/stats/location/chem_counts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+      `/stats/location/chemcounts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = Object.keys(res.data)
       .map((key, i) => {
