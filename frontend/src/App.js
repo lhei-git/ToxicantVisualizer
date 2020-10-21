@@ -16,19 +16,20 @@ import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import { useReducer } from "react";
+import { getChemical } from "./helpers";
 const React = require("react");
 
 const initialState = {
   location: localStorage.getItem("searchedLocation") || "",
-  numReleases: 0,
+  numFacilities: 0,
   refreshed: false,
-  chemical: "",
-  showingPubchem: false,
+  lastSearch: "",
   chemicals: [],
   filters: {
     dioxins: false,
     carcinogens: false,
     releaseType: "all",
+    year: 2018,
   },
 };
 
@@ -36,14 +37,21 @@ const reducer = (state, action) => {
   switch (action.type) {
     case "setLocation":
       return { ...state, location: action.payload };
-    case "setNumReleases":
-      return { ...state, numReleases: action.payload };
+    case "setNumFacilities":
+      return { ...state, numFacilities: action.payload };
     case "setFilters":
       return { ...state, filters: action.payload };
-    case "togglePubchem":
-      return { ...state, showingPubchem: action.payload };
     case "setChemicals":
-      return { ...state, chemicals: action.payload };
+      return {
+        ...state,
+        chemicals: action.payload.map((c) => ({
+          ...c,
+          name: getChemical(c.name),
+        })),
+      };
+    case "setLastSearch":
+      localStorage.setItem("searchedLocation", state.location);
+      return { ...state, lastSearch: action.payload };
     case "refresh":
       const old = state.refreshed;
       return { ...state, refreshed: !old, chemicals: [] };
@@ -53,23 +61,21 @@ const reducer = (state, action) => {
 };
 
 const setLocation = (location) => ({ type: "setLocation", payload: location });
-const setNumReleases = (num) => ({ type: "setNumReleases", payload: num });
+const setNumFacilities = (num) => ({ type: "setNumFacilities", payload: num });
 const setFilters = (filters) => ({ type: "setFilters", payload: filters });
 const refresh = () => ({ type: "refresh" });
+const setLastSearch = (search) => ({ type: "setLastSearch", payload: search });
 const setChemicals = (chemicals) => ({
   type: "setChemicals",
   payload: chemicals,
-});
-const togglePubchem = (value) => ({
-  type: "togglePubchem",
-  payload: value,
 });
 
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   function handleSearchSubmit() {
-    localStorage.setItem("searchedLocation", state.location);
+    dispatch(setLastSearch(state.location));
+    // localStorage.setItem("searchedLocation", state.location);
     history.push("/map");
   }
 
@@ -78,14 +84,10 @@ const App = (props) => {
 
     const listItems = chemicals
       .sort((a, b) => b.totalreleases - a.totalreleases)
-      .map((c) => (
-        <li key={c.name + " " + c.totalreleases}>
-          {c.name}: {c.totalreleases} lbs
-        </li>
-      ));
+      .map((c) => <li key={c.name + " " + c.totalreleases}>{c.name} ({c.totalreleases} lbs)</li>);
     return (
       <div>
-        <ul>{listItems}</ul>
+        <ol>{listItems}</ol>
       </div>
     );
   }
@@ -96,24 +98,21 @@ const App = (props) => {
         <nav className="navbar">
           <div>
             <ul>
-              {props.location.pathname !== "/" && (
-                <li>
-                  <Link to="/">Home</Link>
-                </li>
-              )}
-              {props.location.pathname !== "/" && (
-                <li>
-                  <Link to="/map">Map</Link>
-                </li>
-              )}
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+
+              <li>
+                <Link to="/map">Map</Link>
+              </li>
               <li>
                 <Link to="/graphs">Graphs</Link>
               </li>
             </ul>
           </div>
-          {state.location !== "" && props.location.pathname === "map" && (
+          {state.lastSearch !== "" && (
             <div className="query">
-              Search: <span>{state.location}</span>
+              Search: <span>{state.lastSearch}</span>
             </div>
           )}
         </nav>
@@ -127,28 +126,27 @@ const App = (props) => {
                 <div className="filters">
                   <UserControlPanel
                     filters={Object.assign({}, state.filters)}
-                    numReleases={state.numReleases}
+                    numFacilities={state.numFacilities}
                     onFilterChange={(filters) => dispatch(setFilters(filters))}
                     onRefresh={() => dispatch(refresh())}
                   ></UserControlPanel>
+                </div>
+                <div className="chemicals">
                   {renderChemicals(state.chemicals)}
                 </div>
               </div>
-              {state.showingPubchem ? (
-                <div></div>
-              ) : (
-                <div className="map-wrapper">
-                  <MapContainer
-                    filters={Object.assign({}, state.filters)}
-                    apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-                    onUpdate={(num) => dispatch(setNumReleases(num))}
-                    refreshed={state.refreshed}
-                    onMarkerClick={(chemicals) =>
-                      dispatch(setChemicals(chemicals))
-                    }
-                  />
-                </div>
-              )}
+
+              <div className="map-wrapper">
+                <MapContainer
+                  filters={Object.assign({}, state.filters)}
+                  apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                  onUpdate={(num) => dispatch(setNumFacilities(num))}
+                  refreshed={state.refreshed}
+                  onMarkerClick={(chemicals) =>
+                    dispatch(setChemicals(chemicals))
+                  }
+                />
+              </div>
             </div>
           </Route>
           <Route path="/graphs">
