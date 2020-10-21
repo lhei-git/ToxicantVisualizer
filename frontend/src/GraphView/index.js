@@ -12,23 +12,30 @@ const {
   ResponsiveContainer,
 } = require("recharts");
 
-function DropdownIcon(props) {
-  return (
-    <svg
-      className={`dropdown-icon ${!props.hidden ? "active" : ""}`}
-      height="50px"
-      viewBox="0 0 400 400"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M 100 100 L 400 100 L 250 300 z" fill="#FFF" />
-    </svg>
-  );
+class CustomizedAxisTick extends React.Component {
+  render() {
+    const { x, y, stroke, payload } = this.props;
+    console.log(payload.value);
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          fontSize="12"
+          transform="rotate(35)"
+          x={0}
+          y={0}
+          dy={16}
+          fill="#666"
+        >
+          <tspan textAnchor="beginning" x="0" dy="0">
+            {payload.value}
+          </tspan>
+        </text>
+      </g>
+    );
+  }
 }
 
-function GraphDropdown(props) {
-  let [hidden, setHidden] = React.useState(
-    props.hidden !== undefined ? props.hidden : true
-  );
+function GraphContainer(props) {
   let [graph, setGraph] = React.useState(null);
   let [viewport] = React.useState(localStorage.getItem("viewport") || {});
 
@@ -42,17 +49,10 @@ function GraphDropdown(props) {
     fetchData();
   }, [props, viewport]);
 
-  const renderGraph = () => {
-    setHidden(!hidden);
-  };
-
   return (
-    <div className="graph-dropdown">
-      <div className="header" onClick={renderGraph}>
-        {props.title}
-      </div>
-      <DropdownIcon hidden={hidden} />
-      {hidden ? null : <div className="graph">{graph}</div>}
+    <div className="graph">
+      <div className="header">{props.title}</div>
+      <div className="rechart">{graph}</div>
     </div>
   );
 }
@@ -107,19 +107,24 @@ async function GraphTopTenFacilities(viewport) {
       .slice(0, 10);
     return (
       <div className="top-ten facilities">
-        <ResponsiveContainer width="60%" aspect={16 / 9}>
+        <ResponsiveContainer width="90%" aspect={16 / 9}>
           <BarChart
             data={data}
             layout="vertical"
             margin={{
               top: 30,
-              right: 30,
+              right: 150,
               left: 50,
               bottom: 10,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <YAxis dataKey="name" type="category" orientation="right" dx={10} />
+            <YAxis
+              dataKey="name"
+              type="category"
+              orientation="right"
+              tick={<CustomizedAxisTick />}
+            />
             <XAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend />
@@ -135,6 +140,8 @@ async function GraphTopTenFacilities(viewport) {
 }
 
 async function GraphTopTenParents(viewport) {
+  const layout = "vertical";
+
   try {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
@@ -144,27 +151,33 @@ async function GraphTopTenParents(viewport) {
     const data = res.data
       .map((d, i) => {
         return {
-          name: d.fields.facilityname,
+          name: d.fields.parentconame,
           pv: d.fields.totalreleases,
         };
       })
       .sort((a, b) => b.pv - a.pv)
       .slice(0, 10);
+
     return (
       <div className="top-ten parents">
-        <ResponsiveContainer width="60%" aspect={16 / 9}>
+        <ResponsiveContainer width="90%" aspect={16 / 9}>
           <BarChart
             data={data}
-            layout="vertical"
+            layout={layout}
             margin={{
               top: 30,
-              right: 30,
+              right: 150,
               left: 50,
               bottom: 10,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <YAxis dataKey="name" type="category" orientation="right" dx={10} />
+            <YAxis
+              dataKey="name"
+              type="category"
+              orientation="right"
+              tick={<CustomizedAxisTick />}
+            />
             <XAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend />
@@ -197,7 +210,7 @@ async function GraphTopChemicals(viewport) {
       .slice(0, 10);
     return (
       <div className="top-ten parents">
-        <ResponsiveContainer width="60%" aspect={16 / 9}>
+        <ResponsiveContainer width="90%" aspect={16 / 9}>
           <BarChart
             data={data}
             layout="vertical"
@@ -209,7 +222,12 @@ async function GraphTopChemicals(viewport) {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <YAxis dataKey="name" type="category" orientation="right" dx={10} />
+            <YAxis
+              dataKey="name"
+              type="category"
+              orientation="right"
+              tick={<CustomizedAxisTick />}
+            />
             <XAxis type="number" />
             <Tooltip />
             <Legend />
@@ -227,27 +245,27 @@ async function GraphTopChemicals(viewport) {
 function GraphView() {
   return (
     <div className="graph-container">
-      <GraphDropdown
+      <GraphContainer
         name="summary"
         hidden={false}
         graph={GraphSummary}
         title="Summary"
-      ></GraphDropdown>
-      <GraphDropdown
+      ></GraphContainer>
+      <GraphContainer
         name="total_facilities"
         graph={GraphTopTenFacilities}
         title="Total releases (on-site+off-site) for top 10 facilities (in lbs)"
-      ></GraphDropdown>
-      <GraphDropdown
+      ></GraphContainer>
+      <GraphContainer
         name="total_parents"
         graph={GraphTopTenParents}
         title="Total Releases for the top 10 parent companies (in lbs)"
-      ></GraphDropdown>
-      <GraphDropdown
+      ></GraphContainer>
+      <GraphContainer
         name="top_graphs"
         graph={GraphTopChemicals}
         title="Top Ten Chemicals (in # occurrances)"
-      ></GraphDropdown>
+      ></GraphContainer>
     </div>
   );
 }

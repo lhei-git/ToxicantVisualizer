@@ -84,7 +84,11 @@ const App = (props) => {
 
     const listItems = chemicals
       .sort((a, b) => b.totalreleases - a.totalreleases)
-      .map((c) => <li key={c.name + " " + c.totalreleases}>{c.name} ({c.totalreleases} lbs)</li>);
+      .map((c) => (
+        <li key={c.name + " " + c.totalreleases}>
+          {c.name} ({c.totalreleases} lbs)
+        </li>
+      ));
     return (
       <div>
         <ol>{listItems}</ol>
