@@ -1,5 +1,4 @@
 .control-container {
-  position: relative;
   width: 100%;
 }
 
@@ -15,9 +14,6 @@
 
 .control-container .content {
   cursor: pointer;
-  border-left: solid 1px #f2f2f2;
-  border-right: solid 1px #f2f2f2;
-  border-bottom: solid 1px #f2f2f2;
   border-radius: 0 0 5px 5px;
   padding: 15px;
   font-size: 18px;

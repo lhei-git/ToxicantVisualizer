@@ -76,8 +76,15 @@ class MapContainer extends Component {
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refeshed || refiltered) {
       if (refiltered) {
-        const oldPoints = this.state.points;
-        newState.markers = this.createMarkers(oldPoints);
+        if (this.props.filters.year !== prevProps.filters.year) {
+          this.fetchPoints(
+            this.state.viewport.northeast,
+            this.state.viewport.southwest
+          );
+        } else {
+          const oldPoints = this.state.points;
+          newState.markers = this.createMarkers(oldPoints);
+        }
       }
 
       const mapsApi = this.props.google.maps;
@@ -133,10 +140,15 @@ class MapContainer extends Component {
 
   fetchPoints(ne, sw) {
     console.log("fetching...");
+    const params = {
+      ne_lat: ne.lat,
+      ne_lng: ne.lng,
+      sw_lat: sw.lat,
+      sw_lng: sw.lng,
+      year: this.props.filters.year,
+    };
     axios
-      .get(
-        `/facilities?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
-      )
+      .get(`facilities`, { params })
       .then((res) => {
         console.log("flattening...");
         const points = flatten(res.data.map((d) => d.fields));
@@ -204,7 +216,11 @@ class MapContainer extends Component {
         (filters.carcinogens && chemical.carcinogen === "NO") ||
         (filters.releaseType === "air" && chemical.totalreleaseair === 0) ||
         (filters.releaseType === "water" && chemical.totalreleasewater === 0) ||
-        (filters.releaseType === "land" && chemical.totalreleaseland === 0)
+        (filters.releaseType === "land" && chemical.totalreleaseland === 0) ||
+        (filters.releaseType === "on-site" &&
+          chemical.on_sitereleasetotal === 0) ||
+        (filters.releaseType === "off-site" &&
+          chemical.off_sitereleasetotal === 0)
       ) {
       } else newList.push(chemical);
     });
@@ -270,6 +286,7 @@ class MapContainer extends Component {
             streetViewControl={false}
             styles={mapStyles}
             draggable={false}
+            fullscreenControl={false}
             zoom={5}
             center={this.state.center}
             initialCenter={INITIAL_CENTER}
@@ -294,7 +311,7 @@ class MapContainer extends Component {
                       Industry: {this.state.activeMarker.meta.industrysector}
                     </p>
                     <p>
-                      Total Amount Released:{" "}
+                      Total Toxicants Released:{" "}
                       {
                         +this.state.activeMarker.meta.chemicals
                           .reduce((acc, cur) => acc + cur.totalreleases, 0)
