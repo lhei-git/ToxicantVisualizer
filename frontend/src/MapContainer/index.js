@@ -2,7 +2,7 @@ import "./index.css";
 import mapStyles from "./standard";
 const React = require("react");
 const geocoder = require("../api/geocoder/index");
-const axios = require("../api/axios/index");
+const axios = require("../api/vetapi/index");
 const flatten = require("./flatten");
 const { shallowEqual } = require("../helpers");
 const Component = React.Component;

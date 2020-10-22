@@ -1,5 +1,5 @@
 import "./index.css";
-const axios = require("../api/axios");
+const vetapi = require("../api/vetapi");
 const React = require("react");
 const {
   BarChart,
@@ -61,7 +61,7 @@ async function GraphSummary(viewport) {
   try {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
-    const res = await axios.get(
+    const res = await vetapi.get(
       `/stats/location/summary?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     let rows = Object.keys(res.data).map((row, i) => (
@@ -93,7 +93,7 @@ async function GraphTopTenFacilities(viewport) {
   try {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
-    const res = await axios.get(
+    const res = await vetapi.get(
       `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = res.data
@@ -145,7 +145,7 @@ async function GraphTopTenParents(viewport) {
   try {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
-    const res = await axios.get(
+    const res = await vetapi.get(
       `/stats/location/parent_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = res.data
@@ -196,7 +196,7 @@ async function GraphTopChemicals(viewport) {
   try {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
-    const res = await axios.get(
+    const res = await vetapi.get(
       `/stats/location/chemcounts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = Object.keys(res.data)
