@@ -230,6 +230,7 @@ async function GraphAllFacilities(viewport) {
     const res = await axios.get(
       `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
+    const arrayLen = Object.keys(res.data).length
     const data = Object.keys(res.data)
       .map((key, i) => {
         return {
@@ -239,11 +240,14 @@ async function GraphAllFacilities(viewport) {
       })
       .sort((a, b) => b.pv - a.pv)
     return (
-      <div className="all facilities">
-        <ResponsiveContainer width="60%" aspect={16 / 9}>
+
+      <div className="all-facilities">
+        <div width="60%" >
+        <ResponsiveContainer width="60%" height={arrayLen * 64}>
           <BarChart
             data={data}
-            layout="horizontal"
+            layout="vertical"
+            barSize="265"
             margin={{
               top: 30,
               right: 30,
@@ -259,6 +263,7 @@ async function GraphAllFacilities(viewport) {
             <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
           </BarChart>
         </ResponsiveContainer>
+        </div>
       </div>
     );
   } catch (err) {
@@ -272,15 +277,18 @@ async function tableAllFacilities(viewport) {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
     const res = await axios.get(
-      `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+      `/facilities?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
+
+    alert(res.data.facilityname[0])
+
     let rows = Object.keys(res.data).map((row, i) => (
       <tr key={row}>
-        <td>{row.replace("_", " ")}</td>        //fac. name
-        <td>{row.totalreleaseair}</td>          //total  air
-        <td>{row.totalreleasewater}</td>        //total  water
-        <td>{row.totalreleaseland}</td>         //total  land
-        <td>{row.off_sitereleasetotal}</td>     //total  offsite
+        <td>{row.replace("_", " ")}</td>
+        <td>{row.totalreleaseair}</td>
+        <td>{row.totalreleasewater}</td>
+        <td>{row.totalreleaseland}</td>
+        <td>{row.off_sitereleasetotal}</td>
       </tr>
     ));
     return (

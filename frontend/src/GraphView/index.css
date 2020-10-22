@@ -27,8 +27,9 @@
   margin-right: 20px;
 }
 
-.graph-container .all_facilities{
+.graph-container .all-facilities{
     overflow: scroll;
+    height: 34vw;       /* 60% of 9/16, simulates 16:9 aspect ratio */
 }
 
 .graph-container .dropdown-icon.active {
