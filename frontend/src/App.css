@@ -1,5 +1,11 @@
 /* NAVBAR */
 
+.app-container {
+  position: relative;
+  height: 100vh;
+  max-height: 100%;
+}
+
 .navbar {
   font-size: 24px;
   font-weight: bold;
@@ -87,14 +93,14 @@
   overflow-y: auto;
 }
 
-.filter-wrapper .chemicals ol {
-  /* list-style: none; */
-}
-
 .filter-wrapper .chemicals ol li {
   padding: 3px 0;
+  font-size: 18px;
   padding-left: 8px;
-  /* border-bottom: 1px solid rgba(32, 33, 36, 0.28); */
+}
+
+.filter-wrapper .chemicals ol li:hover {
+  color: #0096aa;
 }
 
 .map-wrapper {
@@ -107,6 +113,25 @@
 
 .pubchem {
   position: relative;
-  /* padding: 10px; */
-  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.pubchem .back {
+  /* width: 100%; */
+  margin: 2px 10px;
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.footer {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.footer span {
+  opacity: 0.8;
+  font-style: italic;
 }

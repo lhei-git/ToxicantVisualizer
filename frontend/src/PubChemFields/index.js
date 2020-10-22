@@ -1,6 +1,6 @@
 import "../index.css";
 import "./index.css";
-const { getChemical } = require("../helpers");
+const { formatChemical } = require("../helpers");
 const axios = require("axios");
 const React = require("react");
 const Component = React.Component;
@@ -28,7 +28,7 @@ class PubChemFields extends Component {
 
   //gets chemical CID and molecular formula from PUG REST data
   getPugRestData(chemName) {
-    chemName = getChemical(chemName);
+    chemName = formatChemical(chemName);
     let state = {};
     let cid = null;
     axios
@@ -245,7 +245,7 @@ class PubChemFields extends Component {
   render() {
     return (
       <this.Content
-        chemName={getChemical(this.props.chemName)}
+        chemName={formatChemical(this.props.chemName)}
         notFound={this.state.chemicalNotFound}
       ></this.Content>
     );

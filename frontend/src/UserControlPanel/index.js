@@ -23,7 +23,7 @@ function UserControlPanel(props) {
 
   function getYears() {
     let years = [];
-    for (let i = startYear; i <= endYear; i++) {
+    for (let i = endYear; i >= startYear; i--) {
       years.push(
         <option selected={i === endYear} value={i}>
           {i}

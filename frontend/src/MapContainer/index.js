@@ -1,15 +1,10 @@
 import "./index.css";
 import mapStyles from "./standard";
-// import Icon1 from "./../../src/assets/marker-1.png";
-// import Icon2 from "./../../src/assets/marker-2.png";
-// import Icon3 from "./../../src/assets/marker-3.png";
-// import Icon4 from "./../../src/assets/marker-4.png";
-// import Icon5 from "./../../src/assets/marker-5.png";
-// const Icon6 = require("./../../src/assets/marker-6.png");
 const React = require("react");
 const geocoder = require("../api/geocoder/index");
 const axios = require("../api/axios/index");
 const flatten = require("./flatten");
+const { shallowEqual } = require("../helpers");
 const Component = React.Component;
 const {
   Map,
@@ -29,24 +24,6 @@ const containerStyle = {
   height: "100%",
   width: "100%",
 };
-
-function shallowEqual(obj1, obj2) {
-  // console.log(obj1, obj2);
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (let key of keys1) {
-    if (obj1[key] !== obj2[key]) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 // Wrapping class around Google Maps react object
 class MapContainer extends Component {
@@ -151,7 +128,8 @@ class MapContainer extends Component {
       .get(`facilities`, { params })
       .then((res) => {
         console.log("flattening...");
-        const points = flatten(res.data.map((d) => d.fields));
+        const data = res.data.map((d) => d.fields);
+        const points = flatten(data);
         this.setState({
           points,
           markers: this.createMarkers(points),
@@ -181,10 +159,16 @@ class MapContainer extends Component {
   handleMount(mapProps, map) {
     this.map = map;
     const location = localStorage.getItem("searchedLocation") || "";
+    // const viewport = localStorage.getItem("viewport");
     if (location !== "")
       this.geocodeLocation(location).then(() => {
         this.adjustMap(mapProps, map);
       });
+    // else {
+    //   this.setState({ viewport: JSON.parse(viewport) }, () => {
+    //     this.adjustMap(mapProps, map);
+    //   });
+    // }
   }
 
   adjustMap(mapProps, map) {
@@ -192,6 +176,7 @@ class MapContainer extends Component {
     const viewport = this.state.viewport;
     if (viewport) {
       try {
+        console.log(viewport);
         const b = this.createLatLngBounds(viewport, mapsApi);
         map.fitBounds(b);
         mapsApi.event.addListenerOnce(map, "idle", () =>
@@ -254,8 +239,6 @@ class MapContainer extends Component {
     console.log("creating markers");
     const facilities = this.filterFacilities(points);
     // create a marker for every point that is passed to the map
-    console.log(this.map.getZoom());
-    // const dimension = this.map.getZoom() <= 7 ? 15 : 20;
     const markers = facilities.map((facility, i) => {
       return (
         <Marker
@@ -265,7 +248,7 @@ class MapContainer extends Component {
           meta={facility}
           icon={{
             url: require(`./../../src/assets/marker-${facility.color}.png`),
-            scaledSize: new this.props.google.maps.Size(18, 18),
+            scaledSize: new this.props.google.maps.Size(21, 21),
           }}
           onClick={this.onMarkerClick}
         />
@@ -285,7 +268,7 @@ class MapContainer extends Component {
             google={this.props.google}
             streetViewControl={false}
             styles={mapStyles}
-            draggable={false}
+            // draggable={false}
             fullscreenControl={false}
             zoom={5}
             center={this.state.center}
