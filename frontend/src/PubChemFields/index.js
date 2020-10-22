@@ -1,7 +1,7 @@
 import "../index.css";
 import "./index.css";
 const { formatChemical } = require("../helpers");
-const axios = require("axios");
+const pubchem = require("../api/pubchem/index");
 const React = require("react");
 const Component = React.Component;
 
@@ -17,13 +17,10 @@ class PubChemFields extends Component {
       toxicity: [],
       toxicityHeader: null,
       pictograms: [],
+      isLoading: false,
       chemicalNotFound: false,
     };
     this.Content = this.Content.bind(this);
-  }
-
-  updateItem(state) {
-    this.setState(state);
   }
 
   //gets chemical CID and molecular formula from PUG REST data
@@ -31,23 +28,19 @@ class PubChemFields extends Component {
     chemName = formatChemical(chemName);
     let state = {};
     let cid = null;
-    axios
+    pubchem
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/" +
           chemName +
           "/property/MolecularFormula/JSON"
       )
       .then((response) => {
-        // this.setState({
-        //   cid: response.data.PropertyTable.Properties[0].CID,
-        //   formula: response.data.PropertyTable.Properties[0].MolecularFormula,
-        // });
         cid = response.data.PropertyTable.Properties[0].CID;
         state = {
           cid,
           formula: response.data.PropertyTable.Properties[0].MolecularFormula,
         };
-        return axios.get(
+        return pubchem.get(
           "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" +
             cid +
             "/Description/JSON"
@@ -71,7 +64,7 @@ class PubChemFields extends Component {
   //gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data
   getPugViewData() {
     //PHARMACOLOGY
-    axios
+    pubchem
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
           this.state.cid +
@@ -87,7 +80,7 @@ class PubChemFields extends Component {
       .catch((response) => this.setState({ pharmacology: null }));
 
     //HAZARD STATEMENTS AND PICTOGRAMS
-    axios
+    pubchem
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
           this.state.cid +
@@ -97,7 +90,7 @@ class PubChemFields extends Component {
       .catch((response) => this.setState({ hazardStatement: null }));
 
     //TOXICITY
-    axios
+    pubchem
       .get(
         "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
           this.state.cid +
@@ -184,6 +177,38 @@ class PubChemFields extends Component {
     }
   }
 
+  Pharmacology(props) {
+    const [pubchemData, setPubchemData] = React.useState(null);
+
+    React.useEffect(() => {
+      if (pubchemData === null && props.cid) getPubchemData();
+    });
+
+    async function getPubchemData() {
+      try {
+        const response = await pubchem.get(
+          "/pug_view/data/compound/" + props.cid + "/JSON?heading=Pharmacology"
+        );
+        const res =
+          response.data.Record.Section[0].Section[0].Information[0].Value
+            .StringWithMarkup[0].String;
+        setPubchemData(res);
+      } catch (err) {
+        console.log(err);
+        setPubchemData(-1);
+      }
+    }
+
+    return pubchemData !== null ? (
+      <div className="pharmacology">
+        <h2>Pharmacology</h2>
+        {pubchemData}
+      </div>
+    ) : (
+      <div></div>
+    );
+  }
+
   Content(props) {
     const notFound = props.notFound;
     if (notFound) {
@@ -206,12 +231,7 @@ class PubChemFields extends Component {
               })}
             </div>
           )}
-          {this.state.pharmacology !== null && (
-            <div className="pharmacology">
-              <h2>Pharmacology</h2>
-              {this.state.pharmacology}
-            </div>
-          )}
+          <this.Pharmacology cid={this.state.cid}></this.Pharmacology>
           {this.state.hazardStatements.length > 0 && (
             <div className="hazards">
               <h2>Hazard Statements</h2>
