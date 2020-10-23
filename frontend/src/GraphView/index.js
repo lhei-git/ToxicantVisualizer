@@ -15,7 +15,6 @@ const {
 class CustomizedAxisTick extends React.Component {
   render() {
     const { x, y, payload } = this.props;
-    console.log(payload.value);
     return (
       <g transform={`translate(${x},${y})`}>
         <text

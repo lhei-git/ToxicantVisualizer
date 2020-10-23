@@ -222,7 +222,7 @@ const App = (props) => {
             />
           </Route>
         </Switch>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </Router>
   );
