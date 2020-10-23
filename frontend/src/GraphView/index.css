@@ -1,8 +1,10 @@
 .graph-container {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
   background-color: #fff;
+  /* overflow-y: auto; */
 }
 .graph-container .graph {
   position: relative;
@@ -10,8 +12,8 @@
   flex-basis: calc(50% - 80px);
   justify-content: center;
   flex-direction: column;
-  padding: 20px 0;
-  /* border: 1px solid black; */
+  padding: 50px;
+  box-sizing: border-box;
 }
 
 .graph-container .header {

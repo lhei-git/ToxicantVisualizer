@@ -19,21 +19,19 @@ class ChemTypeSelector extends Component {
 
   render() {
     return (
-      <div>
-        <div>
-          {this.state.title}
-          <input
-            type="checkbox"
-            attribute={this.props.attribute}
-            defaultChecked={this.state.defaultChecked}
-            onClick={(event) =>
-              this.props.onClick({
-                attribute: this.state.attribute,
-                value: event.target.checked,
-              })
-            }
-          />
-        </div>
+      <div className="selector">
+        {this.state.title}
+        <input
+          type="checkbox"
+          attribute={this.props.attribute}
+          defaultChecked={this.state.defaultChecked}
+          onClick={(event) =>
+            this.props.onClick({
+              attribute: this.state.attribute,
+              value: event.target.checked,
+            })
+          }
+        />
       </div>
     );
   }

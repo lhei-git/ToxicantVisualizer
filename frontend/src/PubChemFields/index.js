@@ -1,10 +1,191 @@
 import "../index.css";
 import "./index.css";
-const { getChemical } = require("../helpers");
-const axios = require("axios");
+const { formatChemical } = require("../helpers");
+const pubchem = require("../api/pubchem/index");
 const React = require("react");
 const Component = React.Component;
 
+function Link(props) {
+  return (
+    <div className="link-icon">
+      <img src={require("./../../src/assets/openlink.png")} alt="" />
+    </div>
+  );
+}
+
+/* Pharmacology Component */
+function Pharmacology(props) {
+  const [pubchemData, setPubchemData] = React.useState(null);
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
+    props.cid || 0
+  }#section=Pharmacology`;
+
+  // fetches data when component is updated
+  React.useEffect(() => {
+    if (!pubchemData && props.cid) getPubchemData(props.cid);
+  });
+
+  async function getPubchemData(cid) {
+    try {
+      const response = await pubchem.get(
+        "/pug_view/data/compound/" + cid + "/JSON?heading=Pharmacology"
+      );
+      const res =
+        response.data.Record.Section[0].Section[0].Information[0].Value
+          .StringWithMarkup[0].String;
+      setPubchemData(res);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  return pubchemData !== null ? (
+    <div className="pharmacology">
+      <a href={link}>
+        <h2>
+          Pharmacology
+          <Link href={link} />
+        </h2>
+      </a>
+      {pubchemData}
+    </div>
+  ) : (
+    <div></div>
+  );
+}
+
+/* Hazards and Pictograms Component */
+function HazardStatements(props) {
+  const [pubchemData, setPubchemData] = React.useState(null);
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${props.cid}#section=Safety-and-Hazards`;
+
+  // fetches data when component is updated
+  React.useEffect(() => {
+    if (!pubchemData && props.cid) {
+      getPubchemData();
+    }
+  });
+
+  async function getPubchemData() {
+    try {
+      const response = await pubchem.get(
+        "/pug_view/data/compound/" +
+          props.cid +
+          "/JSON?heading=GHS+Classification"
+      );
+      const data = parseGHSData(response);
+      setPubchemData(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  function parseGHSData(response) {
+    const info =
+      response.data.Record.Section[0].Section[0].Section[0].Information;
+    var pictograms = [];
+    var hazardStatements = [];
+
+    // pictograms: first element of Information Array
+    pictograms = info[0].Value.StringWithMarkup[0].Markup.map((pic) => pic.URL);
+    // pictograms: third element of Information Array
+    hazardStatements = info[2].Value.StringWithMarkup.map((st) => st.String);
+
+    return { pictograms, hazardStatements };
+  }
+
+  return (
+    pubchemData !== null && (
+      <div className="hazards">
+        <a href={link}>
+          <h2>
+            Hazard Statements
+            <Link href={link} />
+          </h2>
+        </a>
+        <div className="pictograms">
+          {pubchemData.pictograms.map((v, i) => {
+            return <img src={v} alt="" key={JSON.stringify(v)}></img>;
+          })}
+        </div>
+        <ul>
+          {pubchemData.hazardStatements.map((v, i) => {
+            return <li key={JSON.stringify(v)}>{v}</li>;
+          })}
+        </ul>
+      </div>
+    )
+  );
+}
+
+/* Evidence for Carcinogenicity Component */
+function Toxicity(props) {
+  const [header, setHeader] = React.useState(null);
+  const [pubchemData, setPubchemData] = React.useState(null);
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
+    props.cid || 0
+  }#section=Toxicity`;
+
+  // fetches data when component is updated
+  React.useEffect(() => {
+    if (!pubchemData && props.cid) {
+      getPubchemData();
+    }
+  });
+
+  async function getPubchemData() {
+    try {
+      const response = await pubchem.get(
+        `/pug_view/data/compound/${props.cid}/JSON?heading=Toxicological+Information`
+      );
+      const data = parseToxicityData(response);
+      setPubchemData(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  function parseToxicityData(response) {
+    var toxicity = [];
+
+    //grab the section heading to be displayed
+    const TOCHeading =
+      response.data.Record.Section[0].Section[0].Section[1].TOCHeading;
+    setHeader(TOCHeading);
+
+    const info =
+      response.data.Record.Section[0].Section[0].Section[1].Information;
+
+    toxicity = info
+      .map((t) => t.Value.StringWithMarkup[0].String)
+      .filter((t) => t.toUpperCase() !== "NOT LISTED");
+
+    return { toxicity };
+  }
+
+  return (
+    pubchemData !== null &&
+    header !== null &&
+    pubchemData.toxicity.length !== 0 && (
+      <div className="toxicity">
+        <a href={link}>
+          <h2>
+            {header}
+            <Link href={link} />
+          </h2>
+        </a>
+
+        <ul>
+          {pubchemData.toxicity.map((v, i) => {
+            return <li key={"toxicity-" + i}>{v}</li>;
+          })}
+        </ul>
+      </div>
+    )
+  );
+}
+
+/* Main class that fetches data on creation and renders all Pubchem components */
 class PubChemFields extends Component {
   constructor(props) {
     super(props);
@@ -12,152 +193,35 @@ class PubChemFields extends Component {
       cid: null,
       formula: null,
       description: null,
-      pharmacology: null,
-      hazardStatements: [],
-      toxicity: [],
-      toxicityHeader: null,
-      pictograms: [],
-      chemicalNotFound: false,
+      isLoading: false,
     };
     this.Content = this.Content.bind(this);
   }
 
-  updateItem(state) {
-    this.setState(state);
-  }
-
   //gets chemical CID and molecular formula from PUG REST data
   getPugRestData(chemName) {
-    chemName = getChemical(chemName);
+    chemName = formatChemical(chemName);
     let state = {};
     let cid = null;
-    axios
-      .get(
-        "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/" +
-          chemName +
-          "/property/MolecularFormula/JSON"
-      )
+    pubchem
+      .get("pug/compound/name/" + chemName + "/property/MolecularFormula/JSON")
       .then((response) => {
-        // this.setState({
-        //   cid: response.data.PropertyTable.Properties[0].CID,
-        //   formula: response.data.PropertyTable.Properties[0].MolecularFormula,
-        // });
         cid = response.data.PropertyTable.Properties[0].CID;
         state = {
           cid,
           formula: response.data.PropertyTable.Properties[0].MolecularFormula,
         };
-        return axios.get(
-          "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" +
-            cid +
-            "/Description/JSON"
-        );
+        return pubchem.get("/pug/compound/cid/" + cid + "/Description/JSON");
       })
       .then((response) => {
         if (response.data.InformationList.Information.length > 1)
           state.description =
             response.data.InformationList.Information[1].Description;
         this.setState(state);
-        return this.getPugViewData();
       })
       .catch((err) => {
-        this.setState({
-          chemicalNotFound: true,
-        });
         console.log(err);
       });
-  }
-
-  //gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data
-  getPugViewData() {
-    //PHARMACOLOGY
-    axios
-      .get(
-        "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
-          this.state.cid +
-          "/JSON?heading=Pharmacology"
-      )
-      .then((response) =>
-        this.setState({
-          pharmacology:
-            response.data.Record.Section[0].Section[0].Information[0].Value
-              .StringWithMarkup[0].String,
-        })
-      )
-      .catch((response) => this.setState({ pharmacology: null }));
-
-    //HAZARD STATEMENTS AND PICTOGRAMS
-    axios
-      .get(
-        "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
-          this.state.cid +
-          "/JSON?heading=GHS+Classification"
-      )
-      .then((response) => this.parseGHSData(response))
-      .catch((response) => this.setState({ hazardStatement: null }));
-
-    //TOXICITY
-    axios
-      .get(
-        "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/" +
-          this.state.cid +
-          "/JSON?heading=Toxicological+Information"
-      )
-      //.then((response) => alert(response.data.Record.Section[0].Section[0].Section[1].TOCHeading))
-      .then((response) => this.parseToxicityData(response))
-      .catch((response) => this.setState({ hazardStatement: null }));
-  }
-
-  parseToxicityData(response) {
-    var toxicity = [];
-
-    //grab the section heading to be displayed
-    this.setState({
-      toxicityHeader:
-        response.data.Record.Section[0].Section[0].Section[1].TOCHeading,
-    });
-
-    //grab the first 4 statements
-    for (var i = 0; i < 3; i++)
-      if (
-        typeof response.data.Record.Section[0].Section[0].Section[1]
-          .Information[i].Value.StringWithMarkup[0].String !== undefined
-      )
-        toxicity.push(
-          response.data.Record.Section[0].Section[0].Section[1].Information[i]
-            .Value.StringWithMarkup[0].String
-        );
-
-    this.setState({ toxicity: toxicity });
-  }
-
-  parseGHSData(response) {
-    var pictograms = [];
-    var statements = [];
-
-    //grab the first 3 pictograms
-    for (var i = 0; i < 3; i++)
-      if (
-        typeof response.data.Record.Section[0].Section[0].Section[0]
-          .Information[0].Value.StringWithMarkup[0].Markup[i].URL !== undefined
-      )
-        pictograms.push(
-          response.data.Record.Section[0].Section[0].Section[0].Information[0]
-            .Value.StringWithMarkup[0].Markup[i].URL
-        );
-
-    //grab the first 4 GHS hazard statements
-    for (i = 0; i < 4; i++)
-      if (
-        typeof response.data.Record.Section[0].Section[0].Section[0]
-          .Information[2].Value.StringWithMarkup[i].String !== undefined
-      )
-        statements.push(
-          response.data.Record.Section[0].Section[0].Section[0].Information[2]
-            .Value.StringWithMarkup[i].String
-        );
-
-    this.setState({ pictograms: pictograms, hazardStatements: statements });
   }
 
   componentDidMount() {
@@ -173,80 +237,37 @@ class PubChemFields extends Component {
         cid: null,
         formula: null,
         description: null,
-        pharmacology: null,
-        hazardStatements: [],
-        toxicity: [],
-        toxicityHeader: null,
-        pictograms: [],
-        chemicalNotFound: false,
       });
       this.getPugRestData(this.props.chemName);
     }
   }
 
+  /* Composition of all sections */
   Content(props) {
-    const notFound = props.notFound;
-    if (notFound) {
-      return <h2>Data for {props.chemName} could not be found.</h2>;
-    } else {
-      return (
-        <div className="pubChemFields">
-          {props.chemName !== "" && (
-            <div className="name">
-              <h1>{props.chemName}</h1>
-            </div>
-          )}
-          {this.state.description !== null && (
-            <div>{this.state.description}</div>
-          )}
-          {this.state.pictograms.length > 0 && (
-            <div className="pictograms">
-              {this.state.pictograms.map((v, i) => {
-                return <img src={v} alt="" key={v + "-" + i}></img>;
-              })}
-            </div>
-          )}
-          {this.state.pharmacology !== null && (
-            <div className="pharmacology">
-              <h2>Pharmacology</h2>
-              {this.state.pharmacology}
-            </div>
-          )}
-          {this.state.hazardStatements.length > 0 && (
-            <div className="hazards">
-              <h2>Hazard Statements</h2>
-              {this.state.hazardStatements.map((v, i) => {
-                return (
-                  <ul>
-                    <li key={"hazards-" + i}>{v}</li>
-                  </ul>
-                );
-              })}
-            </div>
-          )}
-          {this.state.toxicityHeader !== null &&
-            this.state.toxicity.length !== 0 && (
-              <div className="toxicity">
-                <h2>{this.state.toxicityHeader}</h2>
-                {this.state.toxicity.map((v, i) => {
-                  return (
-                    <ul>
-                      <li key={"toxicity-" + i}>{v}</li>
-                    </ul>
-                  );
-                })}
-              </div>
-            )}
-        </div>
-      );
-    }
+    return (
+      <div className="pubChemFields">
+        {props.chemName !== "" && (
+          <div className="name">
+            <h1>{props.chemName}</h1>
+          </div>
+        )}
+        {this.state.description !== null && <div>{this.state.description}</div>}
+        {/*gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data */}
+        {this.state.cid && (
+          <div>
+            <Pharmacology cid={this.state.cid}></Pharmacology>
+            <HazardStatements cid={this.state.cid}></HazardStatements>
+            <Toxicity cid={this.state.cid}></Toxicity>
+          </div>
+        )}
+      </div>
+    );
   }
 
   render() {
     return (
       <this.Content
-        chemName={getChemical(this.props.chemName)}
-        notFound={this.state.chemicalNotFound}
+        chemName={formatChemical(this.props.chemName)}
       ></this.Content>
     );
   }
