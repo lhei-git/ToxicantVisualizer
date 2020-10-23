@@ -38,6 +38,7 @@ class MapContainer extends Component {
       isLoading: true,
       viewport: null,
       map: null,
+      hasMoved: false,
     };
 
     this.fetchPoints = this.fetchPoints.bind(this);
@@ -45,23 +46,43 @@ class MapContainer extends Component {
     this.adjustMap = this.adjustMap.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
     this.createMarkers = this.createMarkers.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
+  }
+
+  onRefresh() {
+    const newState = {};
+    const oldPoints = this.state.points;
+    newState.markers = this.createMarkers(oldPoints);
+
+    const mapsApi = this.props.google.maps;
+    const viewport = this.state.viewport;
+    if (viewport) {
+      try {
+        const b = this.createLatLngBounds(viewport, mapsApi);
+        this.map.fitBounds(b);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    newState.showingInfoWindow = false;
+    newState.hasMoved = false;
+    this.setState(newState, () => {
+      this.props.onRefresh();
+    });
   }
 
   componentDidUpdate(prevProps) {
     const newState = {};
-    const refeshed = prevProps.refreshed !== this.props.refreshed;
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
-    if (refeshed || refiltered) {
-      if (refiltered) {
-        if (this.props.filters.year !== prevProps.filters.year) {
-          this.fetchPoints(
-            this.state.viewport.northeast,
-            this.state.viewport.southwest
-          );
-        } else {
-          const oldPoints = this.state.points;
-          newState.markers = this.createMarkers(oldPoints);
-        }
+    if (refiltered) {
+      if (this.props.filters.year !== prevProps.filters.year) {
+        this.fetchPoints(
+          this.state.viewport.northeast,
+          this.state.viewport.southwest
+        );
+      } else {
+        const oldPoints = this.state.points;
+        newState.markers = this.createMarkers(oldPoints);
       }
 
       const mapsApi = this.props.google.maps;
@@ -85,6 +106,7 @@ class MapContainer extends Component {
       this.setState({
         activeMarker: marker,
         showingInfoWindow: true,
+        hasMoved: true,
       });
       this.map.setCenter(marker.position);
       this.map.setZoom(14);
@@ -158,6 +180,13 @@ class MapContainer extends Component {
 
   handleMount(mapProps, map) {
     this.map = map;
+    const mapsApi = this.props.google.maps;
+    setTimeout(() => {
+      mapsApi.event.addListener(map, "center_changed", () => {
+        this.setState({ hasMoved: true });
+      });
+    }, 1000);
+
     const location = localStorage.getItem("searchedLocation") || "";
     // const viewport = localStorage.getItem("viewport");
     if (location !== "")
@@ -261,13 +290,18 @@ class MapContainer extends Component {
   render() {
     return (
       <div className="map-container">
+        {this.state.hasMoved && (
+          <div className="refresh" onClick={this.onRefresh}>
+            RESET
+          </div>
+        )}
         <div className="map">
           <Map
             onReady={this.handleMount}
             google={this.props.google}
             streetViewControl={false}
             styles={mapStyles}
-            // draggable={false}
+            draggable={true}
             fullscreenControl={false}
             zoom={5}
             center={this.state.center}
