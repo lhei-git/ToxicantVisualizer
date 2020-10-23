@@ -2,7 +2,7 @@ import "./index.css";
 import mapStyles from "./standard";
 const React = require("react");
 const geocoder = require("../api/geocoder/index");
-const axios = require("../api/vetapi/index");
+const vetapi = require("../api/vetapi/index");
 const flatten = require("./flatten");
 const { shallowEqual } = require("../helpers");
 const Component = React.Component;
@@ -124,8 +124,8 @@ class MapContainer extends Component {
       sw_lng: sw.lng,
       year: this.props.filters.year,
     };
-    axios
-      .get(`facilities`, { params })
+    vetapi
+      .get(`/facilities`, { params })
       .then((res) => {
         console.log("flattening...");
         const data = res.data.map((d) => d.fields);
@@ -176,7 +176,6 @@ class MapContainer extends Component {
     const viewport = this.state.viewport;
     if (viewport) {
       try {
-        console.log(viewport);
         const b = this.createLatLngBounds(viewport, mapsApi);
         map.fitBounds(b);
         mapsApi.event.addListenerOnce(map, "idle", () =>
