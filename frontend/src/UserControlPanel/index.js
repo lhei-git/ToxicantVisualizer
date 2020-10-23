@@ -37,37 +37,47 @@ function UserControlPanel(props) {
     <div className="control-container">
       <div className="header">
         {/* Search Bar Title and Image */}
-        Facilities found: <span>{props.numFacilities || 0}</span>
+        <span>{props.numFacilities || 0}</span> Facilities found
       </div>
       <div className="content">
         {/* Search Bar Content*/}
-        <ChemTypeSelector
-          title="Only Show Carcinogens"
-          attribute="carcinogens"
-          defaultChecked={false}
-          onClick={onFilterChange}
-        />
-        <ChemTypeSelector
-          title="Only Show PBTs"
-          attribute="dioxins"
-          defaultChecked={false}
-          onClick={onFilterChange}
-        />
-        <div className="type-selector">
-          <label htmlFor="releaseType">Release Type</label>
-          <select name="releaseType" onChange={onSelectChange} id="">
-            {(function () {
-              return types.map((type) => {
-                return <option>{type}</option>;
-              });
-            })()}
-          </select>
+        <div className="flex-item">
+          <ChemTypeSelector
+            title="Only Show Carcinogens"
+            attribute="carcinogens"
+            defaultChecked={false}
+            onClick={onFilterChange}
+          />
+          <ChemTypeSelector
+            title="Only Show PBTs"
+            attribute="dioxins"
+            defaultChecked={false}
+            onClick={onFilterChange}
+          />
         </div>
-        <div className="year-selector">
-          <label htmlFor="year">Year</label>
-          <select name="year" onChange={onSelectChange} id="">
-            {getYears()}
-          </select>
+        <div className="flex-item">
+          <div className="selector">
+            <label htmlFor="releaseType">Release Type</label>
+            <select name="releaseType" onChange={onSelectChange} id="">
+              {(function () {
+                return types.map((type) => {
+                  return <option>{type}</option>;
+                });
+              })()}
+            </select>
+          </div>
+          <div className="selector">
+            <label htmlFor="year">Year</label>
+            <select name="year" onChange={onSelectChange} id="">
+              {getYears()}
+            </select>
+          </div>
+          <div className="selector">
+            <label htmlFor="chemical">Chemical</label>
+            <select name="chemical" onChange={onSelectChange} id="">
+              {getYears()}
+            </select>
+          </div>
         </div>
       </div>
     </div>
