@@ -8,14 +8,14 @@
 
 .navbar {
   font-size: 24px;
-  color: black;
-  background: #caecab;
+  color: #FFF;
+  background: purple;
   min-height: 60px;
   line-height: 60px;
   display: flex;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
   margin-bottom: 10px;
-  border-top: 20px solid #9cb982;
+  border-top: 20px solid rgb(70, 0, 70);
 }
 
 .navbar ul {
@@ -31,8 +31,12 @@
 
 .navbar li a {
   text-decoration: none;
-  color: #000;
+  color: #FFF;
   opacity: 0.7;
+}
+
+.navbar li.active a {
+  opacity: 1;
 }
 
 .navbar li a:hover {

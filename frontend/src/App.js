@@ -6,6 +6,7 @@ import {
   Route,
   Link,
   withRouter,
+  useLocation,
 } from "react-router-dom";
 import history from "./history";
 import Home from "./Home";
@@ -69,19 +70,19 @@ const reducer = (state, action) => {
   }
 };
 
-const setLocation = (location) => ({ type: "setLocation", payload: location });
-const setNumFacilities = (num) => ({ type: "setNumFacilities", payload: num });
-const setFilters = (filters) => ({ type: "setFilters", payload: filters });
+const setLocation = (payload) => ({ type: "setLocation", payload });
+const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
+const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
-const setLastSearch = (search) => ({ type: "setLastSearch", payload: search });
+const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
-const setCurrentChemical = (chemical) => ({
+const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
-  payload: chemical,
+  payload,
 });
-const setChemicals = (chemicals) => ({
+const setChemicals = (payload) => ({
   type: "setChemicals",
-  payload: chemicals,
+  payload,
 });
 
 function ChemicalList(props) {
@@ -135,22 +136,22 @@ const App = (props) => {
           <div>
             <ul>
               <li>
-                <Link to="/">Home</Link>
+                <Link to="/">HOME</Link>
               </li>
 
               <li>
-                <Link to="/map">Map</Link>
+                <Link to="/map">MAP</Link>
               </li>
               <li>
-                <Link to="/graphs">Graphs</Link>
+                <Link to="/graphs">GRAPHS</Link>
               </li>
             </ul>
           </div>
-          {state.lastSearch !== "" && (
+          {/* {state.lastSearch !== "" && (
             <div className="query">
               Search: <span>{state.lastSearch}</span>
             </div>
-          )}
+          )} */}
         </nav>
         <Switch>
           <Route path="/map">
@@ -199,7 +200,6 @@ const App = (props) => {
                   </div>
                 )}
               </div>
-
               <div className="map-wrapper">
                 <MapContainer
                   filters={Object.assign({}, state.filters)}
@@ -212,6 +212,7 @@ const App = (props) => {
                 />
               </div>
             </div>
+            <Footer />
           </Route>
           <Route path="/graphs">
             <GraphView></GraphView>
@@ -221,9 +222,9 @@ const App = (props) => {
               onSearchChange={(search) => dispatch(setLocation(search))}
               onSearchSubmit={handleSearchSubmit}
             />
+            <Footer />
           </Route>
         </Switch>
-        {/* <Footer /> */}
       </div>
     </Router>
   );
