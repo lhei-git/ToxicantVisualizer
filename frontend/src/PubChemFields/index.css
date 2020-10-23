@@ -1,5 +1,5 @@
 .pubChemFields {
-  padding: 20px;
+  padding: 0 20px;
 }
 
 h1 {
@@ -12,4 +12,18 @@ ul {
 
 .pictograms {
   margin: 10px 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+.link-icon {
+  position: relative;
+  top: 2px;
+  display: inline-block;
+  margin: 0 8px;
+}
+.link-icon img {
+  width: 16px;
 }

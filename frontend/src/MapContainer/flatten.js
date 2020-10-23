@@ -14,6 +14,8 @@ module.exports = (data) => {
       const newEntry = e;
       newEntry.chemicals = [];
 
+      if (e.totalreleases === 0) return;
+
       /* convert chemical info to an object, add to chemicals array */
       newEntry.chemicals.push({
         name: e.chemical,
@@ -50,6 +52,8 @@ module.exports = (data) => {
 
       unique.push(newEntry);
     } else {
+      if (e.totalreleases === 0) return;
+
       const existing = unique.find(
         (u) => u.facilityname.localeCompare(e.facilityname) === 0
       );

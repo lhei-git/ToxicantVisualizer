@@ -1,15 +1,10 @@
 import "./index.css";
 import mapStyles from "./standard";
-// import Icon1 from "./../../src/assets/marker-1.png";
-// import Icon2 from "./../../src/assets/marker-2.png";
-// import Icon3 from "./../../src/assets/marker-3.png";
-// import Icon4 from "./../../src/assets/marker-4.png";
-// import Icon5 from "./../../src/assets/marker-5.png";
-// const Icon6 = require("./../../src/assets/marker-6.png");
 const React = require("react");
 const geocoder = require("../api/geocoder/index");
-const axios = require("../api/axios/index");
+const vetapi = require("../api/vetapi/index");
 const flatten = require("./flatten");
+const { shallowEqual } = require("../helpers");
 const Component = React.Component;
 const {
   Map,
@@ -30,24 +25,6 @@ const containerStyle = {
   width: "100%",
 };
 
-function shallowEqual(obj1, obj2) {
-  // console.log(obj1, obj2);
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (let key of keys1) {
-    if (obj1[key] !== obj2[key]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 // Wrapping class around Google Maps react object
 class MapContainer extends Component {
   constructor(props) {
@@ -61,6 +38,7 @@ class MapContainer extends Component {
       isLoading: true,
       viewport: null,
       map: null,
+      hasMoved: false,
     };
 
     this.fetchPoints = this.fetchPoints.bind(this);
@@ -68,23 +46,43 @@ class MapContainer extends Component {
     this.adjustMap = this.adjustMap.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
     this.createMarkers = this.createMarkers.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
+  }
+
+  onRefresh() {
+    const newState = {};
+    const oldPoints = this.state.points;
+    newState.markers = this.createMarkers(oldPoints);
+
+    const mapsApi = this.props.google.maps;
+    const viewport = this.state.viewport;
+    if (viewport) {
+      try {
+        const b = this.createLatLngBounds(viewport, mapsApi);
+        this.map.fitBounds(b);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    newState.showingInfoWindow = false;
+    newState.hasMoved = false;
+    this.setState(newState, () => {
+      this.props.onRefresh();
+    });
   }
 
   componentDidUpdate(prevProps) {
     const newState = {};
-    const refeshed = prevProps.refreshed !== this.props.refreshed;
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
-    if (refeshed || refiltered) {
-      if (refiltered) {
-        if (this.props.filters.year !== prevProps.filters.year) {
-          this.fetchPoints(
-            this.state.viewport.northeast,
-            this.state.viewport.southwest
-          );
-        } else {
-          const oldPoints = this.state.points;
-          newState.markers = this.createMarkers(oldPoints);
-        }
+    if (refiltered) {
+      if (this.props.filters.year !== prevProps.filters.year) {
+        this.fetchPoints(
+          this.state.viewport.northeast,
+          this.state.viewport.southwest
+        );
+      } else {
+        const oldPoints = this.state.points;
+        newState.markers = this.createMarkers(oldPoints);
       }
 
       const mapsApi = this.props.google.maps;
@@ -108,6 +106,7 @@ class MapContainer extends Component {
       this.setState({
         activeMarker: marker,
         showingInfoWindow: true,
+        hasMoved: true,
       });
       this.map.setCenter(marker.position);
       this.map.setZoom(14);
@@ -147,11 +146,12 @@ class MapContainer extends Component {
       sw_lng: sw.lng,
       year: this.props.filters.year,
     };
-    axios
-      .get(`facilities`, { params })
+    vetapi
+      .get(`/facilities`, { params })
       .then((res) => {
         console.log("flattening...");
-        const points = flatten(res.data.map((d) => d.fields));
+        const data = res.data.map((d) => d.fields);
+        const points = flatten(data);
         this.setState({
           points,
           markers: this.createMarkers(points),
@@ -180,11 +180,24 @@ class MapContainer extends Component {
 
   handleMount(mapProps, map) {
     this.map = map;
+    const mapsApi = this.props.google.maps;
+    setTimeout(() => {
+      mapsApi.event.addListener(map, "center_changed", () => {
+        this.setState({ hasMoved: true });
+      });
+    }, 1000);
+
     const location = localStorage.getItem("searchedLocation") || "";
+    // const viewport = localStorage.getItem("viewport");
     if (location !== "")
       this.geocodeLocation(location).then(() => {
         this.adjustMap(mapProps, map);
       });
+    // else {
+    //   this.setState({ viewport: JSON.parse(viewport) }, () => {
+    //     this.adjustMap(mapProps, map);
+    //   });
+    // }
   }
 
   adjustMap(mapProps, map) {
@@ -254,8 +267,6 @@ class MapContainer extends Component {
     console.log("creating markers");
     const facilities = this.filterFacilities(points);
     // create a marker for every point that is passed to the map
-    console.log(this.map.getZoom());
-    // const dimension = this.map.getZoom() <= 7 ? 15 : 20;
     const markers = facilities.map((facility, i) => {
       return (
         <Marker
@@ -265,7 +276,7 @@ class MapContainer extends Component {
           meta={facility}
           icon={{
             url: require(`./../../src/assets/marker-${facility.color}.png`),
-            scaledSize: new this.props.google.maps.Size(18, 18),
+            scaledSize: new this.props.google.maps.Size(21, 21),
           }}
           onClick={this.onMarkerClick}
         />
@@ -279,13 +290,18 @@ class MapContainer extends Component {
   render() {
     return (
       <div className="map-container">
+        {this.state.hasMoved && (
+          <div className="refresh" onClick={this.onRefresh}>
+            RESET
+          </div>
+        )}
         <div className="map">
           <Map
             onReady={this.handleMount}
             google={this.props.google}
             streetViewControl={false}
             styles={mapStyles}
-            draggable={false}
+            draggable={true}
             fullscreenControl={false}
             zoom={5}
             center={this.state.center}
