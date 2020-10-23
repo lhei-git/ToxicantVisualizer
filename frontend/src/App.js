@@ -47,6 +47,7 @@ const reducer = (state, action) => {
     case "setChemicals":
       return {
         ...state,
+        showPubchemInfo: false,
         chemicals: action.payload.map((c) => ({
           ...c,
           name: formatChemical(c.name),
@@ -180,7 +181,11 @@ const App = (props) => {
                 ) : (
                   <div className="chemicals">
                     {state.chemicals.length === 0 ? (
-                      <div></div>
+                      <div className="placeholder">
+                        <div className="text-center">
+                          Click a facility on the map to see its pollutants.{" "}
+                        </div>
+                      </div>
                     ) : (
                       <div>Released Toxicants (click for info)</div>
                     )}

@@ -5,9 +5,20 @@ const pubchem = require("../api/pubchem/index");
 const React = require("react");
 const Component = React.Component;
 
+function Link(props) {
+  return (
+    <div className="link-icon">
+      <img src={require("./../../src/assets/openlink.png")} alt="" />
+    </div>
+  );
+}
+
 /* Pharmacology Component */
 function Pharmacology(props) {
   const [pubchemData, setPubchemData] = React.useState(null);
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
+    props.cid || 0
+  }#section=Pharmacology`;
 
   // fetches data when component is updated
   React.useEffect(() => {
@@ -30,7 +41,12 @@ function Pharmacology(props) {
 
   return pubchemData !== null ? (
     <div className="pharmacology">
-      <h2>Pharmacology</h2>
+      <a href={link}>
+        <h2>
+          Pharmacology
+          <Link href={link} />
+        </h2>
+      </a>
       {pubchemData}
     </div>
   ) : (
@@ -41,6 +57,7 @@ function Pharmacology(props) {
 /* Hazards and Pictograms Component */
 function HazardStatements(props) {
   const [pubchemData, setPubchemData] = React.useState(null);
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${props.cid}#section=Safety-and-Hazards`;
 
   // fetches data when component is updated
   React.useEffect(() => {
@@ -80,7 +97,12 @@ function HazardStatements(props) {
   return (
     pubchemData !== null && (
       <div className="hazards">
-        <h2>Hazard Statements</h2>
+        <a href={link}>
+          <h2>
+            Hazard Statements
+            <Link href={link} />
+          </h2>
+        </a>
         <div className="pictograms">
           {pubchemData.pictograms.map((v, i) => {
             return <img src={v} alt="" key={JSON.stringify(v)}></img>;
@@ -100,6 +122,9 @@ function HazardStatements(props) {
 function Toxicity(props) {
   const [header, setHeader] = React.useState(null);
   const [pubchemData, setPubchemData] = React.useState(null);
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
+    props.cid || 0
+  }#section=Toxicity`;
 
   // fetches data when component is updated
   React.useEffect(() => {
@@ -131,7 +156,9 @@ function Toxicity(props) {
     const info =
       response.data.Record.Section[0].Section[0].Section[1].Information;
 
-    toxicity = info.map((t) => t.Value.StringWithMarkup[0].String);
+    toxicity = info
+      .map((t) => t.Value.StringWithMarkup[0].String)
+      .filter((t) => t.toUpperCase() !== "NOT LISTED");
 
     return { toxicity };
   }
@@ -141,7 +168,13 @@ function Toxicity(props) {
     header !== null &&
     pubchemData.toxicity.length !== 0 && (
       <div className="toxicity">
-        <h2>{header}</h2>
+        <a href={link}>
+          <h2>
+            {header}
+            <Link href={link} />
+          </h2>
+        </a>
+
         <ul>
           {pubchemData.toxicity.map((v, i) => {
             return <li key={"toxicity-" + i}>{v}</li>;
