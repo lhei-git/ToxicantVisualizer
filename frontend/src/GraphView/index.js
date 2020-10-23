@@ -12,7 +12,29 @@ const {
   ResponsiveContainer,
 } = require("recharts");
 
-class CustomizedAxisTick extends React.Component {
+class CustomizedXAxisTick extends React.Component {
+  render() {
+    const { x, y, payload } = this.props;
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          fontSize="12"
+          transform="rotate(-35)"
+          x={0}
+          y={0}
+          dx={-10}
+          fill="#666"
+        >
+          <tspan textAnchor="end" x="0" dy="0">
+            {payload.value}
+          </tspan>
+        </text>
+      </g>
+    );
+  }
+}
+
+class CustomizedYAxisTick extends React.Component {
   render() {
     const { x, y, payload } = this.props;
     return (
@@ -57,18 +79,63 @@ function GraphContainer(props) {
 }
 
 async function GraphSummary(viewport) {
+  const format = (num) => {
+    return +num.toFixed(2);
+  };
+
   try {
     const ne = JSON.parse(viewport).northeast;
     const sw = JSON.parse(viewport).southwest;
     const res = await vetapi.get(
       `/stats/location/summary?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
-    let rows = Object.keys(res.data).map((row, i) => (
-      <tr key={row}>
-        <td>{row.replace("_", " ")}</td>
-        <td>{+res.data[row].toFixed(2)}</td>
-      </tr>
-    ));
+    console.log(Object.keys(res.data));
+    const body = (
+      <tbody>
+        <tr>
+          <td>Facilities</td>
+          <td>{res.data["num_facilities"]}</td>
+        </tr>
+        <tr>
+          <td>Distinct Chemicals</td>
+          <td>{res.data["num_distinct_chemicals"]}</td>
+        </tr>
+        <tr>
+          <td>Total Disposal Amount</td>
+          <td>{format(res.data["total_disposal"])} lbs</td>
+        </tr>
+        <tr>
+          <td>On-Site Releases</td>
+          <td>{format(res.data["total_on_site"])} lbs</td>
+        </tr>
+        <tr>
+          <td>Off-Site Releases</td>
+          <td>{format(res.data["total_off_site"])} lbs</td>
+        </tr>
+        <tr>
+          <td>Air Releases</td>
+          <td>{format(res.data["total_air"])} lbs</td>
+        </tr>
+        <tr>
+          <td>Water Releases</td>
+          <td>{format(res.data["total_water"])} lbs</td>
+        </tr>
+        <tr>
+          <td>Land Releases</td>
+          <td>{format(res.data["total_land"])} lbs</td>
+        </tr>
+        <tr>
+          <td>Carcinogenic Releases</td>
+          <td>{format(res.data["total_carcinogen"])} lbs</td>
+        </tr>
+      </tbody>
+    );
+    // let rows = Object.keys(res.data).map((row, i) => (
+    //   <tr key={row}>
+    //     <td>{row.replace("_", " ")}</td>
+    //     <td>{+res.data[row].toFixed(2)}</td>
+    //   </tr>
+    // ));
     return (
       <div className="summary">
         <table>
@@ -78,7 +145,7 @@ async function GraphSummary(viewport) {
               <th>Current Location</th>
             </tr>
           </thead>
-          <tbody>{rows}</tbody>
+          {body}
         </table>
       </div>
     );
@@ -95,11 +162,18 @@ async function GraphTopTenFacilities(viewport) {
     const res = await vetapi.get(
       `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
+    console.log(res.data.map((d) => d.fields));
     const data = res.data
       .map((d, i) => {
+        const f = d.fields;
         return {
-          name: d.fields.facilityname,
-          pv: d.fields.totalreleases,
+          name: f.facilityname,
+          av:
+            !f.totalreleaseair && !f.totalreleasewater && !f.totalreleaseland
+              ? f.totalreleases
+              : f.totalreleaseair,
+          bv: f.totalreleasewater,
+          cv: f.totalreleaseland,
         };
       })
       .sort((a, b) => b.pv - a.pv)
@@ -109,25 +183,27 @@ async function GraphTopTenFacilities(viewport) {
         <ResponsiveContainer width="90%" aspect={16 / 9}>
           <BarChart
             data={data}
-            layout="vertical"
+            // layout="vertical"
             margin={{
               top: 30,
-              right: 150,
-              left: 50,
-              bottom: 10,
+              right: 10,
+              left: 100,
+              bottom: 200,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <YAxis
+            <XAxis
               dataKey="name"
               type="category"
-              orientation="right"
-              tick={<CustomizedAxisTick />}
+              interval={0}
+              tick={<CustomizedXAxisTick />}
             />
-            <XAxis type="number" unit="lbs" />
+            <YAxis type="number" unit="lbs" />
             <Tooltip />
-            <Legend />
-            <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
+            <Legend align="right" verticalAlign="top" />
+            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
+            <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
+            <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -175,7 +251,7 @@ async function GraphTopTenParents(viewport) {
               dataKey="name"
               type="category"
               orientation="right"
-              tick={<CustomizedAxisTick />}
+              tick={<CustomizedYAxisTick />}
             />
             <XAxis type="number" unit="lbs" />
             <Tooltip />
@@ -225,7 +301,7 @@ async function GraphTopChemicals(viewport) {
               dataKey="name"
               type="category"
               orientation="right"
-              tick={<CustomizedAxisTick />}
+              tick={<CustomizedYAxisTick />}
             />
             <XAxis type="number" />
             <Tooltip />
@@ -253,7 +329,7 @@ function GraphView() {
       <GraphContainer
         name="total_facilities"
         graph={GraphTopTenFacilities}
-        title="Total releases (on-site+off-site) for top 10 facilities (in lbs)"
+        title="Total releases for top 10 facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         name="total_parents"
