@@ -9,16 +9,16 @@ services:
     - ./frontend:/reactApp
     - /reactApp/node_modules
     depends_on: 
-      - backend
+    - backend
   backend:
     build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./backend:/code
+    - ./backend:/code
     ports:
-      - 8000:8000
+    - 8000:8000
     depends_on:
-      - db
+    - db
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
