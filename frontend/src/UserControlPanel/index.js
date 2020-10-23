@@ -40,10 +40,7 @@ function UserControlPanel(props) {
         Facilities found: <span>{props.numFacilities || 0}</span>
       </div>
       <div className="content">
-        {/* Collapsing Search Bar Content*/}
-        <div className="refresh" onClick={props.onRefresh}>
-          <img alt="" src={require("../assets/refresh.png")}></img>
-        </div>
+        {/* Search Bar Content*/}
         <ChemTypeSelector
           title="Only Show Carcinogens"
           attribute="carcinogens"

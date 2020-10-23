@@ -22,7 +22,6 @@ const React = require("react");
 const initialState = {
   location: localStorage.getItem("searchedLocation") || "",
   numFacilities: 0,
-  refreshed: false,
   lastSearch: "",
   chemicals: [],
   showPubchemInfo: false,
@@ -59,10 +58,8 @@ const reducer = (state, action) => {
     case "showPubchemInfo":
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
     case "refresh":
-      const old = state.refreshed;
       return {
         ...state,
-        refreshed: !old,
         chemicals: [],
         showPubchemInfo: false,
       };
@@ -166,7 +163,6 @@ const App = (props) => {
                     filters={Object.assign({}, state.filters)}
                     numFacilities={state.numFacilities}
                     onFilterChange={(filters) => dispatch(setFilters(filters))}
-                    onRefresh={() => dispatch(refresh())}
                   ></UserControlPanel>
                 </div>
                 {state.showPubchemInfo ? (
@@ -204,7 +200,7 @@ const App = (props) => {
                   filters={Object.assign({}, state.filters)}
                   apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                   onUpdate={(num) => dispatch(setNumFacilities(num))}
-                  refreshed={state.refreshed}
+                  onRefresh={() => dispatch(refresh())}
                   onMarkerClick={(chemicals) =>
                     dispatch(setChemicals(chemicals))
                   }
