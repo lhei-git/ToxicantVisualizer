@@ -20,8 +20,9 @@ services:
     depends_on:
     - db
   db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
+    image: postgres:12
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      POSTGRES_PASSWORD: postgres
+    volumes: 
+    - ./backend/pgdump.sql:/docker-entrypoint-initdb.d/dump.sql
