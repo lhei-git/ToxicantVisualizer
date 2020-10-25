@@ -48,6 +48,7 @@ def points(request):
                                                     & Q(longitude__gt=sw_lng)
                                                     & Q(year=y))
 
+    # rows = list(map(lambda e: e.__dict__, list(raw)))
     return HttpResponse(szs.serialize('json', raw), content_type='application/json')
 
 # stats/state/summary
