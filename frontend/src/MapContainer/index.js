@@ -13,11 +13,6 @@ const {
   GoogleApiWrapper,
 } = require("google-maps-react");
 
-const INITIAL_CENTER = {
-  lat: 39.8283,
-  lng: -98.5795,
-};
-
 const containerStyle = {
   position: "relative",
   overflow: "hidden",
@@ -34,9 +29,7 @@ class MapContainer extends Component {
       markers: [],
       points: [],
       showingInfoWindow: false,
-      center: INITIAL_CENTER,
       isLoading: true,
-      viewport: null,
       map: null,
       hasMoved: false,
     };
@@ -55,7 +48,7 @@ class MapContainer extends Component {
     newState.markers = this.createMarkers(oldPoints);
 
     const mapsApi = this.props.google.maps;
-    const viewport = this.state.viewport;
+    const viewport = this.props.viewport;
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
@@ -77,26 +70,25 @@ class MapContainer extends Component {
     if (refiltered) {
       if (this.props.filters.year !== prevProps.filters.year) {
         this.fetchPoints(
-          this.state.viewport.northeast,
-          this.state.viewport.southwest
+          this.props.viewport.northeast,
+          this.props.viewport.southwest
         );
       } else {
         const oldPoints = this.state.points;
         newState.markers = this.createMarkers(oldPoints);
       }
-
-      const mapsApi = this.props.google.maps;
-      const viewport = this.state.viewport;
-      if (viewport) {
-        try {
-          const b = this.createLatLngBounds(viewport, mapsApi);
-          this.map.fitBounds(b);
-        } catch (err) {
-          console.log(err);
-        }
-      }
       newState.showingInfoWindow = false;
       this.setState(newState);
+    }
+
+    const mapsApi = this.props.google.maps;
+    if ( !shallowEqual(prevProps.viewport, this.props.viewport)) {
+      try {
+        const b = this.createLatLngBounds(this.props.viewport, mapsApi);
+        this.map.fitBounds(b);
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 
@@ -116,25 +108,6 @@ class MapContainer extends Component {
         showingInfoWindow: false,
       });
     }
-  }
-
-  geocodeLocation(location) {
-    return new Promise((resolve, reject) => {
-      geocoder
-        .get(`/json?address=${location}`)
-        .then((res) => {
-          this.setState({
-            center: res.data.results[0].geometry.location,
-            viewport: res.data.results[0].geometry.viewport,
-          });
-          localStorage.setItem(
-            "viewport",
-            JSON.stringify(res.data.results[0].geometry.viewport)
-          );
-        })
-        .then(resolve)
-        .catch(reject);
-    });
   }
 
   fetchPoints(ne, sw) {
@@ -166,18 +139,6 @@ class MapContainer extends Component {
     return chem.charAt(0) + chem.slice(1).toLowerCase();
   }
 
-  getCenter() {
-    let state = this.state;
-    if (state.activeMarker) {
-      return {
-        lat: this.state.activeMarker.position.lat(),
-        lng: this.state.activeMarker.position.lng(),
-      };
-    } else {
-      return this.props.searchedCenter || INITIAL_CENTER;
-    }
-  }
-
   handleMount(mapProps, map) {
     this.map = map;
     const mapsApi = this.props.google.maps;
@@ -187,22 +148,13 @@ class MapContainer extends Component {
       });
     }, 1000);
 
-    const location = localStorage.getItem("searchedLocation") || "";
-    // const viewport = localStorage.getItem("viewport");
-    if (location !== "")
-      this.geocodeLocation(location).then(() => {
-        this.adjustMap(mapProps, map);
-      });
-    // else {
-    //   this.setState({ viewport: JSON.parse(viewport) }, () => {
-    //     this.adjustMap(mapProps, map);
-    //   });
-    // }
+    // const viewport = this.props.viewport;
+    this.adjustMap(mapProps, map);
   }
 
   adjustMap(mapProps, map) {
     const mapsApi = this.props.google.maps;
-    const viewport = this.state.viewport;
+    const viewport = this.props.viewport;
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
@@ -304,8 +256,7 @@ class MapContainer extends Component {
             draggable={true}
             fullscreenControl={false}
             zoom={5}
-            center={this.state.center}
-            initialCenter={INITIAL_CENTER}
+            initialCenter={this.props.center}
             containerStyle={containerStyle}
           >
             {!this.state.isLoading && this.state.markers}

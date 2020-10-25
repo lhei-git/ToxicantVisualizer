@@ -6,7 +6,6 @@ import {
   Route,
   Link,
   withRouter,
-  useLocation,
 } from "react-router-dom";
 import history from "./history";
 import Home from "./Home";
@@ -18,13 +17,21 @@ import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import { useReducer } from "react";
 import { formatChemical } from "./helpers";
+const geocoder = require("./api/geocoder");
 const React = require("react");
+
+const INITIAL_CENTER = {
+  lat: 39.8283,
+  lng: -98.5795,
+};
 
 const initialState = {
   location: localStorage.getItem("searchedLocation") || "",
   numFacilities: 0,
   lastSearch: "",
   chemicals: [],
+  center: INITIAL_CENTER,
+  viewport: null,
   showPubchemInfo: false,
   currentChemical: "",
   filters: {
@@ -45,6 +52,12 @@ const reducer = (state, action) => {
       return { ...state, filters: action.payload };
     case "setCurrentChemical":
       return { ...state, currentChemical: action.payload };
+    case "setMapData":
+      return {
+        ...state,
+        center: action.payload.center,
+        viewport: action.payload.viewport,
+      };
     case "setChemicals":
       return {
         ...state,
@@ -75,6 +88,7 @@ const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
 const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
+const setMapData = (payload) => ({ type: "setMapData", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
@@ -124,15 +138,36 @@ const Footer = () => {
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  // fetches data when component is updated
+  React.useEffect(() => {
+    if (state.viewport === null) geocodeLocation(state.location);
+  });
+
   function handleSearchSubmit() {
-    dispatch(setLastSearch(state.location));
-    history.push("/map");
+    geocodeLocation(state.location)
+      .then(() => {
+        dispatch(setLastSearch(state.location));
+        history.push("/map");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  async function geocodeLocation(location) {
+    const res = await geocoder.get(`/json?address=${location}`);
+    dispatch(
+      setMapData({
+        center: res.data.results[0].geometry.location,
+        viewport: res.data.results[0].geometry.viewport,
+      })
+    );
   }
 
   return (
     <Router history={history}>
       <div className="app-container">
-        <nav className="navbar">
+        {/* <nav className="navbar">
           <div>
             <ul>
               <li>
@@ -147,12 +182,7 @@ const App = (props) => {
               </li>
             </ul>
           </div>
-          {/* {state.lastSearch !== "" && (
-            <div className="query">
-              Search: <span>{state.lastSearch}</span>
-            </div>
-          )} */}
-        </nav>
+        </nav> */}
         <Switch>
           <Route path="/map">
             <div className="title">
@@ -201,15 +231,19 @@ const App = (props) => {
                 )}
               </div>
               <div className="map-wrapper">
-                <MapContainer
-                  filters={Object.assign({}, state.filters)}
-                  apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-                  onUpdate={(num) => dispatch(setNumFacilities(num))}
-                  onRefresh={() => dispatch(refresh())}
-                  onMarkerClick={(chemicals) =>
-                    dispatch(setChemicals(chemicals))
-                  }
-                />
+                {state.viewport && (
+                  <MapContainer
+                    filters={Object.assign({}, state.filters)}
+                    center={state.center}
+                    viewport={state.viewport}
+                    apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                    onUpdate={(num) => dispatch(setNumFacilities(num))}
+                    onRefresh={() => dispatch(refresh())}
+                    onMarkerClick={(chemicals) =>
+                      dispatch(setChemicals(chemicals))
+                    }
+                  />
+                )}
               </div>
             </div>
             <Footer />
