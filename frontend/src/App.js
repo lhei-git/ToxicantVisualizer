@@ -15,6 +15,7 @@ import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
+import ThematicMapView from './ThematicMapView/index.js'
 import { useReducer } from "react";
 import { formatChemical } from "./helpers";
 const geocoder = require("./api/geocoder");
@@ -251,6 +252,11 @@ const App = (props) => {
           <Route path="/graphs">
             <GraphView></GraphView>
           </Route>
+            <Route path="/thematicmaps">
+            <div className="thematic-Maps">
+              <ThematicMapView></ThematicMapView>
+            </div>
+            </Route>
           <Route path="/">
             <Home
               onSearchChange={(search) => dispatch(setLocation(search))}
