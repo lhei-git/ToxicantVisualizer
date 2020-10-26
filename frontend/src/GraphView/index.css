@@ -1,0 +1,62 @@
+.graph-container {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  background-color: #fff;
+  /* overflow-y: auto; */
+}
+.graph-container .graph {
+  position: relative;
+  display: flex;
+  flex-basis: calc(50% - 80px);
+  justify-content: center;
+  flex-direction: column;
+  padding: 50px;
+  box-sizing: border-box;
+}
+
+.graph-container .header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 30px;
+  text-align: center;
+  width: 100%;
+}
+
+.graph-container .dropdown-icon {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  margin-right: 20px;
+}
+
+.graph-container .dropdown-icon.active {
+  transform: rotate(180deg);
+  transform-origin: 60% 50%;
+}
+
+.graph-container .summary {
+  width: 100%;
+}
+
+.graph-container .summary th,
+.graph-container .summary td {
+  border: 2px solid var(--blue);
+  padding: 5px;
+}
+
+.graph-container .summary tr {
+  min-height: 30px;
+}
+
+.graph-container .summary table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.graph-container .top-ten {
+  position: relative;
+}

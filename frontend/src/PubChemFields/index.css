@@ -1,3 +1,7 @@
+.pubChemFields {
+  padding: 0 20px;
+}
+
 h1 {
   border-bottom: 2px solid var(--blue);
 }
@@ -8,4 +12,18 @@ ul {
 
 .pictograms {
   margin: 10px 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+.link-icon {
+  position: relative;
+  top: 2px;
+  display: inline-block;
+  margin: 0 8px;
+}
+.link-icon img {
+  width: 16px;
 }
