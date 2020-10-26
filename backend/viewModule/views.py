@@ -61,17 +61,17 @@ def state_total_releases(request):
         tri_set = tri.objects.filter(st=state, year=y)
         for t in tri_set:
             if t.classification == 'Dioxin': # exclude dioxin stats in other categories
-                t_dioxin += t.totalreleases
+                t_dioxin += t.vet_total_releases
                 if t.carcinogen == 'YES':
-                    t_carc += t.totalreleases
+                    t_carc += t.vet_total_releases
             else:
                 if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
-                    t_carc += t.totalreleases
+                    t_carc += t.vet_total_releases
                 t_onsite += t.on_sitereleasetotal
                 t_offsite += t.off_sitereleasetotal
-                t_air += t.totalreleaseair
-                t_water += t.totalreleasewater
-                t_land += t.totalreleaseland
+                t_air += t.vet_total_releases_air
+                t_water += t.total_releases_water
+                t_land += t.vet_total_releases_land
         result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
                   'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
                   'numtrifacilities':t_facilitycount}
@@ -89,14 +89,14 @@ def top_parentco_releases(request):
     state = str(request.GET.get('state', default='None')).upper()
     # filtering by pounds here as grams denotes dioxin (not to be included)
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        queryset = tri.objects.filter(unitofmeasure='Pounds', st=state, year=y).order_by('-totalreleases')[:10]
-        data = szs.serialize('json', queryset, fields=('parentconame', 'totalreleases'))
+        queryset = tri.objects.filter(unitofmeasure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
+        data = szs.serialize('json', queryset, fields=('parent_co_name', 'vet_total_releases'))
     else:
         queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                                    & Q(longitude__lt=ne_lng)
                                                    & Q(longitude__gt=sw_lng)
-                                                   & Q(year=y)).order_by('-totalreleases')[:10]
-        data = szs.serialize('json', queryset, fields=('parentconame', 'totalreleases'))
+                                                   & Q(year=y)).order_by('-vet_total_releases')[:10]
+        data = szs.serialize('json', queryset, fields=('parent_co_name', 'vet_total_releases'))
     return HttpResponse(data, content_type='application/json')
 
 # stats/location/facility_releases
@@ -110,16 +110,16 @@ def top_facility_releases(request):
     # filtering by pounds here as grams denotes dioxin (not to be included)
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
         queryset = tri.objects.filter(
-            unitofmeasure='Pounds', st=state, year=y).order_by('-totalreleases')[:10]
+            unitofmeasure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
         data = szs.serialize('json', queryset, fields=(
-            'facilityname', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
+            'facility', 'vet_total_releases', 'vet_total_releases_air', 'total_releases_water', 'vet_total_releases_land'))
     else:
         queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                       & Q(longitude__lt=ne_lng)
                                       & Q(longitude__gt=sw_lng)
-                                      & Q(year=y)).order_by('-totalreleases')[:10]
+                                      & Q(year=y)).order_by('-vet_total_releases')[:10]
         data = szs.serialize('json', queryset, fields=(
-            'facilityname', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
+            'facility', 'vet_total_releases', 'vet_total_releases_air', 'total_releases_water', 'vet_total_releases_land'))
     return HttpResponse(data, content_type='application/json')
 
 # stats/location/num_facilities
@@ -131,10 +131,10 @@ def num_facilities(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
     if state!='None' and ne_lat==0.0 and sw_lng==0.0 and ne_lng==0.0 and sw_lat==0.0:
-        data = tri.objects.filter(st=state, year=y).values('facilityname').distinct().count()
+        data = tri.objects.filter(st=state, year=y).values('facility').distinct().count()
     else:
         data = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                  & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)).values('facilityname')\
+                                  & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)).values('facility')\
                                   .distinct().count()
     return HttpResponse(data, content_type='application/json')
 
@@ -151,7 +151,7 @@ def location_summary(request):
                                                     & Q(year=y))
     rows = list(map(lambda e: e.__dict__, list(raw)))
     summary = {}
-    summary['num_facilities'] = len(set(list(map(lambda r: r['facilityname'], rows))))
+    summary['num_facilities'] = len(set(list(map(lambda r: r['facility'], rows))))
     summary['num_distinct_chemicals'] = len(set(list(map(lambda r: clean_chemical_name(r['chemical']), rows))))
     summary['total_disposal'] = 0
     summary['total_on_site'] = 0
@@ -162,13 +162,13 @@ def location_summary(request):
     summary['total_carcinogen'] = 0
     # TODO - make calculations based on unit of measure. Currently assumes everything is in pounds
     for r in rows: 
-      summary['total_disposal'] += r['totalreleases']
-      summary['total_on_site'] += r['on_sitereleasetotal']
-      summary['total_off_site'] += r['off_sitereleasetotal']
-      summary['total_air'] += r['totalreleaseair']
-      summary['total_water'] += r['totalreleasewater']
-      summary['total_land'] += r['totalreleaseland']
-      summary['total_carcinogen'] += r['totalreleases'] if r['carcinogen'] == 'YES' else 0
+      summary['total_disposal'] += r['vet_total_releases']
+      summary['total_on_site'] += r['vet_total_releases_onsite']
+      summary['total_off_site'] += r['vet_total_releases_offsite']
+      summary['total_air'] += r['vet_total_releases_air']
+      summary['total_water'] += r['total_releases_water']
+      summary['total_land'] += r['vet_total_releases_land']
+      summary['total_carcinogen'] += r['vet_total_releases'] if r['carcinogen'] == 'YES' else 0
     response = json.dumps(summary)
     return HttpResponse(response, content_type='application/json')
 
@@ -188,7 +188,7 @@ def XXXlocation_releases_by_facility(request):
     for r in rows:
       f = r['facilityname']
       if f in facilities:
-          facilities[f] += r['totalreleases']
+          facilities[f] += r['vet_total_releases']
       else:
           facilities[f] = 0
     return HttpResponse(json.dumps(facilities), content_type='application/json')
@@ -207,9 +207,9 @@ def XXXlocation_releases_by_parent(request):
   rows = list(map(lambda e: e.__dict__, list(raw)))
   parents = {}
   for r in rows:
-    f = r['parentconame']
+    f = r['parent_co_name']
     if f in parents:
-        parents[f] += r['totalreleases']
+        parents[f] += r['vet_total_releases']
     else:
         parents[f] = 0
   return HttpResponse(json.dumps(parents), content_type='application/json')
