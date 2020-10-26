@@ -1,9 +1,35 @@
-language: node_js
-node_js:
-  - 14
-before_script:
-  - cd frontend/
-  - npm install
-script:
-  - npm run lint
-  - npm test
+branches:
+  only:
+  - master
+
+jobs:
+  include:
+  - language: node_js
+    node_js: 14
+    before_install:
+    - cd frontend/
+    after_success:
+    - npm run build
+    - pip install awscli --upgrade --user
+    - aws s3 sync --delete  build/ "s3://$S3_BUCKET" --acl public-read
+    - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+  - language: python
+    python: 3.7
+    before_install:
+    - cd backend/
+    install:
+    - pip install -r requirements.txt
+    script: skip
+    deploy:
+      provider: elasticbeanstalk
+      access_key_id: $PIPELINE_AWS_ID
+      secret_access_key: $PIPELINE_AWS_SECRET
+      region: us-east-1
+      app: visualizing-environmental-toxicants
+      env: visualizing-environmental-toxicants-dev
+      bucket_name: elasticbeanstalk-us-east-1-211778834029
+      cleanup: false
+env:
+  global:
+  - secure: zLRi/hYB/6kmcKUD7UyJdnM/SUnW+fPcPF2x4HkKZkHhJUP4nBX4XR6ZaWjZ3aYzD2UHiUUrFXjIw9jhH+DmO8U9kU/SvEd0RyJyJkClJ2oxMb2IaQ027BD+qOL93w+VrqkKbaWVfuOt6ofCelbYIKWpVQFLQLwT3Nt07lQ+6j/EkCkwQenQaQCtM6PJyPDZY1tQhjKEmJFk7VQ2z51pvf0/RHSG3NIm/oYNLvStaZuHNpKQ3gYcoKRzDStMEFruz01Wfy6jMAH8o+L5rmp9dKffLF0ccOJ85L6cG5FnKLBiBjLHgUMGNZHApJdBuGdkrD4Fe+rDNQ0UHU7jiuYzkN0p9kgpSqS689ZUZMuEJACVwZqF375qyQ6khllfOenKr9u71yotUCCg1Hl+jjhHOpLQshvDQNz7Hze1EJr3w208EQieEL2d6yq2sFacIanNhF0enYEenvpKgq9Eb6UQekbLCAg4m6g4TS7aH9RPAHKb7ZJdni7omuqifXL6N5Dp+mKdjqqFw62V+5nO8ruuwETGi7jLsFtUyoFNZ5TEEDRnynZJaA1tqSc3EGmK8coo9QHmkmdIbeT94l/xTYUajgTb0zdEtHGCQeLEjLkiMw/nD4m7Cka+AvgjM+jeFR3GUrw8rCeCPV4l57XAmwPw4P52n6nz5WaPNoWId9dO4WQ=
+  - secure: GRfDzw52Sk7OcJ0YTtU8ipaS5qjQbbPveoGHXOEzgnHZtmXHWdf836+lS0DHIxXh0kxW3flfi73xeR+EFm55jLZtqkhcOxAaf4ssmGg/S7JLK3CZv5Msk5XjHgenv5QcClUseEM8mMR38DmVE4w236tbwUxIyMR34e8BaAtlKdCVh0Yp+4O6/M8nQLvC1CcXB/iIwlVDJUjF3Zv5zytKfqkC4g7Cf1uYi5x0ZTz9dPtcmgnWuTU9lszyLU2HAvuXkGuQWNaTKAr6tUP226797iiQ52WZCZxb4YGcNyMdslzHWrnmx1dusKlF4FIBThYxOmqkC7nW+UXqAKnJkR7GT8mRzWRpBPaope2qdl9hb0WialseQh5RyyrXlkLfI4sYZ9HUyLoQa7w7hPYs68OyRCZCp6QVjFrWUsZTciLU4jAr2OEcTG3UxRDZEwe0Erix2EpdxPb9BhTsNQ8EudgoJViNjy/2EJS5ktdWPTeyDT13eS5CPVHGkZQJ3tfXt6FkKogDno3XBhZRGwLiRRFn/VVTvBDv8wyqOp0FpmBelsA7CVm8iSFx8yYuiQCZ6Ra3SkpXonsmHio41IbdjLOd71KnPQwHWkeZ6hX7bw6ttCGGhW47r8n/f9P8rBtyt6dBk7QCcX3c1xkIY3nIBT2KS8JbozjgbWmJRNHaS81H7w0=

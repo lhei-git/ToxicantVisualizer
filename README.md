@@ -1,4 +1,6 @@
 # ToxicantVisualizer
+[![Build Status](https://travis-ci.com/ejdejesu/ToxicantVisualizer.svg?token=MTaqyrMFvgPVyLmcZyoK&branch=master)](https://travis-ci.com/ejdejesu/ToxicantVisualizer)
+
 Fall 2020 Capstone Project
 
 ## Development
@@ -10,3 +12,11 @@ Fall 2020 Capstone Project
     3.1. Add at least one reviewer to your PR. Anyone can review, but a PR requires at least one approval before it can be merged. 
 
 5. Once a PR is approved, either the approving reviewer or the creator of the PR can merge it into `master`. 
+
+### Development with Docker
+Docker is a container runtime that allows fine control over the development and production environment. We will use it to run the frontend, backend, and sql database in unison to match the remote environment.
+
+https://www.docker.com/products/docker-desktop
+https://docs.docker.com/compose/ 
+
+After installation of Docker and Docker-compose, the application can be run by calling `docker-compose up` at the root of the directory. 

@@ -34,7 +34,7 @@
 .search-bar button {
   flex: 1;
   max-width: 120px;
-  color: black;
+  color: #000;
   text-align: center;
   text-decoration: none;
   cursor: pointer;

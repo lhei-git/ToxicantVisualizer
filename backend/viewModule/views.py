@@ -48,7 +48,6 @@ def points(request):
                                                     & Q(longitude__gt=sw_lng)
                                                     & Q(year=y))
 
-    # rows = list(map(lambda e: e.__dict__, list(raw)))
     return HttpResponse(szs.serialize('json', raw), content_type='application/json')
 
 # stats/state/summary
@@ -110,14 +109,17 @@ def top_facility_releases(request):
     state = str(request.GET.get('state', default='None')).upper()
     # filtering by pounds here as grams denotes dioxin (not to be included)
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        queryset = tri.objects.filter(unitofmeasure='Pounds', st=state, year=y).order_by('-totalreleases')[:10]
-        data = szs.serialize('json', queryset, fields=('facilityname', 'totalreleases'))
+        queryset = tri.objects.filter(
+            unitofmeasure='Pounds', st=state, year=y).order_by('-totalreleases')[:10]
+        data = szs.serialize('json', queryset, fields=(
+            'facilityname', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
     else:
         queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                       & Q(longitude__lt=ne_lng)
                                       & Q(longitude__gt=sw_lng)
                                       & Q(year=y)).order_by('-totalreleases')[:10]
-        data = szs.serialize('json', queryset, fields=('facilityname', 'totalreleases'))
+        data = szs.serialize('json', queryset, fields=(
+            'facilityname', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
     return HttpResponse(data, content_type='application/json')
 
 # stats/location/num_facilities
