@@ -58,11 +58,11 @@ class CustomizedYAxisTick extends React.Component {
 
 function GraphContainer(props) {
   let [graph, setGraph] = React.useState(null);
-  let [viewport] = React.useState(localStorage.getItem("viewport") || {});
+  let viewport = props.viewport;
 
   React.useEffect(() => {
     async function fetchData() {
-      if (!props.graph) return;
+      if (!props.graph || !props.viewport) return;
       const g = await props.graph(viewport);
 
       setGraph(g);
@@ -84,12 +84,11 @@ async function GraphSummary(viewport) {
   };
 
   try {
-    const ne = JSON.parse(viewport).northeast;
-    const sw = JSON.parse(viewport).southwest;
+    const ne = viewport.northeast;
+    const sw = viewport.southwest;
     const res = await vetapi.get(
       `/stats/location/summary?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
-    console.log(Object.keys(res.data));
     const body = (
       <tbody>
         <tr>
@@ -130,12 +129,6 @@ async function GraphSummary(viewport) {
         </tr>
       </tbody>
     );
-    // let rows = Object.keys(res.data).map((row, i) => (
-    //   <tr key={row}>
-    //     <td>{row.replace("_", " ")}</td>
-    //     <td>{+res.data[row].toFixed(2)}</td>
-    //   </tr>
-    // ));
     return (
       <div className="summary">
         <table>
@@ -150,30 +143,29 @@ async function GraphSummary(viewport) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    console.log("summary error:", err);
     return <div>ERROR: Summary statistics could not be found.</div>;
   }
 }
 
 async function GraphTopTenFacilities(viewport) {
   try {
-    const ne = JSON.parse(viewport).northeast;
-    const sw = JSON.parse(viewport).southwest;
+    const ne = viewport.northeast;
+    const sw = viewport.southwest;
     const res = await vetapi.get(
       `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
-    console.log(res.data.map((d) => d.fields));
     const data = res.data
       .map((d, i) => {
         const f = d.fields;
         return {
-          name: f.facilityname,
+          name: f.facility,
           av:
-            !f.totalreleaseair && !f.totalreleasewater && !f.totalreleaseland
-              ? f.totalreleases
-              : f.totalreleaseair,
-          bv: f.totalreleasewater,
-          cv: f.totalreleaseland,
+            !f.vet_total_releases_air && !f.total_releases_water && !f.vet_total_releases_land
+              ? f.vet_total_releases
+              : f.vet_total_releases_air,
+          bv: f.total_releases_water,
+          cv: f.vet_total_releases_land,
         };
       })
       .sort((a, b) => b.pv - a.pv)
@@ -218,16 +210,16 @@ async function GraphTopTenParents(viewport) {
   const layout = "vertical";
 
   try {
-    const ne = JSON.parse(viewport).northeast;
-    const sw = JSON.parse(viewport).southwest;
+    const ne = viewport.northeast;
+    const sw = viewport.southwest;
     const res = await vetapi.get(
       `/stats/location/parent_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = res.data
       .map((d, i) => {
         return {
-          name: d.fields.parentconame,
-          pv: d.fields.totalreleases,
+          name: d.fields.parent_co_name,
+          pv: d.fields.vet_total_releases,
         };
       })
       .sort((a, b) => b.pv - a.pv)
@@ -269,8 +261,8 @@ async function GraphTopTenParents(viewport) {
 
 async function GraphTopChemicals(viewport) {
   try {
-    const ne = JSON.parse(viewport).northeast;
-    const sw = JSON.parse(viewport).southwest;
+    const ne = viewport.northeast;
+    const sw = viewport.southwest;
     const res = await vetapi.get(
       `/stats/location/chemcounts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
@@ -317,26 +309,30 @@ async function GraphTopChemicals(viewport) {
   }
 }
 
-function GraphView() {
+function GraphView(props) {
   return (
     <div className="graph-container">
       <GraphContainer
+        viewport={props.viewport}
         name="summary"
         hidden={false}
         graph={GraphSummary}
         title="Summary"
       ></GraphContainer>
       <GraphContainer
+        viewport={props.viewport}
         name="total_facilities"
         graph={GraphTopTenFacilities}
         title="Total releases for top 10 facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
+        viewport={props.viewport}
         name="total_parents"
         graph={GraphTopTenParents}
         title="Total Releases for the top 10 parent companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
+        viewport={props.viewport}
         name="top_graphs"
         graph={GraphTopChemicals}
         title="Top Ten Chemicals (in # occurrances)"

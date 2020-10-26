@@ -246,6 +246,7 @@ const App = (props) => {
                 )}
               </div>
             </div>
+            <GraphView viewport={state.viewport}></GraphView>
             <Footer />
           </Route>
           <Route path="/graphs">

@@ -1,17 +1,18 @@
 .graph-container {
   position: relative;
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
-  flex-direction: row;
-  background-color: #fff;
+  flex-direction: row; */
+  background: rgb(247, 247, 247);
+
   /* overflow-y: auto; */
 }
 .graph-container .graph {
   position: relative;
-  display: flex;
-  flex-basis: calc(50% - 80px);
+  /* display: flex; */
+  /* flex-basis: calc(50% - 80px); */
   justify-content: center;
-  flex-direction: column;
+  /* flex-direction: column; */
   padding: 50px;
   box-sizing: border-box;
 }
