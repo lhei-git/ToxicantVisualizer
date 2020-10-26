@@ -104,15 +104,15 @@ function ChemicalList(props) {
   if (chemicals.length === 0) return <div></div>;
 
   const listItems = chemicals
-    .sort((a, b) => b.totalreleases - a.totalreleases)
+    .sort((a, b) => b.vet_total_releases - a.vet_total_releases)
     .map((c) => (
       <li
         onClick={() => {
           props.onClick(c.name);
         }}
-        key={c.name + " " + c.totalreleases}
+        key={c.name + " " + c.vet_total_releases}
       >
-        {c.name} ({c.totalreleases} lbs)
+        {c.name} ({c.vet_total_releases} lbs)
       </li>
     ));
   return (
