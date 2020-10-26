@@ -4,6 +4,7 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
+  Link,
   withRouter,
 } from "react-router-dom";
 import history from "./history";
@@ -195,6 +196,9 @@ const App = (props) => {
           <Route path="/map">
             <div className="search"></div>
             <div className="title">
+              <div className="go-home">
+                <Link to="/"> &lt; Back to home</Link>
+              </div>
               Visualizer of Environmental Toxicants (VET)
             </div>
             <div className="map-view">

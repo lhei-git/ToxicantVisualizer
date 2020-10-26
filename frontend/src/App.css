@@ -6,6 +6,11 @@
   max-height: 100%;
 }
 
+.go-home {
+  float: left;
+  margin-left: 50px;
+}
+
 .navbar {
   font-size: 24px;
   color: #FFF;
@@ -14,7 +19,6 @@
   line-height: 60px;
   display: flex;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  /* margin-bottom: 10px; */
   border-top: 20px solid rgb(70, 0, 70);
 }
 

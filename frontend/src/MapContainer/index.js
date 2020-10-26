@@ -70,10 +70,12 @@ class MapContainer extends Component {
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
       if (this.props.filters.year !== prevProps.filters.year) {
-        this.fetchPoints(
-          this.props.viewport.northeast,
-          this.props.viewport.southwest
-        );
+        this.setState({ isLoading: true }, () => {
+          this.fetchPoints(
+            this.props.viewport.northeast,
+            this.props.viewport.southwest
+          );
+        });
       } else {
         const oldPoints = this.state.points;
         newState.markers = this.createMarkers(oldPoints);
@@ -112,9 +114,6 @@ class MapContainer extends Component {
   }
 
   fetchPoints(ne, sw) {
-    this.setState({
-      isLoading: true,
-    });
     console.log("fetching...");
     const params = {
       ne_lat: ne.lat,
@@ -170,9 +169,16 @@ class MapContainer extends Component {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
         map.fitBounds(b);
-        mapsApi.event.addListenerOnce(map, "idle", () =>
-          this.fetchPoints(viewport.northeast, viewport.southwest)
-        );
+        mapsApi.event.addListenerOnce(map, "idle", () => {
+          this.setState(
+            {
+              isLoading: true,
+            },
+            () => {
+              this.fetchPoints(viewport.northeast, viewport.southwest);
+            }
+          );
+        });
       } catch (err) {
         console.log(err);
       }
