@@ -13,6 +13,8 @@ services:
   backend:
     build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
+    environment: 
+      DB_HOST: postgres_local
     volumes:
     - ./backend:/code
     ports:
@@ -20,6 +22,7 @@ services:
     depends_on:
     - db
   db:
+    container_name: postgres_local
     image: postgres:12
     restart: always
     environment:
