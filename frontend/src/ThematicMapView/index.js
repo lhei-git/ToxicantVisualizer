@@ -16,13 +16,18 @@ class ThematicMapView extends Component {
     super(props);
     this.state = {
       content: "",
-      stateData: [],
-      statesLoaded: false,
+      stateData: null,
+      stateMax: null,
+      stateMin: null,
     };
     this.handleContent = this.handleContent.bind(this);
-//   this.
-//
-//   //this.getStateData();
+    this.getStateData = this.getStateData.bind(this);
+
+
+  }
+
+  componentDidMount(){
+   this.getStateData();
   }
 
 handleContent(content){
@@ -30,37 +35,76 @@ handleContent(content){
 }
 
 render(){
+    if (!this.state.stateData) {
+            return null
+        }
+
+
   return (
     <div>
-      <ThematicMap setTooltipContent={this.handleContent} data={this.state.stateData}/>
+      <ThematicMap
+            setTooltipContent={this.handleContent}
+            data={this.state.stateData}
+            maxValue={this.state.stateMax}
+            minValue={this.state.stateMin}/>
       <ReactTooltip>{this.state.content}</ReactTooltip>
     </div>
   );
 }
-}
+
 
 //loads the state data from the backend
-async function getStateData()
+//async  getStateData()
+//{
+//
+//
+// var d = []
+//
+//    for (var i = 0; i < states.length; i++)
+//        {
+//            await axios.get(
+//              "http://localhost:8000/stats/state/summary?state=mi")                              //TODO: CHANGE ME TO THE CORRECT LINK
+//              .then((response) => {
+//              d.push({name: states[i], total: response.data.totalonsite})
+//              })
+//              .catch((e) => alert(e));
+//            };
+//
+//    this.setState({statesLoaded: true});
+//    this.setState({stateData: d});
+//    return d;
+//}
+
+async  getStateData()
 {
-alert("getting state data")
+    var d= [];
+    var maxValue = 0;
+    var minValue = 100000000000000;
+    let promises = [];
+    for (var i = 0; i < states.length; i++) {
 
- var d = []
-
-    for (var i = 0; i < states.length; i++)
-        {
-            await axios.get(
-              "http://localhost:8000/stats/state/summary?state=mi")                              //TODO: CHANGE ME TO THE CORRECT LINK
+      await axios.get(
+              "http://localhost:8000/stats/state/summary?state=" + states[i])                              //TODO: CHANGE ME TO THE CORRECT LINK
               .then((response) => {
-              d.push({name: states[i], total: response.data.totalonsite})
+              d.push({name: states[i], total: response.data.totalonsite, air: response.data.air, water: response.data.water, land: response.data.land, offsite: response.data.totaloffsite,
+                                        dioxins: response.data.totaldioxin, carcinogens: response.data.totalcarcs, facilities: response.data.numtrifacilities })
+
+              if(response.data.totalonsite > maxValue) maxValue = response.data.totalonsite;
+              if(response.data.totalonsite < minValue && response.data.totalonsite != 0) minValue = response.data.totalonsite;
+
               })
-              .catch();
+              .catch((e) => alert(e));
             };
 
-    this.setState({statesLoaded: true});
-    return [];
+
+
+
+Promise.all(promises).then(() => this.setState({stateData: d, stateMax: maxValue, stateMin: minValue}));
+
+
 }
 
-
+}
 
 
 export default ThematicMapView

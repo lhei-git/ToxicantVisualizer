@@ -6,7 +6,7 @@ import {
   Geography
 } from "react-simple-maps";
 
-import { scaleQuantize } from "d3-scale";
+import { scaleQuantile } from "d3-scale";
 
 //state map topo data
 const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers.json"
@@ -21,20 +21,28 @@ const rounded = num => {
   }
 };
 
-const thematicMap = ({ setTooltipContent }) => {
+const thematicMap = (props) => {
 
-const colorScale = scaleQuantize()
-  .domain([1, 10])
+const colorScale = scaleQuantile()
+  .domain([props.minValue, props.maxValue])
   .range([
-    "#ffedea",
-    "#ffcec5",
-    "#ffad9f",
-    "#ff8a75",
-    "#ff5533",
-    "#e2492d",
-    "#be3d26",
-    "#9a311f",
-    "#782618"
+    "#fdcdcb",
+    "#fcb6b3",
+    "#fba09c",
+    "#fb8984",
+    "#fa726c",
+    "#f95b54",
+    "#f9443c",
+    "#f82e25",
+    "#f7170d",
+    "#e51006",
+    "#cd0e06",
+    "#b60c05",
+    "#9e0b04",
+    "#860904",
+    "#6e0703",
+    "#570602",
+    "#3f0401",
   ]);
 
   return (
@@ -43,56 +51,34 @@ const colorScale = scaleQuantize()
         <Geographies geography={geoUrl}>
           {({ geographies }) =>
             geographies.map(geo => {
-              const cur = 0; //data.find(s => s.id === geo.id);
+              var cur = props.data.find(s => s.name === geo.properties.iso_3166_2);
+              if( cur != undefined){
               return (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={colorScale(cur ? cur.unemployment_rate : "#EEE")}
+                  fill={colorScale(cur ? cur.total : "#EEE")}
                   onMouseEnter={() => {
                     const { name, POP_EST } = geo.properties;
-                    setTooltipContent(`${name} — ${rounded(POP_EST)}`);
+                    const total = cur.total;
+                    props.setTooltipContent(`${name} \n
+
+
+                    ${total}`);
                   }}
                  onMouseLeave={() => {
-                    setTooltipContent("");
+                    props.setTooltipContent("");
                   }}
                 />
               );
-            })
+            }}
+            )
           }
         </Geographies>
       </ComposableMap>
     </>
   );
-
-
 }
-//  return (
-//    <>
-//      <ComposableMap data-tip="" projectionConfig={{ scale: 200 }}>
-//        <ZoomableGroup>
-//          <Geographies geography={geoUrl}>
-//            {({ geographies }) =>
-//              geographies.map(geo => (
-//             // alert(geo.properties.name)
-//                <Geography
-//                  key={geo.rsmKey}
-//                  geography={geo}
-//                  onMouseEnter={() => {
-//                    const { name, POP_EST } = geo.properties;
-//                    setTooltipContent(`${name} — ${rounded(POP_EST)}`);
-//                  }}
-//                  onMouseLeave={() => {
-//                    setTooltipContent("");
-//                  }}
-//                />
-//              ))
-//            }
-//          </Geographies>
-//        </ZoomableGroup>
-//      </ComposableMap>
-//    </>
-//)
-//};
+
 
 export default memo(thematicMap);
