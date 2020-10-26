@@ -54,21 +54,7 @@ function UserControlPanel(props) {
       </div>
       <div className="content">
         {/* Search Bar Content*/}
-        <div className="flex-item">
-          <ChemTypeSelector
-            title="Only Show Carcinogens"
-            attribute="carcinogens"
-            defaultChecked={false}
-            onClick={onFilterChange}
-          />
-          {/* <ChemTypeSelector
-            title="Only Show PBTs"
-            attribute="dioxins"
-            defaultChecked={false}
-            onClick={onFilterChange}
-          /> */}
-        </div>
-        <div className="flex-item">
+        <div className="flex-item one">
           <div className="selector">
             <label htmlFor="releaseType">Release Type</label>
             <select name="releaseType" onChange={onSelectChange} id="">
@@ -91,6 +77,20 @@ function UserControlPanel(props) {
               {getChemicals()}
             </select>
           </div>
+        </div>
+        <div className="flex-item two">
+          <ChemTypeSelector
+            title="Only Show Carcinogens"
+            attribute="carcinogens"
+            defaultChecked={false}
+            onClick={onFilterChange}
+          />
+          {/* <ChemTypeSelector
+            title="Only Show PBTs"
+            attribute="dioxins"
+            defaultChecked={false}
+            onClick={onFilterChange}
+          /> */}
         </div>
       </div>
     </div>
