@@ -1,4 +1,5 @@
 import "./index.css";
+import "../index.css";
 import mapStyles from "./standard";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
@@ -111,6 +112,9 @@ class MapContainer extends Component {
   }
 
   fetchPoints(ne, sw) {
+    this.setState({
+      isLoading: true,
+    });
     console.log("fetching...");
     const params = {
       ne_lat: ne.lat,
@@ -134,6 +138,7 @@ class MapContainer extends Component {
         this.setState({
           points,
           markers: this.createMarkers(points),
+          isLoading: false,
         });
       })
       .catch((err) => {
@@ -245,14 +250,33 @@ class MapContainer extends Component {
         />
       );
     });
-    this.setState({ isLoading: false });
     this.props.onUpdate(markers.length);
     return markers;
   }
 
   render() {
     return (
-      <div className="map-container">
+      <div className={`map-container ${this.state.isLoading ? "loading" : ""}`}>
+        {this.state.isLoading && (
+          <div className="loading-overlay">
+            <div className="spinner">
+              <div class="lds-spinner">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            </div>
+          </div>
+        )}
         {this.state.hasMoved && (
           <div className="refresh" onClick={this.onRefresh}>
             RESET
@@ -270,7 +294,7 @@ class MapContainer extends Component {
             initialCenter={this.props.center}
             containerStyle={containerStyle}
           >
-            {!this.state.isLoading && this.state.markers}
+            {this.state.markers}
             <InfoWindow
               marker={this.state.activeMarker}
               visible={this.state.showingInfoWindow}
