@@ -1,10 +1,9 @@
 import "./index.css";
 import mapStyles from "./standard";
 const React = require("react");
-const geocoder = require("../api/geocoder/index");
 const vetapi = require("../api/vetapi/index");
 const flatten = require("./flatten");
-const { shallowEqual } = require("../helpers");
+const { shallowEqual, formatChemical } = require("../helpers");
 const Component = React.Component;
 const {
   Map,
@@ -31,6 +30,7 @@ class MapContainer extends Component {
       showingInfoWindow: false,
       isLoading: true,
       map: null,
+      chemicalList: [],
       hasMoved: false,
     };
 
@@ -82,7 +82,7 @@ class MapContainer extends Component {
     }
 
     const mapsApi = this.props.google.maps;
-    if ( !shallowEqual(prevProps.viewport, this.props.viewport)) {
+    if (!shallowEqual(prevProps.viewport, this.props.viewport)) {
       try {
         const b = this.createLatLngBounds(this.props.viewport, mapsApi);
         this.map.fitBounds(b);
@@ -122,8 +122,14 @@ class MapContainer extends Component {
     vetapi
       .get(`/facilities`, { params })
       .then((res) => {
+        const data = res.data
+          .map((d) => ({
+            ...d.fields,
+            chemical: formatChemical(d.fields.chemical),
+          }))
+          .filter((d) => d.vet_total_releases !== 0);
+        this.props.onFetchPoints([...new Set(data.map((d) => d.chemical))]);
         console.log("flattening...");
-        const data = res.data.map((d) => d.fields);
         const points = flatten(data);
         this.setState({
           points,
@@ -178,14 +184,19 @@ class MapContainer extends Component {
     const newList = [];
     list.forEach((chemical) => {
       if (
+        (filters.chemical !== "all" &&
+          chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
         (filters.carcinogens && chemical.carcinogen === "NO") ||
-        (filters.releaseType === "air" && chemical.totalreleaseair === 0) ||
-        (filters.releaseType === "water" && chemical.totalreleasewater === 0) ||
-        (filters.releaseType === "land" && chemical.totalreleaseland === 0) ||
+        (filters.releaseType === "air" &&
+          chemical.vet_total_releases_air === 0) ||
+        (filters.releaseType === "water" &&
+          chemical.total_releases_water === 0) ||
+        (filters.releaseType === "land" &&
+          chemical.vet_total_releases_land === 0) ||
         (filters.releaseType === "on-site" &&
-          chemical.on_sitereleasetotal === 0) ||
+          chemical.vet_total_releases_onsite === 0) ||
         (filters.releaseType === "off-site" &&
-          chemical.off_sitereleasetotal === 0)
+          chemical.vet_total_releases_offsite === 0)
       ) {
       } else newList.push(chemical);
     });
@@ -198,7 +209,7 @@ class MapContainer extends Component {
         const totalFacilityReleases = this.filterChemicalList(
           f.chemicals,
           this.props.filters
-        ).reduce((acc, cur) => acc + cur.totalreleases, 0);
+        ).reduce((acc, cur) => acc + cur.vet_total_releases, 0);
         if (totalFacilityReleases === 0) return null;
         let color = 1;
 
@@ -267,21 +278,21 @@ class MapContainer extends Component {
               <div className="info-window">
                 {this.state.activeMarker !== null && (
                   <div>
-                    <h2>{this.state.activeMarker.meta.facilityname}</h2>
+                    <h2>{this.state.activeMarker.meta.facility}</h2>
                     <p>
-                      {this.state.activeMarker.meta.streetaddress} <br></br>
+                      {this.state.activeMarker.meta.street_address} <br></br>
                       {this.state.activeMarker.meta.city},{" "}
                       {this.state.activeMarker.meta.st}{" "}
                       {this.state.activeMarker.meta.zip}
                     </p>
                     <p>
-                      Industry: {this.state.activeMarker.meta.industrysector}
+                      Industry: {this.state.activeMarker.meta.industry_sector}
                     </p>
                     <p>
                       Total Toxicants Released:{" "}
                       {
                         +this.state.activeMarker.meta.chemicals
-                          .reduce((acc, cur) => acc + cur.totalreleases, 0)
+                          .reduce((acc, cur) => acc + cur.vet_total_releases, 0)
                           .toFixed(2)
                       }{" "}
                       lbs

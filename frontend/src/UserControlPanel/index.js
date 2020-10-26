@@ -33,6 +33,19 @@ function UserControlPanel(props) {
     return years;
   }
 
+  function getChemicals() {
+    let chemicals = [];
+    chemicals.push(
+      <option selected={true} value="all">
+        all
+      </option>
+    );
+    for (var chemical of props.chemicals) {
+      chemicals.push(<option value={chemical}>{chemical}</option>);
+    }
+    return chemicals;
+  }
+
   return (
     <div className="control-container">
       <div className="header">
@@ -48,12 +61,12 @@ function UserControlPanel(props) {
             defaultChecked={false}
             onClick={onFilterChange}
           />
-          <ChemTypeSelector
+          {/* <ChemTypeSelector
             title="Only Show PBTs"
             attribute="dioxins"
             defaultChecked={false}
             onClick={onFilterChange}
-          />
+          /> */}
         </div>
         <div className="flex-item">
           <div className="selector">
@@ -75,7 +88,7 @@ function UserControlPanel(props) {
           <div className="selector">
             <label htmlFor="chemical">Chemical</label>
             <select name="chemical" onChange={onSelectChange} id="">
-              {getYears()}
+              {getChemicals()}
             </select>
           </div>
         </div>
