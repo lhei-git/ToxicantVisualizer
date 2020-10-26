@@ -4,7 +4,6 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
   withRouter,
 } from "react-router-dom";
 import history from "./history";
@@ -29,12 +28,14 @@ const initialState = {
   location: localStorage.getItem("searchedLocation") || "",
   numFacilities: 0,
   lastSearch: "",
-  chemicals: [],
   center: INITIAL_CENTER,
   viewport: null,
   showPubchemInfo: false,
+  chemicals: [],
+  selectedChemicalList: [],
   currentChemical: "",
   filters: {
+    chemical: "all",
     dioxins: false,
     carcinogens: false,
     releaseType: "all",
@@ -49,16 +50,22 @@ const reducer = (state, action) => {
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
+      console.log(action.payload);
       return { ...state, filters: action.payload };
+    case "setChemicals":
+      return {
+        ...state,
+        selectedChemicalList: action.payload,
+      };
     case "setCurrentChemical":
       return { ...state, currentChemical: action.payload };
-    case "setMapData":
+    case "setMapView":
       return {
         ...state,
         center: action.payload.center,
         viewport: action.payload.viewport,
       };
-    case "setChemicals":
+    case "setMarker":
       return {
         ...state,
         showPubchemInfo: false,
@@ -88,14 +95,15 @@ const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
 const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
-const setMapData = (payload) => ({ type: "setMapData", payload });
+const setMapView = (payload) => ({ type: "setMapView", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
+const setChemicals = (payload) => ({ type: "setChemicals", payload });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
 });
-const setChemicals = (payload) => ({
-  type: "setChemicals",
+const setMarker = (payload) => ({
+  type: "setMarker",
   payload,
 });
 
@@ -104,15 +112,15 @@ function ChemicalList(props) {
   if (chemicals.length === 0) return <div></div>;
 
   const listItems = chemicals
-    .sort((a, b) => b.totalreleases - a.totalreleases)
+    .sort((a, b) => b.vet_total_releases - a.vet_total_releases)
     .map((c) => (
       <li
         onClick={() => {
           props.onClick(c.name);
         }}
-        key={c.name + " " + c.totalreleases}
+        key={c.name + " " + c.vet_total_releases}
       >
-        {c.name} ({c.totalreleases} lbs)
+        {c.name} ({c.vet_total_releases} lbs)
       </li>
     ));
   return (
@@ -157,7 +165,7 @@ const App = (props) => {
   async function geocodeLocation(location) {
     const res = await geocoder.get(`/json?address=${location}`);
     dispatch(
-      setMapData({
+      setMapView({
         center: res.data.results[0].geometry.location,
         viewport: res.data.results[0].geometry.viewport,
       })
@@ -185,6 +193,7 @@ const App = (props) => {
         </nav> */}
         <Switch>
           <Route path="/map">
+            <div className="search"></div>
             <div className="title">
               Visualizer of Environmental Toxicants (VET)
             </div>
@@ -192,6 +201,7 @@ const App = (props) => {
               <div className="filter-wrapper">
                 <div className="filters">
                   <UserControlPanel
+                    chemicals={state.selectedChemicalList}
                     filters={Object.assign({}, state.filters)}
                     numFacilities={state.numFacilities}
                     onFilterChange={(filters) => dispatch(setFilters(filters))}
@@ -238,15 +248,19 @@ const App = (props) => {
                     viewport={state.viewport}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
+                    onFetchPoints={(chemicals) =>
+                      dispatch(setChemicals(chemicals))
+                    }
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(chemicals) =>
-                      dispatch(setChemicals(chemicals))
+                      dispatch(setMarker(chemicals))
                     }
                   />
                 )}
               </div>
             </div>
-            <Footer />
+            <GraphView viewport={state.viewport}></GraphView>
+            {/* <Footer /> */}
           </Route>
           <Route path="/graphs">
             <GraphView></GraphView>

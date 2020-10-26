@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import points, attr, num_facilities, state_total_releases, top_parentco_releases, chem_counts, location_summary, top_facility_releases
+from viewModule.views import points, attr, num_facilities, state_total_releases, top_parentco_releases, chem_counts, chem_amounts, location_summary, top_facility_releases
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -13,6 +13,8 @@ urlpatterns = [
     path('stats/location/summary', location_summary),
     # return number of each chemical within: window
     path('stats/location/chemcounts', chem_counts),
+    # return amount of each chemical within: window
+    path('stats/location/chem_amounts', chem_amounts),
     # return number of reports by: coord window OR state
     path('stats/location/num_facilities', num_facilities),
     # return top ten polluting facilities by: window
