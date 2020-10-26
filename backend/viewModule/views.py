@@ -57,21 +57,21 @@ def state_total_releases(request):
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
     if state != 'None':
-        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facilityname').distinct().count())
+        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
         tri_set = tri.objects.filter(st=state, year=y)
         for t in tri_set:
             if t.classification == 'Dioxin': # exclude dioxin stats in other categories
-                t_dioxin += t.totalreleases
+                t_dioxin += t.vet_total_releases
                 if t.carcinogen == 'YES':
-                    t_carc += t.totalreleases
+                    t_carc += t.vet_total_releases
             else:
                 if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
-                    t_carc += t.totalreleases
-                t_onsite += t.on_sitereleasetotal
-                t_offsite += t.off_sitereleasetotal
-                t_air += t.totalreleaseair
-                t_water += t.totalreleasewater
-                t_land += t.totalreleaseland
+                    t_carc += t.vet_total_releases
+                t_onsite += t.vet_total_releases_onsite
+                t_offsite += t.epa_offsite_release_total
+                t_air += t.vet_total_releases_air
+                t_water += t.total_releases_water
+                t_land += t.vet_total_releases_land
         result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
                   'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
                   'numtrifacilities':t_facilitycount}
