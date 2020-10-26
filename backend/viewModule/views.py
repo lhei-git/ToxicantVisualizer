@@ -48,7 +48,10 @@ def points(request):
                                                     & Q(longitude__gt=sw_lng)
                                                     & Q(year=y))
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 820da6446f2b25d9683e67840f073133bf368ceb
     return HttpResponse(szs.serialize('json', raw), content_type='application/json')
 
 # stats/state/summary
