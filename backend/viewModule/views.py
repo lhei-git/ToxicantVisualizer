@@ -18,6 +18,19 @@ import re
 
 
 # facilities
+def points(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    y = int(request.GET.get('year', default=2018))
+    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                    & Q(longitude__lt=ne_lng)
+                                                    & Q(longitude__gt=sw_lng)
+                                                    & Q(year=y))
+
+    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+
 def dist_fac(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -36,20 +49,6 @@ def dist_fac(request):
     data = json.dumps(list(qs))
     return HttpResponse(data, content_type='application/json')
 
-#
-def points(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    y = int(request.GET.get('year', default=2018))
-    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                                    & Q(longitude__lt=ne_lng)
-                                                    & Q(longitude__gt=sw_lng)
-                                                    & Q(year=y))
-
-    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
-
 # stats/state/summary
 def state_total_releases(request):
     state = str(request.GET.get('state')).upper()
@@ -57,7 +56,7 @@ def state_total_releases(request):
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
     if state != 'None':
-        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facilityname').distinct().count())
+        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
         tri_set = tri.objects.filter(st=state, year=y)
         for t in tri_set:
             if t.classification == 'Dioxin': # exclude dioxin stats in other categories
@@ -67,8 +66,8 @@ def state_total_releases(request):
             else:
                 if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
                     t_carc += t.vet_total_releases
-                t_onsite += t.on_sitereleasetotal
-                t_offsite += t.off_sitereleasetotal
+                t_onsite += t.vet_total_releases_onsite
+                t_offsite += t.vet_total_releases_offsite
                 t_air += t.vet_total_releases_air
                 t_water += t.total_releases_water
                 t_land += t.vet_total_releases_land
@@ -89,7 +88,7 @@ def top_parentco_releases(request):
     state = str(request.GET.get('state', default='None')).upper()
     # filtering by pounds here as grams denotes dioxin (not to be included)
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        queryset = tri.objects.filter(unitofmeasure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
+        queryset = tri.objects.filter(unit_of_measure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
         data = szs.serialize('json', queryset, fields=('parent_co_name', 'vet_total_releases'))
     else:
         queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
@@ -110,7 +109,7 @@ def top_facility_releases(request):
     # filtering by pounds here as grams denotes dioxin (not to be included)
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
         queryset = tri.objects.filter(
-            unitofmeasure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
+            unit_of_measure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
         data = szs.serialize('json', queryset, fields=(
             'facility', 'vet_total_releases', 'vet_total_releases_air', 'total_releases_water', 'vet_total_releases_land'))
     else:
@@ -138,6 +137,7 @@ def num_facilities(request):
                                   .distinct().count()
     return HttpResponse(data, content_type='application/json')
 
+# stats/location/summary
 def location_summary(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
