@@ -26,8 +26,8 @@ SECRET_KEY = 'yb#re#b*nmjvxnxmno9qk-2owmi&b)77&8xm+=izl4v*w%i8^r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1","visualizing-environmental-toxicants-dev.us-east-1.elasticbeanstalk.com",
-"api.vet.lhei.org", 'localhost']
+ALLOWED_HOSTS = ["127.0.0.1", "visualizing-environmental-toxicants-dev.us-east-1.elasticbeanstalk.com",
+                 "api.vet.lhei.org", 'localhost']
 
 
 # Application definition
@@ -85,9 +85,9 @@ WSGI_APPLICATION = 'api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('APP_DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.environ.get('DB_NAME', 'postgres'),    
+        'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': '', # use environment variable here
+        'PASSWORD': os.environ.get('DB_PASS', 'postgres'),
         'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
         'PORT': os.environ.get('DB_PORT', 5432)
     }
