@@ -1,9 +1,9 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
-import { createContext , useState, useEffect} from "react";
+
 import axios from 'axios';
 const React = require("react");
-
+const Component = React.Component;
 
 // TEMP list of states used to get state data from backend
 const states = [ "AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM", "FL", "GA", "GU", "HI",
@@ -11,26 +11,34 @@ const states = [ "AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM
                 "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA",
                 "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", 'WI', "WY"]
 
+class ThematicMapView extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      content: "",
+      stateData: [],
+      statesLoaded: false,
+    };
+   //this.getStateData = this.getStateData.bind(this);
+   this.
 
-function ThematicMapView() {
-  const [content, setContent] = useState("");
-  const [stateData, setStateData] = useState(GetStateData());   //load the state data from the backend
-  const [statesLoaded, setStatesLoaded] = useState(false);      //set states loaded to false by default so that loading message can be displayed
+   //this.getStateData();
+  }
 
-  this.GetStateData = this.GetStateData.bind(this);
+handleContent(){}
 
-  this.getStateData(setStatesLoaded())
-
+render(){
   return (
     <div>
-      <ThematicMap setTooltipContent={setContent} data={useEffect(stateData)}/>
-      <ReactTooltip>{content}</ReactTooltip>
+      <ThematicMap setTooltipContent={this.handleContent()} data={this.state.stateData}/>
+      <ReactTooltip>{this.state.content}</ReactTooltip>
     </div>
   );
 }
+}
 
 //loads the state data from the backend
-async function GetStateData(setStatesLoaded)
+async function getStateData()
 {
 alert("getting state data")
 
@@ -46,7 +54,7 @@ alert("getting state data")
               .catch();
             };
 
-    setStatesLoaded(true);
+    this.setState({statesLoaded: true});
     return [];
 }
 
