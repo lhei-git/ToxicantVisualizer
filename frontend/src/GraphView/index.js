@@ -156,19 +156,22 @@ async function GraphTopTenFacilities(viewport) {
       `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = res.data
+      .sort((a, b) => b.fields.vet_total_releases - a.vet_total_releases)
       .map((d, i) => {
         const f = d.fields;
         return {
           name: f.facility,
-          av:
-            !f.vet_total_releases_air && !f.total_releases_water && !f.vet_total_releases_land
+          pv:
+            f.vet_total_releases_air === 0 &&
+            f.vet_total_releases_land === 0 &&
+            f.total_releases_water === 0
               ? f.vet_total_releases
-              : f.vet_total_releases_air,
+              : 0,
+          av: f.vet_total_releases_air,
           bv: f.total_releases_water,
           cv: f.vet_total_releases_land,
         };
       })
-      .sort((a, b) => b.pv - a.pv)
       .slice(0, 10);
     return (
       <div className="top-ten facilities">
@@ -178,8 +181,8 @@ async function GraphTopTenFacilities(viewport) {
             // layout="vertical"
             margin={{
               top: 30,
-              right: 10,
-              left: 100,
+              right: 50,
+              left: 50,
               bottom: 200,
             }}
           >
@@ -193,6 +196,7 @@ async function GraphTopTenFacilities(viewport) {
             <YAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend align="right" verticalAlign="top" />
+            <Bar name="total" dataKey="pv" stackId="a" fill="#5b8e7d" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
             <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
@@ -233,7 +237,7 @@ async function GraphTopTenParents(viewport) {
             layout={layout}
             margin={{
               top: 30,
-              right: 150,
+              right: 100,
               left: 50,
               bottom: 10,
             }}
@@ -264,13 +268,13 @@ async function GraphTopChemicals(viewport) {
     const ne = viewport.northeast;
     const sw = viewport.southwest;
     const res = await vetapi.get(
-      `/stats/location/chemcounts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
+      `/stats/location/chem_amounts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
-    const data = Object.keys(res.data)
-      .map((key, i) => {
+    const data = res.data
+      .map((d, i) => {
         return {
-          name: key,
-          pv: res.data[key],
+          name: d.chemical,
+          pv: d.total,
         };
       })
       .sort((a, b) => b.pv - a.pv)
@@ -283,7 +287,7 @@ async function GraphTopChemicals(viewport) {
             layout="vertical"
             margin={{
               top: 30,
-              right: 30,
+              right: 100,
               left: 50,
               bottom: 10,
             }}
@@ -298,7 +302,7 @@ async function GraphTopChemicals(viewport) {
             <XAxis type="number" />
             <Tooltip />
             <Legend />
-            <Bar name="Occurrances" dataKey="pv" fill="#5b8e7d" />
+            <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -335,7 +339,7 @@ function GraphView(props) {
         viewport={props.viewport}
         name="top_graphs"
         graph={GraphTopChemicals}
-        title="Top Ten Chemicals (in # occurrances)"
+        title="Top Ten Chemicals (in lbs)"
       ></GraphContainer>
     </div>
   );

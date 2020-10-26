@@ -1,6 +1,6 @@
 # This page handles requests by individual "view" functions
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q
+from django.db.models import Q, Sum
 from viewModule.models import Tri as tri
 from viewModule.serializers import TriSerializer as t_szr
 from django.core import serializers as szs
@@ -233,6 +233,19 @@ def chem_counts(request):
       else:
         top_chems[chem] = top_chems[chem] + 1
     return HttpResponse(json.dumps(top_chems), content_type='application/json')
+
+def chem_amounts(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    y = int(request.GET.get('year', default=2018))
+    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                                    & Q(longitude__lt=ne_lng)
+                                                    & Q(longitude__gt=sw_lng)
+                                                    & Q(year=y)).values('chemical').annotate(total=Sum('vet_total_releases')).order_by('-total')[:10]
+    print(raw)
+    return JsonResponse(list(raw), content_type='application/json', safe=False)
 
 def XXXfac_count(request):
     state = str(request.GET.get('state')).upper()

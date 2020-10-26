@@ -3,7 +3,7 @@ import mapStyles from "./standard";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
 const flatten = require("./flatten");
-const { shallowEqual } = require("../helpers");
+const { shallowEqual, formatChemical } = require("../helpers");
 const Component = React.Component;
 const {
   Map,
@@ -30,6 +30,7 @@ class MapContainer extends Component {
       showingInfoWindow: false,
       isLoading: true,
       map: null,
+      chemicalList: [],
       hasMoved: false,
     };
 
@@ -81,7 +82,7 @@ class MapContainer extends Component {
     }
 
     const mapsApi = this.props.google.maps;
-    if ( !shallowEqual(prevProps.viewport, this.props.viewport)) {
+    if (!shallowEqual(prevProps.viewport, this.props.viewport)) {
       try {
         const b = this.createLatLngBounds(this.props.viewport, mapsApi);
         this.map.fitBounds(b);
@@ -121,7 +122,13 @@ class MapContainer extends Component {
     vetapi
       .get(`/facilities`, { params })
       .then((res) => {
-        const data = res.data.map((d) => d.fields);
+        const data = res.data
+          .map((d) => ({
+            ...d.fields,
+            chemical: formatChemical(d.fields.chemical),
+          }))
+          .filter((d) => d.vet_total_releases !== 0);
+        this.props.onFetchPoints([...new Set(data.map((d) => d.chemical))]);
         console.log("flattening...");
         const points = flatten(data);
         this.setState({
@@ -177,10 +184,15 @@ class MapContainer extends Component {
     const newList = [];
     list.forEach((chemical) => {
       if (
+        (filters.chemical !== "all" &&
+          chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
         (filters.carcinogens && chemical.carcinogen === "NO") ||
-        (filters.releaseType === "air" && chemical.vet_total_releases_air === 0) ||
-        (filters.releaseType === "water" && chemical.total_releases_water === 0) ||
-        (filters.releaseType === "land" && chemical.vet_total_releases_land === 0) ||
+        (filters.releaseType === "air" &&
+          chemical.vet_total_releases_air === 0) ||
+        (filters.releaseType === "water" &&
+          chemical.total_releases_water === 0) ||
+        (filters.releaseType === "land" &&
+          chemical.vet_total_releases_land === 0) ||
         (filters.releaseType === "on-site" &&
           chemical.vet_total_releases_onsite === 0) ||
         (filters.releaseType === "off-site" &&
