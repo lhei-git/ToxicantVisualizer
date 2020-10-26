@@ -19,18 +19,20 @@ class ThematicMapView extends Component {
       stateData: [],
       statesLoaded: false,
     };
-   //this.getStateData = this.getStateData.bind(this);
-   this.
-
-   //this.getStateData();
+    this.handleContent = this.handleContent.bind(this);
+//   this.
+//
+//   //this.getStateData();
   }
 
-handleContent(){}
+handleContent(content){
+    this.setState({content:content})
+}
 
 render(){
   return (
     <div>
-      <ThematicMap setTooltipContent={this.handleContent()} data={this.state.stateData}/>
+      <ThematicMap setTooltipContent={this.handleContent} data={this.state.stateData}/>
       <ReactTooltip>{this.state.content}</ReactTooltip>
     </div>
   );
