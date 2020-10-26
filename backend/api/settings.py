@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,12 +26,9 @@ SECRET_KEY = 'yb#re#b*nmjvxnxmno9qk-2owmi&b)77&8xm+=izl4v*w%i8^r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-<<<<<<< HEAD
-ALLOWED_HOSTS = ["127.0.0.1","visualizing-environmental-toxicants-dev.us-east-1.elasticbeanstalk.com",
-"api.vet.lhei.org", 'localhost']
-=======
 ALLOWED_HOSTS = ['vet-pg-development.cjt2ltp5zdka.us-east-1.rds.amazonaws.com', 'localhost']
->>>>>>> 22b74127f947f3a434ada9991f02cefeb44b2543
+
+
 
 
 # Application definition
@@ -87,12 +85,12 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'Y9fSIoOWwH1dHSCIl4Bi',
-        'HOST': 'vet-pg-development.cjt2ltp5zdka.us-east-1.rds.amazonaws.com',
-        'PORT': '5432'
+        'ENGINE': os.environ.get('APP_DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.environ.get('DB_NAME', 'postgres'),    
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', 5432)
     }
 }
 
