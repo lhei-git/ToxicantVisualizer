@@ -44,26 +44,33 @@ handleContent(content){
     this.setState({content:content})
 }
 
+
+
 render(){
-    {isLoggedIn ? <button>Logout</button> : <button>Login</button>}
-    return(
-        <div
-            style={{
-            width: "100%",
-            height: "100",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-            }}
-        >
-            <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" />
-        </div>
-        )
+return(
+<>
+    <div style={{height: 1600}}>
+    <h1>State Data</h1>
+      {this.state.stateData ? (
+        <>
+        <ThematicMap
+                setTooltipContent={this.handleContent}
+                data={this.state.stateData}
+                maxValue={this.state.stateMax}
+                minValue={this.state.stateMin}
+                geoUrl={stateGeoUrl}
+                type={"states"}/>
+                <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
+                </>
+      ) : (
+         <LoadSpinner/>
+      )}
+    </div>
 
-
-    else
-      return (
-          <div>
+    <div>
+    <h1>County Data</h1>
+      {this.state.countyData ? (
+        <>
           <ThematicMap
                 setTooltipContent={this.handleContent}
                 data={this.state.countyData}
@@ -72,38 +79,14 @@ render(){
                 geoUrl={countyGeoUrl}
                 type={"counties"}/>
           <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
-        </div>
-      );
+                </>
+      ) : (
+         <LoadSpinner/>
+      )}
+    </div>
+    </>
+)
 
-         if (!this.state.stateData) {
-    return(
-        <div
-            style={{
-            width: "100%",
-            height: "100",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-            }}
-        >
-            <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" />
-        </div>
-        )
-    }
-
-    else
-      return (
-          <div>
-          <ThematicMap
-                setTooltipContent={this.handleContent}
-                data={this.state.stateData}
-                maxValue={this.state.stateMax}
-                minValue={this.state.stateMin}
-                geoUrl={stateGeoUrl}
-                type={"states"}/>
-          <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
-        </div>
-      );
 }
 
 async getCountyData()
@@ -145,5 +128,25 @@ async  getStateData()
 
 }
 
+
+
+
+// loading animation
+function LoadSpinner()
+{
+    return(
+        <div
+            style={{
+            width: "100%",
+            height: "100",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+            }}
+        >
+        <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" />
+        </div>
+        )
+}
 
 export default ThematicMapView
