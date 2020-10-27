@@ -80,8 +80,9 @@ def state_total_releases(request):
 # stats/state/all
 def all_state_total_releases(request):
     d = []
+    y = int(request.GET.get('year', default=2018))
     results = tri.objects.raw(
-        'SELECT max("t_ID") as "t_ID", st, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = 2018GROUP BY st')
+        'SELECT max("t_ID") as "t_ID", st, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = ' + str(y) + ' GROUP BY st')
     for res in results:
         l = {"name": res.st, "totalonsite":res.totalonsite, "air": res.air, "water":res.water, "land":res.land, "totaloffsite":res.offsite, "numtrifacilities":res.facility}
         d.append(l)
@@ -89,9 +90,9 @@ def all_state_total_releases(request):
 
 # stats/county/all
 def all_county_total_releases(request):
-
     d = []
-    results = tri.objects.raw('SELECT max("t_ID") as "t_ID", st, county, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = 2018GROUP BY st, county')
+    y = int(request.GET.get('year', default=2018))
+    results = tri.objects.raw('SELECT max("t_ID") as "t_ID", st, county, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = ' + str(y) + ' GROUP BY st, county')
     for res in results:
         l = {"state": res.st, "county":res.county, "totalonsite":res.totalonsite, "air": res.air, "water":res.water, "land":res.land, "totaloffsite":res.offsite, "numtrifacilities":res.facility}
         d.append(l)
