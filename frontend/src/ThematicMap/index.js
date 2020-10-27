@@ -77,19 +77,19 @@ const colorScale = scaleQuantile()
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={colorScale(cur ? cur.total : "#EEE")}
+                  fill={colorScale(cur ? cur.totalonsite : "#EEE")}
                   onMouseEnter={() => {
                     const { name, POP_EST } = geo.properties;
                     const total = cur.total;
                     props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
-                                                Total: ${Math.trunc(cur.total)} lbs. <br />
+                                                Total: ${Math.trunc(cur.totalonsite)} lbs. <br />
                                                 Air: ${Math.trunc(cur.air)} lbs. <br />
                                                 Water: ${Math.trunc(cur.water)} lbs. <br />
                                                 Land: ${Math.trunc(cur.land)} lbs. <br />
-                                                Offsite: ${Math.trunc(cur.offsite)} lbs. <br />
-                                                Dioxins: ${Math.trunc(cur.dioxins)} grams <br />
-                                                Carcinogens: ${Math.trunc(cur.carcinogens)} lbs. <br />
-                                                Facilities: ${Math.trunc(cur.facilities)} <br />
+                                                Offsite: ${Math.trunc(cur.totaloffsite)} lbs. <br />
+                                                Dioxins: ${Math.trunc(cur.totaldioxin)} grams <br />
+                                                Carcinogens: ${Math.trunc(cur.totalcarcs)} lbs. <br />
+                                                Facilities: ${Math.trunc(cur.numtrifacilities)} <br />
 
                                                 `);
                   }}

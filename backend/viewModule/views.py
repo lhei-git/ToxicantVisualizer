@@ -80,16 +80,15 @@ def state_total_releases(request):
 # stats/state/all
 def all_state_total_releases(request):
     states = ["AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM", "FL", "GA", "GU", "HI",
-                "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MH", "MD", "MA", "MI", "MN", "MS", "MO",
-                "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA",
-                "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", 'WI', "WY"]
+              "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MH", "MD", "MA", "MI", "MN", "MS", "MO",
+              "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA",
+              "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", 'WI', "WY"]
     results = []
 
     for s in states:
         state = s
         y = int(request.GET.get('year', default=2018))
         t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
-        print(s)
         if state != 'None':
             t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
             tri_set = tri.objects.filter(st=state, year=y)
@@ -108,7 +107,7 @@ def all_state_total_releases(request):
                     t_land += t.vet_total_releases_land
             result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
                       'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
-                      'numtrifacilities':t_facilitycount}
+                      'numtrifacilities':t_facilitycount,'name':s}
             results.append(result)
     return JsonResponse(results, safe=False)
 
