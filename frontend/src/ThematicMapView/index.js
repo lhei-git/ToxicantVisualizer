@@ -1,6 +1,8 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
 
+import Loader from 'react-loader-spinner';
+
 import axios from 'axios';
 const React = require("react");
 const Component = React.Component;
@@ -36,8 +38,20 @@ handleContent(content){
 
 render(){
     if (!this.state.stateData) {
-            return null
-        }
+    return(
+        <div
+            style={{
+            width: "100%",
+            height: "100",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+            }}
+        >
+            <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" />
+        </div>
+        )
+    }
 
 
   return (
