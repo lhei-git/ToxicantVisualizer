@@ -7,79 +7,91 @@ import {
 
 import { scaleQuantile } from "d3-scale";
 
+// used to produce human readable numbers
 const rounded = num => {
   if (num > 1000000000) {
     return Math.round(num / 100000000) / 10 + "Bn";
   } else if (num > 1000000) {
     return Math.round(num / 100000) / 10 + "M";
-  } else {
+  } else if (num > 1000) {
     return Math.round(num / 100) / 10 + "K";
-  }
+  } else return num;
 };
 
 const thematicMap = (props) => {
 
+if(!props.data) return null
+
+//change the scale domain based on whether states or counties are being viewed
+//TODO: determine why minVal to maxVal doesn't work well as a domain
+var domain = [];
+if (props.type == "counties")
+    domain = [1000, 1000000]
+else domain = [props.minValue, props.maxValue]
+
+//returns a geography color based on the scale and given value
 const colorScale = scaleQuantile()
-  .domain([1000, 1000000])      //TODO: determine why minVal to maxVal doesn't work well as a range
+  .domain(domain)
   .range([
-    //"#fef3f3",
-    //"#feeceb",
+    "#fef3f3",
+    "#feeceb",
     "#fee4e3",
-    //"#fddcdb",
-    //"#fdd5d3",
+    "#fddcdb",
+    "#fdd5d3",
     "#fdc6c3",
-    //"#fcbebb",
-    //"#fcb6b3",
+    "#fcbebb",
+    "#fcb6b3",
     "#fcafab",
-    //"#fca7a3",
-    //"#fba09c",
+    "#fca7a3",
+    "#fba09c",
     "#fb9894",
-    //"#fb908c",
-    //"#fb8984",
+    "#fb908c",
+    "#fb8984",
     "#fb817c",
-    //"#fa7a74",
-    //"#fa726c",
+    "#fa7a74",
+    "#fa726c",
     "#fa6a64",
-    //"#fa635c",
-    //"#f95b54",
+    "#fa635c",
+    "#f95b54",
     "#f9544c",
-    //"#f94c44",
-    //"#f9443c",
+    "#f94c44",
+    "#f9443c",
     "#f83d35",
-    //"#f82e25",
-    //"#f8352d",
+    "#f82e25",
+    "#f8352d",
     "#f8261d",
-    //"#f7170d",
-    //"#f51107",
+    "#f7170d",
+    "#f51107",
     "#f71e15",
-    //"#ed1007",
-    //"#e51006",
+    "#ed1007",
+    "#e51006",
     "#dd0f06",
-    //"#d50f06",
-    //"#cd0e06",
+    "#d50f06",
+    "#cd0e06",
     "#c50e06",
-    //"#be0d05",
-    //"#b60c05",
+    "#be0d05",
+    "#b60c05",
     "#ae0c05",
-    //"#a60b05",
-    //"#9e0b04",
+    "#a60b05",
+    "#9e0b04",
     "#960a04",
-    //"#8e0a04",
-    //"#860904",
+    "#8e0a04",
+    "#860904",
     "#7e0903",
-    //"#760803",
-    //"#6e0703",
+    "#760803",
+    "#6e0703",
     "#660703",
-    //"#5f0602",
-    //"#570602",
+    "#5f0602",
+    "#570602",
     "#4f0502",
-    //"#470502",
+    "#470502",
     //"#3f0401",
-    "#370301",
+    //"#370301",
     //"#2f0301",
     //"#1f0200",
-    "#270201",
+    //"#270201",
   ]);
+
 
 
 if (props.type === "states")
@@ -96,19 +108,19 @@ if (props.type === "states")
                   key={geo.rsmKey}
                   geography={geo}
                   fill={colorScale(cur ? cur.totalonsite : "#EEE")}
+                  stroke={"#000"}
                   onMouseEnter={() => {
                     const { name, POP_EST } = geo.properties;
                     const total = cur.total;
                     props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
-                                                Total: ${Math.trunc(cur.totalonsite)} lbs. <br />
-                                                Air: ${Math.trunc(cur.air)} lbs. <br />
-                                                Water: ${Math.trunc(cur.water)} lbs. <br />
-                                                Land: ${Math.trunc(cur.land)} lbs. <br />
-                                                Offsite: ${Math.trunc(cur.totaloffsite)} lbs. <br />
-                                                Dioxins: ${Math.trunc(cur.totaldioxin)} grams <br />
-                                                Carcinogens: ${Math.trunc(cur.totalcarcs)} lbs. <br />
-                                                Facilities: ${Math.trunc(cur.numtrifacilities)} <br />
-
+                                                Total: ${rounded(Math.trunc(cur.totalonsite))} lbs. <br />
+                                                Air: ${rounded(Math.trunc(cur.air))} lbs. <br />
+                                                Water: ${rounded(Math.trunc(cur.water))} lbs. <br />
+                                                Land: ${rounded(Math.trunc(cur.land))} lbs. <br />
+                                                Offsite: ${rounded(Math.trunc(cur.totaloffsite))} lbs. <br />
+                                                Dioxins: ${rounded(Math.trunc(cur.totaldioxin))} grams <br />
+                                                Carcinogens: ${rounded(Math.trunc(cur.totalcarcs))} lbs. <br />
+                                                Facilities: ${rounded(Math.trunc(cur.numtrifacilities))} <br />
                                                 `);
                   }}
                  onMouseLeave={() => {
@@ -138,6 +150,7 @@ return(
                   key={geo.rsmKey}
                   geography={geo}
                   fill={colorScale(cur ? cur.totalonsite : "#EEE")}
+                  stroke={"#000"}
                   onMouseEnter={() => {
                     const { name, POP_EST } = geo.properties;
                     props.setTooltipContent(`${cur.county} — ${rounded(POP_EST)}`);
@@ -172,83 +185,6 @@ return(
 
 
 
-//    <>
-//      <ComposableMap projection="geoAlbersUsa">
-//        <Geographies geography={props.geoUrl}>
-//          {({ geographies }) =>
-//            geographies.map(geo => {
-//               var cur = props.data.find(s => s.county === geo.properties.name.toUpperCase() && s.state === geo.properties.state);
-//
-//              return (
-//                 <Geography
-//                  key={geo.rsmKey}
-//                  geography={geo}
-//                  fill={colorScale(cur ? cur.totalonsite : "#EEE")}
-//                  onMouseEnter={() => {
-//                    const { name, POP_EST } = geo.properties;
-//
-//                    props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
-//                                                Total: ${Math.trunc(cur.totalonsite)} lbs. <br />
-//                                                Air: ${Math.trunc(cur.air)} lbs. <br />
-//                                                Water: ${Math.trunc(cur.water)} lbs. <br />
-//                                                Land: ${Math.trunc(cur.land)} lbs. <br />
-//                                                Offsite: ${Math.trunc(cur.totaloffsite)} lbs. <br />
-//                                                Dioxins: ${Math.trunc(cur.totaldioxin)} grams <br />
-//                                                Carcinogens: ${Math.trunc(cur.totalcarcs)} lbs. <br />
-//                                                Facilities: ${Math.trunc(cur.numtrifacilities)} <br />
-//
-//                                                `);
-//                  }}
-//                 onMouseLeave={() => {
-//                    props.setTooltipContent("");
-//                  }}
-//                />
-//              );
-//            })
-//          }
-//        </Geographies>
-//      </ComposableMap>
-//    </>
-
-//    <>
-//    {alert(props.geoUrl)}
-//      <ComposableMap data-tip="" projection="geoAlbersUsa">
-//        <Geographies geography={props.geoUrl}>
-//          {({ geographies }) =>
-//            geographies.map(geo => {
-//              var cur = props.data.find(s => s.county === geo.properties.name && s.state === geo.properties.state);
-//              if( cur != undefined){
-//              return (
-//                <Geography
-//                  key={geo.rsmKey}
-//                  geography={geo}
-//                  fill={colorScale(cur ? cur.totalonsite : "#EEE")}
-//                  onMouseEnter={() => {
-//                    const { name, POP_EST } = geo.properties;
-//                    const total = cur.total;
-//                    props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
-//                                                Total: ${Math.trunc(cur.totalonsite)} lbs. <br />
-//                                                Air: ${Math.trunc(cur.air)} lbs. <br />
-//                                                Water: ${Math.trunc(cur.water)} lbs. <br />
-//                                                Land: ${Math.trunc(cur.land)} lbs. <br />
-//                                                Offsite: ${Math.trunc(cur.totaloffsite)} lbs. <br />
-//                                                Dioxins: ${Math.trunc(cur.totaldioxin)} grams <br />
-//                                                Carcinogens: ${Math.trunc(cur.totalcarcs)} lbs. <br />
-//                                                Facilities: ${Math.trunc(cur.numtrifacilities)} <br />
-//
-//                                                `);
-//                  }}
-//                 onMouseLeave={() => {
-//                    props.setTooltipContent("");
-//                  }}
-//                />
-//              );
-//            }}
-//            )
-//          }
-//        </Geographies>
-//      </ComposableMap>
-//    </>
 
 }
 
