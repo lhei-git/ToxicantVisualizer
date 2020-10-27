@@ -1,21 +1,14 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
-
 import Loader from 'react-loader-spinner';
-
 import axios from 'axios';
 const React = require("react");
 const Component = React.Component;
 
-// TEMP list of states used to get state data from backend
-const states = [ "AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM", "FL", "GA", "GU", "HI",
-                "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MH", "MD", "MA", "MI", "MN", "MS", "MO",
-                "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA",
-                "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", 'WI', "WY"]
-
-//state map topo data
+// state map topographical data
 const stateGeoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers.json"
 const countyGeoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers-counties.json"
+//const countyGeoUrl = "https://raw.githubusercontent.com/jgoodall/us-maps/master/topojson/county.topo.json"
 
 class ThematicMapView extends Component {
   constructor(props) {
@@ -29,9 +22,8 @@ class ThematicMapView extends Component {
       countyMax: null,
       countyMin: null,
     };
+
     this.handleContent = this.handleContent.bind(this);
-    this.getStateData = this.getStateData.bind(this);
-    this.getCountyData = this.getCountyData.bind(this);
 
   }
 
@@ -62,9 +54,9 @@ return(
                 type={"states"}/>
                 <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
                 </>
-      ) : (
+          ) : (
          <LoadSpinner/>
-      )}
+        )}
     </div>
 
     <div>
@@ -80,13 +72,12 @@ return(
                 type={"counties"}/>
           <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
                 </>
-      ) : (
-         <LoadSpinner/>
-      )}
-    </div>
-    </>
-)
-
+          ) : (
+             <LoadSpinner/>
+              )}
+            </div>
+        </>
+    )
 }
 
 async getCountyData()
@@ -115,8 +106,7 @@ async  getStateData()
     var minValue = 100000000000000;
     await axios.get(
               "http://localhost:8000/stats/state/all")              //TODO: CHANGE ME TO THE CORRECT LINK
-    .then((response) => {alert(response.data[0].facilities)
-                            l = response.data
+    .then((response) => {l = response.data
                          d = Object.values(l)
                          response.data.map ( (totalonsite, i) => {
                             if(response.data[i].totalonsite > maxValue) maxValue = response.data[i].totalonsite
@@ -124,10 +114,10 @@ async  getStateData()
                             })
 
                          this.setState({stateData:d, stateMin: minValue, stateMax:maxValue})
-                         })
-}
+                  })
+            }
 
-}
+    }
 
 
 

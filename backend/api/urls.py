@@ -21,8 +21,8 @@ urlpatterns = [
     path('stats/location/parent_releases', top_parentco_releases),
     # return total amount stats released by: state
     path('stats/state/summary', state_total_releases),
-    # return all states
+    # return release all states, individually
     path('stats/state/all', all_state_total_releases),
-    # return all counties
+    # return release all counties, individually
     path('stats/county/all', all_county_total_releases),
 ]
