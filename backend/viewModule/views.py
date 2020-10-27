@@ -26,12 +26,12 @@ def dist_fac(request):
     y = int(request.GET.get('year', default=2018))
     state = str(request.GET.get('state', default='None')).upper()
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        qs = tri.objects.filter(st=state, year=y).values('facilityname').distinct()
+        qs = tri.objects.filter(st=state, year=y).values('facility').distinct()
     else:
         qs = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                                    & Q(longitude__lt=ne_lng)
                                                    & Q(longitude__gt=sw_lng)
-                                                   & Q(year=y)).values('facilityname').distinct()
+                                                   & Q(year=y)).values('facility').distinct()
     #data = szs.serialize('json', qs) <--here values() is used so serializer will not work
     data = json.dumps(list(qs))
     return HttpResponse(data, content_type='application/json')
@@ -48,10 +48,6 @@ def points(request):
                                                     & Q(longitude__gt=sw_lng)
                                                     & Q(year=y))
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 820da6446f2b25d9683e67840f073133bf368ceb
     return HttpResponse(szs.serialize('json', raw), content_type='application/json')
 
 # stats/state/summary
@@ -61,25 +57,60 @@ def state_total_releases(request):
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
     if state != 'None':
-        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facilityname').distinct().count())
+        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
         tri_set = tri.objects.filter(st=state, year=y)
         for t in tri_set:
             if t.classification == 'Dioxin': # exclude dioxin stats in other categories
-                t_dioxin += t.totalreleases
+                t_dioxin += t.vet_total_releases
                 if t.carcinogen == 'YES':
-                    t_carc += t.totalreleases
+                    t_carc += t.vet_total_releases
             else:
                 if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
-                    t_carc += t.totalreleases
-                t_onsite += t.on_sitereleasetotal
-                t_offsite += t.off_sitereleasetotal
-                t_air += t.totalreleaseair
-                t_water += t.totalreleasewater
-                t_land += t.totalreleaseland
+                    t_carc += t.vet_total_releases
+                t_onsite += t.vet_total_releases_onsite
+                t_offsite += t.vet_total_releases_offsite
+                t_air += t.vet_total_releases_air
+                t_water += t.total_releases_water
+                t_land += t.vet_total_releases_land
         result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
                   'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
                   'numtrifacilities':t_facilitycount}
         return JsonResponse(result)
+
+# stats/state/all
+def all_state_total_releases(request):
+    states = ["AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM", "FL", "GA", "GU", "HI",
+                "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MH", "MD", "MA", "MI", "MN", "MS", "MO",
+                "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA",
+                "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", 'WI', "WY"]
+    results = []
+
+    for s in states:
+        state = s
+        y = int(request.GET.get('year', default=2018))
+        t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
+        print(s)
+        if state != 'None':
+            t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
+            tri_set = tri.objects.filter(st=state, year=y)
+            for t in tri_set:
+                if t.classification == 'Dioxin': # exclude dioxin stats in other categories
+                    t_dioxin += t.vet_total_releases
+                    if t.carcinogen == 'YES':
+                        t_carc += t.vet_total_releases
+                else:
+                    if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
+                        t_carc += t.vet_total_releases
+                    t_onsite += t.vet_total_releases_onsite
+                    t_offsite += t.vet_total_releases_offsite
+                    t_air += t.vet_total_releases_air
+                    t_water += t.total_releases_water
+                    t_land += t.vet_total_releases_land
+            result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
+                      'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
+                      'numtrifacilities':t_facilitycount}
+            results.append(result)
+    return JsonResponse(results, safe=False)
 
 # FIXME - top_releases have repetitions, refer to err for distinct() here
 
@@ -116,14 +147,14 @@ def top_facility_releases(request):
         queryset = tri.objects.filter(
             unitofmeasure='Pounds', st=state, year=y).order_by('-totalreleases')[:10]
         data = szs.serialize('json', queryset, fields=(
-            'facilityname', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
+            'facility', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
     else:
         queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                       & Q(longitude__lt=ne_lng)
                                       & Q(longitude__gt=sw_lng)
                                       & Q(year=y)).order_by('-totalreleases')[:10]
         data = szs.serialize('json', queryset, fields=(
-            'facilityname', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
+            'facility', 'totalreleases', 'totalreleaseair', 'totalreleasewater', 'totalreleaseland'))
     return HttpResponse(data, content_type='application/json')
 
 # stats/location/num_facilities
@@ -135,10 +166,10 @@ def num_facilities(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
     if state!='None' and ne_lat==0.0 and sw_lng==0.0 and ne_lng==0.0 and sw_lat==0.0:
-        data = tri.objects.filter(st=state, year=y).values('facilityname').distinct().count()
+        data = tri.objects.filter(st=state, year=y).values('facility').distinct().count()
     else:
         data = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                  & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)).values('facilityname')\
+                                  & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)).values('facility')\
                                   .distinct().count()
     return HttpResponse(data, content_type='application/json')
 
@@ -155,7 +186,7 @@ def location_summary(request):
                                                     & Q(year=y))
     rows = list(map(lambda e: e.__dict__, list(raw)))
     summary = {}
-    summary['num_facilities'] = len(set(list(map(lambda r: r['facilityname'], rows))))
+    summary['num_facilities'] = len(set(list(map(lambda r: r['facility'], rows))))
     summary['num_distinct_chemicals'] = len(set(list(map(lambda r: clean_chemical_name(r['chemical']), rows))))
     summary['total_disposal'] = 0
     summary['total_on_site'] = 0
@@ -165,7 +196,7 @@ def location_summary(request):
     summary['total_land'] = 0
     summary['total_carcinogen'] = 0
     # TODO - make calculations based on unit of measure. Currently assumes everything is in pounds
-    for r in rows: 
+    for r in rows:
       summary['total_disposal'] += r['totalreleases']
       summary['total_on_site'] += r['on_sitereleasetotal']
       summary['total_off_site'] += r['off_sitereleasetotal']
@@ -190,7 +221,7 @@ def XXXlocation_releases_by_facility(request):
     rows = list(map(lambda e: e.__dict__, list(raw)))
     facilities = {}
     for r in rows:
-      f = r['facilityname']
+      f = r['facility']
       if f in facilities:
           facilities[f] += r['totalreleases']
       else:
