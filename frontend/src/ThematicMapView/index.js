@@ -115,7 +115,8 @@ async  getStateData()
     var minValue = 100000000000000;
     await axios.get(
               "http://localhost:8000/stats/state/all")              //TODO: CHANGE ME TO THE CORRECT LINK
-    .then((response) => {l = response.data
+    .then((response) => {alert(response.data[0].facilities)
+                            l = response.data
                          d = Object.values(l)
                          response.data.map ( (totalonsite, i) => {
                             if(response.data[i].totalonsite > maxValue) maxValue = response.data[i].totalonsite
