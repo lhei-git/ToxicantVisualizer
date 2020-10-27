@@ -77,31 +77,43 @@ render(){
 
 async  getStateData()
 {
-    var d= [];
+/////// THIS SECTION OF CODE WAS USED BEFORE CREATING A NEW ENDPOINT AND IS MODERATELY SLOWER
+//    var d= [];
+//    var maxValue = 0;
+//    var minValue = 100000000000000;
+//    let promises = [];
+//    for (var i = 0; i < states.length; i++) {
+//
+//      await axios.get(
+//              "http://localhost:8000/stats/state/summary?state=" + states[i])
+//              .then((response) => {
+//              d.push({name: states[i], total: response.data.totalonsite, air: response.data.air, water: response.data.water, land: response.data.land, offsite: response.data.totaloffsite,
+//                                        dioxins: response.data.totaldioxin, carcinogens: response.data.totalcarcs, facilities: response.data.numtrifacilities })
+//
+//              if(response.data.totalonsite > maxValue) maxValue = response.data.totalonsite;
+//              if(response.data.totalonsite < minValue && response.data.totalonsite != 0) minValue = response.data.totalonsite;
+//
+//              })
+//              .catch((e) => alert(e));
+//            };
+//
+//    Promise.all(promises).then(() => this.setState({stateData: d, stateMax: maxValue, stateMin: minValue}));
+
+    var l = {}
+    var d = [];
     var maxValue = 0;
     var minValue = 100000000000000;
-    let promises = [];
-    for (var i = 0; i < states.length; i++) {
+    await axios.get(
+              "http://localhost:8000/stats/state/all")              //TODO: CHANGE ME TO THE CORRECT LINK
+    .then((response) => {l = response.data
+                         d = Object.values(l)
+                         response.data.map ( (totalonsite, i) => {
+                            if(response.data[i].totalonsite > maxValue) maxValue = response.data[i].totalonsite
+                            if(response.data[i].totalonsite < minValue && response.data[i].totalonsite != 0) minValue = response.data[i].totalonsite
+                            })
 
-      await axios.get(
-              "http://localhost:8000/stats/state/summary?state=" + states[i])                              //TODO: CHANGE ME TO THE CORRECT LINK
-              .then((response) => {
-              d.push({name: states[i], total: response.data.totalonsite, air: response.data.air, water: response.data.water, land: response.data.land, offsite: response.data.totaloffsite,
-                                        dioxins: response.data.totaldioxin, carcinogens: response.data.totalcarcs, facilities: response.data.numtrifacilities })
-
-              if(response.data.totalonsite > maxValue) maxValue = response.data.totalonsite;
-              if(response.data.totalonsite < minValue && response.data.totalonsite != 0) minValue = response.data.totalonsite;
-
-              })
-              .catch((e) => alert(e));
-            };
-
-
-
-
-Promise.all(promises).then(() => this.setState({stateData: d, stateMax: maxValue, stateMin: minValue}));
-
-
+                         this.setState({stateData:d, stateMin: minValue, stateMax:maxValue})
+                         })
 }
 
 }
