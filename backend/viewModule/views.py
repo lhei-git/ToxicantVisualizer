@@ -79,6 +79,8 @@ def state_total_releases(request):
 # FIXME - top_releases have repetitions, refer to err for distinct() here
 
 # stats/location/parent_releases
+
+
 def top_parentco_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -86,19 +88,15 @@ def top_parentco_releases(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
     state = str(request.GET.get('state', default='None')).upper()
-    # filtering by pounds here as grams denotes dioxin (not to be included)
-    if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        queryset = tri.objects.filter(unit_of_measure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
-        data = szs.serialize('json', queryset, fields=('parent_co_name', 'vet_total_releases'))
-    else:
-        queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                                   & Q(longitude__lt=ne_lng)
-                                                   & Q(longitude__gt=sw_lng)
-                                                   & Q(year=y)).order_by('-vet_total_releases')[:10]
-        data = szs.serialize('json', queryset, fields=('parent_co_name', 'vet_total_releases'))
-    return HttpResponse(data, content_type='application/json')
+    queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                  & Q(longitude__lt=ne_lng)
+                                  & Q(longitude__gt=sw_lng)
+                                  & Q(year=y) & ~Q(parent_co_name="NA")).values('parent_co_name').annotate(total=Sum('vet_total_releases_onsite')).annotate(land=Sum('vet_total_releases_land')).annotate(air=Sum('vet_total_releases_air')).annotate(water=Sum('total_releases_water')).order_by('-total')[:10]
+    return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 # stats/location/facility_releases
+
+
 def top_facility_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -106,20 +104,11 @@ def top_facility_releases(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
     state = str(request.GET.get('state', default='None')).upper()
-    # filtering by pounds here as grams denotes dioxin (not to be included)
-    if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        queryset = tri.objects.filter(
-            unit_of_measure='Pounds', st=state, year=y).order_by('-vet_total_releases')[:10]
-        data = szs.serialize('json', queryset, fields=(
-            'facility', 'vet_total_releases', 'vet_total_releases_air', 'total_releases_water', 'vet_total_releases_land'))
-    else:
-        queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                      & Q(longitude__lt=ne_lng)
-                                      & Q(longitude__gt=sw_lng)
-                                      & Q(year=y)).order_by('-vet_total_releases')[:10]
-        data = szs.serialize('json', queryset, fields=(
-            'facility', 'vet_total_releases', 'vet_total_releases_air', 'total_releases_water', 'vet_total_releases_land'))
-    return HttpResponse(data, content_type='application/json')
+    queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                  & Q(longitude__lt=ne_lng)
+                                  & Q(longitude__gt=sw_lng)
+                                  & Q(year=y)).values('facility').annotate(total=Sum('vet_total_releases_onsite')).annotate(land=Sum('vet_total_releases_land')).annotate(air=Sum('vet_total_releases_air')).annotate(water=Sum('total_releases_water')).order_by('-total')[:10]
+    return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 # stats/location/num_facilities
 def num_facilities(request):

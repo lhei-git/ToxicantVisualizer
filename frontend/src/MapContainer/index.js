@@ -1,6 +1,7 @@
 import "./index.css";
 import "../index.css";
 import mapStyles from "./standard";
+import MarkerCluster from "./MarkerClusterer";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
 const flatten = require("./flatten");
@@ -95,22 +96,29 @@ class MapContainer extends Component {
     }
   }
 
-  onMarkerClick(props, marker) {
+  onMarkerClick(props) {
     const showing = this.state.showingInfoWindow;
-    if (!showing || this.state.activeMarker !== marker) {
+    if (!showing || !shallowEqual(this.state.activeMarker, props.entry)) {
       this.setState({
-        activeMarker: marker,
+        activeMarker: props.entry,
         showingInfoWindow: true,
         hasMoved: true,
       });
-      this.map.setCenter(marker.position);
+      this.map.setCenter(props.marker.position);
       this.map.setZoom(14);
-      this.props.onMarkerClick(marker.meta.chemicals);
+      this.props.onMarkerClick(props.marker.meta.chemicals);
     } else {
       this.setState({
         showingInfoWindow: false,
       });
     }
+  }
+
+  uniq(a) {
+    var seen = {};
+    return a.filter(function (item) {
+      return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
   }
 
   fetchPoints(ne, sw) {
@@ -131,7 +139,7 @@ class MapContainer extends Component {
             chemical: formatChemical(d.fields.chemical),
           }))
           .filter((d) => d.vet_total_releases !== 0);
-        this.props.onFetchPoints([...new Set(data.map((d) => d.chemical))]);
+        this.props.onFetchPoints(this.uniq(data.map((d) => d.chemical)));
         console.log("flattening...");
         const points = flatten(data);
         this.setState({
@@ -242,19 +250,12 @@ class MapContainer extends Component {
     const facilities = this.filterFacilities(points);
     // create a marker for every point that is passed to the map
     const markers = facilities.map((facility, i) => {
-      return (
-        <Marker
-          name={"point " + i}
-          key={"point-" + i}
-          position={{ lat: facility.latitude, lng: facility.longitude }}
-          meta={facility}
-          icon={{
-            url: require(`./../../src/assets/marker-${facility.color}.png`),
-            scaledSize: new this.props.google.maps.Size(21, 21),
-          }}
-          onClick={this.onMarkerClick}
-        />
-      );
+      return {
+        meta: facility,
+        color: facility.color,
+        name: facility.facility,
+        position: { lat: facility.latitude, lng: facility.longitude },
+      };
     });
     this.props.onUpdate(markers.length);
     return markers;
@@ -266,7 +267,7 @@ class MapContainer extends Component {
         {this.state.isLoading && (
           <div className="loading-overlay">
             <div className="spinner">
-              <div class="lds-spinner">
+              <div className="lds-spinner">
                 <div></div>
                 <div></div>
                 <div></div>
@@ -297,10 +298,19 @@ class MapContainer extends Component {
             draggable={true}
             fullscreenControl={false}
             zoom={5}
+            minZoom={5}
             initialCenter={this.props.center}
             containerStyle={containerStyle}
           >
-            {this.state.markers}
+            {this.state.markers.length > 0 && (
+              <MarkerCluster
+                markers={this.state.markers}
+                click={this.onMarkerClick}
+                mouseover={this.onMouseOver}
+                mouseout={this.onMouseOut}
+              />
+            )}
+            {/* {this.state.markers} */}
             <InfoWindow
               marker={this.state.activeMarker}
               visible={this.state.showingInfoWindow}
