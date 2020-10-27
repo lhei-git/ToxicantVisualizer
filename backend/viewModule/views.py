@@ -79,45 +79,21 @@ def state_total_releases(request):
 
 # stats/state/all
 def all_state_total_releases(request):
-    states = ["AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM", "FL", "GA", "GU", "HI",
-              "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MH", "MD", "MA", "MI", "MN", "MS", "MO",
-              "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA",
-              "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", 'WI', "WY"]
-    results = []
-
-    for s in states:
-        state = s
-        y = int(request.GET.get('year', default=2018))
-        t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
-        if state != 'None':
-            t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
-            tri_set = tri.objects.filter(st=state, year=y)
-            for t in tri_set:
-                if t.classification == 'Dioxin': # exclude dioxin stats in other categories
-                    t_dioxin += t.vet_total_releases
-                    if t.carcinogen == 'YES':
-                        t_carc += t.vet_total_releases
-                else:
-                    if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
-                        t_carc += t.vet_total_releases
-                    t_onsite += t.vet_total_releases_onsite
-                    t_offsite += t.vet_total_releases_offsite
-                    t_air += t.vet_total_releases_air
-                    t_water += t.total_releases_water
-                    t_land += t.vet_total_releases_land
-            result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
-                      'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
-                      'numtrifacilities':t_facilitycount,'name':s}
-            results.append(result)
-    return JsonResponse(results, safe=False)
+    d = []
+    results = tri.objects.raw(
+        'SELECT max("t_ID") as "t_ID", st, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = 2018GROUP BY st')
+    for res in results:
+        l = {"name": res.st, "totalonsite":res.totalonsite, "air": res.air, "water":res.water, "land":res.land, "totaloffsite":res.offsite, "numtrifacilities":res.facility}
+        d.append(l)
+    return JsonResponse(list(d), safe=False)
 
 # stats/county/all
 def all_county_total_releases(request):
 
     d = []
-    results = tri.objects.raw('SELECT max("t_ID") as "t_ID", st, county, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land), sum(vet_total_releases_offsite), count(facility) FROM public."TRI_DATA" WHERE YEAR = 2018GROUP BY st, county')
+    results = tri.objects.raw('SELECT max("t_ID") as "t_ID", st, county, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = 2018GROUP BY st, county')
     for res in results:
-        l = {"state" : res.st, "county": res.county, "totalonsite":res.totalonsite}
+        l = {"state": res.st, "county":res.county, "totalonsite":res.totalonsite, "air": res.air, "water":res.water, "land":res.land, "totaloffsite":res.offsite, "numtrifacilities":res.facility}
         d.append(l)
     return JsonResponse(list(d), safe=False)
 

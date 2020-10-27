@@ -118,8 +118,6 @@ if (props.type === "states")
                                                 Water: ${rounded(Math.trunc(cur.water))} lbs. <br />
                                                 Land: ${rounded(Math.trunc(cur.land))} lbs. <br />
                                                 Offsite: ${rounded(Math.trunc(cur.totaloffsite))} lbs. <br />
-                                                Dioxins: ${rounded(Math.trunc(cur.totaldioxin))} grams <br />
-                                                Carcinogens: ${rounded(Math.trunc(cur.totalcarcs))} lbs. <br />
                                                 Facilities: ${rounded(Math.trunc(cur.numtrifacilities))} <br />
                                                 `);
                   }}
@@ -153,7 +151,14 @@ return(
                   stroke={"#000"}
                   onMouseEnter={() => {
                     const { name, POP_EST } = geo.properties;
-                    props.setTooltipContent(`${cur.county} — ${rounded(POP_EST)}`);
+                    props.setTooltipContent(`<h1><p style="text-align:center;">${cur.county} COUNTY</p></h1><br />
+                                                Total: ${rounded(Math.trunc(cur.totalonsite))} lbs. <br />
+                                                Air: ${rounded(Math.trunc(cur.air))} lbs. <br />
+                                                Water: ${rounded(Math.trunc(cur.water))} lbs. <br />
+                                                Land: ${rounded(Math.trunc(cur.land))} lbs. <br />
+                                                Offsite: ${rounded(Math.trunc(cur.totaloffsite))} lbs. <br />
+                                                Facilities: ${rounded(Math.trunc(cur.numtrifacilities))} <br />
+                    `);
                   }}
                   onMouseLeave={() => {
                     props.setTooltipContent("");
@@ -167,7 +172,9 @@ return(
                   geography={geo}
                   onMouseEnter={() => {
                     const { name, POP_EST } = geo.properties;
-                    props.setTooltipContent(`${name} — ${rounded(POP_EST)}`);
+                    props.setTooltipContent(`<h1><p style="text-align:center;">${name.toUpperCase()} COUNTY</p></h1><br />
+                                             No data available at this time
+                    `);
                   }}
                   onMouseLeave={() => {
                     props.setTooltipContent("");
