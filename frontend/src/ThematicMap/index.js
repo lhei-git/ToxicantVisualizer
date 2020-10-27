@@ -29,6 +29,20 @@ if (props.type == "counties")
     domain = [1000, 1000000]
 else domain = [props.minValue, props.maxValue]
 
+//removes inconsistencies in county name, slow af
+//LEFT IN FOR PROTOTYPE 1 BECAUSE LOUSIANA STUCK OUT
+const fixCountyName = (name) => {
+    var res = name.substring(name.length -6 , name.length);
+    if (res.toUpperCase() === "PARISH") return name.substring(0, name.length -7)            //parish
+    //else if (res.toUpperCase() === "S AREA") return name.substring(0, name.length -12)      //census area
+    //else if (res.toUpperCase() === "PALITY") return name.substring(0, name.length -13)      //municipality
+
+    //res = name.substring(name.length -9 , name.length);
+    //if (res.toUpperCase() === " BOROUGH") alert( name.substring(0, name.length -13) )     //borough
+
+    return name
+}
+
 //returns a geography color based on the scale and given value
 const colorScale = scaleQuantile()
   .domain(domain)
@@ -140,7 +154,7 @@ else return(
           <Geographies geography={props.geoUrl}>
             {({ geographies }) =>
               geographies.map(geo => {
-              var cur = props.data.find(s => (s.county === geo.properties.name.toUpperCase() && s.state === geo.properties.iso_3166_2));
+              var cur = props.data.find(s => (fixCountyName(s.county) === geo.properties.name.toUpperCase() && s.state === geo.properties.iso_3166_2));
               if(cur != undefined){
               return(
                 <Geography
@@ -186,6 +200,12 @@ else return(
       </ComposableMap>
     </>
   )
+}
+
+
+
+function mapFilter(){
+
 }
 
 export default memo(thematicMap);
