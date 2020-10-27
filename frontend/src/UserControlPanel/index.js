@@ -25,7 +25,7 @@ function UserControlPanel(props) {
     let years = [];
     for (let i = endYear; i >= startYear; i--) {
       years.push(
-        <option selected={i === endYear} value={i}>
+        <option defaultValue={i === endYear} key={i} value={i}>
           {i}
         </option>
       );
@@ -36,13 +36,15 @@ function UserControlPanel(props) {
   function getChemicals() {
     let chemicals = [];
     chemicals.push(
-      <option selected={true} value="all">
+      <option defaultValue={true} key="all" value="all">
         all
       </option>
     );
     for (var chemical of props.chemicals) {
-      chemicals.push(<option value={chemical}>{chemical}</option>);
+      chemicals.push(<option key={chemical} value={chemical}>{chemical}</option>);
     }
+    
+
     return chemicals;
   }
 
@@ -60,7 +62,7 @@ function UserControlPanel(props) {
             <select name="releaseType" onChange={onSelectChange} id="">
               {(function () {
                 return types.map((type) => {
-                  return <option>{type}</option>;
+                  return <option key={type}>{type}</option>;
                 });
               })()}
             </select>

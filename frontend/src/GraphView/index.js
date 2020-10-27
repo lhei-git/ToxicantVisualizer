@@ -61,13 +61,16 @@ function GraphContainer(props) {
   let viewport = props.viewport;
 
   React.useEffect(() => {
+    let mounted = true;
     async function fetchData() {
       if (!props.graph || !props.viewport) return;
       const g = await props.graph(viewport);
 
-      setGraph(g);
+      if (mounted) setGraph(g);
     }
     fetchData();
+
+    return () => (mounted = false);
   }, [props, viewport]);
 
   return (
@@ -156,26 +159,19 @@ async function GraphTopTenFacilities(viewport) {
       `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = res.data
-      .sort((a, b) => b.fields.vet_total_releases - a.vet_total_releases)
+      .sort((a, b) => b.total - a.total)
       .map((d, i) => {
-        const f = d.fields;
+        const f = d;
         return {
           name: f.facility,
-          pv:
-            f.vet_total_releases_air === 0 &&
-            f.vet_total_releases_land === 0 &&
-            f.total_releases_water === 0
-              ? f.vet_total_releases
-              : 0,
-          av: f.vet_total_releases_air,
-          bv: f.total_releases_water,
-          cv: f.vet_total_releases_land,
+          av: f.air,
+          bv: f.water,
+          cv: f.land,
         };
-      })
-      .slice(0, 10);
+      });
     return (
       <div className="top-ten facilities">
-        <ResponsiveContainer width="90%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
             // layout="vertical"
@@ -196,7 +192,6 @@ async function GraphTopTenFacilities(viewport) {
             <YAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="total" dataKey="pv" stackId="a" fill="#5b8e7d" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
             <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
@@ -211,8 +206,6 @@ async function GraphTopTenFacilities(viewport) {
 }
 
 async function GraphTopTenParents(viewport) {
-  const layout = "vertical";
-
   try {
     const ne = viewport.northeast;
     const sw = viewport.southwest;
@@ -220,39 +213,42 @@ async function GraphTopTenParents(viewport) {
       `/stats/location/parent_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
     );
     const data = res.data
+      .sort((a, b) => b.total - a.total)
       .map((d, i) => {
+        const f = d;
         return {
-          name: d.fields.parent_co_name,
-          pv: d.fields.vet_total_releases,
+          name: f.parent_co_name,
+          av: f.air,
+          bv: f.water,
+          cv: f.land,
         };
-      })
-      .sort((a, b) => b.pv - a.pv)
-      .slice(0, 10);
-
+      });
     return (
       <div className="top-ten parents">
-        <ResponsiveContainer width="90%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
-            layout={layout}
+            // layout="vertical"
             margin={{
               top: 30,
-              right: 100,
+              right: 50,
               left: 50,
-              bottom: 10,
+              bottom: 200,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <YAxis
+            <XAxis
               dataKey="name"
               type="category"
-              orientation="right"
-              tick={<CustomizedYAxisTick />}
+              interval={0}
+              tick={<CustomizedXAxisTick />}
             />
-            <XAxis type="number" unit="lbs" />
+            <YAxis type="number" unit="lbs" />
             <Tooltip />
-            <Legend />
-            <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
+            <Legend align="right" verticalAlign="top" />
+            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
+            <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
+            <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -277,32 +273,36 @@ async function GraphTopChemicals(viewport) {
           pv: d.total,
         };
       })
-      .sort((a, b) => b.pv - a.pv)
-      .slice(0, 10);
+      .sort((a, b) => b.pv - a.pv);
     return (
-      <div className="top-ten parents">
-        <ResponsiveContainer width="90%" aspect={16 / 9}>
+      <div className="top-ten chemicals">
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
-            layout="vertical"
+            // layout="vertical"
             margin={{
               top: 30,
-              right: 100,
+              right: 50,
               left: 50,
-              bottom: 10,
+              bottom: 200,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <YAxis
+            <XAxis
               dataKey="name"
               type="category"
-              orientation="right"
-              tick={<CustomizedYAxisTick />}
+              interval={0}
+              tick={<CustomizedXAxisTick />}
             />
-            <XAxis type="number" />
+            <YAxis type="number" unit="lbs" />
             <Tooltip />
-            <Legend />
-            <Bar name="release amount (lbs)" dataKey="pv" fill="#5b8e7d" />
+            <Legend align="right" verticalAlign="top" />
+            <Bar
+              name="release amount (lbs)"
+              dataKey="pv"
+              stackId="a"
+              fill="#8884d8"
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -327,13 +327,13 @@ function GraphView(props) {
         viewport={props.viewport}
         name="total_facilities"
         graph={GraphTopTenFacilities}
-        title="Total releases for top 10 facilities (in lbs)"
+        title="Total On-Site Releases for Top 10 Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
         name="total_parents"
         graph={GraphTopTenParents}
-        title="Total Releases for the top 10 parent companies (in lbs)"
+        title="Total On-Site Releases for Top 10 Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}

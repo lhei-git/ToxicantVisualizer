@@ -252,9 +252,9 @@ const App = (props) => {
                     viewport={state.viewport}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
-                    onFetchPoints={(chemicals) =>
-                      dispatch(setChemicals(chemicals))
-                    }
+                    onFetchPoints={(chemicals) => {
+                      dispatch(setChemicals(chemicals));
+                    }}
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(chemicals) =>
                       dispatch(setMarker(chemicals))
