@@ -7,7 +7,7 @@ import {
 
 import { scaleQuantile } from "d3-scale";
 
-// used to produce human readable numbers
+// used to produce more easily readable numbers
 const rounded = num => {
   if (num > 1000000000) {
     return Math.round(num / 100000000) / 10 + "Bn";
@@ -23,7 +23,7 @@ const thematicMap = (props) => {
 if(!props.data) return null
 
 //change the scale domain based on whether states or counties are being viewed
-//TODO: determine why minVal to maxVal doesn't work well as a domain
+//TODO: determine why minVal to maxVal doesn't work well as a domain, or see if there is a better scaling option
 var domain = [];
 if (props.type == "counties")
     domain = [1000, 1000000]
@@ -92,8 +92,7 @@ const colorScale = scaleQuantile()
     //"#270201",
   ]);
 
-
-
+// used to render the state based map
 if (props.type === "states")
   return (
     <>
@@ -134,8 +133,8 @@ if (props.type === "states")
     </>
 )
 
-else
-return(
+//used to render the county based map
+else return(
 <>
 <ComposableMap data-tip="" projection="geoAlbersUsa">
           <Geographies geography={props.geoUrl}>
@@ -186,14 +185,7 @@ return(
           </Geographies>
       </ComposableMap>
     </>
-)
-
-
-
-
-
-
+  )
 }
-
 
 export default memo(thematicMap);
