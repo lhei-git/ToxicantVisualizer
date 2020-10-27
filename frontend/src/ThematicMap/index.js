@@ -43,6 +43,26 @@ const colorScale = scaleQuantile()
     "#6e0703",
     "#570602",
     "#3f0401",
+
+    // Alaska skews the results so bad that I had to add these
+    // TODO: try to find a non-linear way to scale this data
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
+    "#3f0401",
   ]);
 
   return (
@@ -61,10 +81,17 @@ const colorScale = scaleQuantile()
                   onMouseEnter={() => {
                     const { name, POP_EST } = geo.properties;
                     const total = cur.total;
-                    props.setTooltipContent(`${name} \n
+                    props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
+                                                Total: ${Math.trunc(cur.total)} lbs. <br />
+                                                Air: ${Math.trunc(cur.air)} lbs. <br />
+                                                Water: ${Math.trunc(cur.water)} lbs. <br />
+                                                Land: ${Math.trunc(cur.land)} lbs. <br />
+                                                Offsite: ${Math.trunc(cur.offsite)} lbs. <br />
+                                                Dioxins: ${Math.trunc(cur.dioxins)} grams <br />
+                                                Carcinogens: ${Math.trunc(cur.carcinogens)} lbs. <br />
+                                                Facilities: ${Math.trunc(cur.facilities)} <br />
 
-
-                    ${total}`);
+                                                `);
                   }}
                  onMouseLeave={() => {
                     props.setTooltipContent("");

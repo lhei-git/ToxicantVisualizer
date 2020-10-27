@@ -47,7 +47,7 @@ render(){
             data={this.state.stateData}
             maxValue={this.state.stateMax}
             minValue={this.state.stateMin}/>
-      <ReactTooltip>{this.state.content}</ReactTooltip>
+      <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
     </div>
   );
 }
