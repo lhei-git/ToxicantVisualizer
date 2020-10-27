@@ -111,6 +111,17 @@ def all_state_total_releases(request):
             results.append(result)
     return JsonResponse(results, safe=False)
 
+# stats/county/all
+def all_county_total_releases(request):
+
+    d = []
+    results = tri.objects.raw('SELECT max("t_ID") as "t_ID", st, county, sum(vet_total_releases) as totalonsite, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land), sum(vet_total_releases_offsite), count(facility) FROM public."TRI_DATA" WHERE YEAR = 2018GROUP BY st, county')
+    for res in results:
+        l = {"state" : res.st, "county": res.county, "totalonsite":res.totalonsite}
+        d.append(l)
+    return JsonResponse(list(d), safe=False)
+
+
 # FIXME - top_releases have repetitions, refer to err for distinct() here
 
 # stats/location/parent_releases
