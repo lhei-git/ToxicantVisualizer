@@ -105,6 +105,54 @@ function GraphContainer(props) {
   );
 }
 
+async function TimelineTotal(props) {
+  try {
+    const { northeast, southwest } = props.viewport;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+    };
+    const res = await vetapi.get(`/stats/location/timeline/total`, {
+      params,
+    });
+    return (
+      <div className="top-ten facilities">
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
+          <LineChart
+            width={500}
+            height={300}
+            data={res.data}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 50,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" tick={{ fill: "#FFF" }}/>
+            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
+            <Tooltip />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="total"
+              stroke={"#8884d8"}
+              strokeWidth={3}
+              activeDot={{ r: 8 }}
+            ></Line>
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
 async function GraphSummary(props) {
   function format(x) {
     return x.toLocaleString();
@@ -125,10 +173,10 @@ async function GraphSummary(props) {
     });
     const body = (
       <tbody>
-        <tr>
+        {/* <tr>
           <td>Facilities</td>
           <td>{res.data["num_facilities"]}</td>
-        </tr>
+        </tr> */}
         <tr>
           <td>Distinct Chemicals</td>
           <td>{res.data["num_distinct_chemicals"]}</td>
@@ -558,14 +606,21 @@ async function TimelineTopChemicals(props) {
 function GraphView(props) {
   return (
     <div className="graph-container">
-      {/* <GraphContainer
+      <GraphContainer
         viewport={props.viewport}
         year={props.year}
         name="summary"
         hidden={false}
         graph={GraphSummary}
         title="Summary"
-      ></GraphContainer> */}
+      ></GraphContainer>
+        <GraphContainer
+        viewport={props.viewport}
+        year={props.year}
+        name="total_facilities"
+        graph={TimelineTotal}
+        title="Total Releases"
+      ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
         year={props.year}

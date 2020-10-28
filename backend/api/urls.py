@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import points, attr, num_facilities, state_total_releases, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, all_county_total_releases
+from viewModule.views import points, attr, num_facilities, state_total_releases, timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, all_county_total_releases
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,6 +19,8 @@ urlpatterns = [
     path('stats/location/facility_releases', top_facility_releases),
     # return top ten polluting parent companies by: window
     path('stats/location/parent_releases', top_parentco_releases),
+    # return global amount over time by: window
+    path('stats/location/timeline/total', timeline_total),
     # return top ten chemicals over time by: window
     path('stats/location/timeline/top_chemicals', timeline_top_chemicals),
     # return top ten polluting facilities over time by: window
