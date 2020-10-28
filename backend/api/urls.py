@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import points, attr, num_facilities, state_total_releases, top_parentco_releases, chem_counts, chem_amounts, location_summary, top_facility_releases
+from viewModule.views import points, attr, num_facilities, state_total_releases, top_parentco_releases, chem_counts, chem_amounts, location_summary, top_facility_releases, all_state_total_releases, all_county_total_releases
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,4 +23,8 @@ urlpatterns = [
     path('stats/location/parent_releases', top_parentco_releases),
     # return total amount stats released by: state
     path('stats/state/summary', state_total_releases),
+    # return release all states, individually
+    path('stats/state/all', all_state_total_releases),
+    # return release all counties, individually
+    path('stats/county/all', all_county_total_releases),
 ]

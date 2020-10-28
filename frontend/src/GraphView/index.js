@@ -80,7 +80,7 @@ function GraphContainer(props) {
     fetchData();
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, yearProp]);
+  }, [graphProp, viewportProp, yearProp]); /* eslint-disable-line */
 
   return (
     <div className="graph">
