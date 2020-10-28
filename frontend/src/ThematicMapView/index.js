@@ -5,7 +5,7 @@ import axios from 'axios';
 const React = require("react");
 const Component = React.Component;
 
-// state map topographical data
+// state and county map topographical data
 const stateGeoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers.json"
 const countyGeoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers-counties.json"
 //const countyGeoUrl = "https://raw.githubusercontent.com/jgoodall/us-maps/master/topojson/county.topo.json"
@@ -21,24 +21,56 @@ class ThematicMapView extends Component {
       countyData: null,
       countyMax: null,
       countyMin: null,
+      filterYear: null,
+      prevYear: null,
+      filterType: null,     //valid options: totalonsite, air, water, land, totaloffsite, total
+      prevType: null,
+      countyMap: null,
+      stateMap: null,
     };
 
     this.handleContent = this.handleContent.bind(this);
+    this.state.filterYear = 2018;
+    this.state.filterYear = 2018;
+    this.state.filterType = "totalonsite";
+    this.state.filterType = "totalonsite";
 
   }
 
-  componentDidMount(){
+//call this function to apply new filters to the thematic maps
+//valid types: totalonsite, air, water, land, totaloffsite, total
+//valid years: 2005 - 2018
+constApplyFilter(props){
+    if(props.year != undefined) this.setState({filterYear:year})
+    if(props.type != undefined) this.setState({filterType:type})
+}
+
+componentDidMount(){
    this.getStateData();
    this.getCountyData();
   }
 
+//refetch data if the year or release type filter changed
+componentDidUpdate(){
+   if (this.state.prevYear != this.state.filterYear ||
+       this.state.prevType != this.state.filterType){
+       this.state.prevYear = this.state.filterYear;
+       this.state.prevType = this.state.filterType;
+       this.setState({stateData:null, countyData:null})
+       this.getStateData();
+       this.getCountyData();
+       }
+  }
+
+//sets tooltip content for the maps
 handleContent(content){
     this.setState({content:content})
 }
 
-
-
 render(){
+const filterYear = (this.state.filterYear != null ? this.state.filterYear : 2018)
+const filterType = (this.state.filterType != null ? this.state.filterType : "totalonsite")
+
 return(
 <>
     <div style={{height: 1600}}>
@@ -50,6 +82,8 @@ return(
                 data={this.state.stateData}
                 maxValue={this.state.stateMax}
                 minValue={this.state.stateMin}
+                filterYear={filterYear}
+                filterType={filterType}
                 geoUrl={stateGeoUrl}
                 type={"states"}/>
                 <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
@@ -68,6 +102,8 @@ return(
                 data={this.state.countyData}
                 maxValue={this.state.countyMax}
                 minValue={this.state.countyMin}
+                filterYear={filterYear}
+                filterType={filterType}
                 geoUrl={countyGeoUrl}
                 type={"counties"}/>
           <ReactTooltip multiline={true} html={true}>{this.state.content}</ReactTooltip>
@@ -86,13 +122,15 @@ async getCountyData()
     var d = [];
     var maxValue = 0;
     var minValue = 100000000000000;
+    const filterYear = this.state.filterYear;
+    const filterType = this.state.filterType;
     await axios.get(
-              "http://localhost:8000/stats/county/all")              //TODO: CHANGE ME TO THE CORRECT LINK
+              "http://localhost:8000/stats/county/all?year=" + filterYear)              //TODO: CHANGE ME TO THE CORRECT LINK
     .then((response) => {l = response.data
                          d = Object.values(l)
-                         response.data.map ( (totalonsite, i) => {
-                            if(response.data[i].totalonsite > maxValue) maxValue = response.data[i].totalonsite
-                            if(response.data[i].totalonsite < minValue && response.data[i].totalonsite != 0) minValue = response.data[i].totalonsite
+                         response.data.map ( (st, i) => {
+                            if(response.data[i].[filterType] > maxValue) maxValue = response.data[i].[filterType]
+                            if(response.data[i].[filterType] < minValue && response.data[i].[filterType] != 0) minValue = response.data[i].[filterType]
                             })
                          this.setState({countyData:d, countyMin: minValue, countyMax:maxValue})
                          })
@@ -104,13 +142,15 @@ async  getStateData()
     var d = [];
     var maxValue = 0;
     var minValue = 100000000000000;
+    const filterYear = this.state.filterYear;
+    const filterType = this.state.filterType;
     await axios.get(
-              "http://localhost:8000/stats/state/all")              //TODO: CHANGE ME TO THE CORRECT LINK
+              "http://localhost:8000/stats/state/all?year=" + filterYear)              //TODO: CHANGE ME TO THE CORRECT LINK
     .then((response) => {l = response.data
                          d = Object.values(l)
-                         response.data.map ( (totalonsite, i) => {
-                            if(response.data[i].totalonsite > maxValue) maxValue = response.data[i].totalonsite
-                            if(response.data[i].totalonsite < minValue && response.data[i].totalonsite != 0) minValue = response.data[i].totalonsite
+                         response.data.map ( (st, i) => {
+                            if(response.data[i].[filterType] > maxValue) maxValue = response.data[i].[filterType]
+                            if(response.data[i].[filterType] < minValue && response.data[i].[filterType] != 0) minValue = response.data[i].[filterType]
                             })
 
                          this.setState({stateData:d, stateMin: minValue, stateMax:maxValue})
@@ -118,9 +158,6 @@ async  getStateData()
             }
 
     }
-
-
-
 
 // loading animation
 function LoadSpinner()
