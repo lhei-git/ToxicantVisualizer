@@ -39,12 +39,12 @@ def dist_fac(request):
     y = int(request.GET.get('year', default=2018))
     state = str(request.GET.get('state', default='None')).upper()
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        qs = tri.objects.filter(st=state, year=y).values('facilityname').distinct()
+        qs = tri.objects.filter(st=state, year=y).values('facility').distinct()
     else:
         qs = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                                    & Q(longitude__lt=ne_lng)
                                                    & Q(longitude__gt=sw_lng)
-                                                   & Q(year=y)).values('facilityname').distinct()
+                                                   & Q(year=y)).values('facility').distinct()
     #data = szs.serialize('json', qs) <--here values() is used so serializer will not work
     data = json.dumps(list(qs))
     return HttpResponse(data, content_type='application/json')
@@ -75,6 +75,28 @@ def state_total_releases(request):
                   'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
                   'numtrifacilities':t_facilitycount}
         return JsonResponse(result)
+
+# stats/state/all
+def all_state_total_releases(request):
+    d = []
+    y = int(request.GET.get('year', default=2018))
+    results = tri.objects.raw(
+        'SELECT max("t_ID") as "t_ID", st, sum(vet_total_releases_onsite) as totalonsite, sum(vet_total_releases) as total, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = ' + str(y) + ' GROUP BY st')
+    for res in results:
+        l = {"name": res.st, "totalonsite":res.totalonsite, "air": res.air, "water":res.water, "land":res.land, "totaloffsite":res.offsite, "numtrifacilities":res.facility, "total":res.total}
+        d.append(l)
+    return JsonResponse(list(d), safe=False)
+
+# stats/county/all
+def all_county_total_releases(request):
+    d = []
+    y = int(request.GET.get('year', default=2018))
+    results = tri.objects.raw('SELECT max("t_ID") as "t_ID", st, county, sum(vet_total_releases_onsite) as totalonsite, sum(vet_total_releases) as total, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = ' + str(y) + ' GROUP BY st, county')
+    for res in results:
+        l = {"state": res.st, "county":res.county, "totalonsite":res.totalonsite, "air": res.air, "water":res.water, "land":res.land, "totaloffsite":res.offsite, "numtrifacilities":res.facility, "total":res.total}
+        d.append(l)
+    return JsonResponse(list(d), safe=False)
+
 
 # FIXME - top_releases have repetitions, refer to err for distinct() here
 
@@ -175,7 +197,7 @@ def XXXlocation_releases_by_facility(request):
     rows = list(map(lambda e: e.__dict__, list(raw)))
     facilities = {}
     for r in rows:
-      f = r['facilityname']
+      f = r['facility']
       if f in facilities:
           facilities[f] += r['vet_total_releases']
       else:

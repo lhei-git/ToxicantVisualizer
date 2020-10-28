@@ -15,6 +15,7 @@ import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
+import ThematicMapView from "./ThematicMapView/index.js";
 import { useReducer } from "react";
 import { formatChemical } from "./helpers";
 const geocoder = require("./api/geocoder");
@@ -231,7 +232,9 @@ const App = (props) => {
                         </div>
                       </div>
                     ) : (
-                      <div className="header">Released Toxicants (click for info)</div>
+                      <div className="header">
+                        Released Toxicants (click for info)
+                      </div>
                     )}
                     <ChemicalList
                       onClick={(chemical) => {
@@ -262,12 +265,17 @@ const App = (props) => {
                 )}
               </div>
             </div>
-            <GraphView viewport={state.viewport} year={state.filters.year}></GraphView>
+            <GraphView
+              viewport={state.viewport}
+              year={state.filters.year}
+            ></GraphView>
             {/* <Footer /> */}
           </Route>
-          {/* <Route path="/graphs">
-            <GraphView ></GraphView>
-          </Route> */}
+          <Route path="/thematicmaps">
+            <div className="thematic-Maps">
+              <ThematicMapView year={state.filters.year}></ThematicMapView>
+            </div>
+          </Route>
           <Route path="/">
             <Home
               onSearchChange={(search) => dispatch(setLocation(search))}
