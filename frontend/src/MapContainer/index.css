@@ -1,3 +1,7 @@
+.map-container {
+  --primary-dark: #6a0080;
+}
+
 .map-container.loading {
   opacity: 0.3;
 }
@@ -12,6 +16,11 @@
   overflow: hidden;
 }
 
+.map-container .info-window {
+  font-size: 1rem;
+  
+}
+
 .map-container .refresh {
   position: absolute;
   top: 0;
@@ -20,10 +29,9 @@
   padding: 10px 30px;
   margin: 20px;
   border-radius: 5px;
-  background: purple;
   color: #fff;
+  background: var(--primary);
   font-size: 20px;
-  font-weight: bold;
   text-align: center;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);

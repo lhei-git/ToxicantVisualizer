@@ -255,7 +255,6 @@ def chem_amounts(request):
                                                     & Q(longitude__lt=ne_lng)
                                                     & Q(longitude__gt=sw_lng)
                                                     & Q(year=y)).values('chemical').annotate(total=Sum('vet_total_releases')).order_by('-total')[:10]
-    print(raw)
     return JsonResponse(list(raw), content_type='application/json', safe=False)
 
 def XXXfac_count(request):

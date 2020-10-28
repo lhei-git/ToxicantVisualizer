@@ -351,14 +351,14 @@ async function GraphTopChemicals(props) {
 function GraphView(props) {
   return (
     <div className="graph-container">
-      <GraphContainer
+      {/* <GraphContainer
         viewport={props.viewport}
         year={props.year}
         name="summary"
         hidden={false}
         graph={GraphSummary}
         title="Summary"
-      ></GraphContainer>
+      ></GraphContainer> */}
       <GraphContainer
         viewport={props.viewport}
         year={props.year}

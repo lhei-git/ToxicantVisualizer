@@ -104,10 +104,12 @@ class MapContainer extends Component {
         activeMarker: props.entry,
         showingInfoWindow: true,
         hasMoved: true,
+      }, () => {
+        this.map.setCenter(props.marker.position);
+        this.map.setZoom(14);
+        this.props.onMarkerClick(props.entry.chemicals);
       });
-      this.map.setCenter(props.marker.position);
-      this.map.setZoom(14);
-      this.props.onMarkerClick(props.marker.meta.chemicals);
+
     } else {
       this.setState({
         showingInfoWindow: false,
@@ -268,7 +270,7 @@ class MapContainer extends Component {
         {this.state.isLoading && (
           <div className="loading-overlay">
             <div className="spinner">
-                <LoadingSpinner></LoadingSpinner>
+              <LoadingSpinner></LoadingSpinner>
             </div>
           </div>
         )}
@@ -307,23 +309,24 @@ class MapContainer extends Component {
               <div className="info-window">
                 {this.state.activeMarker !== null && (
                   <div>
-                    <h2>{this.state.activeMarker.meta.facility}</h2>
+                    <h2>{this.state.activeMarker.facility}</h2>
                     <p>
-                      {this.state.activeMarker.meta.street_address} <br></br>
-                      {this.state.activeMarker.meta.city},{" "}
-                      {this.state.activeMarker.meta.st}{" "}
-                      {this.state.activeMarker.meta.zip}
+                      {this.state.activeMarker.street_address} <br></br>
+                      {this.state.activeMarker.city},{" "}
+                      {this.state.activeMarker.st}{" "}
+                      {this.state.activeMarker.zip}
                     </p>
                     <p>
-                      Industry: {this.state.activeMarker.meta.industry_sector}
+                      Industry: {this.state.activeMarker.industry_sector}
                     </p>
                     <p>
                       Total Toxicants Released:{" "}
-                      {
-                        +this.state.activeMarker.meta.chemicals
-                          .reduce((acc, cur) => acc + cur.vet_total_releases, 0).toLocaleString()
-                      }{" "}
-                      lbs
+                      <span style={{ fontWeight: "bold" }}>
+                        {this.state.activeMarker.chemicals
+                          .reduce((acc, cur) => acc + cur.vet_total_releases, 0)
+                          .toLocaleString()}{" "}
+                        lbs
+                      </span>
                     </p>
                   </div>
                 )}
