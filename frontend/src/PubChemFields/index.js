@@ -13,6 +13,8 @@ function Link(props) {
   );
 }
 
+function handleError(err) {}
+
 /* Pharmacology Component */
 function Pharmacology(props) {
   const [pubchemData, setPubchemData] = React.useState(null);
@@ -35,7 +37,7 @@ function Pharmacology(props) {
           .StringWithMarkup[0].String;
       setPubchemData(res);
     } catch (err) {
-      console.log(err);
+      handleError(err);
     }
   }
 
@@ -76,7 +78,7 @@ function HazardStatements(props) {
       const data = parseGHSData(response);
       setPubchemData(data);
     } catch (err) {
-      console.log(err);
+      handleError(err);
     }
   }
 
@@ -99,7 +101,7 @@ function HazardStatements(props) {
       <div className="hazards">
         <a href={link}>
           <h2>
-            Hazard Statements
+            Hazards
             <Link href={link} />
           </h2>
         </a>
@@ -141,7 +143,74 @@ function Toxicity(props) {
       const data = parseToxicityData(response);
       setPubchemData(data);
     } catch (err) {
-      console.log(err);
+      handleError(err);
+    }
+  }
+
+  function parseToxicityData(response) {
+    var toxicity = [];
+
+    //grab the section heading to be displayed
+    const TOCHeading =
+      response.data.Record.Section[0].Section[0].Section[1].TOCHeading;
+    setHeader(TOCHeading);
+
+    const info =
+      response.data.Record.Section[0].Section[0].Section[1].Information;
+
+    toxicity = info
+      .map((t) => t.Value.StringWithMarkup[0].String)
+      .filter((t) => t.toUpperCase() !== "NOT LISTED");
+
+    return { toxicity };
+  }
+
+  return (
+    pubchemData !== null &&
+    header !== null &&
+    pubchemData.toxicity.length !== 0 && (
+      <div className="toxicity">
+        <a href={link}>
+          <h2>
+            {header}
+            <Link href={link} />
+          </h2>
+        </a>
+
+        <ul>
+          {pubchemData.toxicity.map((v, i) => {
+            return <li key={"toxicity-" + i}>{v}</li>;
+          })}
+        </ul>
+      </div>
+    )
+  );
+}
+
+/* Diseases Component */
+function Diseases(props) {
+  const [header, setHeader] = React.useState(null);
+  const [pubchemData, setPubchemData] = React.useState(null);
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
+    props.cid || 0
+  }#section=Toxicity`;
+
+  // fetches data when component is updated
+  React.useEffect(() => {
+    if (!pubchemData && props.cid) {
+      getPubchemData();
+    }
+  });
+
+  async function getPubchemData() {
+    try {
+      const response = await pubchem.get(
+        `/pug_view/data/compound/${props.cid}/JSON?heading=Toxicological+Information`
+      );
+      const data = parseToxicityData(response);
+      setPubchemData(data);
+    } catch (err) {
+      handleError(err);
     }
   }
 
@@ -228,19 +297,28 @@ class PubChemFields extends Component {
     if (this.props.chemName !== "") this.getPugRestData(this.props.chemName);
   }
 
-  componentDidUpdate(prevProps) {
-    if (
-      this.props.chemName !== "" &&
-      prevProps.chemName !== this.props.chemName
-    ) {
-      this.setState({
-        cid: null,
-        formula: null,
-        description: null,
-      });
-      this.getPugRestData(this.props.chemName);
-    }
-  }
+  /* UPDATE HOOK NOT NEEDED as this component is recreated on each chemical click. 
+  TODO: prevent component recreation */
+
+  // componentDidUpdate(prevProps) {
+  //   if (
+  //     this.props.chemName !== "" &&
+  //     prevProps.chemName !== this.props.chemName
+  //   ) {
+  //     this.setState(
+  //       {
+  //         cid: null,
+  //         formula: null,
+  //         description: null,
+  //       },
+  //       () => {
+  //         this.getPugRestData(this.props.chemName);
+  //       }
+  //     );
+  //   } else {
+  //     console.log(prevProps.chemName, this.props.chemName);
+  //   }
+  // }
 
   /* Composition of all sections */
   Content(props) {
@@ -258,6 +336,13 @@ class PubChemFields extends Component {
             <Pharmacology cid={this.state.cid}></Pharmacology>
             <HazardStatements cid={this.state.cid}></HazardStatements>
             <Toxicity cid={this.state.cid}></Toxicity>
+            {/* <div className="diseases">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: '<iframe src="https://pubchem.ncbi.nlm.nih.gov/compound/5352425#section=Associated-Disorders-and-Diseases&fullscreen=true" width="540" height="450"></iframe>',
+                }}
+              ></div>
+            </div> */}
           </div>
         )}
       </div>
