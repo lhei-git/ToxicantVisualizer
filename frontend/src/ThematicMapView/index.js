@@ -36,18 +36,18 @@ class ThematicMapView extends Component {
 
     this.handleContentState = this.handleContentState.bind(this);
     this.handleContentCounty = this.handleContentCounty.bind(this);
-    this.state.filterYear = 2018;
-    this.state.filterYear = 2018;
+    this.state.filterYear = props.year;
+    //this.state.filterYear = props.year;
     this.state.filterType = "totalonsite";
-    this.state.filterType = "totalonsite";
+    //this.state.filterType = "totalonsite";
   }
 
   //call this function to apply new filters to the thematic maps
   //valid types: totalonsite, air, water, land, totaloffsite, total
   //valid years: 2005 - 2018
   constApplyFilter(props) {
-    if (!props.year) this.setState({ filterYear: props.year });
-    if (!props.type) this.setState({ filterType: props.type });
+    if (props.year) this.setState({ filterYear: props.year });
+    if (props.type) this.setState({ filterType: props.type });
   }
 
   componentDidMount() {
@@ -55,8 +55,29 @@ class ThematicMapView extends Component {
     this.getCountyData();
   }
 
+  fixFilterName( type )
+  {
+    switch(type) {
+      case "all":
+        return "total";
+      case "air":
+      case "water":
+      case "land":
+        return type;
+      case "off-site":
+        return "totaloffsite";
+    case "on-site":
+        return "totalonsite";
+    default:
+        return "total"
+}
+  }
+
   //refetch data if the year or release type filter changed
   componentDidUpdate() {
+    // update filters from parent
+    this.state.filterYear = this.props.year;
+    this.state.filterType = this.fixFilterName(this.props.type);
     if (
       this.state.prevYear !== this.state.filterYear ||
       this.state.prevType !== this.state.filterType

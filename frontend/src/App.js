@@ -274,7 +274,7 @@ const App = (props) => {
               year={state.filters.year}
             ></GraphView>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <ThematicMapView year={state.filters.year}></ThematicMapView>
+            <ThematicMapView year={state.filters.year} type ={state.filters.releaseType}> </ThematicMapView>
 
             {/* <Footer /> */}
           </Route>
