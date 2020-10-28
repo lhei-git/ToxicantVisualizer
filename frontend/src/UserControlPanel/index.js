@@ -3,7 +3,7 @@ import "../index.css";
 import ChemTypeSelector from "./ChemTypeSelector.js";
 const React = require("react");
 
-const startYear = 2005;
+const startYear = 2006;
 const endYear = 2018;
 const types = ["all", "air", "water", "land", "off-site", "on-site"];
 
@@ -41,9 +41,12 @@ function UserControlPanel(props) {
       </option>
     );
     for (var chemical of props.chemicals) {
-      chemicals.push(<option key={chemical} value={chemical}>{chemical}</option>);
+      chemicals.push(
+        <option key={chemical} value={chemical}>
+          {chemical}
+        </option>
+      );
     }
-    
 
     return chemicals;
   }
@@ -87,12 +90,18 @@ function UserControlPanel(props) {
             defaultChecked={false}
             onClick={onFilterChange}
           />
-          {/* <ChemTypeSelector
-            title="Only Show PBTs"
+          <ChemTypeSelector
+            title="Only Show dioxins"
             attribute="dioxins"
             defaultChecked={false}
             onClick={onFilterChange}
-          /> */}
+          />
+          <ChemTypeSelector
+            title="Only Show PBTs"
+            attribute="pbts"
+            defaultChecked={false}
+            onClick={onFilterChange}
+          />
         </div>
       </div>
     </div>
