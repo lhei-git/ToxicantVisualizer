@@ -100,16 +100,18 @@ class MapContainer extends Component {
   onMarkerClick(props) {
     const showing = this.state.showingInfoWindow;
     if (!showing || !shallowEqual(this.state.activeMarker, props.entry)) {
-      this.setState({
-        activeMarker: props.entry,
-        showingInfoWindow: true,
-        hasMoved: true,
-      }, () => {
-        this.map.setCenter(props.marker.position);
-        this.map.setZoom(14);
-        this.props.onMarkerClick(props.entry.chemicals);
-      });
-
+      this.setState(
+        {
+          activeMarker: props.entry,
+          showingInfoWindow: true,
+          hasMoved: true,
+        },
+        () => {
+          this.map.setCenter(props.marker.position);
+          this.map.setZoom(14);
+          this.props.onMarkerClick(props.entry.chemicals);
+        }
+      );
     } else {
       this.setState({
         showingInfoWindow: false,
@@ -202,25 +204,32 @@ class MapContainer extends Component {
     return new api.LatLngBounds(s, n);
   }
 
+  passesFilter(chemical, filters) {
+    if (
+      (filters.chemical !== "all" &&
+        chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
+      (filters.carcinogens && chemical.carcinogen === "NO") ||
+      (filters.pbts && chemical.classification.toUpperCase() !== "PBT") ||
+      (filters.dioxins && chemical.classification.toUpperCase() !== "DIOXIN") ||
+      (filters.releaseType === "air" &&
+        chemical.vet_total_releases_air === 0) ||
+      (filters.releaseType === "water" &&
+        chemical.total_releases_water === 0) ||
+      (filters.releaseType === "land" &&
+        chemical.vet_total_releases_land === 0) ||
+      (filters.releaseType === "on-site" &&
+        chemical.vet_total_releases_onsite === 0) ||
+      (filters.releaseType === "off-site" &&
+        chemical.vet_total_releases_offsite === 0)
+    )
+      return false;
+    return true;
+  }
+
   filterChemicalList(list, filters) {
     const newList = [];
     list.forEach((chemical) => {
-      if (
-        (filters.chemical !== "all" &&
-          chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
-        (filters.carcinogens && chemical.carcinogen === "NO") ||
-        (filters.releaseType === "air" &&
-          chemical.vet_total_releases_air === 0) ||
-        (filters.releaseType === "water" &&
-          chemical.total_releases_water === 0) ||
-        (filters.releaseType === "land" &&
-          chemical.vet_total_releases_land === 0) ||
-        (filters.releaseType === "on-site" &&
-          chemical.vet_total_releases_onsite === 0) ||
-        (filters.releaseType === "off-site" &&
-          chemical.vet_total_releases_offsite === 0)
-      ) {
-      } else newList.push(chemical);
+      if (this.passesFilter(chemical, filters)) newList.push(chemical);
     });
     return newList;
   }
@@ -313,12 +322,9 @@ class MapContainer extends Component {
                     <p>
                       {this.state.activeMarker.street_address} <br></br>
                       {this.state.activeMarker.city},{" "}
-                      {this.state.activeMarker.st}{" "}
-                      {this.state.activeMarker.zip}
+                      {this.state.activeMarker.st} {this.state.activeMarker.zip}
                     </p>
-                    <p>
-                      Industry: {this.state.activeMarker.industry_sector}
-                    </p>
+                    <p>Industry: {this.state.activeMarker.industry_sector}</p>
                     <p>
                       Total Toxicants Released:{" "}
                       <span style={{ fontWeight: "bold" }}>

@@ -41,6 +41,7 @@ const initialState = {
   filters: {
     chemical: "all",
     dioxins: false,
+    pbts: false,
     carcinogens: false,
     releaseType: "all",
     year: 2018,
