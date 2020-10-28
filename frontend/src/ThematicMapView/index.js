@@ -2,7 +2,7 @@ import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
 // import Loader from 'react-loader-spinner';
 import LoadingSpinner from "../LoadingSpinner";
-import axios from "axios";
+import vetapi from "../api/vetapi";
 const React = require("react");
 const Component = React.Component;
 
@@ -142,7 +142,7 @@ class ThematicMapView extends Component {
     var minValue = 100000000000000;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-    await axios
+    await vetapi
       .get("/stats/county/all?year=" + filterYear) //TODO: CHANGE ME TO THE CORRECT LINK
       .then((response) => {
         l = response.data;
@@ -171,7 +171,7 @@ class ThematicMapView extends Component {
     var minValue = 100000000000000;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-    await axios
+    await vetapi
       .get("/stats/state/all?year=" + filterYear) //TODO: CHANGE ME TO THE CORRECT LINK
       .then((response) => {
         l = response.data;
