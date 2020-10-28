@@ -15,7 +15,8 @@ import PubChemFields from "./PubChemFields";
 import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
-import { useReducer } from "react";
+import ThematicMapView from "./ThematicMapView/index.js";
+import { useReducer, useRef, useEffect } from "react";
 import { formatChemical } from "./helpers";
 const geocoder = require("./api/geocoder");
 const React = require("react");
@@ -27,6 +28,7 @@ const INITIAL_CENTER = {
 
 const initialState = {
   location: localStorage.getItem("searchedLocation") || "",
+  altLocation: "",
   numFacilities: 0,
   lastSearch: "",
   center: INITIAL_CENTER,
@@ -35,6 +37,7 @@ const initialState = {
   chemicals: [],
   selectedChemicalList: [],
   currentChemical: "",
+  activeTab: 0,
   filters: {
     chemical: "all",
     dioxins: false,
@@ -48,10 +51,11 @@ const reducer = (state, action) => {
   switch (action.type) {
     case "setLocation":
       return { ...state, location: action.payload };
+    case "setAltLocation":
+      return { ...state, altLocation: action.payload };
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
-      console.log(action.payload);
       return { ...state, filters: action.payload };
     case "setChemicals":
       return {
@@ -80,6 +84,8 @@ const reducer = (state, action) => {
       return { ...state, lastSearch: action.payload };
     case "showPubchemInfo":
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
+    case "setActiveTab":
+      return { ...state, activeTab: action.payload };
     case "refresh":
       return {
         ...state,
@@ -92,6 +98,7 @@ const reducer = (state, action) => {
 };
 
 const setLocation = (payload) => ({ type: "setLocation", payload });
+const setAltLocation = (payload) => ({ type: "setAltLocation", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
@@ -99,6 +106,7 @@ const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
 const setMapView = (payload) => ({ type: "setMapView", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
+const setActiveTab = (payload) => ({ type: "setActiveTab", payload });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
@@ -144,19 +152,27 @@ const Footer = () => {
   );
 };
 
+const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
+// General scroll to element function
+
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const summaryRef = useRef();
+  const graphRef = useRef();
+  const thematicRef = useRef();
+
+  const executeScroll = (ref) => scrollToRef(ref);
 
   // fetches data when component is updated
   React.useEffect(() => {
     if (state.viewport === null) geocodeLocation(state.location);
-  });
+  }, []);
 
-  function handleSearchSubmit() {
-    geocodeLocation(state.location)
+  function handleSearchSubmit(location) {
+    geocodeLocation(location)
       .then(() => {
-        dispatch(setLastSearch(state.location));
-        history.push("/map");
+        dispatch(setLastSearch(location));
+        history.push("/fullview");
       })
       .catch((err) => {
         console.log(err);
@@ -176,34 +192,79 @@ const App = (props) => {
   return (
     <Router history={history}>
       <div className="app-container">
-        {/* <nav className="navbar">
-          <div>
-            <ul>
-              <li>
-                <Link to="/">HOME</Link>
-              </li>
-
-              <li>
-                <Link to="/map">MAP</Link>
-              </li>
-              <li>
-                <Link to="/graphs">GRAPHS</Link>
-              </li>
-            </ul>
-          </div>
-        </nav> */}
         <Switch>
-          <Route path="/map">
-            <div className="search"></div>
-            <div className="title">
+          <Route path="/fullview">
+            <div className="navigation">
               <div className="go-home">
                 <Link to="/"> &lt; Back to home</Link>
               </div>
-              Visualizer of Environmental Toxicants (VET)
+              {/* <div className="flex-item">
+                <div className="alt-input">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSearchSubmit(altLocationInput.current.value);
+                    }}
+                  >
+                    <label htmlFor="alt-input">Location:</label>
+                    <input
+                      type="text"
+                      name="alt-input"
+                      id=""
+                      value={state.altLocation}
+                      onChange={(event) => {
+                        dispatch(setAltLocation(event.target.value));
+                      }}
+                      ref={altLocationInput}
+                    />
+                  </form>
+                </div>
+              </div> */}
+              <ul>
+                <li
+                  className={state.activeTab === 0 ? "active" : ""}
+                  onClick={() => {
+                    executeScroll(summaryRef);
+                    dispatch(setActiveTab(0));
+                  }}
+                >
+                  Summary
+                </li>
+                <li
+                  className={state.activeTab === 1 ? "active" : ""}
+                  onClick={() => {
+                    executeScroll(graphRef);
+                    dispatch(setActiveTab(1));
+                  }}
+                >
+                  Graphs
+                </li>
+                <li
+                  className={state.activeTab === 2 ? "active" : ""}
+                  onClick={() => {
+                    executeScroll(thematicRef);
+                    dispatch(setActiveTab(2));
+                  }}
+                >
+                  Thematic Maps
+                </li>
+              </ul>
             </div>
+            {/* <div className="title">
+              <div className="go-home">
+                <Link to="/"> &lt; Back to home</Link>
+              </div>
+              <div className="hamburger">
+                <img
+                  src={require("./../src/assets/hamburger_icon.svg")}
+                  alt=""
+                />
+              </div>
+            </div> */}
             <div className="map-view">
               <div className="filter-wrapper">
-                <div className="filters">
+                {/* VET MAP FILTER */}
+                <div className="filters" ref={summaryRef}>
                   <UserControlPanel
                     chemicals={state.selectedChemicalList}
                     filters={Object.assign({}, state.filters)}
@@ -221,6 +282,7 @@ const App = (props) => {
                     >
                       &lt; Back to Chemicals
                     </div>
+                    {/* PUBCHEM DATA */}
                     <PubChemFields chemName={state.currentChemical} />
                   </div>
                 ) : (
@@ -232,7 +294,9 @@ const App = (props) => {
                         </div>
                       </div>
                     ) : (
-                      <div>Released Toxicants (click for info)</div>
+                      <div className="header">
+                        Released Toxicants (click for info)
+                      </div>
                     )}
                     <ChemicalList
                       onClick={(chemical) => {
@@ -244,6 +308,7 @@ const App = (props) => {
                   </div>
                 )}
               </div>
+              {/* GOOGLE MAPS RENDER */}
               <div className="map-wrapper">
                 {state.viewport && (
                   <MapContainer
@@ -263,16 +328,23 @@ const App = (props) => {
                 )}
               </div>
             </div>
-            <GraphView viewport={state.viewport}></GraphView>
+            {/* VET GRAPHS */}
+            <div className="graph-view" ref={graphRef}>
+              <GraphView
+                viewport={state.viewport}
+                year={state.filters.year}
+              ></GraphView>
+            </div>
+            {/* THEMATIC (CHLOROPLETH) MAPS */}
+            <div className="thematic-map-view" ref={thematicRef}>
+              <ThematicMapView year={state.filters.year}></ThematicMapView>
+            </div>
             {/* <Footer /> */}
-          </Route>
-          <Route path="/graphs">
-            <GraphView></GraphView>
           </Route>
           <Route path="/">
             <Home
               onSearchChange={(search) => dispatch(setLocation(search))}
-              onSearchSubmit={handleSearchSubmit}
+              onSearchSubmit={() => handleSearchSubmit(state.location)}
             />
             <Footer />
           </Route>
