@@ -1,5 +1,16 @@
 version: "3.8"
 services:
+  static:
+    build: 
+      context: ./frontend
+      dockerfile: static.Dockerfile
+    ports: 
+    - 3001:80
+    volumes: 
+    - ./frontend:/reactApp
+    - /reactApp/node_modules
+    depends_on: 
+    - backend
   frontend:
     build: ./frontend
     ports: 
