@@ -101,9 +101,6 @@ class ThematicMapView extends Component {
                 geoUrl={stateGeoUrl}
                 type={"states"}
               />
-              <ReactTooltip multiline={true} html={true}>
-                {this.state.content}
-              </ReactTooltip>
             </>
           ) : (
             <LoadSpinner />
