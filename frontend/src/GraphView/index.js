@@ -413,7 +413,71 @@ async function TimelineTopFacilities(props) {
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis type="number" unit="lbs"/>
+            <YAxis type="number" unit="lbs" />
+            <Tooltip />
+            <Legend />
+            {lines}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+async function TimelineTopParents(props) {
+  try {
+    const { northeast, southwest } = props.viewport;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+    };
+    const res = await vetapi.get(`/stats/location/timeline/parent_releases`, {
+      params,
+    });
+    const keys = Object.keys(res.data);
+    const data = res.data.years.map((year) => {
+      const obj = { year };
+      keys.forEach((key) => {
+        if (key !== "years") {
+          const x = res.data[key].find((fac) => fac["year"] === year);
+          if (x) {
+            obj[key] = x.total;
+          }
+        }
+      });
+      return obj;
+    });
+    const lines = keys.map((k, i) => (
+      <Line
+        type="monotone"
+        dataKey={k}
+        stroke={colors[i] || "#8884d8"}
+        strokeWidth={3}
+        activeDot={{ r: 8 }}
+      ></Line>
+    ));
+    return (
+      <div className="top-ten parents">
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
+          <LineChart
+            width={500}
+            height={300}
+            data={data}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" />
+            <YAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend />
             {lines}
@@ -477,7 +541,7 @@ async function TimelineTopChemicals(props) {
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis type="number" unit="lbs"/>
+            <YAxis type="number" unit="lbs" />
             <Tooltip />
             <Legend />
             {lines}
@@ -529,7 +593,13 @@ function GraphView(props) {
         graph={TimelineTopFacilities}
         title="Total Releases for Top Ten Facilities (in lbs)"
       ></GraphContainer>
-        <GraphContainer
+      <GraphContainer
+        viewport={props.viewport}
+        name="top_graphs"
+        graph={TimelineTopParents}
+        title="Total Releases for Top Ten Parent Companies (in lbs)"
+      ></GraphContainer>
+      <GraphContainer
         viewport={props.viewport}
         name="top_graphs"
         graph={TimelineTopChemicals}
