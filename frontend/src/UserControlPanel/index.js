@@ -91,7 +91,7 @@ function UserControlPanel(props) {
             onClick={onFilterChange}
           />
           <ChemTypeSelector
-            title="Only Show dioxins"
+            title="Only Show Dioxins"
             attribute="dioxins"
             defaultChecked={false}
             onClick={onFilterChange}
