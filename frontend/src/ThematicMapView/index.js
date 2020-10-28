@@ -18,7 +18,8 @@ class ThematicMapView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      content: "",
+      contentState: "",
+      contentCounty: "",
       stateData: null,
       stateMax: null,
       stateMin: null,
@@ -33,7 +34,8 @@ class ThematicMapView extends Component {
       stateMap: null,
     };
 
-    this.handleContent = this.handleContent.bind(this);
+    this.handleContentState = this.handleContentState.bind(this);
+    this.handleContentCounty = this.handleContentCounty.bind(this);
     this.state.filterYear = 2018;
     this.state.filterYear = 2018;
     this.state.filterType = "totalonsite";
@@ -75,7 +77,12 @@ class ThematicMapView extends Component {
   }
 
   //sets tooltip content for the maps
-  handleContent(content) {
+  handleContentState(content) {
+    this.setState({ content: content });
+  }
+
+    //sets tooltip content for the maps
+  handleContentCounty(content) {
     this.setState({ content: content });
   }
 
@@ -92,7 +99,7 @@ class ThematicMapView extends Component {
           {this.state.stateData ? (
             <>
               <ThematicMap
-                setTooltipContent={this.handleContent}
+                setTooltipContent={this.handleContentState}
                 data={this.state.stateData}
                 maxValue={this.state.stateMax}
                 minValue={this.state.stateMin}
@@ -101,6 +108,9 @@ class ThematicMapView extends Component {
                 geoUrl={stateGeoUrl}
                 type={"states"}
               />
+              <ReactTooltip multiline={true} html={true}>
+                {this.state.contentState}
+              </ReactTooltip>
             </>
           ) : (
             <LoadSpinner />
@@ -112,7 +122,7 @@ class ThematicMapView extends Component {
           {this.state.countyData ? (
             <>
               <ThematicMap
-                setTooltipContent={this.handleContent}
+                setTooltipContent={this.handleContentCounty}
                 data={this.state.countyData}
                 maxValue={this.state.countyMax}
                 minValue={this.state.countyMin}
