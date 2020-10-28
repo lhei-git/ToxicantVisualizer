@@ -156,7 +156,7 @@ const App = (props) => {
     geocodeLocation(state.location)
       .then(() => {
         dispatch(setLastSearch(state.location));
-        history.push("/map");
+        history.push("/fullview");
       })
       .catch((err) => {
         console.log(err);
@@ -193,7 +193,7 @@ const App = (props) => {
           </div>
         </nav> */}
         <Switch>
-          <Route path="/map">
+          <Route path="/fullview">
             <div className="search"></div>
             <div className="title">
               <div className="go-home">
@@ -203,6 +203,7 @@ const App = (props) => {
             </div>
             <div className="map-view">
               <div className="filter-wrapper">
+                {/* VET MAP FILTER */}
                 <div className="filters">
                   <UserControlPanel
                     chemicals={state.selectedChemicalList}
@@ -221,6 +222,7 @@ const App = (props) => {
                     >
                       &lt; Back to Chemicals
                     </div>
+                    {/* PUBCHEM DATA */}
                     <PubChemFields chemName={state.currentChemical} />
                   </div>
                 ) : (
@@ -246,6 +248,7 @@ const App = (props) => {
                   </div>
                 )}
               </div>
+              {/* GOOGLE MAPS RENDER */}
               <div className="map-wrapper">
                 {state.viewport && (
                   <MapContainer
@@ -265,16 +268,15 @@ const App = (props) => {
                 )}
               </div>
             </div>
+            {/* VET GRAPHS */}
             <GraphView
               viewport={state.viewport}
               year={state.filters.year}
             ></GraphView>
+            {/* THEMATIC (CHLOROPLETH) MAPS */}
+            <ThematicMapView year={state.filters.year}></ThematicMapView>
+
             {/* <Footer /> */}
-          </Route>
-          <Route path="/thematicmaps">
-            <div className="thematic-Maps">
-              <ThematicMapView year={state.filters.year}></ThematicMapView>
-            </div>
           </Route>
           <Route path="/">
             <Home

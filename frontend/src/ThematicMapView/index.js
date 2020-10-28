@@ -3,6 +3,7 @@ import ThematicMap from "../ThematicMap/index.js";
 // import Loader from 'react-loader-spinner';
 import LoadingSpinner from "../LoadingSpinner";
 import vetapi from "../api/vetapi";
+import './index.css';
 const React = require("react");
 const Component = React.Component;
 
@@ -85,9 +86,9 @@ class ThematicMapView extends Component {
       this.state.filterType !== null ? this.state.filterType : "totalonsite";
 
     return (
-      <>
-        <div className="thematic-maps-container">
-          <h1>State Data</h1>
+      <div className="thematic-view-container">
+        <div className="flex-item">
+          <h1>Total Releases By State (all types)</h1>
           {this.state.stateData ? (
             <>
               <ThematicMap
@@ -109,8 +110,8 @@ class ThematicMapView extends Component {
           )}
         </div>
 
-        <div>
-          <h1>County Data</h1>
+        <div className="flex-item">
+          <h1>Total Releases By County (all types)</h1>
           {this.state.countyData ? (
             <>
               <ThematicMap
@@ -131,7 +132,7 @@ class ThematicMapView extends Component {
             <LoadSpinner />
           )}
         </div>
-      </>
+      </div>
     );
   }
 
