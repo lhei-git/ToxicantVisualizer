@@ -86,7 +86,7 @@ class ThematicMapView extends Component {
 
     return (
       <>
-        <div style={{ height: 1600 }}>
+        <div className="thematic-maps-container">
           <h1>State Data</h1>
           {this.state.stateData ? (
             <>
