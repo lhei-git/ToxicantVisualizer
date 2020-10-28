@@ -40,7 +40,13 @@ function MarkerCluster(props) {
             lng: marker.position.lng,
           },
           map: map,
-          meta: marker.meta,
+          facility: marker.meta.facility,
+          street_address: marker.meta.street_address,
+          city: marker.meta.city,
+          ar: marker.meta.ar,
+          zip: marker.meta.zip,
+          industry_sector: marker.meta.industry_sector,
+          chemicals: marker.meta.chemicals,
           name: marker.name,
           icon: {
             url: require(`./../../../src/assets/marker-${marker.color}.png`),
@@ -62,7 +68,7 @@ function MarkerCluster(props) {
       });
 
       const clusterer = new MarkerClusterer(map, mapMarkers, {
-        minimumClusterSize: 10,
+        minimumClusterSize: props.minimumClusterSize,
         imagePath:
           "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m",
       });
@@ -81,6 +87,7 @@ function MarkerCluster(props) {
 
 MarkerCluster.propTypes = {
   map: PropTypes.object,
+  minimumClusterSize: PropTypes.number.isRequired,
   google: PropTypes.object,
   markers: PropTypes.arrayOf(
     PropTypes.shape({

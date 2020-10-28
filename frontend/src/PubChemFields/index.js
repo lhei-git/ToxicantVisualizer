@@ -13,6 +13,8 @@ function Link(props) {
   );
 }
 
+function handleError(err) {}
+
 /* Pharmacology Component */
 function Pharmacology(props) {
   const [pubchemData, setPubchemData] = React.useState(null);
@@ -35,7 +37,7 @@ function Pharmacology(props) {
           .StringWithMarkup[0].String;
       setPubchemData(res);
     } catch (err) {
-      console.log(err);
+      handleError(err);
     }
   }
 
@@ -76,7 +78,7 @@ function HazardStatements(props) {
       const data = parseGHSData(response);
       setPubchemData(data);
     } catch (err) {
-      console.log(err);
+      handleError(err);
     }
   }
 
@@ -141,7 +143,7 @@ function Toxicity(props) {
       const data = parseToxicityData(response);
       setPubchemData(data);
     } catch (err) {
-      console.log(err);
+      handleError(err);
     }
   }
 
@@ -228,19 +230,28 @@ class PubChemFields extends Component {
     if (this.props.chemName !== "") this.getPugRestData(this.props.chemName);
   }
 
-  componentDidUpdate(prevProps) {
-    if (
-      this.props.chemName !== "" &&
-      prevProps.chemName !== this.props.chemName
-    ) {
-      this.setState({
-        cid: null,
-        formula: null,
-        description: null,
-      });
-      this.getPugRestData(this.props.chemName);
-    }
-  }
+  /* UPDATE HOOK NOT NEEDED as this component is recreated on each chemical click. 
+  TODO: prevent component recreation */
+
+  // componentDidUpdate(prevProps) {
+  //   if (
+  //     this.props.chemName !== "" &&
+  //     prevProps.chemName !== this.props.chemName
+  //   ) {
+  //     this.setState(
+  //       {
+  //         cid: null,
+  //         formula: null,
+  //         description: null,
+  //       },
+  //       () => {
+  //         this.getPugRestData(this.props.chemName);
+  //       }
+  //     );
+  //   } else {
+  //     console.log(prevProps.chemName, this.props.chemName);
+  //   }
+  // }
 
   /* Composition of all sections */
   Content(props) {

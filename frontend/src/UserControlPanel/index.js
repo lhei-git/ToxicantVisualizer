@@ -3,7 +3,7 @@ import "../index.css";
 import ChemTypeSelector from "./ChemTypeSelector.js";
 const React = require("react");
 
-const startYear = 2005;
+const startYear = 2006;
 const endYear = 2018;
 const types = ["all", "air", "water", "land", "off-site", "on-site"];
 
