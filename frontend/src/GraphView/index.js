@@ -134,7 +134,7 @@ async function TimelineTotal(props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" tick={{ fill: "#FFF" }}/>
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip />
+            <Tooltip contentStyle={{color: "#000"}}/>
             <Legend />
             <Line
               type="monotone"
@@ -276,7 +276,7 @@ async function GraphTopTenFacilities(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip />
+            <Tooltip contentStyle={{color: "#000"}}/>
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -337,7 +337,7 @@ async function GraphTopTenParents(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip />
+            <Tooltip contentStyle={{color: "#000"}}/>
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -393,7 +393,7 @@ async function GraphTopTenChemicals(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip />
+            <Tooltip contentStyle={{color: "#000"}}/>
             <Legend align="right" verticalAlign="top" />
             <Bar
               name="release amount (lbs)"
@@ -462,7 +462,7 @@ async function TimelineTopFacilities(props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
             <YAxis type="number" unit="lbs" />
-            <Tooltip />
+            <Tooltip contentStyle={{color: "#000"}}/>
             <Legend />
             {lines}
           </LineChart>
@@ -526,7 +526,7 @@ async function TimelineTopParents(props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
             <YAxis type="number" unit="lbs" />
-            <Tooltip />
+            <Tooltip contentStyle={{color: "#000"}}/>
             <Legend />
             {lines}
           </LineChart>
@@ -590,7 +590,7 @@ async function TimelineTopChemicals(props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
             <YAxis type="number" unit="lbs" />
-            <Tooltip />
+            <Tooltip contentStyle={{color: "#000"}}/>
             <Legend />
             {lines}
           </LineChart>
