@@ -119,9 +119,9 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur[filterType] : "#EEE")}
+                        fill={colorScale(cur ? cur[filterType] : "#ECECEC")}
                         stroke={"#000"}
-                        onMouseEnter={() => {
+                        onMouseEnter={() => { props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           const total = cur.total;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
@@ -183,9 +183,9 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur.totalonsite : "#EEE")}
+                        fill={colorScale(cur ? cur.totalonsite : "#ECECEC")}
                         stroke={"#000"}
-                        onMouseEnter={() => {
+                        onMouseEnter={() => { props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.county
@@ -225,7 +225,9 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        onMouseEnter={() => {
+                        fill={"#D3D3D3"}
+                        stroke={"#000"}
+                        onMouseEnter={() => { props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name.toUpperCase()} COUNTY</p></h1><br />
                                              No data available at this time
