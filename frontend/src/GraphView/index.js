@@ -1,6 +1,7 @@
 import "./index.css";
+import React, { Component, useEffect, useState } from "react";
 const vetapi = require("../api/vetapi");
-const React = require("react");
+const { formatChemical } = require("../helpers");
 const {
   BarChart,
   CartesianGrid,
@@ -12,7 +13,7 @@ const {
   ResponsiveContainer,
 } = require("recharts");
 
-class CustomizedXAxisTick extends React.Component {
+class CustomizedXAxisTick extends Component {
   render() {
     const { x, y, payload } = this.props;
     return (
@@ -34,7 +35,7 @@ class CustomizedXAxisTick extends React.Component {
   }
 }
 
-class CustomizedYAxisTick extends React.Component {
+class CustomizedYAxisTick extends Component {
   render() {
     const { x, y, payload } = this.props;
     return (
@@ -57,21 +58,29 @@ class CustomizedYAxisTick extends React.Component {
 }
 
 function GraphContainer(props) {
-  let [graph, setGraph] = React.useState(null);
-  let viewport = props.viewport;
+  let [graph, setGraph] = useState(null);
+  let graphProp = props.graph;
+  let viewportProp = props.viewport;
+  let yearProp = props.year;
 
-  React.useEffect(() => {
+  let innerProps = {
+    graph: graphProp,
+    viewport: viewportProp,
+    year: yearProp,
+  };
+
+  useEffect(() => {
     let mounted = true;
-    async function fetchData() {
-      if (!props.graph || !props.viewport) return;
-      const g = await props.graph(viewport);
 
+    async function fetchData() {
+      if(!viewportProp) return;
+      const g = await graphProp(innerProps);
       if (mounted) setGraph(g);
     }
     fetchData();
 
     return () => (mounted = false);
-  }, [props, viewport]);
+  }, [graphProp, viewportProp, yearProp]);
 
   return (
     <div className="graph">
@@ -81,17 +90,24 @@ function GraphContainer(props) {
   );
 }
 
-async function GraphSummary(viewport) {
-  const format = (num) => {
-    return +num.toFixed(2);
-  };
+async function GraphSummary(props) {
+  function format(x) {
+    return x.toLocaleString();
+  }
 
   try {
-    const ne = viewport.northeast;
-    const sw = viewport.southwest;
-    const res = await vetapi.get(
-      `/stats/location/summary?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
-    );
+    const { northeast, southwest } = props.viewport;
+    const { year } = props;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      year,
+    };
+    const res = await vetapi.get(`/stats/location/summary`, {
+      params,
+    });
     const body = (
       <tbody>
         <tr>
@@ -151,13 +167,20 @@ async function GraphSummary(viewport) {
   }
 }
 
-async function GraphTopTenFacilities(viewport) {
+async function GraphTopTenFacilities(props) {
   try {
-    const ne = viewport.northeast;
-    const sw = viewport.southwest;
-    const res = await vetapi.get(
-      `/stats/location/facility_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
-    );
+    const { northeast, southwest } = props.viewport;
+    const { year } = props;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      year,
+    };
+    const res = await vetapi.get(`/stats/location/facility_releases`, {
+      params,
+    });
     const data = res.data
       .sort((a, b) => b.total - a.total)
       .map((d, i) => {
@@ -201,17 +224,24 @@ async function GraphTopTenFacilities(viewport) {
     );
   } catch (err) {
     console.log(err);
-    return <div></div>;
+    return null;
   }
 }
 
-async function GraphTopTenParents(viewport) {
+async function GraphTopTenParents(props) {
   try {
-    const ne = viewport.northeast;
-    const sw = viewport.southwest;
-    const res = await vetapi.get(
-      `/stats/location/parent_releases?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
-    );
+    const { northeast, southwest } = props.viewport;
+    const { year } = props;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      year,
+    };
+    const res = await vetapi.get(`/stats/location/parent_releases`, {
+      params,
+    });
     const data = res.data
       .sort((a, b) => b.total - a.total)
       .map((d, i) => {
@@ -255,21 +285,26 @@ async function GraphTopTenParents(viewport) {
     );
   } catch (err) {
     console.log(err);
-    return <div></div>;
+    return null;
   }
 }
 
-async function GraphTopChemicals(viewport) {
+async function GraphTopChemicals(props) {
   try {
-    const ne = viewport.northeast;
-    const sw = viewport.southwest;
-    const res = await vetapi.get(
-      `/stats/location/chem_amounts?ne_lat=${ne.lat}&ne_lng=${ne.lng}&sw_lat=${sw.lat}&sw_lng=${sw.lng}`
-    );
+    const { northeast, southwest } = props.viewport;
+    const { year } = props;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      year,
+    };
+    const res = await vetapi.get(`/stats/location/chem_amounts`, { params });
     const data = res.data
       .map((d, i) => {
         return {
-          name: d.chemical,
+          name: formatChemical(d.chemical),
           pv: d.total,
         };
       })
@@ -309,7 +344,7 @@ async function GraphTopChemicals(viewport) {
     );
   } catch (err) {
     console.log(err);
-    return <div></div>;
+    return null;
   }
 }
 
@@ -318,6 +353,7 @@ function GraphView(props) {
     <div className="graph-container">
       <GraphContainer
         viewport={props.viewport}
+        year={props.year}
         name="summary"
         hidden={false}
         graph={GraphSummary}
@@ -325,18 +361,21 @@ function GraphView(props) {
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        year={props.year}
         name="total_facilities"
         graph={GraphTopTenFacilities}
         title="Total On-Site Releases for Top 10 Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        year={props.year}
         name="total_parents"
         graph={GraphTopTenParents}
         title="Total On-Site Releases for Top 10 Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        year={props.year}
         name="top_graphs"
         graph={GraphTopChemicals}
         title="Top Ten Chemicals (in lbs)"

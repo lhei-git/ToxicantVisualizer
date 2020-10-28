@@ -51,7 +51,6 @@ const reducer = (state, action) => {
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
-      console.log(action.payload);
       return { ...state, filters: action.payload };
     case "setChemicals":
       return {
@@ -232,7 +231,7 @@ const App = (props) => {
                         </div>
                       </div>
                     ) : (
-                      <div>Released Toxicants (click for info)</div>
+                      <div className="header">Released Toxicants (click for info)</div>
                     )}
                     <ChemicalList
                       onClick={(chemical) => {
@@ -263,12 +262,12 @@ const App = (props) => {
                 )}
               </div>
             </div>
-            <GraphView viewport={state.viewport}></GraphView>
+            <GraphView viewport={state.viewport} year={state.filters.year}></GraphView>
             {/* <Footer /> */}
           </Route>
-          <Route path="/graphs">
-            <GraphView></GraphView>
-          </Route>
+          {/* <Route path="/graphs">
+            <GraphView ></GraphView>
+          </Route> */}
           <Route path="/">
             <Home
               onSearchChange={(search) => dispatch(setLocation(search))}

@@ -2,6 +2,7 @@ import "./index.css";
 import "../index.css";
 import mapStyles from "./standard";
 import MarkerCluster from "./MarkerClusterer";
+import LoadingSpinner from "../LoadingSpinner";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
 const flatten = require("./flatten");
@@ -267,20 +268,7 @@ class MapContainer extends Component {
         {this.state.isLoading && (
           <div className="loading-overlay">
             <div className="spinner">
-              <div className="lds-spinner">
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-              </div>
+                <LoadingSpinner></LoadingSpinner>
             </div>
           </div>
         )}
@@ -308,6 +296,7 @@ class MapContainer extends Component {
                 click={this.onMarkerClick}
                 mouseover={this.onMouseOver}
                 mouseout={this.onMouseOut}
+                minimumClusterSize={15}
               />
             )}
             {/* {this.state.markers} */}
@@ -332,8 +321,7 @@ class MapContainer extends Component {
                       Total Toxicants Released:{" "}
                       {
                         +this.state.activeMarker.meta.chemicals
-                          .reduce((acc, cur) => acc + cur.vet_total_releases, 0)
-                          .toFixed(2)
+                          .reduce((acc, cur) => acc + cur.vet_total_releases, 0).toLocaleString()
                       }{" "}
                       lbs
                     </p>

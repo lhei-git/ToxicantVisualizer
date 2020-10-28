@@ -102,6 +102,14 @@
   overflow-y: auto;
 }
 
+.filter-wrapper .chemicals .header, .pubchem .back {
+  margin: 15px 0;
+  padding: 0 10px;
+  font-size: 20px;
+  font-weight: bold;
+  /* background: rgb(255, 183, 255); */
+}
+
 .filter-wrapper .chemicals ol li {
   padding: 3px 0;
   font-size: 18px;
@@ -127,9 +135,6 @@
 }
 
 .pubchem .back {
-  /* width: 100%; */
-  margin: 2px 10px;
-  box-sizing: border-box;
   text-align: right;
 }
 
