@@ -38,6 +38,7 @@ const initialState = {
   selectedChemicalList: [],
   currentChemical: "",
   activeTab: 0,
+  error: false,
   filters: {
     chemical: "all",
     dioxins: false,
@@ -50,6 +51,8 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case "setError":
+      return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
     case "setAltLocation":
@@ -99,7 +102,7 @@ const reducer = (state, action) => {
 };
 
 const setLocation = (payload) => ({ type: "setLocation", payload });
-const setAltLocation = (payload) => ({ type: "setAltLocation", payload });
+const setError = (payload) => ({ type: "setError", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
@@ -164,18 +167,36 @@ const App = (props) => {
 
   const executeScroll = (ref) => scrollToRef(ref);
 
+  const handleScroll = (event) => {
+    const cur = event.target.scrollingElement.scrollTop;
+    if (cur <= summaryRef.current.offsetTop) {
+      dispatch(setActiveTab(0));
+    } else if (cur <= graphRef.current.offsetTop) {
+      dispatch(setActiveTab(1));
+    } else {
+      dispatch(setActiveTab(2));
+    }
+  };
+
   // fetches data when component is updated
   React.useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+
     if (state.viewport === null) geocodeLocation(state.location);
   }, []);
 
   function handleSearchSubmit(location) {
     geocodeLocation(location)
       .then(() => {
+        dispatch(setError(false));
         dispatch(setLastSearch(location));
         history.push("/fullview");
       })
       .catch((err) => {
+        dispatch(setError(true));
+        setTimeout(() => {
+          dispatch(setError(false));
+        }, 5000);
         console.log(err);
       });
   }
@@ -344,6 +365,7 @@ const App = (props) => {
           </Route>
           <Route path="/">
             <Home
+              isError={state.error}
               onSearchChange={(search) => dispatch(setLocation(search))}
               onSearchSubmit={() => handleSearchSubmit(state.location)}
             />
