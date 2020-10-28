@@ -116,8 +116,23 @@ def top_parentco_releases(request):
                                   & Q(year=y) & ~Q(parent_co_name="NA")).values('parent_co_name').annotate(total=Sum('vet_total_releases_onsite')).annotate(land=Sum('vet_total_releases_land')).annotate(air=Sum('vet_total_releases_air')).annotate(water=Sum('total_releases_water')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
-# stats/location/facility_releases
+def timeline_top_parentco_releases(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                  & Q(longitude__lt=ne_lng)
+                                  & Q(longitude__gt=sw_lng)
+                                  & Q(year=2018) & ~Q(parent_co_name="NA")).values('parent_co_name').annotate(total=Sum('vet_total_releases')).order_by('-total')[:10]
 
+    response = {}
+    response['years'] = [f['year'] for f in tri.objects.values("year").distinct("year").order_by("year")]
+    for c in queryset:
+      chem = c['parent_co_name']
+      response[chem] = list(tri.objects.filter(Q(latitude__lt=ne_lat) & Q(
+          latitude__gt=sw_lat) & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng) & Q(parent_co_name=chem)).values('year').annotate(total=Sum('vet_total_releases')))
+    return HttpResponse(json.dumps(response), content_type='application/json')
 
 def top_facility_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
