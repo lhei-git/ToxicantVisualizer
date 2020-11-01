@@ -1,7 +1,7 @@
 module.exports = (data) => {
   let entries = data;
   const unique = [];
-  
+
   entries = entries.sort((a, b) => a.facility.localeCompare(b.facility));
 
   entries.forEach((e) => {
