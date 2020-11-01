@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
-import './index.css';
+import "./index.css";
 
 // used to produce more easily readable numbers
 const rounded = (num) => {
@@ -121,7 +121,8 @@ const thematicMap = (props) => {
                         geography={geo}
                         fill={colorScale(cur ? cur[filterType] : "#ECECEC")}
                         stroke={"#000"}
-                        onMouseEnter={() => { props.setTooltipContent(null);
+                        onMouseEnter={() => {
+                          props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           const total = cur.total;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
@@ -185,7 +186,8 @@ const thematicMap = (props) => {
                         geography={geo}
                         fill={colorScale(cur ? cur.totalonsite : "#ECECEC")}
                         stroke={"#000"}
-                        onMouseEnter={() => { props.setTooltipContent(null);
+                        onMouseEnter={() => {
+                          props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.county
@@ -227,7 +229,8 @@ const thematicMap = (props) => {
                         geography={geo}
                         fill={"#D3D3D3"}
                         stroke={"#000"}
-                        onMouseEnter={() => { props.setTooltipContent(null);
+                        onMouseEnter={() => {
+                          props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name.toUpperCase()} COUNTY</p></h1><br />
                                              No data available at this time
