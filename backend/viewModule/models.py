@@ -94,6 +94,7 @@ class Chemical(models.Model):
     metal_category = models.IntegerField(blank=True, null=True)
     carcinogen = models.TextField(blank=True, null=True)
     unit_of_measure = models.TextField(blank=True, null=True)
+    facilities = models.ManyToManyField(Facility, through='Release')
 
     class Meta:
         db_table = 'chemicals'
