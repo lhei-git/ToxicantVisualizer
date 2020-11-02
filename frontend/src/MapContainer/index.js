@@ -136,7 +136,7 @@ class MapContainer extends Component {
       year: this.props.filters.year,
     };
     vetapi
-      .get(`/facilities`, { params })
+      .get(`/points`, { params })
       .then((res) => {
         const data = res.data
           .map((d) => ({

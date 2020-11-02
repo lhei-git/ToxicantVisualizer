@@ -2,6 +2,9 @@
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q, Sum
 from viewModule.models import Tri as tri
+from viewModule.models import Facility as facility
+from viewModule.models import Chemical as chemical
+from viewModule.models import Release as release
 from viewModule.serializers import TriSerializer as t_szr
 from django.core import serializers as szs
 import json
@@ -29,6 +32,24 @@ def points(request):
                                                     & Q(longitude__gt=sw_lng)
                                                     & Q(year=y))
 
+    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+
+
+def get_facilities(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    # y = int(request.GET.get('year', default=2018))
+    raw = facility.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                  & Q(longitude__lt=ne_lng)
+                                  & Q(longitude__gt=sw_lng))
+    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+
+
+def get_releases(request, facility_id):
+    y = int(request.GET.get('year', default=2018))
+    raw = release.objects.filter(Q(facility_id=facility_id) & Q(year=y))
     return HttpResponse(szs.serialize('json', raw), content_type='application/json')
 
 def dist_fac(request):
