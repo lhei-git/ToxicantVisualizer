@@ -39,4 +39,4 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
     volumes: 
-    - ./backend/pgdump.sql:/docker-entrypoint-initdb.d/dump.sql
+    - ./backend/pgdump.sql:/docker-entrypoint-initdb.d/pgdump.sql
