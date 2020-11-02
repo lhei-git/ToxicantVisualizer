@@ -1,12 +1,13 @@
 # This page handles requests by individual "view" functions
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Subquery
 from viewModule.models import Tri as tri
 from viewModule.models import Facility as facility
 from viewModule.models import Chemical as chemical
 from viewModule.models import Release as release
 from viewModule.serializers import TriSerializer as t_szr
 from django.core import serializers as szs
+from django.core.serializers.json import DjangoJSONEncoder
 import json
 import re
 
@@ -40,11 +41,12 @@ def get_facilities(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    # y = int(request.GET.get('year', default=2018))
+    y = int(request.GET.get('year', default=2018))
     raw = facility.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                   & Q(longitude__lt=ne_lng)
-                                  & Q(longitude__gt=sw_lng))
-    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+                                  & Q(longitude__gt=sw_lng) & Q(release__year=y)).annotate(total=Sum('release__total')).values()
+    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
+    return HttpResponse(response, content_type='application/json')
 
 
 def get_releases(request, facility_id):
