@@ -67,7 +67,7 @@ class Tri(models.Model):
 
 class Facility(models.Model):
     id = models.TextField(db_column='trf_id', primary_key=True)
-    facility_name = models.TextField(blank=True, null=True)
+    name = models.TextField(db_column='facility_name', blank=True, null=True)
     street_address = models.TextField(blank=True, null=True)
     city = models.TextField(blank=True, null=True)
     county = models.TextField(blank=True, null=True)
@@ -87,7 +87,7 @@ class Facility(models.Model):
 
 class Chemical(models.Model):
     id = models.TextField(db_column='compound_id', primary_key=True)
-    chemical = models.TextField(blank=True, null=True)
+    name = models.TextField(db_column='chemical', blank=True, null=True)
     clean_air_act_chemical = models.CharField(
         max_length=100, blank=True, null=True)
     classification = models.CharField(max_length=100, blank=True, null=True)
