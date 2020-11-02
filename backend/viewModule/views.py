@@ -35,16 +35,54 @@ def points(request):
 
     return HttpResponse(szs.serialize('json', raw), content_type='application/json')
 
-
+""" 
+Returns list of facilties filtered by geographic window, year, release type, and chemical classification.
+"""
 def get_facilities(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
+    release_type = request.GET.get('release_type')
     y = int(request.GET.get('year', default=2018))
-    raw = facility.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                  & Q(longitude__lt=ne_lng)
-                                  & Q(longitude__gt=sw_lng) & Q(release__year=y)).annotate(total=Sum('release__total')).values()
+
+    # filter by geographic window and year
+    filters = (Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+               & Q(longitude__lt=ne_lng)
+               & Q(longitude__gt=sw_lng) & Q(release__year=y))
+
+    # filter by release_type
+    if release_type is not None:
+        if release_type.lower() == 'air':
+            filters &= Q(release__air__gt=0)
+        elif release_type.lower() == 'water':
+            filters &= Q(release__water__gt=0)
+        elif release_type.lower() == 'land':
+            filters &= Q(release__land__gt=0)
+        elif release_type.lower() == 'on_site':
+            filters &= Q(release__on_site__gt=0)
+        elif release_type.lower() == 'off_site':
+            filters &= Q(release__off_site__gt=0)
+
+    # filter by chemicals
+    if chemical is not None:
+        filters &= Q(chemical__name=chemical)
+               
+    # filter by carcinogens, PBTs, or dioxins only
+    if carcinogen is not None:
+        filters &= Q(chemical__carcinogen='YES')
+    elif dioxin is not None:
+        filters &= Q(chemical__classification='Dioxin')
+    elif pbt is not None:
+        filters &= Q(chemical__classification='PBT')
+
+    # add sum of total releases for the facility with these filters
+    raw = facility.objects.filter(filters).annotate(
+        total=Sum('release__total')).values()
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
 
