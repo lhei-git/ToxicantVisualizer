@@ -18,6 +18,8 @@ import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
 import { useReducer, useRef, useEffect } from "react";
 import { formatChemical } from "./helpers";
+import vetapi from "./api/vetapi";
+import { format } from "prettier";
 const geocoder = require("./api/geocoder");
 const React = require("react");
 
@@ -61,11 +63,11 @@ const reducer = (state, action) => {
       return { ...state, numFacilities: action.payload };
     case "setFilters":
       return { ...state, filters: action.payload };
-    case "setChemicals":
-      return {
-        ...state,
-        selectedChemicalList: action.payload,
-      };
+    // case "setChemicals":
+    //   return {
+    //     ...state,
+    //     selectedChemicalList: action.payload,
+    //   };
     case "setCurrentChemical":
       return { ...state, currentChemical: action.payload };
     case "setMapView":
@@ -74,14 +76,11 @@ const reducer = (state, action) => {
         center: action.payload.center,
         viewport: action.payload.viewport,
       };
-    case "setMarker":
+    case "setChemicals":
       return {
         ...state,
         showPubchemInfo: false,
-        chemicals: action.payload.map((c) => ({
-          ...c,
-          name: formatChemical(c.name),
-        })),
+        chemicals: action.payload,
       };
     case "setLastSearch":
       localStorage.setItem("searchedLocation", state.location);
@@ -115,27 +114,33 @@ const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
 });
-const setMarker = (payload) => ({
-  type: "setMarker",
-  payload,
-});
+
+const getChemicals = async (facilityId) => {
+  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`);
+  const chemicals = res.data;
+  return chemicals;
+};
 
 function ChemicalList(props) {
   const { chemicals } = props;
   if (chemicals.length === 0) return <div></div>;
 
   const listItems = chemicals
-    .sort((a, b) => b.vet_total_releases - a.vet_total_releases)
-    .map((c) => (
-      <li
-        onClick={() => {
-          props.onClick(c.name);
-        }}
-        key={c.name + " " + c.vet_total_releases}
-      >
-        {c.name} ({c.vet_total_releases} lbs)
-      </li>
-    ));
+    .filter(c => c.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .map((c) => {
+      c.name = formatChemical(c.name);
+      return (
+        <li
+          onClick={() => {
+            props.onClick(c.name);
+          }}
+          key={c.name + " " + c.total}
+        >
+          {c.name} ({c.total} lbs)
+        </li>
+      );
+    });
   return (
     <div>
       <ol>{listItems}</ol>
@@ -183,7 +188,7 @@ const App = (props) => {
     window.addEventListener("scroll", handleScroll);
 
     if (state.viewport === null) geocodeLocation(state.location);
-  }, []);
+  }, [state.location, state.viewport]);
 
   function handleSearchSubmit(location) {
     geocodeLocation(location)
@@ -339,28 +344,30 @@ const App = (props) => {
                     viewport={state.viewport}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
-                    onFetchPoints={(chemicals) => {
-                      dispatch(setChemicals(chemicals));
-                    }}
+                    // onFetchPoints={(chemicals) => {
+                    //   dispatch(setChemicals(chemicals));
+                    // }}
                     onRefresh={() => dispatch(refresh())}
-                    onMarkerClick={(chemicals) =>
-                      dispatch(setMarker(chemicals))
-                    }
+                    onMarkerClick={(facilityId) => {
+                      getChemicals(facilityId).then((chemicals) =>
+                        dispatch(setChemicals(chemicals))
+                      );
+                    }}
                   />
                 )}
               </div>
             </div>
             {/* VET GRAPHS */}
             <div className="graph-view" ref={graphRef}>
-              <GraphView
+              {/* <GraphView
                 viewport={state.viewport}
                 year={state.filters.year}
-              ></GraphView>
+              ></GraphView> */}
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <div className="thematic-map-view" ref={thematicRef}>
+            {/* <div className="thematic-map-view" ref={thematicRef}>
               <ThematicMapView year={state.filters.year}></ThematicMapView>
-            </div>
+            </div> */}
             {/* <Footer /> */}
           </Route>
           <Route path="/">
