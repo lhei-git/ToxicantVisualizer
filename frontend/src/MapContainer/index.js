@@ -5,15 +5,9 @@ import MarkerCluster from "./MarkerClusterer";
 import LoadingSpinner from "../LoadingSpinner";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
-const flatten = require("./flatten");
-const { shallowEqual, formatChemical } = require("../helpers");
+const { shallowEqual } = require("../helpers");
 const Component = React.Component;
-const {
-  Map,
-  Marker,
-  InfoWindow,
-  GoogleApiWrapper,
-} = require("google-maps-react");
+const { Map, InfoWindow, GoogleApiWrapper } = require("google-maps-react");
 
 const containerStyle = {
   position: "relative",
@@ -71,17 +65,20 @@ class MapContainer extends Component {
     const newState = {};
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
-      if (this.props.filters.year !== prevProps.filters.year) {
-        this.setState({ isLoading: true }, () => {
-          this.fetchPoints(
-            this.props.viewport.northeast,
-            this.props.viewport.southwest
-          );
-        });
-      } else {
-        const oldPoints = this.state.points;
-        newState.markers = this.createMarkers(oldPoints);
-      }
+      this.setState({ isLoading: true }, () => {
+        this.fetchPoints(this.props.viewport, this.props.filters);
+      });
+      // if (this.props.filters.year !== prevProps.filters.year) {
+      //   this.setState({ isLoading: true }, () => {
+      //     this.fetchPoints(
+      //       this.props.viewport,
+      //       this.props.filters
+      //     );
+      //   });
+      // } else {
+      //   const oldPoints = this.state.points;
+      //   newState.markers = this.createMarkers(oldPoints);
+      // }
       newState.showingInfoWindow = false;
       this.setState(newState);
     }
@@ -100,14 +97,18 @@ class MapContainer extends Component {
   onMarkerClick(props) {
     const showing = this.state.showingInfoWindow;
     if (!showing || !shallowEqual(this.state.activeMarker, props.entry)) {
-      this.setState({
-        activeMarker: props.entry,
-        showingInfoWindow: true,
-        hasMoved: true,
-      });
-      this.map.setCenter(props.marker.position);
-      this.map.setZoom(14);
-      this.props.onMarkerClick(props.marker.meta.chemicals);
+      this.setState(
+        {
+          activeMarker: props.entry,
+          showingInfoWindow: true,
+          hasMoved: true,
+        },
+        () => {
+          this.map.setCenter(props.marker.position);
+          this.map.setZoom(14);
+          this.props.onMarkerClick(props.entry.meta.id);
+        }
+      );
     } else {
       this.setState({
         showingInfoWindow: false,
@@ -122,40 +123,31 @@ class MapContainer extends Component {
     });
   }
 
-  fetchPoints(ne, sw) {
+  fetchPoints(viewport, filters) {
     console.log("fetching...");
     const params = {
-      ne_lat: ne.lat,
-      ne_lng: ne.lng,
-      sw_lat: sw.lat,
-      sw_lng: sw.lng,
-      year: this.props.filters.year,
+      ne_lat: viewport.northeast.lat,
+      ne_lng: viewport.northeast.lng,
+      sw_lat: viewport.southwest.lat,
+      sw_lng: viewport.southwest.lng,
+      carcinogen: filters.carcinogens || null,
+      dioxin: filters.dioxins || null,
+      pbt: filters.pbts || null,
+      release_type: filters.releaseType,
+      year: filters.year,
     };
     vetapi
       .get(`/facilities`, { params })
       .then((res) => {
-        const data = res.data
-          .map((d) => ({
-            ...d.fields,
-            chemical: formatChemical(d.fields.chemical),
-          }))
-          .filter((d) => d.vet_total_releases !== 0);
-        this.props.onFetchPoints(this.uniq(data.map((d) => d.chemical)));
-        console.log("flattening...");
-        const points = flatten(data);
+        const data = res.data;
         this.setState({
-          points,
-          markers: this.createMarkers(points),
-          isLoading: false,
+          points: data,
+          markers: this.createMarkers(data),
         });
       })
       .catch((err) => {
         console.log(err);
       });
-  }
-
-  chemicalToTitle(chem) {
-    return chem.charAt(0) + chem.slice(1).toLowerCase();
   }
 
   handleMount(mapProps, map) {
@@ -184,7 +176,7 @@ class MapContainer extends Component {
               isLoading: true,
             },
             () => {
-              this.fetchPoints(viewport.northeast, viewport.southwest);
+              this.fetchPoints(viewport, this.props.filters);
             }
           );
         });
@@ -200,44 +192,48 @@ class MapContainer extends Component {
     return new api.LatLngBounds(s, n);
   }
 
-  filterChemicalList(list, filters) {
-    const newList = [];
-    list.forEach((chemical) => {
-      if (
-        (filters.chemical !== "all" &&
-          chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
-        (filters.carcinogens && chemical.carcinogen === "NO") ||
-        (filters.releaseType === "air" &&
-          chemical.vet_total_releases_air === 0) ||
-        (filters.releaseType === "water" &&
-          chemical.total_releases_water === 0) ||
-        (filters.releaseType === "land" &&
-          chemical.vet_total_releases_land === 0) ||
-        (filters.releaseType === "on-site" &&
-          chemical.vet_total_releases_onsite === 0) ||
-        (filters.releaseType === "off-site" &&
-          chemical.vet_total_releases_offsite === 0)
-      ) {
-      } else newList.push(chemical);
-    });
-    return newList;
-  }
+  // passesFilter(chemical, filters) {
+  //   if (
+  //     (filters.chemical !== "all" &&
+  //       chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
+  //     (filters.carcinogens && chemical.carcinogen === "NO") ||
+  //     (filters.pbts && chemical.classification.toUpperCase() !== "PBT") ||
+  //     (filters.dioxins && chemical.classification.toUpperCase() !== "DIOXIN") ||
+  //     (filters.releaseType === "air" &&
+  //       chemical.vet_total_releases_air === 0) ||
+  //     (filters.releaseType === "water" &&
+  //       chemical.total_releases_water === 0) ||
+  //     (filters.releaseType === "land" &&
+  //       chemical.vet_total_releases_land === 0) ||
+  //     (filters.releaseType === "on-site" &&
+  //       chemical.vet_total_releases_onsite === 0) ||
+  //     (filters.releaseType === "off-site" &&
+  //       chemical.vet_total_releases_offsite === 0)
+  //   )
+  //     return false;
+  //   return true;
+  // }
+
+  // filterChemicalList(list, filters) {
+  //   const newList = [];
+  //   list.forEach((chemical) => {
+  //     if (this.passesFilter(chemical, filters)) newList.push(chemical);
+  //   });
+  //   return newList;
+  // }
 
   filterFacilities(facilities) {
     return facilities
       .map((f, i) => {
-        const totalFacilityReleases = this.filterChemicalList(
-          f.chemicals,
-          this.props.filters
-        ).reduce((acc, cur) => acc + cur.vet_total_releases, 0);
-        if (totalFacilityReleases === 0) return null;
+        const total = f.total;
+        if (total === 0) return null;
         let color = 1;
 
-        if (totalFacilityReleases < 100) color = 1;
-        else if (totalFacilityReleases < 100) color = 2;
-        else if (totalFacilityReleases < 10000) color = 3;
-        else if (totalFacilityReleases < 100000) color = 4;
-        else if (totalFacilityReleases < 1000000) color = 5;
+        if (total < 100) color = 1;
+        else if (total < 100) color = 2;
+        else if (total < 10000) color = 3;
+        else if (total < 100000) color = 4;
+        else if (total < 1000000) color = 5;
         else color = 6;
 
         f.color = color;
@@ -254,9 +250,15 @@ class MapContainer extends Component {
       return {
         meta: facility,
         color: facility.color,
-        name: facility.facility,
-        position: { lat: facility.latitude, lng: facility.longitude },
+        name: facility.name,
+        position: {
+          lat: parseFloat(facility.latitude),
+          lng: parseFloat(facility.longitude),
+        },
       };
+    });
+    this.setState({
+      isLoading: false,
     });
     this.props.onUpdate(markers.length);
     return markers;
@@ -268,7 +270,7 @@ class MapContainer extends Component {
         {this.state.isLoading && (
           <div className="loading-overlay">
             <div className="spinner">
-                <LoadingSpinner></LoadingSpinner>
+              <LoadingSpinner></LoadingSpinner>
             </div>
           </div>
         )}
@@ -299,7 +301,6 @@ class MapContainer extends Component {
                 minimumClusterSize={15}
               />
             )}
-            {/* {this.state.markers} */}
             <InfoWindow
               marker={this.state.activeMarker}
               visible={this.state.showingInfoWindow}
@@ -307,11 +308,11 @@ class MapContainer extends Component {
               <div className="info-window">
                 {this.state.activeMarker !== null && (
                   <div>
-                    <h2>{this.state.activeMarker.meta.facility}</h2>
+                    <h2>{this.state.activeMarker.name}</h2>
                     <p>
                       {this.state.activeMarker.meta.street_address} <br></br>
                       {this.state.activeMarker.meta.city},{" "}
-                      {this.state.activeMarker.meta.st}{" "}
+                      {this.state.activeMarker.meta.state}{" "}
                       {this.state.activeMarker.meta.zip}
                     </p>
                     <p>
@@ -319,11 +320,9 @@ class MapContainer extends Component {
                     </p>
                     <p>
                       Total Toxicants Released:{" "}
-                      {
-                        +this.state.activeMarker.meta.chemicals
-                          .reduce((acc, cur) => acc + cur.vet_total_releases, 0).toLocaleString()
-                      }{" "}
-                      lbs
+                      <span style={{ fontWeight: "bold" }}>
+                        {this.state.activeMarker.meta.total} lbs
+                      </span>
                     </p>
                   </div>
                 )}

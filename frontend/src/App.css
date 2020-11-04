@@ -1,80 +1,82 @@
-/* NAVBAR */
-
 .app-container {
   position: relative;
   height: 100vh;
   max-height: 100%;
+
+  --primary: #9c27b0;
+  --primary-light: #d05ce3;
+  --primary-dark: #6a0080;
+
+}
+
+.navigation {
+  /* display: flex; */
+  position: fixed;
+  z-index: 100;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: #FFF;
+  background: var(--primary);
+  border-top: 10px solid var(--primary-dark);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.navigation .flex-item {
+  flex: 1;
+}
+
+.navigation ul {
+  display: inline-block;
+  margin: 0;
+  margin-left: 50px;
+  padding: 0;
+  height: 72px;
+  line-height: 72px;
+}
+
+.navigation li, .go-home {
+  display: inline-block;
+  padding: 0 20px;
+  height: 100%;
+  font-size: 20px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.navigation li.active {
+  border-bottom: 4px solid #FFF;
+
 }
 
 .go-home {
-  float: left;
   margin-left: 50px;
 }
 
-.navbar {
-  font-size: 24px;
-  color: #FFF;
-  background: purple;
-  height: 60px;
-  line-height: 60px;
-  display: flex;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  border-top: 20px solid rgb(70, 0, 70);
-}
-
-.navbar ul {
-  flex: 1;
-  margin: 0;
-  padding: 0;
-}
-
-.navbar li {
-  display: inline;
-  margin: 0 20px;
-}
-
-.navbar li a {
+.go-home a {
   text-decoration: none;
-  color: #FFF;
-  opacity: 0.7;
-}
-
-.navbar li.active a {
-  opacity: 1;
-}
-
-.navbar li a:hover {
-  text-decoration: none;
-  opacity: 1;
-}
-
-.navbar .query {
-  flex: 1;
-  text-align: right;
-  padding-right: 40px;
-}
-
-.navbar .query span {
-  color: red;
-}
-
-.title {
-  width: 100%;
-  text-align: right;
-  padding-right: 60px;
-  box-sizing: border-box;
-  font-size: 40px;
-  font-weight: bold;
-  margin: 10px 0;
+  color: #fff;
 }
 
 .map-view {
   position: relative;
   display: flex;
-  height: 72vh;
-  max-height: 80%;
+  height: calc( 100vh - 72px);
   padding: 0 50px;
-  margin: 10px 0;
+  padding-top: 120px;
+  margin-bottom: 120px;
+  box-sizing: border-box;
+  z-index: 99;
+}
+
+.thematic-map-view, .graph-view {
+  padding-top: 120px;
+  /* margin-bottom: 120px; */
+}
+
+.graph-view {
+  color: #FFF;
+  background: rgb(31, 31, 31);
 }
 
 .filter-wrapper,
@@ -102,12 +104,12 @@
   overflow-y: auto;
 }
 
-.filter-wrapper .chemicals .header, .pubchem .back {
+.filter-wrapper .chemicals .header,
+.pubchem .back {
   margin: 15px 0;
   padding: 0 10px;
   font-size: 20px;
   font-weight: bold;
-  /* background: rgb(255, 183, 255); */
 }
 
 .filter-wrapper .chemicals ol li {
@@ -158,7 +160,7 @@
   bottom: 10px;
   left: 0;
   width: 100%;
-  color: #FFF;
+  color: #fff;
   text-align: center;
 }
 
