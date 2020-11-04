@@ -294,6 +294,7 @@ class MapContainer extends Component {
           >
             {this.state.markers.length > 0 && (
               <MarkerCluster
+                releaseType={this.props.filters.releaseType}
                 markers={this.state.markers}
                 click={this.onMarkerClick}
                 mouseover={this.onMouseOver}
