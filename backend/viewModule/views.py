@@ -1,9 +1,13 @@
 # This page handles requests by individual "view" functions
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Subquery
 from viewModule.models import Tri as tri
+from viewModule.models import Facility as facility
+from viewModule.models import Chemical as chemical
+from viewModule.models import Release as release
 from viewModule.serializers import TriSerializer as t_szr
 from django.core import serializers as szs
+from django.core.serializers.json import DjangoJSONEncoder
 import json
 import re
 
@@ -30,6 +34,65 @@ def points(request):
                                                     & Q(year=y))
 
     return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+
+""" 
+Returns list of facilties filtered by geographic window, year, release type, and chemical classification.
+"""
+def get_facilities(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
+    release_type = request.GET.get('release_type')
+    y = int(request.GET.get('year', default=2018))
+
+    # filter by geographic window and year
+    filters = (Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+               & Q(longitude__lt=ne_lng)
+               & Q(longitude__gt=sw_lng) & Q(release__year=y))
+
+    # filter by release_type
+    if release_type is not None:
+        if release_type.lower() == 'air':
+            filters &= Q(release__air__gt=0)
+        elif release_type.lower() == 'water':
+            filters &= Q(release__water__gt=0)
+        elif release_type.lower() == 'land':
+            filters &= Q(release__land__gt=0)
+        elif release_type.lower() == 'on_site':
+            filters &= Q(release__on_site__gt=0)
+        elif release_type.lower() == 'off_site':
+            filters &= Q(release__off_site__gt=0)
+
+    # filter by chemicals
+    if chemical is not None:
+        filters &= Q(chemical__name=chemical)
+               
+    # filter by carcinogens, PBTs, or dioxins only
+    if carcinogen is not None:
+        filters &= Q(chemical__carcinogen='YES')
+    elif dioxin is not None:
+        filters &= Q(chemical__classification='Dioxin')
+    elif pbt is not None:
+        filters &= Q(chemical__classification='PBT')
+
+    # add sum of total releases for the facility with these filters
+    raw = facility.objects.filter(filters).annotate(
+        total=Sum('release__total')).values()
+    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
+    return HttpResponse(response, content_type='application/json')
+
+
+def get_chemicals(request, facility_id):
+    y = int(request.GET.get('year', default=2018))
+    # raw = release.objects.filter(Q(facility_id=facility_id) & Q(year=y)).select_related('chemical').values()
+    raw = chemical.objects.filter(facilities__id=facility_id, release__year=y).values().annotate(total=Sum('release__total'))
+    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
+    return HttpResponse(response, content_type='application/json')
 
 def dist_fac(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
