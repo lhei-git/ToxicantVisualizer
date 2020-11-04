@@ -50,27 +50,27 @@ class CustomizedXAxisTick extends Component {
   }
 }
 
-class CustomizedYAxisTick extends Component {
-  render() {
-    const { x, y, payload } = this.props;
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text
-          fontSize="12"
-          transform="rotate(35)"
-          x={0}
-          y={0}
-          dy={16}
-          fill="#FFF"
-        >
-          <tspan textAnchor="beginning" x="0" dy="0">
-            {payload.value}
-          </tspan>
-        </text>
-      </g>
-    );
-  }
-}
+// class CustomizedYAxisTick extends Component {
+//   render() {
+//     const { x, y, payload } = this.props;
+//     return (
+//       <g transform={`translate(${x},${y})`}>
+//         <text
+//           fontSize="12"
+//           transform="rotate(35)"
+//           x={0}
+//           y={0}
+//           dy={16}
+//           fill="#FFF"
+//         >
+//           <tspan textAnchor="beginning" x="0" dy="0">
+//             {payload.value}
+//           </tspan>
+//         </text>
+//       </g>
+//     );
+//   }
+// }
 
 function GraphContainer(props) {
   let [graph, setGraph] = useState(null);
