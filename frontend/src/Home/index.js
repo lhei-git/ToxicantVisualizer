@@ -3,7 +3,7 @@ const React = require("react");
 
 function Home(props) {
   let [searchValue, setSearchValue] = React.useState(
-    localStorage.getItem("searchedLocation") || ""
+    sessionStorage.getItem("searchedLocation") || ""
   );
 
   function onSearchChange(event) {

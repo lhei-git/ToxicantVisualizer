@@ -29,7 +29,7 @@ const INITIAL_CENTER = {
 };
 
 const initialState = {
-  location: localStorage.getItem("searchedLocation") || "",
+  location: sessionStorage.getItem("searchedLocation") || "",
   altLocation: "",
   numFacilities: 0,
   lastSearch: "",
@@ -83,7 +83,7 @@ const reducer = (state, action) => {
         chemicals: action.payload,
       };
     case "setLastSearch":
-      localStorage.setItem("searchedLocation", state.location);
+      sessionStorage.setItem("searchedLocation", state.location);
       return { ...state, lastSearch: action.payload };
     case "showPubchemInfo":
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
@@ -359,10 +359,10 @@ const App = (props) => {
             </div>
             {/* VET GRAPHS */}
             <div className="graph-view" ref={graphRef}>
-              {/* <GraphView
+              <GraphView
                 viewport={state.viewport}
                 year={state.filters.year}
-              ></GraphView> */}
+              ></GraphView>
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
             {/* <div className="thematic-map-view" ref={thematicRef}>
