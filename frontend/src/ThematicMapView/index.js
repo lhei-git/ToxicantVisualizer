@@ -44,7 +44,7 @@ class ThematicMapView extends Component {
 
   //call this function to apply new filters to the thematic maps
   //valid types: totalonsite, air, water, land, totaloffsite, total
-  //valid years: 2005 - 2018
+  //valid years: 6 - 2018
   constApplyFilter(props) {
     if (props.year) this.setState({ filterYear: props.year });
     if (props.type) this.setState({ filterType: props.type });

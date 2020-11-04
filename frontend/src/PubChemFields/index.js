@@ -101,7 +101,7 @@ function HazardStatements(props) {
       <div className="hazards">
         <a href={link}>
           <h2>
-            Hazard Statements
+            Hazards
             <Link href={link} />
           </h2>
         </a>
@@ -269,6 +269,13 @@ class PubChemFields extends Component {
             <Pharmacology cid={this.state.cid}></Pharmacology>
             <HazardStatements cid={this.state.cid}></HazardStatements>
             <Toxicity cid={this.state.cid}></Toxicity>
+            {/* <div className="diseases">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: '<iframe src="https://pubchem.ncbi.nlm.nih.gov/compound/5352425#section=Associated-Disorders-and-Diseases&fullscreen=true" width="540" height="450"></iframe>',
+                }}
+              ></div>
+            </div> */}
           </div>
         )}
       </div>

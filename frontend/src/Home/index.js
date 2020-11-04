@@ -12,6 +12,7 @@ function Home(props) {
   }
 
   function onSearchSubmit(event) {
+    if (searchValue.length === 0) return;
     event.preventDefault();
     props.onSearchSubmit();
   }
@@ -35,6 +36,7 @@ function Home(props) {
           relevant information and analyses.
         </div>
         <div className="search-bar">
+          {props.isError && <div className="error">ERROR: location not found</div>}
           <form onSubmit={onSearchSubmit}>
             <label htmlFor="search">
               Enter a zip code; a city, state combination; or a state.
@@ -45,8 +47,13 @@ function Home(props) {
               value={searchValue}
               onChange={onSearchChange}
             />
-            <label htmlFor="search">Blank box defaults to entire U.S.</label>
-            <button type="submit">Submit</button>
+            {/* <label htmlFor="search">Blank box defaults to entire U.S.</label> */}
+            <button
+              type="submit"
+              className={searchValue.length === 0 ? "hidden" : ""}
+            >
+              Submit
+            </button>
           </form>
         </div>
       </div>

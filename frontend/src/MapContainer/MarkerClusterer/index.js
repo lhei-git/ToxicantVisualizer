@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import PropTypes from "prop-types";
 
 import MarkerClusterer from "@googlemaps/markerclustererplus";
@@ -17,21 +17,21 @@ const evtNames = [
 function MarkerCluster(props) {
   const { map, google, markers } = props;
 
-  const handleEvent = ({ event, marker, entry }) => {
-    if (props[event]) {
-      props[event]({
-        props: props,
-        marker: marker,
-        event: event,
-        entry: entry,
-      });
-    }
-  };
-
   // This hook works like ComponentWillMount
   // The  hook isn't really needed, this whole thing worked without it,
   // I added the hook so that I could implement a cleanup function
   useEffect(() => {
+    const handleEvent = ({ event, marker, entry }) => {
+      if (props[event]) {
+        props[event]({
+          props: props,
+          marker: marker,
+          event: event,
+          entry: entry,
+        });
+      }
+    };
+
     if (map && markers) {
       const mapMarkers = markers.map((marker) => {
         const entry = new google.maps.Marker({
@@ -73,7 +73,7 @@ function MarkerCluster(props) {
         clusterer.clearMarkers();
       };
     }
-  }, [map, google, markers]);
+  }, [map, google, markers, props.minimumClusterSize]);
 
   // Do we need to render anything??
   return null;
