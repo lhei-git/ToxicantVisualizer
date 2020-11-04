@@ -87,10 +87,12 @@ def get_facilities(request):
     return HttpResponse(response, content_type='application/json')
 
 
-def get_releases(request, facility_id):
+def get_chemicals(request, facility_id):
     y = int(request.GET.get('year', default=2018))
-    raw = release.objects.filter(Q(facility_id=facility_id) & Q(year=y))
-    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
+    # raw = release.objects.filter(Q(facility_id=facility_id) & Q(year=y)).select_related('chemical').values()
+    raw = chemical.objects.filter(facilities__id=facility_id, release__year=y).values().annotate(total=Sum('release__total'))
+    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
+    return HttpResponse(response, content_type='application/json')
 
 def dist_fac(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
