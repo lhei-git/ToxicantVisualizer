@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import points, get_facilities, get_releases, attr, num_facilities, state_total_releases, timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, all_county_total_releases
+from viewModule.views import points, get_facilities, get_chemicals, attr, num_facilities, state_total_releases, timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, all_county_total_releases
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -10,7 +10,7 @@ urlpatterns = [
     # return distinct facilities within window
     path('facilities', get_facilities),
     # return all chemical releases for a specific facility
-    path('facilities/<str:facility_id>/releases', get_releases),
+    path('facilities/<str:facility_id>/chemicals', get_chemicals),
     # return number of facilities within: window
     path('stats/location/num_facilities', num_facilities),
     # return summary within: window
