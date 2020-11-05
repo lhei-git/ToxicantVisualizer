@@ -132,9 +132,9 @@ async function TimelineTotal(props) {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="year" tick={{ fill: "#FFF" }}/>
+            <XAxis dataKey="year" tick={{ fill: "#FFF" }} />
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{color: "#000"}}/>
+            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend />
             <Line
               type="monotone"
@@ -276,7 +276,7 @@ async function GraphTopTenFacilities(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{color: "#000"}}/>
+            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -337,7 +337,7 @@ async function GraphTopTenParents(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{color: "#000"}}/>
+            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -393,7 +393,7 @@ async function GraphTopTenChemicals(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{color: "#000"}}/>
+            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend align="right" verticalAlign="top" />
             <Bar
               name="release amount (lbs)"
@@ -462,7 +462,7 @@ async function TimelineTopFacilities(props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
             <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{color: "#000"}}/>
+            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend />
             {lines}
           </LineChart>
@@ -526,7 +526,7 @@ async function TimelineTopParents(props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
             <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{color: "#000"}}/>
+            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend />
             {lines}
           </LineChart>
@@ -551,28 +551,45 @@ async function TimelineTopChemicals(props) {
     const res = await vetapi.get(`/stats/location/timeline/top_chemicals`, {
       params,
     });
-    const keys = Object.keys(res.data);
-    const data = res.data.years.map((year) => {
-      const obj = { year };
-      keys.forEach((key) => {
-        if (key !== "years") {
-          const x = res.data[key].find((chem) => chem["year"] === year);
-          if (x) {
-            obj[key] = x.total;
-          }
-        }
-      });
-      return obj;
-    });
-    const lines = keys.map((k, i) => (
-      <Line
-        type="monotone"
-        dataKey={k}
-        stroke={colors[i] || "#8884d8"}
-        strokeWidth={3}
-        activeDot={{ r: 8 }}
-      ></Line>
-    ));
+    const data = res.data.reduce((acc, cur) => {
+      const existing = acc.find((e) => e.year === cur.year);
+      const formatted = formatChemical(cur["chemical__name"]);
+      if (existing) {
+        existing[formatted] = cur.total;
+      } else {
+        const newLine = { year: cur.year, [formatted]: cur.total };
+        acc.push(newLine);
+      }
+      return acc;
+    }, []);
+    console.log(data);
+
+    // const keys = Object.keys(res.data);
+    // const data = res.data.years.map((year) => {
+    //   const obj = { year };
+    //   keys.forEach((key) => {
+    //     if (key !== "years") {
+    //       const x = res.data[key].find((chem) => chem["year"] === year);
+    //       if (x) {
+    //         obj[key] = x.total;
+    //       }
+    //     }
+    //   });
+    //   return obj;
+    // });
+    const keys = Object.keys(data[0]);
+    const lines = keys
+      .filter((k) => k !== "year")
+      .map((k, i) => (
+        <Line
+          type="monotone"
+          dataKey={k}
+          stroke={colors[i] || "#8884d8"}
+          strokeWidth={3}
+          activeDot={{ r: 8 }}
+        ></Line>
+      ));
+    // const lines = <div></div>;
     return (
       <div className="top-ten chemicals">
         <ResponsiveContainer width="100%" aspect={16 / 9}>
@@ -590,7 +607,7 @@ async function TimelineTopChemicals(props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
             <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{color: "#000"}}/>
+            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend />
             {lines}
           </LineChart>
@@ -614,7 +631,7 @@ function GraphView(props) {
         graph={GraphSummary}
         title="Summary"
       ></GraphContainer>
-        <GraphContainer
+      <GraphContainer
         viewport={props.viewport}
         year={props.year}
         name="total_facilities"
