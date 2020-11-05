@@ -173,17 +173,17 @@ async function GraphSummary(props) {
     });
     const body = (
       <tbody>
-        {/* <tr>
+        <tr>
           <td>Facilities</td>
           <td>{res.data["num_facilities"]}</td>
-        </tr> */}
+        </tr>
         <tr>
           <td>Distinct Chemicals</td>
           <td>{res.data["num_distinct_chemicals"]}</td>
         </tr>
         <tr>
           <td>Total Disposal Amount</td>
-          <td>{format(res.data["total_disposal"])} lbs</td>
+          <td>{format(res.data["total"])} lbs</td>
         </tr>
         <tr>
           <td>On-Site Releases</td>

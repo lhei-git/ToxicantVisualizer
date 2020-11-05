@@ -359,10 +359,10 @@ const App = (props) => {
             </div>
             {/* VET GRAPHS */}
             <div className="graph-view" ref={graphRef}>
-              {/* <GraphView
+              <GraphView
                 viewport={state.viewport}
                 year={state.filters.year}
-              ></GraphView> */}
+              ></GraphView>
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
             {/* <div className="thematic-map-view" ref={thematicRef}>
