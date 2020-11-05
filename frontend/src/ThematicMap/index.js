@@ -84,14 +84,14 @@ const thematicMap = (props) => {
     "#960a04",
     "#8e0a04",
     "#860904",
-    "#7e0903",
-    "#760803",
-    "#6e0703",
-    "#660703",
-    "#5f0602",
-    "#570602",
-    "#4f0502",
-    "#470502",
+    //"#7e0903",
+    //"#760803",
+    //"#6e0703",
+    //"#660703",
+    //"#5f0602",
+    //"#570602",
+    //"#4f0502",
+    //"#470502",
     //"#3f0401",
     //"#370301",
     //"#2f0301",
@@ -124,7 +124,7 @@ const thematicMap = (props) => {
                         onMouseEnter={() => { props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           const total = cur.total;
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br />
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br /><span class="geography-attributes">
                                                 Onsite: ${rounded(
                                                   Math.trunc(cur.totalonsite)
                                                 )} lbs. <br />
@@ -147,7 +147,7 @@ const thematicMap = (props) => {
                                                   Math.trunc(
                                                     cur.numtrifacilities
                                                   )
-                                                )} <br />
+                                                )} </span>
                                                 `);
                         }}
                         onMouseLeave={() => {
@@ -189,7 +189,7 @@ const thematicMap = (props) => {
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.county
-                          } COUNTY</p></h1><br />
+                          } COUNTY</p></h1><span class="geography-attributes"><br />
                                                 Onsite: ${rounded(
                                                   Math.trunc(cur.totalonsite)
                                                 )} lbs. <br />
@@ -212,7 +212,7 @@ const thematicMap = (props) => {
                                                   Math.trunc(
                                                     cur.numtrifacilities
                                                   )
-                                                )} <br />
+                                                )} </span>
                     `);
                         }}
                         onMouseLeave={() => {
@@ -230,7 +230,7 @@ const thematicMap = (props) => {
                         onMouseEnter={() => { props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name.toUpperCase()} COUNTY</p></h1><br />
-                                             No data available at this time
+                                             <span class="geography-attributes"> No data available at this time </span>
                     `);
                         }}
                         onMouseLeave={() => {
