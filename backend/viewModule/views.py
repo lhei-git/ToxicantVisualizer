@@ -1,6 +1,6 @@
 # This page handles requests by individual "view" functions
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q, Sum, Subquery
+from django.db.models import Q, Sum, Subquery, Count
 from viewModule.models import Tri as tri
 from viewModule.models import Facility as facility
 from viewModule.models import Chemical as chemical
@@ -197,16 +197,17 @@ def timeline_top_parentco_releases(request):
           latitude__gt=sw_lat) & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng) & Q(parent_co_name=chem)).values('year').annotate(total=Sum('vet_total_releases')))
     return HttpResponse(json.dumps(response), content_type='application/json')
 
-
+""" Returns the total releases (in lbs) in a location for each available year. """
 def timeline_total(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                  & Q(longitude__lt=ne_lng)
-                                  & Q(longitude__gt=sw_lng)).values('year').annotate(total=Sum('vet_total_releases')).order_by('year')
-    return JsonResponse(list(queryset), content_type='application/json', safe=False)
+    queryset = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
+                                  & Q(facility__longitude__lt=ne_lng)
+                                  & Q(facility__longitude__gt=sw_lng)).values('year').annotate(total=Sum('total')).order_by('year')
+    response = json.dumps(list(queryset), cls=DjangoJSONEncoder)
+    return HttpResponse(response, content_type='application/json')
 
 def top_facility_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
@@ -256,8 +257,37 @@ def num_facilities(request):
                                   .distinct().count()
     return HttpResponse(data, content_type='application/json')
 
-# stats/location/summary
+
 def location_summary(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    y = int(request.GET.get('year', default=2018))
+    summary = {}
+    facility_list = facility.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+                                            & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
+    release_list = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
+                                          & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng))
+    summary['num_facilities'] = facility_list.count()
+    summary['num_distinct_chemicals'] = release_list.values(
+        'chemical_id').distinct().count()
+    summary['total'] = release_list.aggregate(total=Sum('total'))['total']
+    summary['total_on_site'] = release_list.aggregate(
+        on_site=Sum('on_site'))['on_site']
+    summary['total_off_site'] = release_list.aggregate(
+        off_site=Sum('off_site'))['off_site']
+    summary['total_air'] = release_list.aggregate(air=Sum('air'))['air']
+    summary['total_water'] = release_list.aggregate(water=Sum('water'))[
+        'water']
+    summary['total_land'] = release_list.aggregate(land=Sum('land'))['land']
+    summary['total_carcinogen'] = release_list.filter(
+        chemical__carcinogen='YES').aggregate(carcinogen=Sum('total'))['carcinogen']
+    response = json.dumps(summary)
+    return HttpResponse(response, content_type='application/json')
+
+# stats/location/summary
+def v1_location_summary(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
