@@ -3,7 +3,7 @@ const React = require("react");
 
 function Home(props) {
   let [searchValue, setSearchValue] = React.useState(
-    localStorage.getItem("searchedLocation") || ""
+    sessionStorage.getItem("searchedLocation") || ""
   );
 
   function onSearchChange(event) {
@@ -36,7 +36,9 @@ function Home(props) {
           relevant information and analyses.
         </div>
         <div className="search-bar">
-          {props.isError && <div className="error">ERROR: location not found</div>}
+          {props.isError && (
+            <div className="error">ERROR: location not found</div>
+          )}
           <form onSubmit={onSearchSubmit}>
             <label htmlFor="search">
               Enter a zip code; a city, state combination; or a state.
