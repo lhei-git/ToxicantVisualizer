@@ -1,5 +1,6 @@
 import "../index.css";
 import "./index.css";
+import LoadingSpinner from "../LoadingSpinner";
 const { formatChemical } = require("../helpers");
 const pubchem = require("../api/pubchem/index");
 const React = require("react");
@@ -13,7 +14,9 @@ function Link(props) {
   );
 }
 
-function handleError(err) {}
+function handleError(err) {
+  /* do something here */
+}
 
 /* Pharmacology Component */
 function Pharmacology(props) {
@@ -25,7 +28,7 @@ function Pharmacology(props) {
   // fetches data when component is updated
   React.useEffect(() => {
     if (!pubchemData && props.cid) getPubchemData(props.cid);
-  });
+  }, []);
 
   async function getPubchemData(cid) {
     try {
@@ -38,6 +41,9 @@ function Pharmacology(props) {
       setPubchemData(res);
     } catch (err) {
       handleError(err);
+    } finally {
+      // console.log("pharmacology loaded");
+      props.onLoad();
     }
   }
 
@@ -66,7 +72,7 @@ function HazardStatements(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  });
+  }, []);
 
   async function getPubchemData() {
     try {
@@ -79,6 +85,9 @@ function HazardStatements(props) {
       setPubchemData(data);
     } catch (err) {
       handleError(err);
+    } finally {
+      // console.log("hazardStatements loaded");
+      props.onLoad();
     }
   }
 
@@ -89,10 +98,12 @@ function HazardStatements(props) {
     var hazardStatements = [];
 
     // pictograms: first element of Information Array
-    pictograms = info[0].Value.StringWithMarkup[0].Markup.map((pic) => pic.URL);
+    pictograms = info[0].Value.StringWithMarkup[0].Markup.map((pic) => ({
+      description: pic.Extra || "unknown",
+      href: pic.URL,
+    }));
     // pictograms: third element of Information Array
     hazardStatements = info[2].Value.StringWithMarkup.map((st) => st.String);
-
     return { pictograms, hazardStatements };
   }
 
@@ -107,7 +118,12 @@ function HazardStatements(props) {
         </a>
         <div className="pictograms">
           {pubchemData.pictograms.map((v, i) => {
-            return <img src={v} alt="" key={JSON.stringify(v)}></img>;
+            return (
+              <div className="pictogram" key={v.description}>
+                <img src={v.href} alt="" key={v.description}></img>{" "}
+                <span className="tooltiptext">{v.description}</span>
+              </div>
+            );
           })}
         </div>
         <ul>
@@ -133,7 +149,7 @@ function Toxicity(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  });
+  }, []);
 
   async function getPubchemData() {
     try {
@@ -144,6 +160,9 @@ function Toxicity(props) {
       setPubchemData(data);
     } catch (err) {
       handleError(err);
+    } finally {
+      // console.log("toxicity loaded");
+      props.onLoad();
     }
   }
 
@@ -221,9 +240,7 @@ class PubChemFields extends Component {
             response.data.InformationList.Information[1].Description;
         this.setState(state);
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch(handleError);
   }
 
   componentDidMount() {
@@ -233,51 +250,62 @@ class PubChemFields extends Component {
   /* UPDATE HOOK NOT NEEDED as this component is recreated on each chemical click. 
   TODO: prevent component recreation */
 
-  // componentDidUpdate(prevProps) {
-  //   if (
-  //     this.props.chemName !== "" &&
-  //     prevProps.chemName !== this.props.chemName
-  //   ) {
-  //     this.setState(
-  //       {
-  //         cid: null,
-  //         formula: null,
-  //         description: null,
-  //       },
-  //       () => {
-  //         this.getPugRestData(this.props.chemName);
-  //       }
-  //     );
-  //   } else {
-  //     console.log(prevProps.chemName, this.props.chemName);
-  //   }
-  // }
-
   /* Composition of all sections */
   Content(props) {
+    const numComponents = 3;
+    const [loaded, setLoaded] = React.useState(false);
+    const [numLoaded, setNumLoaded] = React.useState(0);
+
+    function increment() {
+      setNumLoaded((numLoaded) => numLoaded + 1);
+    }
+
+    React.useEffect(() => {
+      if (numLoaded === numComponents && !loaded) {
+        setLoaded(true);
+      }
+    }, [numLoaded]);
+
     return (
-      <div className="pubChemFields">
-        {props.chemName !== "" && (
-          <div className="name">
-            <h1>{props.chemName}</h1>
+      <div>
+        {!loaded && (
+          <div className="loading-overlay">
+            <div className="spinner">
+              <LoadingSpinner></LoadingSpinner>
+            </div>
           </div>
         )}
-        {this.state.description !== null && <div>{this.state.description}</div>}
-        {/*gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data */}
-        {this.state.cid && (
-          <div>
-            <Pharmacology cid={this.state.cid}></Pharmacology>
-            <HazardStatements cid={this.state.cid}></HazardStatements>
-            <Toxicity cid={this.state.cid}></Toxicity>
-            {/* <div className="diseases">
+        <div className={`pubChemFields ${loaded ? "" : "loading"}`}>
+          {props.chemName !== "" && (
+            <div className="name">
+              <h1>{props.chemName}</h1>
+            </div>
+          )}
+          {this.state.description !== null && (
+            <div>{this.state.description}</div>
+          )}
+          {/*gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data */}
+          {this.state.cid && (
+            <div className="loaded-content">
+              <Pharmacology
+                cid={this.state.cid}
+                onLoad={increment}
+              ></Pharmacology>
+              <HazardStatements
+                cid={this.state.cid}
+                onLoad={increment}
+              ></HazardStatements>
+              <Toxicity cid={this.state.cid} onLoad={increment}></Toxicity>
+              {/* <div className="diseases">
               <div
                 dangerouslySetInnerHTML={{
                   __html: '<iframe src="https://pubchem.ncbi.nlm.nih.gov/compound/5352425#section=Associated-Disorders-and-Diseases&fullscreen=true" width="540" height="450"></iframe>',
                 }}
               ></div>
             </div> */}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
