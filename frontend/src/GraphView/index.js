@@ -423,28 +423,29 @@ async function TimelineTopFacilities(props) {
     const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
       params,
     });
-    const keys = Object.keys(res.data);
-    const data = res.data.years.map((year) => {
-      const obj = { year };
-      keys.forEach((key) => {
-        if (key !== "years") {
-          const x = res.data[key].find((fac) => fac["year"] === year);
-          if (x) {
-            obj[key] = x.total;
-          }
-        }
-      });
-      return obj;
-    });
-    const lines = keys.map((k, i) => (
-      <Line
-        type="monotone"
-        dataKey={k}
-        stroke={colors[i] || "#8884d8"}
-        strokeWidth={3}
-        activeDot={{ r: 8 }}
-      ></Line>
-    ));
+    const data = res.data.reduce((acc, cur) => {
+      const existing = acc.find((e) => e.year === cur.year);
+      const formatted = cur["facility__name"];
+      if (existing) {
+        existing[formatted] = cur.total;
+      } else {
+        const newLine = { year: cur.year, [formatted]: cur.total };
+        acc.push(newLine);
+      }
+      return acc;
+    }, []);
+    const keys = Object.keys(data[0]);
+    const lines = keys
+      .filter((k) => k !== "year")
+      .map((k, i) => (
+        <Line
+          type="monotone"
+          dataKey={k}
+          stroke={colors[i] || "#8884d8"}
+          strokeWidth={3}
+          activeDot={{ r: 8 }}
+        ></Line>
+      ));
     return (
       <div className="top-ten facilities">
         <ResponsiveContainer width="100%" aspect={16 / 9}>
@@ -487,28 +488,29 @@ async function TimelineTopParents(props) {
     const res = await vetapi.get(`/stats/location/timeline/parent_releases`, {
       params,
     });
-    const keys = Object.keys(res.data);
-    const data = res.data.years.map((year) => {
-      const obj = { year };
-      keys.forEach((key) => {
-        if (key !== "years") {
-          const x = res.data[key].find((fac) => fac["year"] === year);
-          if (x) {
-            obj[key] = x.total;
-          }
-        }
-      });
-      return obj;
-    });
-    const lines = keys.map((k, i) => (
-      <Line
-        type="monotone"
-        dataKey={k}
-        stroke={colors[i] || "#8884d8"}
-        strokeWidth={3}
-        activeDot={{ r: 8 }}
-      ></Line>
-    ));
+    const data = res.data.reduce((acc, cur) => {
+      const existing = acc.find((e) => e.year === cur.year);
+      const formatted = cur["facility__parent_co_name"];
+      if (existing) {
+        existing[formatted] = cur.total;
+      } else {
+        const newLine = { year: cur.year, [formatted]: cur.total };
+        acc.push(newLine);
+      }
+      return acc;
+    }, []);
+    const keys = Object.keys(data[0]);
+    const lines = keys
+      .filter((k) => k !== "year")
+      .map((k, i) => (
+        <Line
+          type="monotone"
+          dataKey={k}
+          stroke={colors[i] || "#8884d8"}
+          strokeWidth={3}
+          activeDot={{ r: 8 }}
+        ></Line>
+      ));
     return (
       <div className="top-ten parents">
         <ResponsiveContainer width="100%" aspect={16 / 9}>
@@ -562,21 +564,7 @@ async function TimelineTopChemicals(props) {
       }
       return acc;
     }, []);
-    console.log(data);
 
-    // const keys = Object.keys(res.data);
-    // const data = res.data.years.map((year) => {
-    //   const obj = { year };
-    //   keys.forEach((key) => {
-    //     if (key !== "years") {
-    //       const x = res.data[key].find((chem) => chem["year"] === year);
-    //       if (x) {
-    //         obj[key] = x.total;
-    //       }
-    //     }
-    //   });
-    //   return obj;
-    // });
     const keys = Object.keys(data[0]);
     const lines = keys
       .filter((k) => k !== "year")
@@ -589,7 +577,6 @@ async function TimelineTopChemicals(props) {
           activeDot={{ r: 8 }}
         ></Line>
       ));
-    // const lines = <div></div>;
     return (
       <div className="top-ten chemicals">
         <ResponsiveContainer width="100%" aspect={16 / 9}>
@@ -663,13 +650,13 @@ function GraphView(props) {
         viewport={props.viewport}
         name="top_graphs"
         graph={TimelineTopFacilities}
-        title="Total Releases for Top Ten Facilities (in lbs)"
+        title="Total Releases Over Time for Top Ten Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
         name="top_graphs"
         graph={TimelineTopParents}
-        title="Total Releases for Top Ten Parent Companies (in lbs)"
+        title="Total Releases Over Time for Top Ten Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
