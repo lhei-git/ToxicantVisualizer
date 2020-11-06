@@ -365,9 +365,9 @@ const App = (props) => {
               ></GraphView>
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            {/* <div className="thematic-map-view" ref={thematicRef}>
-              <ThematicMapView year={state.filters.year}></ThematicMapView>
-            </div> */}
+            <div className="thematic-map-view" ref={thematicRef}>
+              {/* <ThematicMapView year={state.filters.year}></ThematicMapView> */}
+            </div>
             {/* <Footer /> */}
           </Route>
           <Route path="/">
