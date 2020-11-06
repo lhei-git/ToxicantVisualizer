@@ -126,7 +126,7 @@ function ChemicalList(props) {
   if (chemicals.length === 0) return <div></div>;
 
   const listItems = chemicals
-    .filter(c => c.total > 0)
+    .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total)
     .map((c) => {
       c.name = formatChemical(c.name);
