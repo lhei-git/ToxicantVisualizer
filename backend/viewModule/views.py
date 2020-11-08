@@ -119,6 +119,8 @@ def state_total_releases(request):
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
     if state != 'None':
+        
+        '''
         t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
         tri_set = tri.objects.filter(st=state, year=y)
         for t in tri_set:
@@ -137,6 +139,7 @@ def state_total_releases(request):
         result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
                   'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
                   'numtrifacilities':t_facilitycount}
+                  '''
         return JsonResponse(result)
 
 # stats/state/all
