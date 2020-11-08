@@ -215,10 +215,10 @@ def top_facility_releases(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
     state = str(request.GET.get('state', default='None')).upper()
-    queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                  & Q(longitude__lt=ne_lng)
-                                  & Q(longitude__gt=sw_lng)
-                                  & Q(year=y)).values('facility').annotate(total=Sum('vet_total_releases_onsite')).annotate(land=Sum('vet_total_releases_land')).annotate(air=Sum('vet_total_releases_air')).annotate(water=Sum('total_releases_water')).order_by('-total')[:10]
+    queryset = release.objects.select_related('facility').select_related('chemical').filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
+                                  & Q(facility__longitude__lt=ne_lng)
+                                  & Q(facility__longitude__gt=sw_lng)
+                                  & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 def timeline_top_facility_releases(request):
@@ -264,14 +264,11 @@ def location_summary(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
     # FIXME - unit of measure can be filtered in ORM query below
-    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                                    & Q(longitude__lt=ne_lng)
-                                                    & Q(longitude__gt=sw_lng)
-                                                    & Q(year=y))
+    raw = release.objects.select_related('facility').select_related('chemical').filter(Q(facility__latitude__lt=ne_lat),year=2018).values('facility__name', 'chemical__name', 'total', 'on_site', 'off_site', 'air', 'water', 'land', 'chemical__carcinogen')
     rows = list(map(lambda e: e.__dict__, list(raw)))
     summary = {}
-    summary['num_facilities'] = len(set(list(map(lambda r: r['facility'], rows))))
-    summary['num_distinct_chemicals'] = len(set(list(map(lambda r: clean_chemical_name(r['chemical']), rows))))
+    summary['num_facilities'] = len(set(list(map(lambda r: r['facility__name'], rows))))
+    summary['num_distinct_chemicals'] = len(set(list(map(lambda r: clean_chemical_name(r['chemical__name']), rows))))
     summary['total_disposal'] = 0
     summary['total_on_site'] = 0
     summary['total_off_site'] = 0
@@ -280,14 +277,14 @@ def location_summary(request):
     summary['total_land'] = 0
     summary['total_carcinogen'] = 0
     # TODO - make calculations based on unit of measure. Currently assumes everything is in pounds
-    for r in rows: 
-      summary['total_disposal'] += r['vet_total_releases']
-      summary['total_on_site'] += r['vet_total_releases_onsite']
-      summary['total_off_site'] += r['vet_total_releases_offsite']
-      summary['total_air'] += r['vet_total_releases_air']
-      summary['total_water'] += r['total_releases_water']
-      summary['total_land'] += r['vet_total_releases_land']
-      summary['total_carcinogen'] += r['vet_total_releases'] if r['carcinogen'] == 'YES' else 0
+    for r in rows:
+      summary['total_disposal'] += r['total']
+      summary['total_on_site'] += r['on_site']
+      summary['total_off_site'] += r['off_site']
+      summary['total_air'] += r['air']
+      summary['total_water'] += r['water']
+      summary['total_land'] += r['land']
+      summary['total_carcinogen'] += r['total'] if r['chemical__carcinogen'] == 'YES' else 0
     response = json.dumps(summary)
     return HttpResponse(response, content_type='application/json')
 
@@ -359,10 +356,10 @@ def top_chemicals(request):
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
-    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                                    & Q(longitude__lt=ne_lng)
-                                                    & Q(longitude__gt=sw_lng)
-                                                    & Q(year=y)).values('chemical').annotate(total=Sum('vet_total_releases')).order_by('-total')[:10]
+    raw = release.objects.select_related('facility').select_related('chemical').filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
+                                                    & Q(facility__longitude__lt=ne_lng)
+                                                    & Q(facility__longitude__gt=sw_lng)
+                                                    & Q(year=y)).values('chemical__name').annotate(total=Sum('total')).order_by('-total')[:10]
     return JsonResponse(list(raw), content_type='application/json', safe=False)
 
 def timeline_top_chemicals(request):
