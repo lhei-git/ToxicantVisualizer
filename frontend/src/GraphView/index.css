@@ -1,22 +1,35 @@
 .graph-container {
   position: relative;
-
-  /* overflow-y: auto; */
+  /* background: #f7f7f7; */
+  background: #fff;
 }
+
+.graph-container h1 {
+  text-align: center;
+  font-size: 40px;
+}
+
 .graph-container .graph {
   position: relative;
   justify-content: center;
-  padding: 50px;
-  width: 50%;
-  margin: 0 auto;
+  padding: 0 50px;
+  padding-top: 75px;
+  padding-bottom: 40px;
+  width: 70vw;
+  /* max-width: 60%; */
+  margin: 20px auto;
+  border-radius: 25px;
   box-sizing: border-box;
+  /* background: #fff;
+  box-shadow: 0 0.75rem 2rem rgba(25, 23, 40, 0.15); */
 }
 
 .graph-container .header {
   position: absolute;
-  top: 0;
+  top: 20px;
   left: 0;
   font-size: 30px;
+  font-weight: bold;
   text-align: center;
   width: 100%;
 }
