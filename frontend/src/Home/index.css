@@ -6,6 +6,8 @@
   max-height: 100%;
   text-align: center;
   color: #fff;
+  background: transparent;
+  z-index: 1;
 }
 
 .home-container .background {
@@ -96,7 +98,7 @@
   padding: 10px 40px;
   font-size: 28px;
   border-radius: 10px;
-  color: #000;
+  color: #3f3844;
   border: 0;
 }
 
