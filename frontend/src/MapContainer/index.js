@@ -5,7 +5,7 @@ import MarkerCluster from "./MarkerClusterer";
 import LoadingSpinner from "../LoadingSpinner";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
-const { shallowEqual, intToString } = require("../helpers");
+const { shallowEqual } = require("../helpers");
 const Component = React.Component;
 const { Map, InfoWindow, GoogleApiWrapper } = require("google-maps-react");
 
@@ -265,15 +265,10 @@ class MapContainer extends Component {
         },
       };
     });
-    this.setState(
-      {
-        isLoading: false,
-      },
-      () => {
-        this.props.onUpdate(markers.length);
-        this.props.onLoad();
-      }
-    );
+    this.setState({
+      isLoading: false,
+    });
+    this.props.onUpdate(markers.length);
     return markers;
   }
 
@@ -335,8 +330,7 @@ class MapContainer extends Component {
                     <p>
                       Total Toxicants Released:{" "}
                       <span style={{ fontWeight: "bold" }}>
-                        {this.state.activeMarker.meta.total.toLocaleString()}{" "}
-                        lbs
+                        {this.state.activeMarker.meta.total} lbs
                       </span>
                     </p>
                   </div>

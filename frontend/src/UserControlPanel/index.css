@@ -1,10 +1,5 @@
 .control-container {
   width: 100%;
-
-  --primary: #9c27b0;
-  --primary-light: #d05ce3;
-  --primary-dark: #6a0080;
-  --black: #3f3844;
 }
 
 .control-container .header {
@@ -13,37 +8,31 @@
   cursor: pointer;
   padding: 10px;
   font-size: 18px;
-  /* border-bottom: 3px solid purple; */
+  border-bottom: 3px solid purple;
   /* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23); */
 }
 
-.control-container .header {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 18px;
-}
-
 .control-container .header span {
-  color: var(--primary);
+  color: purple;
   font-weight: bold;
-  font-size: 32px;
+  font-size: 28px;
   margin-right: 5px;
 }
 
 .control-container .content {
   cursor: pointer;
   border-radius: 0 0 5px 5px;
-  padding: 0 15px;
+  padding: 15px;
   display: flex;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .control-container .content .flex-item {
-  flex: 2;
+  flex: 1;
 }
 
 .control-container .content .flex-item.two {
-  flex: 1;
+  flex: 0.5;
 }
 
 .control-container .content div {
