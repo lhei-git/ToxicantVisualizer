@@ -2,28 +2,28 @@
   padding: 0 20px;
 }
 
-.pubChemFields h1 {
+h1 {
   border-bottom: 2px solid var(--blue);
 }
 
-.pubChemFields ul {
+ul {
   list-style-type: square;
 }
 
-.pubChemFields .pictograms {
+.pictograms {
   margin: 10px 0;
 }
 
-.pubChemFields a {
+a {
   text-decoration: none;
 }
 
-.pubChemFields .link-icon {
+.link-icon {
   position: relative;
   top: 2px;
   display: inline-block;
   margin: 0 8px;
 }
-.pubChemFields .link-icon img {
+.link-icon img {
   width: 16px;
 }

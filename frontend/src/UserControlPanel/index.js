@@ -85,19 +85,19 @@ function UserControlPanel(props) {
         </div>
         <div className="flex-item two">
           <ChemTypeSelector
-            title="Carcinogens Only"
+            title="Only Show Carcinogens"
             attribute="carcinogens"
             defaultChecked={false}
             onClick={onFilterChange}
           />
           <ChemTypeSelector
-            title="Dioxins Only"
+            title="Only Show Dioxins"
             attribute="dioxins"
             defaultChecked={false}
             onClick={onFilterChange}
           />
           <ChemTypeSelector
-            title="PBTs Only"
+            title="Only Show PBTs"
             attribute="pbts"
             defaultChecked={false}
             onClick={onFilterChange}

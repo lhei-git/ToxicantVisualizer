@@ -43,9 +43,9 @@ function MarkerCluster(props) {
         case "land":
           type = "brown";
           break;
-        case "off_site":
-          type = "yellow";
-          break;
+          case "off_site":
+            type = "yellow";
+            break;
         default:
           type = "red";
           break;

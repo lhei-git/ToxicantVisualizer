@@ -1,7 +1,7 @@
 import "./index.css";
 import React, { Component, useEffect, useState } from "react";
 const vetapi = require("../api/vetapi");
-const { formatChemical, intToString } = require("../helpers");
+const { formatChemical } = require("../helpers");
 const {
   BarChart,
   CartesianGrid,
@@ -16,16 +16,16 @@ const {
 } = require("recharts");
 
 const colors = [
-  "#a6cee3",
-  "#1f78b4",
-  "#b2df8a",
-  "#33a02c",
-  "#fb9a99",
-  "#e31a1c",
-  "#fdbf6f",
-  "#ff7f00",
-  "#cab2d6",
-  "#6a3d9a",
+  "#65ADF8",
+  "#FA9165",
+  "#689736",
+  "#5D87E0",
+  "#57BE60",
+  "#20754D",
+  "#635857",
+  "#DABD07",
+  "#560846",
+  "#5C4A43",
 ];
 
 class CustomizedXAxisTick extends Component {
@@ -98,12 +98,10 @@ function GraphContainer(props) {
   }, [graphProp, viewportProp, yearProp]); /* eslint-disable-line */
 
   return (
-    graph !== null && (
-      <div className="graph">
-        <div className="header">{props.title}</div>
-        <div className="rechart">{graph}</div>
-      </div>
-    )
+    <div className="graph">
+      <div className="header">{props.title}</div>
+      <div className="rechart">{graph}</div>
+    </div>
   );
 }
 
@@ -121,7 +119,7 @@ async function TimelineTotal(props) {
     });
     return (
       <div className="top-ten facilities">
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
           <LineChart
             width={500}
             height={300}
@@ -129,26 +127,20 @@ async function TimelineTotal(props) {
             margin={{
               top: 5,
               right: 30,
-              left: 30,
+              left: 50,
               bottom: 5,
             }}
           >
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={80}
-              tickFormatter={(val) => intToString(val) + " "}
-            />
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" tick={{ fill: "#FFF" }} />
+            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
             <Tooltip contentStyle={{ color: "#000" }} />
             <Legend />
             <Line
               type="monotone"
               dataKey="total"
-              stroke={colors[Math.floor(Math.random() * 10)]}
+              stroke={"#8884d8"}
               strokeWidth={3}
-              dot={false}
               activeDot={{ r: 8 }}
             ></Line>
           </LineChart>
@@ -268,6 +260,7 @@ async function GraphTopTenFacilities(props) {
         <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
+            // layout="vertical"
             margin={{
               top: 30,
               right: 50,
@@ -282,7 +275,7 @@ async function GraphTopTenFacilities(props) {
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" />
+            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
             <Tooltip contentStyle={{ color: "#000" }} />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
@@ -293,6 +286,7 @@ async function GraphTopTenFacilities(props) {
       </div>
     );
   } catch (err) {
+    console.log(err);
     return null;
   }
 }
@@ -342,7 +336,7 @@ async function GraphTopTenParents(props) {
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" />
+            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
             <Tooltip contentStyle={{ color: "#000" }} />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
@@ -353,6 +347,7 @@ async function GraphTopTenParents(props) {
       </div>
     );
   } catch (err) {
+    console.log(err);
     return null;
   }
 }
@@ -397,7 +392,7 @@ async function GraphTopTenChemicals(props) {
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" />
+            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
             <Tooltip contentStyle={{ color: "#000" }} />
             <Legend align="right" verticalAlign="top" />
             <Bar
@@ -411,6 +406,7 @@ async function GraphTopTenChemicals(props) {
       </div>
     );
   } catch (err) {
+    console.log(err);
     return null;
   }
 }
@@ -447,44 +443,28 @@ async function TimelineTopFacilities(props) {
           dataKey={k}
           stroke={colors[i] || "#8884d8"}
           strokeWidth={3}
-          dot={false}
           activeDot={{ r: 8 }}
         ></Line>
       ));
     return (
       <div className="top-ten facilities">
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
           <LineChart
+            width={500}
+            height={300}
             data={data}
             margin={{
               top: 5,
-              right: 50,
-              left: 50,
+              right: 30,
+              left: 20,
               bottom: 5,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={(val) => intToString(val) + " "}
-            />
+            <YAxis type="number" unit="lbs" />
             <Tooltip contentStyle={{ color: "#000" }} />
-            <Legend
-              width={120}
-              height={140}
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              wrapperStyle={{
-                "white-space": "nowrap",
-                top: 0,
-                right: 0,
-                lineHeight: "24px",
-              }}
-            />
+            <Legend />
             {lines}
           </LineChart>
         </ResponsiveContainer>
@@ -528,46 +508,28 @@ async function TimelineTopParents(props) {
           dataKey={k}
           stroke={colors[i] || "#8884d8"}
           strokeWidth={3}
-          dot={false}
           activeDot={{ r: 8 }}
         ></Line>
       ));
     return (
       <div className="top-ten parents">
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
           <LineChart
             width={500}
             height={300}
             data={data}
             margin={{
               top: 5,
-              right: 50,
-              left: 50,
+              right: 30,
+              left: 20,
               bottom: 5,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={(val) => intToString(val) + " "}
-            />
+            <YAxis type="number" unit="lbs" />
             <Tooltip contentStyle={{ color: "#000" }} />
-            <Legend
-              width={120}
-              height={140}
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              wrapperStyle={{
-                "white-space": "nowrap",
-                top: 0,
-                right: 0,
-                lineHeight: "24px",
-              }}
-            />
+            <Legend />
             {lines}
           </LineChart>
         </ResponsiveContainer>
@@ -610,48 +572,30 @@ async function TimelineTopChemicals(props) {
         <Line
           type="monotone"
           dataKey={k}
-          stroke={colors[i] || "#d9d9d9"}
+          stroke={colors[i] || "#8884d8"}
           strokeWidth={3}
-          dot={false}
           activeDot={{ r: 8 }}
         ></Line>
       ));
     return (
       <div className="top-ten chemicals">
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
           <LineChart
             width={500}
             height={300}
             data={data}
             margin={{
               top: 5,
-              right: 50,
-              left: 50,
+              right: 30,
+              left: 20,
               bottom: 5,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={(val) => intToString(val) + " "}
-            />
+            <YAxis type="number" unit="lbs" />
             <Tooltip contentStyle={{ color: "#000" }} />
-            <Legend
-              width={120}
-              height={140}
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              wrapperStyle={{
-                "white-space": "nowrap",
-                top: 0,
-                right: 0,
-                lineHeight: "24px",
-              }}
-            />
+            <Legend />
             {lines}
           </LineChart>
         </ResponsiveContainer>
@@ -666,7 +610,6 @@ async function TimelineTopChemicals(props) {
 function GraphView(props) {
   return (
     <div className="graph-container">
-      <h1>Location Insights</h1>
       <GraphContainer
         viewport={props.viewport}
         year={props.year}
