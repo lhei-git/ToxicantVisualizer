@@ -181,17 +181,17 @@ async function GraphSummary(props) {
     });
     const body = (
       <tbody>
-        {/* <tr>
+        <tr>
           <td>Facilities</td>
           <td>{res.data["num_facilities"]}</td>
-        </tr> */}
+        </tr>
         <tr>
           <td>Distinct Chemicals</td>
           <td>{res.data["num_distinct_chemicals"]}</td>
         </tr>
         <tr>
           <td>Total Disposal Amount</td>
-          <td>{format(res.data["total_disposal"])} lbs</td>
+          <td>{format(res.data["total"])} lbs</td>
         </tr>
         <tr>
           <td>On-Site Releases</td>
@@ -707,13 +707,13 @@ function GraphView(props) {
         viewport={props.viewport}
         name="top_graphs"
         graph={TimelineTopFacilities}
-        title="Total Releases for Top Ten Facilities (in lbs)"
+        title="Total Releases Over Time for Top Ten Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
         name="top_graphs"
         graph={TimelineTopParents}
-        title="Total Releases for Top Ten Parent Companies (in lbs)"
+        title="Total Releases Over Time for Top Ten Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}

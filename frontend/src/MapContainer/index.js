@@ -223,33 +223,41 @@ class MapContainer extends Component {
   // }
 
   filterFacilities(facilities) {
-    return facilities
-      .map((f, i) => {
-        const total = f.total;
-        if (total === 0) return null;
-        let color = 1;
+    return facilities.map((f, i) => {
+      const total = f.total;
+      let color = 1;
 
-        if (total < 100) color = 1;
-        else if (total < 100) color = 2;
-        else if (total < 10000) color = 3;
-        else if (total < 100000) color = 4;
-        else if (total < 1000000) color = 5;
-        else color = 6;
+      if (total < 100) color = 1;
+      else if (total < 100) color = 2;
+      else if (total < 10000) color = 3;
+      else if (total < 100000) color = 4;
+      else if (total < 1000000) color = 5;
+      else color = 6;
 
-        f.color = color;
-        return f;
-      })
-      .filter((f) => f !== null);
+      f.color = color;
+      return f;
+    });
+  }
+
+  getColor(total) {
+    let color = 1;
+    if (total < 100) color = 1;
+    else if (total < 100) color = 2;
+    else if (total < 10000) color = 3;
+    else if (total < 100000) color = 4;
+    else if (total < 1000000) color = 5;
+    else color = 6;
+    return color;
   }
 
   createMarkers(points) {
     console.log("creating markers");
-    const facilities = this.filterFacilities(points);
+    const facilities = points;
     // create a marker for every point that is passed to the map
     const markers = facilities.map((facility, i) => {
       return {
         meta: facility,
-        color: facility.color,
+        color: this.getColor(facility.total),
         name: facility.name,
         position: {
           lat: parseFloat(facility.latitude),
