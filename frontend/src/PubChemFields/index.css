@@ -2,38 +2,37 @@
   padding: 0 20px;
 }
 
+<<<<<<< HEAD
 .pubChemFields.loading {
   opacity: 0;
 }
 
 h1 {
+=======
+.pubChemFields h1 {
+>>>>>>> master
   border-bottom: 2px solid var(--blue);
 }
 
-ul {
+.pubChemFields ul {
   list-style-type: square;
 }
 
-.pictograms {
+.pubChemFields .pictograms {
   margin: 10px 0;
 }
 
-.pictogram {
-  position: relative;
-  display: inline-block;
-}
-
-a {
+.pubChemFields a {
   text-decoration: none;
 }
 
-.link-icon {
+.pubChemFields .link-icon {
   position: relative;
   top: 2px;
   display: inline-block;
   margin: 0 8px;
 }
-.link-icon img {
+.pubChemFields .link-icon img {
   width: 16px;
 }
 
