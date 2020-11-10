@@ -112,14 +112,19 @@ def dist_fac(request):
     data = json.dumps(list(qs))
     return HttpResponse(data, content_type='application/json')
 
-# stats/state/summary
+'''
+Return total stats released by state & year {graph }
+'''
 def state_total_releases(request):
     state = str(request.GET.get('state')).upper()
     y = int(request.GET.get('year', default=2018))
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
+    filters = ()
     if state != 'None':
-        
+
+
+
         '''
         t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
         tri_set = tri.objects.filter(st=state, year=y)
@@ -142,6 +147,8 @@ def state_total_releases(request):
                   '''
         return JsonResponse(result)
 
+# FIXME - replace raw queries with ORM calls
+
 # stats/state/all
 def all_state_total_releases(request):
     d = []
@@ -163,24 +170,30 @@ def all_county_total_releases(request):
         d.append(l)
     return JsonResponse(list(d), safe=False)
 
-
-# FIXME - top_releases have repetitions, refer to err for distinct() here
-
-# stats/location/parent_releases
-
-
+'''
+Return top 10 companies in total releases by geo window & year
+'''
 def top_parentco_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
-    state = str(request.GET.get('state', default='None')).upper()
+    
+    f = (Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(facility__longitude__lt=ne_lng) 
+                                     & Q(facility__longitude__gt=sw_lng) & Q(year=y))
+
+    #queryset = release.objects.filter(f).order_by('-total').distinct('facility')
+    # seems that the DISTINCT ON expression(s) must match the leftmost ORDER BY expression
+    queryset = release.objects.filter(f).order_by('facility','-total').distinct('facility')
+    '''
     queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                   & Q(longitude__lt=ne_lng)
                                   & Q(longitude__gt=sw_lng)
                                   & Q(year=y) & ~Q(parent_co_name="NA")).values('parent_co_name').annotate(total=Sum('vet_total_releases_onsite')).annotate(land=Sum('vet_total_releases_land')).annotate(air=Sum('vet_total_releases_air')).annotate(water=Sum('total_releases_water')).order_by('-total')[:10]
-    return JsonResponse(list(queryset), content_type='application/json', safe=False)
+    '''
+    #JsonResponse is breaking the return as it can't serialize the custom queryset (from cte)
+    return HttpResponse(szs.serialize('json', queryset), content_type='application/json')
 
 def timeline_top_parentco_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
