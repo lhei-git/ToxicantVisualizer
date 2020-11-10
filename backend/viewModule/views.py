@@ -106,6 +106,7 @@ def state_total_releases(request):
     result = {}
     filters = ()
     if state != 'None':
+        # Individual queries take too long, query all data in 1 queryset and filter values as done below
         '''
         t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
         tri_set = tri.objects.filter(st=state, year=y)
