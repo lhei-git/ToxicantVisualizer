@@ -21,7 +21,6 @@ import re
 #        is returned which is unusable by serializer, use json.dumps(list(..)) instead and return response
 
 
-# facilities
 def points(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -90,31 +89,16 @@ def get_facilities(request):
 def get_chemicals(request, facility_id):
     y = int(request.GET.get('year', default=2018))
     # raw = release.objects.filter(Q(facility_id=facility_id) & Q(year=y)).select_related('chemical').values()
+
+    # FIXME - how does this endpoint acquire the facility_id
     raw = chemical.objects.filter(facilities__id=facility_id, release__year=y).values().annotate(total=Sum('release__total'))
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
 
-def dist_fac(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    y = int(request.GET.get('year', default=2018))
-    state = str(request.GET.get('state', default='None')).upper()
-    if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        qs = tri.objects.filter(st=state, year=y).values('facility').distinct()
-    else:
-        qs = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                                   & Q(longitude__lt=ne_lng)
-                                                   & Q(longitude__gt=sw_lng)
-                                                   & Q(year=y)).values('facility').distinct()
-    #data = szs.serialize('json', qs) <--here values() is used so serializer will not work
-    data = json.dumps(list(qs))
-    return HttpResponse(data, content_type='application/json')
-
 '''
 Return total stats released by state & year {graph }
 '''
+# TODO
 def state_total_releases(request):
     state = str(request.GET.get('state')).upper()
     y = int(request.GET.get('year', default=2018))
@@ -122,9 +106,6 @@ def state_total_releases(request):
     result = {}
     filters = ()
     if state != 'None':
-
-
-
         '''
         t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
         tri_set = tri.objects.filter(st=state, year=y)
@@ -148,7 +129,6 @@ def state_total_releases(request):
         return JsonResponse(result)
 
 # FIXME - replace raw queries with ORM calls
-
 # stats/state/all
 def all_state_total_releases(request):
     d = []
@@ -179,7 +159,7 @@ def top_parentco_releases(request):
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
-    
+
     f = (Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(facility__longitude__lt=ne_lng) 
                                      & Q(facility__longitude__gt=sw_lng) & Q(year=y))
 
@@ -195,6 +175,9 @@ def top_parentco_releases(request):
     #JsonResponse is breaking the return as it can't serialize the custom queryset (from cte)
     return HttpResponse(szs.serialize('json', queryset), content_type='application/json')
 
+'''
+Return top ten polluting facilities over time by: window
+'''
 def timeline_top_parentco_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -213,7 +196,9 @@ def timeline_top_parentco_releases(request):
           latitude__gt=sw_lat) & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng) & Q(parent_co_name=chem)).values('year').annotate(total=Sum('vet_total_releases')))
     return HttpResponse(json.dumps(response), content_type='application/json')
 
-
+'''
+Return global amount over time by: window
+'''
 def timeline_total(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -224,6 +209,9 @@ def timeline_total(request):
                                   & Q(longitude__gt=sw_lng)).values('year').annotate(total=Sum('vet_total_releases')).order_by('year')
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
+'''
+Return top ten polluting facilities by: window
+'''
 def top_facility_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -237,6 +225,9 @@ def top_facility_releases(request):
                                   & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
+'''
+Return top ten polluting facilities over time by: window
+'''
 def timeline_top_facility_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -272,7 +263,9 @@ def num_facilities(request):
                                   .distinct().count()
     return HttpResponse(data, content_type='application/json')
 
-# stats/location/summary
+'''
+Return summary points within window
+'''
 def location_summary(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -280,7 +273,7 @@ def location_summary(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
     # FIXME - unit of measure can be filtered in ORM query below
-    raw = release.objects.select_related('facility').select_related('chemical').filter(Q(facility__latitude__lt=ne_lat),year=2018).values('facility__name', 'chemical__name', 'total', 'on_site', 'off_site', 'air', 'water', 'land', 'chemical__carcinogen')
+    raw = release.objects.select_related('facility').select_related('chemical').filter(Q(facility__latitude__lt=ne_lat),year=y).values('facility__name', 'chemical__name', 'total', 'on_site', 'off_site', 'air', 'water', 'land', 'chemical__carcinogen')
     rows = list(map(lambda e: e.__dict__, list(raw)))
     summary = {}
     summary['num_facilities'] = len(set(list(map(lambda r: r['facility__name'], rows))))
