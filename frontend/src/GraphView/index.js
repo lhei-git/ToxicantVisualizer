@@ -28,6 +28,10 @@ const colors = [
   "#6a3d9a",
 ];
 
+function handleError(err) {
+  /* do something here */
+}
+
 class CustomizedXAxisTick extends Component {
   render() {
     const { x, y, payload } = this.props;
@@ -133,15 +137,13 @@ async function TimelineTotal(props) {
               bottom: 5,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={80}
-              tickFormatter={(val) => intToString(val) + " "}
+            <YAxis type="number" unit="lbs" />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
             />
-            <Tooltip contentStyle={{ color: "#000" }} />
             <Legend />
             <Line
               type="monotone"
@@ -156,7 +158,7 @@ async function TimelineTotal(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
     return null;
   }
 }
@@ -233,8 +235,8 @@ async function GraphSummary(props) {
       </div>
     );
   } catch (err) {
-    console.log("summary error:", err);
-    return <div>ERROR: Summary statistics could not be found.</div>;
+    handleError(err);
+    return null;
   }
 }
 
@@ -293,6 +295,8 @@ async function GraphTopTenFacilities(props) {
       </div>
     );
   } catch (err) {
+    handleError(err);
+
     return null;
   }
 }
@@ -353,6 +357,8 @@ async function GraphTopTenParents(props) {
       </div>
     );
   } catch (err) {
+    handleError(err);
+
     return null;
   }
 }
@@ -411,6 +417,8 @@ async function GraphTopTenChemicals(props) {
       </div>
     );
   } catch (err) {
+    handleError(err);
+
     return null;
   }
 }
@@ -444,6 +452,7 @@ async function TimelineTopFacilities(props) {
       .map((k, i) => (
         <Line
           type="monotone"
+          key={k}
           dataKey={k}
           stroke={colors[i] || "#8884d8"}
           strokeWidth={3}
@@ -479,7 +488,7 @@ async function TimelineTopFacilities(props) {
               verticalAlign="middle"
               align="right"
               wrapperStyle={{
-                "white-space": "nowrap",
+                whiteSpace: "nowrap",
                 top: 0,
                 right: 0,
                 lineHeight: "24px",
@@ -491,7 +500,8 @@ async function TimelineTopFacilities(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
+
     return null;
   }
 }
@@ -525,6 +535,7 @@ async function TimelineTopParents(props) {
       .map((k, i) => (
         <Line
           type="monotone"
+          key={k}
           dataKey={k}
           stroke={colors[i] || "#8884d8"}
           strokeWidth={3}
@@ -562,7 +573,7 @@ async function TimelineTopParents(props) {
               verticalAlign="middle"
               align="right"
               wrapperStyle={{
-                "white-space": "nowrap",
+                whiteSpace: "nowrap",
                 top: 0,
                 right: 0,
                 lineHeight: "24px",
@@ -574,7 +585,8 @@ async function TimelineTopParents(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
+
     return null;
   }
 }
@@ -609,6 +621,7 @@ async function TimelineTopChemicals(props) {
       .map((k, i) => (
         <Line
           type="monotone"
+          key={k}
           dataKey={k}
           stroke={colors[i] || "#d9d9d9"}
           strokeWidth={3}
@@ -646,7 +659,7 @@ async function TimelineTopChemicals(props) {
               verticalAlign="middle"
               align="right"
               wrapperStyle={{
-                "white-space": "nowrap",
+                whiteSpace: "nowrap",
                 top: 0,
                 right: 0,
                 lineHeight: "24px",
@@ -658,7 +671,7 @@ async function TimelineTopChemicals(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
     return null;
   }
 }
