@@ -177,3 +177,19 @@
     max-height: 400px;
   }
 }
+
+.filter-wrapper .header {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 18px;
+}
+
+.filter-wrapper .header span {
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 32px;
+  margin-right: 5px;
+}

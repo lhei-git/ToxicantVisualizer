@@ -43,8 +43,7 @@ const initialState = {
   graphsLoaded: false,
   filters: {
     chemical: "all",
-    dioxins: false,
-    pbts: false,
+    pbtsAndDioxins: false,
     carcinogens: false,
     releaseType: "all",
     year: 2018,
@@ -170,28 +169,8 @@ const App = (props) => {
 
   const executeScroll = (ref) => scrollToRef(ref);
 
-  const handleScroll = (event) => {
-    try {
-      const cur = event.target.scrollingElement.scrollTop;
-      if (summaryRef && cur <= summaryRef.current.offsetTop) {
-        // dispatch(setActiveTab(0));
-      } else if (cur <= graphRef.current.offsetTop) {
-        if (!state.loadedGraphs) {
-          dispatch(loadGraphs());
-        }
-        // dispatch(setActiveTab(1));
-      } else {
-        // dispatch(setActiveTab(2));
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   // fetches data when component is updated
   React.useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-
     if (state.viewport === null) geocodeLocation(state.location);
   }, []);
 
@@ -230,28 +209,6 @@ const App = (props) => {
               <div className="go-home">
                 <Link to="/"> &lt; Back to home</Link>
               </div>
-              {/* <div className="flex-item">
-                <div className="alt-input">
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSearchSubmit(altLocationInput.current.value);
-                    }}
-                  >
-                    <label htmlFor="alt-input">Location:</label>
-                    <input
-                      type="text"
-                      name="alt-input"
-                      id=""
-                      value={state.altLocation}
-                      onChange={(event) => {
-                        dispatch(setAltLocation(event.target.value));
-                      }}
-                      ref={altLocationInput}
-                    />
-                  </form>
-                </div>
-              </div> */}
               <ul>
                 <li
                   className={state.activeTab === 0 ? "active" : ""}
@@ -282,26 +239,20 @@ const App = (props) => {
                 </li>
               </ul>
             </div>
-            {/* <div className="title">
-              <div className="go-home">
-                <Link to="/"> &lt; Back to home</Link>
-              </div>
-              <div className="hamburger">
-                <img
-                  src={require("./../src/assets/hamburger_icon.svg")}
-                  alt=""
-                />
-              </div>
-            </div> */}
             <div className="map-view">
               <div className="flex-item filter-wrapper">
                 {/* VET MAP FILTER */}
                 <div className="filters" ref={summaryRef}>
+                  <div className="header">
+                    {/* Search Bar Title and Image */}
+                    <span>{state.numFacilities || 0}</span> Facilities found
+                  </div>
                   <UserControlPanel
                     chemicals={state.selectedChemicalList}
-                    filters={Object.assign({}, state.filters)}
-                    numFacilities={state.numFacilities}
-                    onFilterChange={(filters) => dispatch(setFilters(filters))}
+                    filters={state.filters}
+                    onFilterChange={(filters) =>
+                      dispatch(setFilters(Object.assign({}, filters)))
+                    }
                   ></UserControlPanel>
                 </div>
                 {state.showPubchemInfo ? (
@@ -367,7 +318,10 @@ const App = (props) => {
               {state.graphsLoaded && (
                 <GraphView
                   viewport={state.viewport}
-                  year={state.filters.year}
+                  filters={state.filters}
+                  onFilterChange={(filters) =>
+                    dispatch(setFilters(Object.assign({}, filters)))
+                  }
                 ></GraphView>
               )}
             </div>

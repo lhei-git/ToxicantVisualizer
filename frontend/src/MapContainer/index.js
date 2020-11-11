@@ -1,6 +1,6 @@
 import "./index.css";
 import "../index.css";
-import mapStyles from "./standard";
+import { light, dark, silver } from "./mapstyles";
 import MarkerCluster from "./MarkerClusterer";
 import LoadingSpinner from "../LoadingSpinner";
 const React = require("react");
@@ -68,17 +68,6 @@ class MapContainer extends Component {
       this.setState({ isLoading: true }, () => {
         this.fetchPoints(this.props.viewport, this.props.filters);
       });
-      // if (this.props.filters.year !== prevProps.filters.year) {
-      //   this.setState({ isLoading: true }, () => {
-      //     this.fetchPoints(
-      //       this.props.viewport,
-      //       this.props.filters
-      //     );
-      //   });
-      // } else {
-      //   const oldPoints = this.state.points;
-      //   newState.markers = this.createMarkers(oldPoints);
-      // }
       newState.showingInfoWindow = false;
       this.setState(newState);
     }
@@ -131,8 +120,8 @@ class MapContainer extends Component {
       sw_lat: viewport.southwest.lat,
       sw_lng: viewport.southwest.lng,
       carcinogen: filters.carcinogens || null,
-      dioxin: filters.dioxins || null,
-      pbt: filters.pbts || null,
+      dioxin: filters.pbtsAndDioxins || null,
+      pbt: filters.pbtsAndDioxins || null,
       release_type: filters.releaseType,
       year: filters.year,
     };
@@ -250,7 +239,7 @@ class MapContainer extends Component {
             onTilesloaded={this.props.onTilesLoaded}
             google={this.props.google}
             streetViewControl={false}
-            styles={mapStyles}
+            styles={silver}
             draggable={true}
             fullscreenControl={false}
             zoom={5}
