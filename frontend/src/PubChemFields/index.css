@@ -18,6 +18,10 @@
   margin: 10px 0;
 }
 
+.pubChemFields .pictograms .pictogram {
+  display: inline-block;
+}
+
 .pubChemFields a {
   text-decoration: none;
 }

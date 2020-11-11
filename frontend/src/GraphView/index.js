@@ -1,5 +1,6 @@
 import "./index.css";
 import React, { Component, useEffect, useState } from "react";
+import UserControlPanel from "../UserControlPanel";
 const vetapi = require("../api/vetapi");
 const { formatChemical, intToString } = require("../helpers");
 const {
@@ -80,7 +81,7 @@ function GraphContainer(props) {
   let [graph, setGraph] = useState(null);
   let graphProp = props.graph;
   let viewportProp = props.viewport;
-  let yearProp = props.year;
+  let yearProp = props.filters.year;
 
   let innerProps = {
     graph: graphProp,
@@ -132,8 +133,8 @@ async function TimelineTotal(props) {
             data={res.data}
             margin={{
               top: 5,
-              right: 30,
-              left: 30,
+              right: 50,
+              left: 50,
               bottom: 5,
             }}
           >
@@ -285,7 +286,10 @@ async function GraphTopTenFacilities(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -347,7 +351,10 @@ async function GraphTopTenParents(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -404,7 +411,10 @@ async function GraphTopTenChemicals(props) {
               tick={<CustomizedXAxisTick />}
             />
             <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend align="right" verticalAlign="top" />
             <Bar
               name="release amount (lbs)"
@@ -480,7 +490,10 @@ async function TimelineTopFacilities(props) {
               width={100}
               tickFormatter={(val) => intToString(val) + " "}
             />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend
               width={120}
               height={140}
@@ -565,7 +578,10 @@ async function TimelineTopParents(props) {
               width={100}
               tickFormatter={(val) => intToString(val) + " "}
             />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend
               width={120}
               height={140}
@@ -651,7 +667,10 @@ async function TimelineTopChemicals(props) {
               width={100}
               tickFormatter={(val) => intToString(val) + " "}
             />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend
               width={120}
               height={140}
@@ -677,12 +696,39 @@ async function TimelineTopChemicals(props) {
 }
 
 function GraphView(props) {
+  const [visible, setVisible] = React.useState(false);
+  const graphRef = React.useRef();
+
+  const handleScroll = (event) => {
+    try {
+      const cur = event.target.scrollingElement.scrollTop;
+      if (graphRef && cur >= graphRef.current.offsetTop) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  React.useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="graph-container">
+    <div className="graph-container" ref={graphRef}>
       <h1>Location Insights</h1>
+      <div className={`fixed-filter ${visible ? "" : "hidden"}`}>
+        <UserControlPanel
+          chemicals={[]}
+          filters={props.filters}
+          onFilterChange={props.onFilterChange}
+        ></UserControlPanel>
+      </div>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="summary"
         hidden={false}
         graph={GraphSummary}
@@ -690,46 +736,49 @@ function GraphView(props) {
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="total_facilities"
         graph={TimelineTotal}
         title="Total Releases"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="total_facilities"
         graph={GraphTopTenFacilities}
         title="Total On-Site Releases for Top 10 Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="total_parents"
         graph={GraphTopTenParents}
         title="Total On-Site Releases for Top 10 Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="top_graphs"
         graph={GraphTopTenChemicals}
         title="Top Ten Chemicals (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        filters={props.filters}
         name="top_graphs"
         graph={TimelineTopFacilities}
         title="Total Releases Over Time for Top Ten Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        filters={props.filters}
         name="top_graphs"
         graph={TimelineTopParents}
         title="Total Releases Over Time for Top Ten Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        filters={props.filters}
         name="top_graphs"
         graph={TimelineTopChemicals}
         title="Top Ten Chemicals Over Time (in lbs)"
