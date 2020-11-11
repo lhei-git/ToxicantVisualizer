@@ -104,30 +104,14 @@ def state_total_releases(request):
     y = int(request.GET.get('year', default=2018))
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
-<<<<<<< HEAD
     if st != 'None':
-
         queryset = release.objects.filter(facility__state=st, year=y)
         t_facilitycount = int(release.objects.filter(facility__state=st, year=y).values('facility').distinct().count())
-
         for q in queryset:
             if q.chemical.classification == 'Dioxin':
                 t_dioxin += q.total
                 if q.chemical.carcinogen == 'YES':
                     t_carc += q.total
-=======
-    filters = ()
-    if state != 'None':
-        # Individual queries take too long, query all data in 1 queryset and filter values as done below
-        '''
-        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
-        tri_set = tri.objects.filter(st=state, year=y)
-        for t in tri_set:
-            if t.classification == 'Dioxin': # exclude dioxin stats in other categories
-                t_dioxin += t.vet_total_releases
-                if t.carcinogen == 'YES':
-                    t_carc += t.vet_total_releases
->>>>>>> 80a08933fbf391a3129b08bf93f23f0a8ecf5a1e
             else:
                 if q.chemical.carcinogen == 'YES':
                     t_carc += q.total
