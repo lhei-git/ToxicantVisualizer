@@ -100,32 +100,32 @@ Return total stats released by state & year {graph }
 '''
 # TODO
 def state_total_releases(request):
-    state = str(request.GET.get('state')).upper()
+    st = str(request.GET.get('state')).upper()
     y = int(request.GET.get('year', default=2018))
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0,0,0,0,0,0,0,0
     result = {}
-    filters = ()
-    if state != 'None':
-        '''
-        t_facilitycount = int(tri.objects.filter(st=state, year=y).values('facility').distinct().count())
-        tri_set = tri.objects.filter(st=state, year=y)
-        for t in tri_set:
-            if t.classification == 'Dioxin': # exclude dioxin stats in other categories
-                t_dioxin += t.vet_total_releases
-                if t.carcinogen == 'YES':
-                    t_carc += t.vet_total_releases
+    if st != 'None':
+
+        queryset = release.objects.filter(facility__state=st, year=y)
+        t_facilitycount = int(release.objects.filter(facility__state=st, year=y).values('facility').distinct().count())
+
+        for q in queryset:
+            if q.chemical.classification == 'Dioxin':
+                t_dioxin += q.total
+                if q.chemical.carcinogen == 'YES':
+                    t_carc += q.total
             else:
-                if t.carcinogen == 'YES': # carcinogens may be present in dioxins and non-dioxins
-                    t_carc += t.vet_total_releases
-                t_onsite += t.vet_total_releases_onsite
-                t_offsite += t.vet_total_releases_offsite
-                t_air += t.vet_total_releases_air
-                t_water += t.total_releases_water
-                t_land += t.vet_total_releases_land
+                if q.chemical.carcinogen == 'YES':
+                    t_carc += q.total
+                t_onsite += q.on_site
+                t_offsite += q.off_site
+                t_air += q.air
+                t_water += q.water
+                t_land += q.land
+
         result = {'totalonsite':t_onsite, 'air':t_air, 'water':t_water, 'land':t_land,
                   'totaloffsite':t_offsite, 'totaldioxin':t_dioxin, 'totalcarcs':t_carc,
                   'numtrifacilities':t_facilitycount}
-                  '''
         return JsonResponse(result)
 
 # FIXME - replace raw queries with ORM calls
