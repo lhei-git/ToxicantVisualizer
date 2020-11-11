@@ -2,15 +2,11 @@
   padding: 0 20px;
 }
 
-<<<<<<< HEAD
 .pubChemFields.loading {
-  opacity: 0;
+  display: none;
 }
 
-h1 {
-=======
 .pubChemFields h1 {
->>>>>>> master
   border-bottom: 2px solid var(--blue);
 }
 

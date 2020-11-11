@@ -42,7 +42,7 @@ function Pharmacology(props) {
     } catch (err) {
       handleError(err);
     } finally {
-      // console.log("pharmacology loaded");
+      console.log("pharmacology loaded");
       props.onLoad();
     }
   }
@@ -86,7 +86,7 @@ function HazardStatements(props) {
     } catch (err) {
       handleError(err);
     } finally {
-      // console.log("hazardStatements loaded");
+      console.log("hazardStatements loaded");
       props.onLoad();
     }
   }
@@ -161,7 +161,7 @@ function Toxicity(props) {
     } catch (err) {
       handleError(err);
     } finally {
-      // console.log("toxicity loaded");
+      console.log("toxicity loaded");
       props.onLoad();
     }
   }
@@ -206,6 +206,63 @@ function Toxicity(props) {
   );
 }
 
+/* Composition of all sections */
+function Content(props) {
+  const numComponents = 3;
+  const [loaded, setLoaded] = React.useState(false);
+  const [numLoaded, setNumLoaded] = React.useState(0);
+
+  function increment() {
+    setNumLoaded((numLoaded) => numLoaded + 1);
+    // console.log("numLoaded :>> ", numLoaded);
+  }
+
+  React.useEffect(() => {
+    // console.log('numLoaded :>> ', numLoaded);
+    if (numLoaded === numComponents && !loaded) {
+      setLoaded(true);
+    }
+  }, [loaded, numLoaded]);
+
+  return (
+    <div>
+      {!loaded && (
+        <div className="loading-overlay">
+          <div className="spinner">
+            <LoadingSpinner></LoadingSpinner>
+          </div>
+        </div>
+      )}
+      <div className={`pubChemFields ${loaded ? "" : "loading"}`}>
+        {props.chemName !== "" && (
+          <div className="name">
+            <h1>{props.chemName}</h1>
+          </div>
+        )}
+        {props.description !== null && <div>{props.description}</div>}
+        {/*gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data */}
+        {props.cid && (
+          <div className="loaded-content">
+            <Pharmacology cid={props.cid} onLoad={increment}></Pharmacology>
+            <HazardStatements
+              cid={props.cid}
+              onLoad={increment}
+            ></HazardStatements>
+            <Toxicity cid={props.cid} onLoad={increment}></Toxicity>
+            {/* <div className="diseases">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: '<iframe src="https://pubchem.ncbi.nlm.nih.gov/compound/5352425#section=Associated-Disorders-and-Diseases&fullscreen=true" width="540" height="450"></iframe>',
+                }}
+              ></div>
+            </div> */}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* Main class that fetches data on creation and renders all Pubchem components */
 class PubChemFields extends Component {
   constructor(props) {
@@ -214,107 +271,57 @@ class PubChemFields extends Component {
       cid: null,
       formula: null,
       description: null,
-      isLoading: false,
+      isLoading: true,
     };
-    this.Content = this.Content.bind(this);
   }
 
   //gets chemical CID and molecular formula from PUG REST data
-  getPugRestData(chemName) {
-    chemName = formatChemical(chemName);
-    let state = {};
-    let cid = null;
-    pubchem
-      .get("pug/compound/name/" + chemName + "/property/MolecularFormula/JSON")
-      .then((response) => {
-        cid = response.data.PropertyTable.Properties[0].CID;
-        state = {
-          cid,
-          formula: response.data.PropertyTable.Properties[0].MolecularFormula,
-        };
-        return pubchem.get("/pug/compound/cid/" + cid + "/Description/JSON");
-      })
-      .then((response) => {
-        if (response.data.InformationList.Information.length > 1)
-          state.description =
-            response.data.InformationList.Information[1].Description;
-        this.setState(state);
-      })
-      .catch(handleError);
+  async getPugRestData(chemName) {
+    try {
+      chemName = formatChemical(chemName);
+      let state = {};
+      let cid = null;
+      const nameResponse = await pubchem.get(
+        `pug/compound/name/${chemName}/property/MolecularFormula/JSON`
+      );
+
+      cid = nameResponse.data.PropertyTable.Properties[0].CID;
+      state = {
+        cid,
+        formula: nameResponse.data.PropertyTable.Properties[0].MolecularFormula,
+      };
+      const CidResponse = await pubchem.get(
+        `/pug/compound/cid/${cid}/Description/JSON`
+      );
+
+      if (CidResponse.data.InformationList.Information.length > 1)
+        state.description =
+          CidResponse.data.InformationList.Information[1].Description;
+      this.setState(state);
+    } catch (err) {
+      console.log(`err: "${chemName}" not found`);
+    } finally {
+      this.setState({ isLoading: false });
+    }
   }
 
-  componentDidMount() {
-    if (this.props.chemName !== "") this.getPugRestData(this.props.chemName);
+  async componentDidMount() {
+    if (this.props.chemName !== "")
+      await this.getPugRestData(this.props.chemName);
   }
 
   /* UPDATE HOOK NOT NEEDED as this component is recreated on each chemical click. 
   TODO: prevent component recreation */
 
-  /* Composition of all sections */
-  Content(props) {
-    const numComponents = 3;
-    const [loaded, setLoaded] = React.useState(false);
-    const [numLoaded, setNumLoaded] = React.useState(0);
-
-    function increment() {
-      setNumLoaded((numLoaded) => numLoaded + 1);
-    }
-
-    React.useEffect(() => {
-      if (numLoaded === numComponents && !loaded) {
-        setLoaded(true);
-      }
-    }, [numLoaded]);
-
-    return (
-      <div>
-        {!loaded && (
-          <div className="loading-overlay">
-            <div className="spinner">
-              <LoadingSpinner></LoadingSpinner>
-            </div>
-          </div>
-        )}
-        <div className={`pubChemFields ${loaded ? "" : "loading"}`}>
-          {props.chemName !== "" && (
-            <div className="name">
-              <h1>{props.chemName}</h1>
-            </div>
-          )}
-          {this.state.description !== null && (
-            <div>{this.state.description}</div>
-          )}
-          {/*gets Pharmacology, Chemical Safety, GHS hazard statements, and Toxicity data from PUG VIEW data */}
-          {this.state.cid && (
-            <div className="loaded-content">
-              <Pharmacology
-                cid={this.state.cid}
-                onLoad={increment}
-              ></Pharmacology>
-              <HazardStatements
-                cid={this.state.cid}
-                onLoad={increment}
-              ></HazardStatements>
-              <Toxicity cid={this.state.cid} onLoad={increment}></Toxicity>
-              {/* <div className="diseases">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: '<iframe src="https://pubchem.ncbi.nlm.nih.gov/compound/5352425#section=Associated-Disorders-and-Diseases&fullscreen=true" width="540" height="450"></iframe>',
-                }}
-              ></div>
-            </div> */}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   render() {
-    return (
-      <this.Content
+    return this.state.cid || this.state.isLoading ? (
+      <Content
+        description={this.state.description}
+        cid={this.state.cid}
         chemName={formatChemical(this.props.chemName)}
-      ></this.Content>
+      ></Content>
+    ) : (
+      <div>Pubchem data for {this.props.chemName} could not be found.</div>
     );
   }
 }

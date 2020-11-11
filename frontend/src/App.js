@@ -40,7 +40,7 @@ const initialState = {
   currentChemical: "",
   activeTab: 0,
   error: false,
-  loadedGraphs: false,
+  graphsLoaded: false,
   filters: {
     chemical: "all",
     dioxins: false,
@@ -85,7 +85,7 @@ const reducer = (state, action) => {
     case "setActiveTab":
       return { ...state, activeTab: action.payload };
     case "loadGraphs":
-      return { ...state, loadedGraphs: true };
+      return { ...state, graphsLoaded: true };
     case "refresh":
       return {
         ...state,
@@ -106,8 +106,8 @@ const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
 const setMapView = (payload) => ({ type: "setMapView", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
-const setActiveTab = (payload) => ({ type: "setActiveTab", payload });
 const loadGraphs = () => ({ type: "loadGraphs" });
+const setActiveTab = (payload) => ({ type: "setActiveTab", payload });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
@@ -193,7 +193,7 @@ const App = (props) => {
     window.addEventListener("scroll", handleScroll);
 
     if (state.viewport === null) geocodeLocation(state.location);
-  }, [state.location, state.viewport]);
+  }, []);
 
   function handleSearchSubmit(location) {
     geocodeLocation(location)
@@ -349,6 +349,7 @@ const App = (props) => {
                     viewport={state.viewport}
                     onLoad={() => dispatch(loadGraphs())}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                    onTilesLoaded={() => dispatch(loadGraphs())}
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(facilityId) => {
@@ -363,7 +364,7 @@ const App = (props) => {
             </div>
             {/* VET GRAPHS */}
             <div className="graph-view" ref={graphRef}>
-              {state.loadedGraphs && (
+              {state.graphsLoaded && (
                 <GraphView
                   viewport={state.viewport}
                   year={state.filters.year}

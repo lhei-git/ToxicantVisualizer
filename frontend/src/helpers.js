@@ -7,6 +7,9 @@ module.exports.formatChemical = (entry) => {
     .replace(/\b\w/g, (l) => l.toUpperCase())
     .replace(/"/gi, "")
     .trim();
+
+  if (trimmed.toUpperCase() === "POLYCYCLIC AROMATIC")
+    return "Polycyclic Aromatic Compounds";
   return trimmed;
 };
 
