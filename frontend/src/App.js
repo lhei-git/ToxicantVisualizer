@@ -30,6 +30,7 @@ const INITIAL_CENTER = {
 const initialState = {
   location: sessionStorage.getItem("searchedLocation") || "",
   altLocation: "",
+  stateName: "",
   numFacilities: 0,
   lastSearch: "",
   center: INITIAL_CENTER,
@@ -57,6 +58,8 @@ const reducer = (state, action) => {
       return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
+    case "setStateName":
+      return { ...state, stateName: action.payload };
     case "setAltLocation":
       return { ...state, altLocation: action.payload };
     case "setNumFacilities":
@@ -98,6 +101,7 @@ const reducer = (state, action) => {
 };
 
 const setLocation = (payload) => ({ type: "setLocation", payload });
+const setStateName = (payload) => ({ type: "setStateName", payload });
 const setError = (payload) => ({ type: "setError", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
@@ -213,6 +217,7 @@ const App = (props) => {
 
   async function geocodeLocation(location) {
     const res = await geocoder.get(`/json?address=${location}`);
+    dispatch(setStateName(res.data.results[0].address_components[2].short_name))
     dispatch(
       setMapView({
         center: res.data.results[0].geometry.location,
