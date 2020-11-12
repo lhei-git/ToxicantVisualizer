@@ -172,7 +172,7 @@ class ThematicMapView extends Component {
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
     await vetapi
-      .get("/stats/county/all?year=" + filterYear) //TODO: CHANGE ME TO THE CORRECT LINK
+      .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
         l = response.data;
         d = Object.values(l);
@@ -201,7 +201,7 @@ class ThematicMapView extends Component {
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
     await vetapi
-      .get("/stats/state/all?year=" + filterYear) //TODO: CHANGE ME TO THE CORRECT LINK
+      .get("/stats/state/all?year=" + filterYear)
       .then((response) => {
         l = response.data;
         d = Object.values(l);
