@@ -3,7 +3,10 @@ module.exports.formatChemical = (entry) => {
   let trimmed = entry.toLowerCase().replace(/ *\([^)]*\) */g, "");
   const i = trimmed.search(/\band|compounds\b/);
   if (i !== -1) trimmed = trimmed.slice(0, i);
-  trimmed = trimmed.replace(/\b\w/g, (l) => l.toUpperCase()).replace(/"/gi, "").trim();
+  trimmed = trimmed
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+    .replace(/"/gi, "")
+    .trim();
   return trimmed;
 };
 
@@ -22,4 +25,16 @@ module.exports.shallowEqual = (obj1, obj2) => {
   }
 
   return true;
+};
+
+module.exports.intToString = (value) => {
+  var suffixes = ["", "K", "M", "B", "T"];
+  var suffixNum = Math.floor(("" + value).length / 3);
+  var shortValue = parseFloat(
+    (suffixNum !== 0 ? value / Math.pow(1000, suffixNum) : value).toPrecision(2)
+  );
+  if (shortValue % 1 !== 0) {
+    shortValue = shortValue.toFixed(1);
+  }
+  return shortValue + suffixes[suffixNum];
 };

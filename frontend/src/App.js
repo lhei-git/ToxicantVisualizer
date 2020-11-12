@@ -16,10 +16,9 @@ import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
-import { useReducer, useRef, useEffect } from "react";
+import { useReducer, useRef } from "react";
 import { formatChemical } from "./helpers";
 import vetapi from "./api/vetapi";
-import { format } from "prettier";
 const geocoder = require("./api/geocoder");
 const React = require("react");
 
@@ -29,7 +28,7 @@ const INITIAL_CENTER = {
 };
 
 const initialState = {
-  location: localStorage.getItem("searchedLocation") || "",
+  location: sessionStorage.getItem("searchedLocation") || "",
   altLocation: "",
   numFacilities: 0,
   lastSearch: "",
@@ -41,6 +40,7 @@ const initialState = {
   currentChemical: "",
   activeTab: 0,
   error: false,
+  loadedGraphs: false,
   filters: {
     chemical: "all",
     dioxins: false,
@@ -63,11 +63,6 @@ const reducer = (state, action) => {
       return { ...state, numFacilities: action.payload };
     case "setFilters":
       return { ...state, filters: action.payload };
-    // case "setChemicals":
-    //   return {
-    //     ...state,
-    //     selectedChemicalList: action.payload,
-    //   };
     case "setCurrentChemical":
       return { ...state, currentChemical: action.payload };
     case "setMapView":
@@ -83,12 +78,14 @@ const reducer = (state, action) => {
         chemicals: action.payload,
       };
     case "setLastSearch":
-      localStorage.setItem("searchedLocation", state.location);
+      sessionStorage.setItem("searchedLocation", state.location);
       return { ...state, lastSearch: action.payload };
     case "showPubchemInfo":
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
     case "setActiveTab":
       return { ...state, activeTab: action.payload };
+    case "loadGraphs":
+      return { ...state, loadedGraphs: true };
     case "refresh":
       return {
         ...state,
@@ -110,6 +107,7 @@ const setMapView = (payload) => ({ type: "setMapView", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
 const setActiveTab = (payload) => ({ type: "setActiveTab", payload });
+const loadGraphs = () => ({ type: "loadGraphs" });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
@@ -126,7 +124,7 @@ function ChemicalList(props) {
   if (chemicals.length === 0) return <div></div>;
 
   const listItems = chemicals
-    .filter(c => c.total > 0)
+    .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total)
     .map((c) => {
       c.name = formatChemical(c.name);
@@ -137,7 +135,7 @@ function ChemicalList(props) {
           }}
           key={c.name + " " + c.total}
         >
-          {c.name} ({c.total} lbs)
+          {c.name} ({c.total.toLocaleString()} lbs)
         </li>
       );
     });
@@ -173,13 +171,20 @@ const App = (props) => {
   const executeScroll = (ref) => scrollToRef(ref);
 
   const handleScroll = (event) => {
-    const cur = event.target.scrollingElement.scrollTop;
-    if (cur <= summaryRef.current.offsetTop) {
-      dispatch(setActiveTab(0));
-    } else if (cur <= graphRef.current.offsetTop) {
-      dispatch(setActiveTab(1));
-    } else {
-      dispatch(setActiveTab(2));
+    try {
+      const cur = event.target.scrollingElement.scrollTop;
+      if (summaryRef && cur <= summaryRef.current.offsetTop) {
+        // dispatch(setActiveTab(0));
+      } else if (cur <= graphRef.current.offsetTop) {
+        if (!state.loadedGraphs) {
+          dispatch(loadGraphs());
+        }
+        // dispatch(setActiveTab(1));
+      } else {
+        // dispatch(setActiveTab(2));
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -289,7 +294,7 @@ const App = (props) => {
               </div>
             </div> */}
             <div className="map-view">
-              <div className="filter-wrapper">
+              <div className="flex-item filter-wrapper">
                 {/* VET MAP FILTER */}
                 <div className="filters" ref={summaryRef}>
                   <UserControlPanel
@@ -336,17 +341,15 @@ const App = (props) => {
                 )}
               </div>
               {/* GOOGLE MAPS RENDER */}
-              <div className="map-wrapper">
+              <div className="flex-item map-wrapper">
                 {state.viewport && (
                   <MapContainer
                     filters={Object.assign({}, state.filters)}
                     center={state.center}
                     viewport={state.viewport}
+                    onLoad={() => dispatch(loadGraphs())}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
-                    // onFetchPoints={(chemicals) => {
-                    //   dispatch(setChemicals(chemicals));
-                    // }}
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(facilityId) => {
                       getChemicals(facilityId).then((chemicals) =>
@@ -356,13 +359,16 @@ const App = (props) => {
                   />
                 )}
               </div>
+              <div className="flex-item"></div>
             </div>
             {/* VET GRAPHS */}
             <div className="graph-view" ref={graphRef}>
-              {/* <GraphView
-                viewport={state.viewport}
-                year={state.filters.year}
-              ></GraphView> */}
+              {state.loadedGraphs && (
+                <GraphView
+                  viewport={state.viewport}
+                  year={state.filters.year}
+                ></GraphView>
+              )}
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
             <ThematicMapView year={state.filters.year} type ={state.filters.releaseType}> </ThematicMapView>

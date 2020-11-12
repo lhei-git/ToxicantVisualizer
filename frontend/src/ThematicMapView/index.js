@@ -3,7 +3,7 @@ import ThematicMap from "../ThematicMap/index.js";
 // import Loader from 'react-loader-spinner';
 import LoadingSpinner from "../LoadingSpinner";
 import vetapi from "../api/vetapi";
-import './index.css';
+import "./index.css";
 const React = require("react");
 const Component = React.Component;
 
