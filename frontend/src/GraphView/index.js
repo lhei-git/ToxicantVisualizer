@@ -328,7 +328,7 @@ async function GraphTopTenParents(props) {
       .map((d, i) => {
         const f = d;
         return {
-          name: f.parent_co_name,
+          name: f.facility__parent_co_name,
           av: f.air,
           bv: f.water,
           cv: f.land,
@@ -389,7 +389,7 @@ async function GraphTopTenChemicals(props) {
     const data = res.data
       .map((d, i) => {
         return {
-          name: formatChemical(d.chemical),
+          name: formatChemical(d.chemical__name),
           pv: d.total,
         };
       })
