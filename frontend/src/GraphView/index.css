@@ -1,6 +1,5 @@
 .graph-container {
   position: relative;
-  /* background: #f7f7f7; */
   background: #fff;
 }
 
@@ -11,17 +10,15 @@
 
 .graph-container .graph {
   position: relative;
+
   justify-content: center;
   padding: 0 50px;
   padding-top: 75px;
   padding-bottom: 40px;
-  width: 70vw;
-  /* max-width: 60%; */
+  width: 60vw;
   margin: 20px auto;
   border-radius: 25px;
   box-sizing: border-box;
-  /* background: #fff;
-  box-shadow: 0 0.75rem 2rem rgba(25, 23, 40, 0.15); */
 }
 
 .graph-container .header {
@@ -47,7 +44,9 @@
 }
 
 .graph-container .summary {
-  width: 100%;
+  /* width: 100%; */
+  margin: 0 20px;
+  box-sizing: border-box;
 }
 
 .graph-container .summary th,
@@ -68,4 +67,17 @@
 
 .graph-container .top-ten {
   position: relative;
+}
+
+.graph-container .fixed-filter {
+  position: fixed;
+  top: 72px;
+  width: 20vw;
+  left: 0;
+  z-index: 100;
+  border: 2px solid #d05ce3;
+}
+
+.graph-container .fixed-filter.hidden {
+  display: none;
 }
