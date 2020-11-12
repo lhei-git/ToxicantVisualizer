@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import PropTypes from "prop-types";
 
 import MarkerClusterer from "@googlemaps/markerclustererplus";
-
 const evtNames = [
   "click",
   "dblclick",
@@ -15,7 +14,7 @@ const evtNames = [
 ];
 
 function MarkerCluster(props) {
-  const { map, google, markers } = props;
+  const { map, google, markers, releaseType } = props;
 
   // This hook works like ComponentWillMount
   // The  hook isn't really needed, this whole thing worked without it,
@@ -33,6 +32,25 @@ function MarkerCluster(props) {
     };
 
     if (map && markers) {
+      let type;
+      switch (String(releaseType)) {
+        case "air":
+          type = "grey";
+          break;
+        case "water":
+          type = "green";
+          break;
+        case "land":
+          type = "brown";
+          break;
+        case "off_site":
+          type = "yellow";
+          break;
+        default:
+          type = "red";
+          break;
+      }
+
       const mapMarkers = markers.map((marker) => {
         const entry = new google.maps.Marker({
           position: {
@@ -43,7 +61,7 @@ function MarkerCluster(props) {
           meta: marker.meta,
           name: marker.name,
           icon: {
-            url: require(`./../../../src/assets/marker-${marker.color}.png`),
+            url: require(`./../../../src/assets/${type}_${marker.color}-6.png`),
             scaledSize: new google.maps.Size(21, 21),
           },
         });
