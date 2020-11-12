@@ -1,6 +1,6 @@
 import "./index.css";
 import "../index.css";
-import mapStyles from "./standard";
+import { light, dark, silver } from "./mapstyles";
 import MarkerCluster from "./MarkerClusterer";
 import LoadingSpinner from "../LoadingSpinner";
 const React = require("react");
@@ -68,17 +68,6 @@ class MapContainer extends Component {
       this.setState({ isLoading: true }, () => {
         this.fetchPoints(this.props.viewport, this.props.filters);
       });
-      // if (this.props.filters.year !== prevProps.filters.year) {
-      //   this.setState({ isLoading: true }, () => {
-      //     this.fetchPoints(
-      //       this.props.viewport,
-      //       this.props.filters
-      //     );
-      //   });
-      // } else {
-      //   const oldPoints = this.state.points;
-      //   newState.markers = this.createMarkers(oldPoints);
-      // }
       newState.showingInfoWindow = false;
       this.setState(newState);
     }
@@ -131,8 +120,8 @@ class MapContainer extends Component {
       sw_lat: viewport.southwest.lat,
       sw_lng: viewport.southwest.lng,
       carcinogen: filters.carcinogens || null,
-      dioxin: filters.dioxins || null,
-      pbt: filters.pbts || null,
+      dioxin: filters.pbtsAndDioxins || null,
+      pbt: filters.pbtsAndDioxins || null,
       release_type: filters.releaseType,
       year: filters.year,
     };
@@ -192,53 +181,6 @@ class MapContainer extends Component {
     return new api.LatLngBounds(s, n);
   }
 
-  // passesFilter(chemical, filters) {
-  //   if (
-  //     (filters.chemical !== "all" &&
-  //       chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
-  //     (filters.carcinogens && chemical.carcinogen === "NO") ||
-  //     (filters.pbts && chemical.classification.toUpperCase() !== "PBT") ||
-  //     (filters.dioxins && chemical.classification.toUpperCase() !== "DIOXIN") ||
-  //     (filters.releaseType === "air" &&
-  //       chemical.vet_total_releases_air === 0) ||
-  //     (filters.releaseType === "water" &&
-  //       chemical.total_releases_water === 0) ||
-  //     (filters.releaseType === "land" &&
-  //       chemical.vet_total_releases_land === 0) ||
-  //     (filters.releaseType === "on-site" &&
-  //       chemical.vet_total_releases_onsite === 0) ||
-  //     (filters.releaseType === "off-site" &&
-  //       chemical.vet_total_releases_offsite === 0)
-  //   )
-  //     return false;
-  //   return true;
-  // }
-
-  // filterChemicalList(list, filters) {
-  //   const newList = [];
-  //   list.forEach((chemical) => {
-  //     if (this.passesFilter(chemical, filters)) newList.push(chemical);
-  //   });
-  //   return newList;
-  // }
-
-  filterFacilities(facilities) {
-    return facilities.map((f, i) => {
-      const total = f.total;
-      let color = 1;
-
-      if (total < 100) color = 1;
-      else if (total < 100) color = 2;
-      else if (total < 10000) color = 3;
-      else if (total < 100000) color = 4;
-      else if (total < 1000000) color = 5;
-      else color = 6;
-
-      f.color = color;
-      return f;
-    });
-  }
-
   getColor(total) {
     let color = 1;
     if (total < 100) color = 1;
@@ -265,10 +207,14 @@ class MapContainer extends Component {
         },
       };
     });
-    this.setState({
-      isLoading: false,
-    });
-    this.props.onUpdate(markers.length);
+    this.setState(
+      {
+        isLoading: false,
+      },
+      () => {
+        this.props.onUpdate(markers.length);
+      }
+    );
     return markers;
   }
 
@@ -290,9 +236,10 @@ class MapContainer extends Component {
         <div className="map">
           <Map
             onReady={this.handleMount}
+            onTilesloaded={this.props.onTilesLoaded}
             google={this.props.google}
             streetViewControl={false}
-            styles={mapStyles}
+            styles={silver}
             draggable={true}
             fullscreenControl={false}
             zoom={5}
@@ -330,7 +277,8 @@ class MapContainer extends Component {
                     <p>
                       Total Toxicants Released:{" "}
                       <span style={{ fontWeight: "bold" }}>
-                        {this.state.activeMarker.meta.total} lbs
+                        {this.state.activeMarker.meta.total.toLocaleString()}{" "}
+                        lbs
                       </span>
                     </p>
                   </div>

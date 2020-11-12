@@ -1,7 +1,7 @@
 import "./index.css";
 import "../index.css";
-import ChemTypeSelector from "./ChemTypeSelector.js";
 const React = require("react");
+const { shallowEqual } = require("../helpers");
 
 const startYear = 2006;
 const endYear = 2018;
@@ -9,15 +9,15 @@ const types = ["all", "air", "water", "land", "off_site", "on_site"];
 
 //search button and text box
 function UserControlPanel(props) {
-  function onFilterChange(event) {
-    const filters = props.filters;
-    filters[event.attribute] = event.value;
-    props.onFilterChange(filters);
-  }
+  React.useEffect(() => {
+    console.log("filters changed");
+  }, [props.filters]);
 
-  function onSelectChange(event) {
+  function onFilterChange(event) {
+    const target = event.target;
     const filters = props.filters;
-    filters[event.target.name] = event.target.value;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    filters[target.name] = value;
     props.onFilterChange(filters);
   }
 
@@ -53,16 +53,17 @@ function UserControlPanel(props) {
 
   return (
     <div className="control-container">
-      <div className="header">
-        {/* Search Bar Title and Image */}
-        <span>{props.numFacilities || 0}</span> Facilities found
-      </div>
       <div className="content">
         {/* Search Bar Content*/}
         <div className="flex-item one">
           <div className="selector">
             <label htmlFor="releaseType">Release Type</label>
-            <select name="releaseType" onChange={onSelectChange} id="">
+            <select
+              name="releaseType"
+              value={props.filters.releaseType}
+              onChange={onFilterChange}
+              id=""
+            >
               {(function () {
                 return types.map((type) => {
                   return <option key={type}>{type}</option>;
@@ -72,36 +73,48 @@ function UserControlPanel(props) {
           </div>
           <div className="selector">
             <label htmlFor="year">Year</label>
-            <select name="year" onChange={onSelectChange} id="">
+            <select
+              name="year"
+              value={props.filters.year}
+              onChange={onFilterChange}
+              id=""
+            >
               {getYears()}
             </select>
           </div>
           <div className="selector">
             <label htmlFor="chemical">Chemical</label>
-            <select name="chemical" onChange={onSelectChange} id="">
+            <select
+              name="chemical"
+              value={props.filters.chemical}
+              onChange={onFilterChange}
+              id=""
+            >
               {getChemicals()}
             </select>
           </div>
         </div>
         <div className="flex-item two">
-          <ChemTypeSelector
-            title="Only Show Carcinogens"
-            attribute="carcinogens"
-            defaultChecked={false}
-            onClick={onFilterChange}
-          />
-          <ChemTypeSelector
-            title="Only Show Dioxins"
-            attribute="dioxins"
-            defaultChecked={false}
-            onClick={onFilterChange}
-          />
-          <ChemTypeSelector
-            title="Only Show PBTs"
-            attribute="pbts"
-            defaultChecked={false}
-            onClick={onFilterChange}
-          />
+          <div className="selector">
+            <label htmlFor="carcinogens">Carcinogens only</label>
+            <input
+              type="checkbox"
+              checked={props.filters.carcinogens}
+              onChange={onFilterChange}
+              name="carcinogens"
+              id="carcinogens"
+            />
+          </div>
+          <div className="selector">
+            <label htmlFor="pbtsAndDioxins">PBTs and Dioxins only</label>
+            <input
+              type="checkbox"
+              checked={props.filters.pbtsAndDioxins}
+              onChange={onFilterChange}
+              id="pbtsAndDioxins"
+              name="pbtsAndDioxins"
+            />
+          </div>
         </div>
       </div>
     </div>

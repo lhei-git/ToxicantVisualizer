@@ -22,6 +22,118 @@ import re
 #        is returned which is unusable by serializer, use json.dumps(list(..)) instead and return response
 
 
+def filterFacilities(request):
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
+    release_type = request.GET.get('release_type')
+
+    filters = Q()
+
+    # filter by release_type
+    if release_type is not None:
+        if release_type.lower() == 'air':
+            filters.add(Q(release__air__gt=0), filters.connector)
+        elif release_type.lower() == 'water':
+            filters.add(Q(release__water__gt=0), filters.connector)
+        elif release_type.lower() == 'land':
+            filters.add(Q(release__land__gt=0), filters.connector)
+        elif release_type.lower() == 'on_site':
+            filters.add(Q(release__on_site__gt=0), filters.connector)
+        elif release_type.lower() == 'off_site':
+            filters.add(Q(release__off_site__gt=0), filters.connector)
+
+    # filter by chemicals
+    if chemical is not None:
+        filters.add(Q(chemical__name=chemical), filters.connector)
+
+    # filter by carcinogens, PBTs, or dioxins only
+    if carcinogen is not None:
+        filters.add(Q(chemical__carcinogen='YES'), filters.connector)
+    elif dioxin is not None:
+        filters.add(Q(chemical__classification='Dioxin'), filters.connector)
+    elif pbt is not None:
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
+
+    return filters
+
+
+def filterChemicals(request):
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
+    release_type = request.GET.get('release_type')
+
+    filters = Q()
+
+    # filter by release_type
+    if release_type is not None:
+        if release_type.lower() == 'air':
+            filters.add(Q(release__air__gt=0), filters.connector)
+        elif release_type.lower() == 'water':
+            filters.add(Q(release__water__gt=0), filters.connector)
+        elif release_type.lower() == 'land':
+            filters.add(Q(release__land__gt=0), filters.connector)
+        elif release_type.lower() == 'on_site':
+            filters.add(Q(release__on_site__gt=0), filters.connector)
+        elif release_type.lower() == 'off_site':
+            filters.add(Q(release__off_site__gt=0), filters.connector)
+
+    # filter by chemicals
+    if chemical is not None:
+        filters.add(Q(name=chemical), filters.connector)
+
+    # filter by carcinogens, PBTs, or dioxins only
+    if carcinogen is not None:
+        filters.add(Q(carcinogen='YES'), filters.connector)
+    elif dioxin is not None:
+        filters.add(Q(classification='Dioxin'), filters.connector)
+    elif pbt is not None:
+        filters.add(Q(classification='PBT'), filters.connector)
+
+    return filters
+
+
+def filterReleases(request):
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
+    release_type = request.GET.get('release_type')
+
+    filters = Q()
+
+    # filter by release_type
+    if release_type is not None:
+        if release_type.lower() == 'air':
+            filters.add(Q(air__gt=0), filters.connector)
+        elif release_type.lower() == 'water':
+            filters.add(Q(water__gt=0), filters.connector)
+        elif release_type.lower() == 'land':
+            filters.add(Q(land__gt=0), filters.connector)
+        elif release_type.lower() == 'on_site':
+            filters.add(Q(on_site__gt=0), filters.connector)
+        elif release_type.lower() == 'off_site':
+            filters.add(Q(off_site__gt=0), filters.connector)
+
+    # filter by chemicals
+    if chemical is not None:
+        filters.add(Q(chemical__name=chemical), filters.connector)
+
+    # filter by carcinogens, PBTs, or dioxins only
+    if carcinogen is not None:
+        filters.add(Q(chemical__carcinogen='YES'), filters.connector)
+    elif dioxin is not None:
+        filters.add(Q(chemical__classification='Dioxin'), filters.connector)
+    elif pbt is not None:
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
+
+    return filters
+
+
+# facilities
 def points(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -46,45 +158,15 @@ def get_facilities(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    carcinogen = request.GET.get('carcinogen')
-    dioxin = request.GET.get('dioxin')
-    pbt = request.GET.get('pbt')
-    chemical = request.GET.get('chemical')
-    release_type = request.GET.get('release_type')
     y = int(request.GET.get('year', default=2018))
 
     # filter by geographic window and year
-    filters = (Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-               & Q(longitude__lt=ne_lng)
-               & Q(longitude__gt=sw_lng) & Q(release__year=y))
-
-    # filter by release_type
-    if release_type is not None:
-        if release_type.lower() == 'air':
-            filters &= Q(release__air__gt=0)
-        elif release_type.lower() == 'water':
-            filters &= Q(release__water__gt=0)
-        elif release_type.lower() == 'land':
-            filters &= Q(release__land__gt=0)
-        elif release_type.lower() == 'on_site':
-            filters &= Q(release__on_site__gt=0)
-        elif release_type.lower() == 'off_site':
-            filters &= Q(release__off_site__gt=0)
-
-    # filter by chemicals
-    if chemical is not None:
-        filters &= Q(chemical__name=chemical)
-
-    # filter by carcinogens, PBTs, or dioxins only
-    if carcinogen is not None:
-        filters &= Q(chemical__carcinogen='YES')
-    elif dioxin is not None:
-        filters &= Q(chemical__classification='Dioxin')
-    elif pbt is not None:
-        filters &= Q(chemical__classification='PBT')
+    window = (Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
+              & Q(longitude__lt=ne_lng)
+              & Q(longitude__gt=sw_lng))
 
     # add sum of total releases for the facility with these filters
-    raw = facility.objects.filter(filters).annotate(
+    raw = facility.objects.filter(window & Q(release__year=y) & filterFacilities(request)).annotate(
         total=Sum('release__total')).values()
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
@@ -92,10 +174,9 @@ def get_facilities(request):
 
 def get_chemicals(request, facility_id):
     y = int(request.GET.get('year', default=2018))
-    # raw = release.objects.filter(Q(facility_id=facility_id) & Q(year=y)).select_related('chemical').values()
-
-    # FIXME - how does this endpoint acquire the facility_id
-    raw = chemical.objects.filter(facilities__id=facility_id, release__year=y).values().annotate(
+    filters = Q(facilities__id=facility_id) & Q(release__year=y)
+    filters.add(filterChemicals(request), filters.connector)
+    raw = chemical.objects.filter(filters).values().annotate(
         total=Sum('release__total'))
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
@@ -114,7 +195,8 @@ def state_total_releases(request):
     result = {}
     if st != 'None':
         queryset = release.objects.filter(facility__state=st, year=y)
-        t_facilitycount = int(release.objects.filter(facility__state=st, year=y).values('facility').distinct().count())
+        t_facilitycount = int(release.objects.filter(
+            facility__state=st, year=y).values('facility').distinct().count())
         for q in queryset:
             if q.chemical.classification == 'Dioxin':
                 t_dioxin += q.total
@@ -137,6 +219,8 @@ def state_total_releases(request):
 
 # FIXME - replace raw queries with ORM calls
 # stats/state/all
+
+
 def all_state_total_releases(request):
     d = []
     y = int(request.GET.get('year', default=2018))
@@ -151,6 +235,8 @@ def all_state_total_releases(request):
 
 
 # stats/county/all
+
+
 def all_county_total_releases(request):
     d = []
     y = int(request.GET.get('year', default=2018))
@@ -175,21 +261,13 @@ def top_parentco_releases(request):
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
 
-    f = (Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(facility__longitude__lt=ne_lng)
-         & Q(facility__longitude__gt=sw_lng) & Q(year=y))
-
-    # queryset = release.objects.filter(f).order_by('-total').distinct('facility')
-    # seems that the DISTINCT ON expression(s) must match the leftmost ORDER BY expression
-    queryset = release.objects.filter(f).values('facility__parent_co_name', 'total').order_by('facility', '-total').distinct('facility')
-    '''
-    queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                  & Q(longitude__lt=ne_lng)
-                                  & Q(longitude__gt=sw_lng)
-                                  & Q(year=y) & ~Q(parent_co_name="NA")).values('parent_co_name').annotate(total=Sum('vet_total_releases_onsite')).annotate(land=Sum('vet_total_releases_land')).annotate(air=Sum('vet_total_releases_air')).annotate(water=Sum('total_releases_water')).order_by('-total')[:10]
-    '''
-    # JsonResponse is breaking the return as it can't serialize the custom queryset (from cte)
-    return HttpResponse(json.dumps(list(queryset), cls=DjangoJSONEncoder), content_type='application/json')
+    queryset = release.objects.select_related('facility').select_related(
+        'chemical').filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
+        air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
+    return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
 '''
@@ -202,27 +280,33 @@ def timeline_top_parentco_releases(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    facilities = list(release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                          & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(year=2018)).values_list('facility__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
-    response = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                      & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(facility__id__in=facilities)).values('year', 'facility__parent_co_name').order_by('facility__parent_co_name', 'year').annotate(total=Sum('total'))
+    filters = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+
+    facilities = list(release.objects.filter(filters & filterReleases(request) & Q(year=2018)).values_list(
+        'facility__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
+    response = release.objects.filter(filters & filterReleases(request) & Q(facility__id__in=facilities)).values(
+        'year', 'facility__parent_co_name').order_by('facility__parent_co_name', 'year').annotate(total=Sum('total'))
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
 
-'''
-Return global amount over time by: window
-'''
 
 """ Returns the total releases (in lbs) in a location for each available year. """
+
+
 def timeline_total(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    queryset = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                  & Q(facility__longitude__lt=ne_lng)
-                                  & Q(facility__longitude__gt=sw_lng)).values('year').annotate(total=Sum('total')).order_by('year')
+    window = (Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
+              & Q(facility__longitude__lt=ne_lng)
+              & Q(facility__longitude__gt=sw_lng))
+
+    queryset = release.objects.filter(window & filterReleases(request)).values(
+        'year').annotate(total=Sum('total')).order_by('year')
     response = json.dumps(list(queryset), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
+
 
 '''
 Return top ten polluting facilities by: window
@@ -235,12 +319,10 @@ def top_facility_releases(request):
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
-    state = str(request.GET.get('state', default='None')).upper()
-    queryset = release.objects.select_related('facility').select_related('chemical').filter(
-        Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-        & Q(facility__longitude__lt=ne_lng)
-        & Q(facility__longitude__gt=sw_lng)
-        & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+
+    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
         air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
@@ -255,14 +337,18 @@ def timeline_top_facility_releases(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    release_list = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                          & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(year=2018)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    release_list = release.objects.filter(window & filterReleases(request) & Q(
+        year=2018)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
     facilities = [x['facility__id'] for x in release_list][:10]
-    response = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                      & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(facility__id__in=facilities)).values('year', 'facility__name').order_by('facility__name', 'year').annotate(total=Sum('total'))
+    response = release.objects.filter(window & filterReleases(request) & Q(facility__id__in=facilities)).values(
+        'year', 'facility__name').order_by('facility__name', 'year').annotate(total=Sum('total'))
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
 
 # stats/location/num_facilities
+
+
 def num_facilities(request):
     state = str(request.GET.get('state')).upper()
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
@@ -271,7 +357,8 @@ def num_facilities(request):
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     # y = int(request.GET.get('year', default=2018))
     if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        data = facility.objects.filter(st=state).values('name').distinct().count()
+        data = facility.objects.filter(
+            st=state).values('name').distinct().count()
     else:
         data = facility.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                        & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)).values('name') \
@@ -294,11 +381,12 @@ def location_summary(request):
     facility_list = facility.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                             & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
     release_list = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                          & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(
-        year=y))
+                                          & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(year=y))
+    # summary['releases'] = json.loads(json.dumps(list(release_list.values()), cls=DjangoJSONEncoder))
 
     """ TODO: filter out facilities that have a total_releases amount of zero """
-    summary['num_facilities'] = facility_list.annotate(total=Sum('release__total')).filter(total__gt=0).count()
+    summary['num_facilities'] = facility_list.annotate(
+        total=Sum('release__total')).filter(total__gt=0).count()
     summary['num_distinct_chemicals'] = release_list.values(
         'chemical_id').distinct().count()
     summary['total'] = release_list.aggregate(total=Sum('total'))['total']
@@ -315,107 +403,6 @@ def location_summary(request):
     response = json.dumps(summary)
     return HttpResponse(response, content_type='application/json')
 
-    # stats/location/summary
-
-
-def v1_location_summary(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    y = int(request.GET.get('year', default=2018))
-    # FIXME - unit of measure can be filtered in ORM query below
-    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                             & Q(longitude__lt=ne_lng)
-                             & Q(longitude__gt=sw_lng)
-                             & Q(year=y))
-    rows = list(map(lambda e: e.__dict__, list(raw)))
-    summary = {}
-    summary['num_facilities'] = len(set(list(map(lambda r: r['facility'], rows))))
-    summary['num_distinct_chemicals'] = len(set(list(map(lambda r: clean_chemical_name(r['chemical']), rows))))
-    summary['total_disposal'] = 0
-    summary['total_on_site'] = 0
-    summary['total_off_site'] = 0
-    summary['total_air'] = 0
-    summary['total_water'] = 0
-    summary['total_land'] = 0
-    summary['total_carcinogen'] = 0
-    # TODO - make calculations based on unit of measure. Currently assumes everything is in pounds
-    for r in rows:
-        summary['total_disposal'] += r['vet_total_releases']
-        summary['total_on_site'] += r['vet_total_releases_onsite']
-        summary['total_off_site'] += r['vet_total_releases_offsite']
-        summary['total_air'] += r['vet_total_releases_air']
-        summary['total_water'] += r['total_releases_water']
-        summary['total_land'] += r['vet_total_releases_land']
-        summary['total_carcinogen'] += r['vet_total_releases'] if r['carcinogen'] == 'YES' else 0
-    response = json.dumps(summary)
-    return HttpResponse(response, content_type='application/json')
-
-
-def XXXlocation_releases_by_facility(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    y = int(request.GET.get('year', default=2018))
-    state = str(request.GET.get('state', default='None'))
-    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                             & Q(longitude__lt=ne_lng)
-                             & Q(longitude__gt=sw_lng)
-                             & Q(year=y))
-    rows = list(map(lambda e: e.__dict__, list(raw)))
-    facilities = {}
-    for r in rows:
-        f = r['facility']
-        if f in facilities:
-            facilities[f] += r['vet_total_releases']
-        else:
-            facilities[f] = 0
-    return HttpResponse(json.dumps(facilities), content_type='application/json')
-
-
-def XXXlocation_releases_by_parent(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    y = int(request.GET.get('year', default=2018))
-    state = str(request.GET.get('state', default='None'))
-    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                             & Q(longitude__lt=ne_lng)
-                             & Q(longitude__gt=sw_lng)
-                             & Q(year=y))
-    rows = list(map(lambda e: e.__dict__, list(raw)))
-    parents = {}
-    for r in rows:
-        f = r['parent_co_name']
-        if f in parents:
-            parents[f] += r['vet_total_releases']
-        else:
-            parents[f] = 0
-    return HttpResponse(json.dumps(parents), content_type='application/json')
-
-
-# def chem_counts(request):
-#     ne_lat = float(request.GET.get('ne_lat', default=0.0))
-#     ne_lng = float(request.GET.get('ne_lng', default=0.0))
-#     sw_lat = float(request.GET.get('sw_lat', default=0.0))
-#     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-#     y = int(request.GET.get('year', default=2018))
-#     raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-#                                                     & Q(longitude__lt=ne_lng)
-#                                                     & Q(longitude__gt=sw_lng)
-#                                                     & Q(year=y))
-#     rows = map(lambda e: e.__dict__, list(raw))
-#     top_chems = dict()
-#     for r in rows:
-#       chem = clean_chemical_name(r['chemical'])
-#       if not chem in top_chems:
-#         top_chems[chem] = 1
-#       else:
-#         top_chems[chem] = top_chems[chem] + 1
-#     return HttpResponse(json.dumps(top_chems), content_type='application/json')
 
 def top_chemicals(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
@@ -423,12 +410,12 @@ def top_chemicals(request):
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
-    raw = release.objects.select_related('facility').select_related('chemical').filter(
-        Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-        & Q(facility__longitude__lt=ne_lng)
-        & Q(facility__longitude__gt=sw_lng)
-        & Q(year=y)).values('chemical__name').annotate(total=Sum('total')).order_by('-total')[:10]
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    raw = release.objects.filter(window & filterReleases(request) & Q(year=y)).values(
+        'chemical__name').annotate(total=Sum('total')).order_by('-total')[:10]
     return JsonResponse(list(raw), content_type='application/json', safe=False)
+
 
 """ Returns the total release amount over time for the top 10 chemicals released in 2018. """
 
@@ -438,28 +425,13 @@ def timeline_top_chemicals(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    chemicals = list(release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                            & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(year=2018)).values_list('chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
-    response = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                      & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(chemical__id__in=chemicals)).values('year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    chemicals = list(release.objects.filter(window & filterReleases(request) & Q(year=2018)).values_list(
+        'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
+    response = release.objects.filter(window & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
+        'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
-
-def XXXfac_count(request):
-    state = str(request.GET.get('state')).upper()
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    start = int(request.GET.get('start', default=2018))
-    end = int(request.GET.get('end', default=2018))
-    if state != 'None' and ne_lat == 0.0 and sw_lng == 0.0 and ne_lng == 0.0 and sw_lat == 0.0:
-        count = tri.objects.filter(st=state).count()
-        return HttpResponse(int(count), content_type='application/json')
-    else:
-        count = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                   & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng)
-                                   & Q(year__lte=end) & Q(year__gte=start)).count()
-        return HttpResponse(int(count), content_type='application/json')
 
 
 def clean_chemical_name(str):

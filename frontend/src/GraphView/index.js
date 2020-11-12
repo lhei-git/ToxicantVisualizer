@@ -1,7 +1,8 @@
 import "./index.css";
 import React, { Component, useEffect, useState } from "react";
+import UserControlPanel from "../UserControlPanel";
 const vetapi = require("../api/vetapi");
-const { formatChemical } = require("../helpers");
+const { formatChemical, intToString } = require("../helpers");
 const {
   BarChart,
   CartesianGrid,
@@ -16,17 +17,21 @@ const {
 } = require("recharts");
 
 const colors = [
-  "#65ADF8",
-  "#FA9165",
-  "#689736",
-  "#5D87E0",
-  "#57BE60",
-  "#20754D",
-  "#635857",
-  "#DABD07",
-  "#560846",
-  "#5C4A43",
+  "#a6cee3",
+  "#1f78b4",
+  "#b2df8a",
+  "#33a02c",
+  "#fb9a99",
+  "#e31a1c",
+  "#fdbf6f",
+  "#ff7f00",
+  "#cab2d6",
+  "#6a3d9a",
 ];
+
+function handleError(err) {
+  /* do something here */
+}
 
 class CustomizedXAxisTick extends Component {
   render() {
@@ -76,12 +81,12 @@ function GraphContainer(props) {
   let [graph, setGraph] = useState(null);
   let graphProp = props.graph;
   let viewportProp = props.viewport;
-  let yearProp = props.year;
+  let filterProp = props.filters;
 
   let innerProps = {
     graph: graphProp,
     viewport: viewportProp,
-    year: yearProp,
+    filters: filterProp,
   };
 
   useEffect(() => {
@@ -95,13 +100,15 @@ function GraphContainer(props) {
     fetchData();
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, yearProp]); /* eslint-disable-line */
+  }, [graphProp, viewportProp, filterProp]); /* eslint-disable-line */
 
   return (
-    <div className="graph">
-      <div className="header">{props.title}</div>
-      <div className="rechart">{graph}</div>
-    </div>
+    graph !== null && (
+      <div className="graph">
+        <div className="header">{props.title}</div>
+        <div className="rechart">{graph}</div>
+      </div>
+    )
   );
 }
 
@@ -113,34 +120,42 @@ async function TimelineTotal(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/total`, {
       params,
     });
     return (
       <div className="top-ten facilities">
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
             width={500}
             height={300}
             data={res.data}
             margin={{
               top: 5,
-              right: 30,
+              right: 50,
               left: 50,
               bottom: 5,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="year" tick={{ fill: "#FFF" }} />
-            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <XAxis dataKey="year" />
+            <YAxis type="number" unit="lbs" />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend />
             <Line
               type="monotone"
               dataKey="total"
-              stroke={"#8884d8"}
+              stroke={colors[Math.floor(Math.random() * 10)]}
               strokeWidth={3}
+              dot={false}
               activeDot={{ r: 8 }}
             ></Line>
           </LineChart>
@@ -148,7 +163,7 @@ async function TimelineTotal(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
     return null;
   }
 }
@@ -225,8 +240,8 @@ async function GraphSummary(props) {
       </div>
     );
   } catch (err) {
-    console.log("summary error:", err);
-    return <div>ERROR: Summary statistics could not be found.</div>;
+    handleError(err);
+    return null;
   }
 }
 
@@ -260,7 +275,6 @@ async function GraphTopTenFacilities(props) {
         <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
-            // layout="vertical"
             margin={{
               top: 30,
               right: 50,
@@ -275,8 +289,11 @@ async function GraphTopTenFacilities(props) {
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <YAxis type="number" unit="lbs" />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -286,7 +303,8 @@ async function GraphTopTenFacilities(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
+
     return null;
   }
 }
@@ -310,7 +328,7 @@ async function GraphTopTenParents(props) {
       .map((d, i) => {
         const f = d;
         return {
-          name: f.parent_co_name,
+          name: f.facility__parent_co_name,
           av: f.air,
           bv: f.water,
           cv: f.land,
@@ -336,8 +354,11 @@ async function GraphTopTenParents(props) {
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <YAxis type="number" unit="lbs" />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
@@ -347,7 +368,8 @@ async function GraphTopTenParents(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
+
     return null;
   }
 }
@@ -367,7 +389,7 @@ async function GraphTopTenChemicals(props) {
     const data = res.data
       .map((d, i) => {
         return {
-          name: formatChemical(d.chemical),
+          name: formatChemical(d.chemical__name),
           pv: d.total,
         };
       })
@@ -392,8 +414,11 @@ async function GraphTopTenChemicals(props) {
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" tick={{ fill: "#FFF" }} />
-            <Tooltip contentStyle={{ color: "#000" }} />
+            <YAxis type="number" unit="lbs" />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
             <Legend align="right" verticalAlign="top" />
             <Bar
               name="release amount (lbs)"
@@ -406,7 +431,8 @@ async function GraphTopTenChemicals(props) {
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
+
     return null;
   }
 }
@@ -419,6 +445,10 @@ async function TimelineTopFacilities(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
       params,
@@ -440,38 +470,59 @@ async function TimelineTopFacilities(props) {
       .map((k, i) => (
         <Line
           type="monotone"
+          key={k}
           dataKey={k}
           stroke={colors[i] || "#8884d8"}
           strokeWidth={3}
+          dot={false}
           activeDot={{ r: 8 }}
         ></Line>
       ));
     return (
       <div className="top-ten facilities">
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
-            width={500}
-            height={300}
             data={data}
             margin={{
               top: 5,
-              right: 30,
-              left: 20,
+              right: 50,
+              left: 50,
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{ color: "#000" }} />
-            <Legend />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
+            <Legend
+              width={120}
+              height={140}
+              layout="vertical"
+              verticalAlign="middle"
+              align="right"
+              wrapperStyle={{
+                whiteSpace: "nowrap",
+                top: 0,
+                right: 0,
+                lineHeight: "24px",
+              }}
+            />
             {lines}
           </LineChart>
         </ResponsiveContainer>
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
+
     return null;
   }
 }
@@ -484,6 +535,10 @@ async function TimelineTopParents(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/parent_releases`, {
       params,
@@ -505,38 +560,61 @@ async function TimelineTopParents(props) {
       .map((k, i) => (
         <Line
           type="monotone"
+          key={k}
           dataKey={k}
           stroke={colors[i] || "#8884d8"}
           strokeWidth={3}
+          dot={false}
           activeDot={{ r: 8 }}
         ></Line>
       ));
     return (
       <div className="top-ten parents">
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
             width={500}
             height={300}
             data={data}
             margin={{
               top: 5,
-              right: 30,
-              left: 20,
+              right: 50,
+              left: 50,
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{ color: "#000" }} />
-            <Legend />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
+            <Legend
+              width={120}
+              height={140}
+              layout="vertical"
+              verticalAlign="middle"
+              align="right"
+              wrapperStyle={{
+                whiteSpace: "nowrap",
+                top: 0,
+                right: 0,
+                lineHeight: "24px",
+              }}
+            />
             {lines}
           </LineChart>
         </ResponsiveContainer>
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
+
     return null;
   }
 }
@@ -549,6 +627,10 @@ async function TimelineTopChemicals(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/top_chemicals`, {
       params,
@@ -571,48 +653,98 @@ async function TimelineTopChemicals(props) {
       .map((k, i) => (
         <Line
           type="monotone"
+          key={k}
           dataKey={k}
-          stroke={colors[i] || "#8884d8"}
+          stroke={colors[i] || "#d9d9d9"}
           strokeWidth={3}
+          dot={false}
           activeDot={{ r: 8 }}
         ></Line>
       ));
     return (
       <div className="top-ten chemicals">
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
             width={500}
             height={300}
             data={data}
             margin={{
               top: 5,
-              right: 30,
-              left: 20,
+              right: 50,
+              left: 50,
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis type="number" unit="lbs" />
-            <Tooltip contentStyle={{ color: "#000" }} />
-            <Legend />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
+            <Legend
+              width={120}
+              height={140}
+              layout="vertical"
+              verticalAlign="middle"
+              align="right"
+              wrapperStyle={{
+                whiteSpace: "nowrap",
+                top: 0,
+                right: 0,
+                lineHeight: "24px",
+              }}
+            />
             {lines}
           </LineChart>
         </ResponsiveContainer>
       </div>
     );
   } catch (err) {
-    console.log(err);
+    handleError(err);
     return null;
   }
 }
 
 function GraphView(props) {
+  const [visible, setVisible] = React.useState(false);
+  const graphRef = React.useRef();
+
+  const handleScroll = (event) => {
+    try {
+      const cur = event.target.scrollingElement.scrollTop;
+      if (graphRef && cur >= graphRef.current.offsetTop) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  React.useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="graph-container">
+    <div className="graph-container" ref={graphRef}>
+      <h1>Location Insights</h1>
+      <div className={`fixed-filter ${visible ? "" : "hidden"}`}>
+        <UserControlPanel
+          chemicals={[]}
+          filters={props.filters}
+          onFilterChange={props.onFilterChange}
+        ></UserControlPanel>
+      </div>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="summary"
         hidden={false}
         graph={GraphSummary}
@@ -620,46 +752,49 @@ function GraphView(props) {
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="total_facilities"
         graph={TimelineTotal}
         title="Total Releases"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="total_facilities"
         graph={GraphTopTenFacilities}
         title="Total On-Site Releases for Top 10 Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="total_parents"
         graph={GraphTopTenParents}
         title="Total On-Site Releases for Top 10 Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
-        year={props.year}
+        filters={props.filters}
         name="top_graphs"
         graph={GraphTopTenChemicals}
         title="Top Ten Chemicals (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        filters={props.filters}
         name="top_graphs"
         graph={TimelineTopFacilities}
         title="Total Releases Over Time for Top Ten Facilities (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        filters={props.filters}
         name="top_graphs"
         graph={TimelineTopParents}
         title="Total Releases Over Time for Top Ten Parent Companies (in lbs)"
       ></GraphContainer>
       <GraphContainer
         viewport={props.viewport}
+        filters={props.filters}
         name="top_graphs"
         graph={TimelineTopChemicals}
         title="Top Ten Chemicals Over Time (in lbs)"
