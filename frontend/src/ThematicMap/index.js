@@ -160,6 +160,7 @@ const thematicMap = (props) => {
               }
             </Geographies>
           </ComposableMap>
+          <Legend colorScale={colorScale} filterType={filterType} maxVal={props.maxValue} minVal={props.minValue}></Legend>
         </div>
       </>
     );
@@ -243,11 +244,27 @@ const thematicMap = (props) => {
               }
             </Geographies>
           </ComposableMap>
+          <Legend colorScale={colorScale} filterType={filterType} maxVal={props.maxValue} minVal={props.minValue}></Legend>
         </div>
       </>
     );
 };
 
-function mapFilter() {}
+function Legend(props)
+{
+    return(
+        <svg height="25" width="100%" margin="5px">
+          <defs>
+            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={props.colorScale(0)} stopOpacity="1" />
+              <stop offset="100%" stopColor={props.colorScale(Number.MAX_SAFE_INTEGER)} stopOpacity="1" />
+            </linearGradient>1
+          </defs>
+          <rect height="100" width="100%" fill="url(#grad2)" stroke-width="1" stroke="black" />
+          <text x="3%" y="50%" fill="black" dominant-baseline="middle" text-anchor="start">{rounded(Math.trunc(props.minVal))}</text>
+          <text x="97%" y="50%" fill="white" dominant-baseline="middle" text-anchor="end">{rounded(Math.trunc(props.maxVal))}</text>
+        </svg>
+    )
+}
 
 export default memo(thematicMap);
