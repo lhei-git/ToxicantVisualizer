@@ -16,10 +16,9 @@ import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
-import { useReducer, useRef, useEffect } from "react";
+import { useReducer, useRef } from "react";
 import { formatChemical } from "./helpers";
 import vetapi from "./api/vetapi";
-import { format } from "prettier";
 const geocoder = require("./api/geocoder");
 const React = require("react");
 
@@ -41,10 +40,10 @@ const initialState = {
   currentChemical: "",
   activeTab: 0,
   error: false,
+  graphsLoaded: false,
   filters: {
     chemical: "all",
-    dioxins: false,
-    pbts: false,
+    pbtsAndDioxins: false,
     carcinogens: false,
     releaseType: "all",
     year: 2018,
@@ -63,11 +62,6 @@ const reducer = (state, action) => {
       return { ...state, numFacilities: action.payload };
     case "setFilters":
       return { ...state, filters: action.payload };
-    // case "setChemicals":
-    //   return {
-    //     ...state,
-    //     selectedChemicalList: action.payload,
-    //   };
     case "setCurrentChemical":
       return { ...state, currentChemical: action.payload };
     case "setMapView":
@@ -89,6 +83,8 @@ const reducer = (state, action) => {
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
     case "setActiveTab":
       return { ...state, activeTab: action.payload };
+    case "loadGraphs":
+      return { ...state, graphsLoaded: true };
     case "refresh":
       return {
         ...state,
@@ -109,14 +105,25 @@ const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
 const setMapView = (payload) => ({ type: "setMapView", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
+const loadGraphs = () => ({ type: "loadGraphs" });
 const setActiveTab = (payload) => ({ type: "setActiveTab", payload });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
 });
 
-const getChemicals = async (facilityId) => {
-  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`);
+const getChemicals = async (facilityId, filters) => {
+
+  const params = {
+    carcinogen: filters.carcinogens || null,
+    dioxin: filters.pbtsAndDioxins || null,
+    pbt: filters.pbtsAndDioxins || null,
+    release_type: filters.releaseType,
+    year: filters.year,
+  };
+
+
+  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`, { params });
   const chemicals = res.data;
   return chemicals;
 };
@@ -137,7 +144,7 @@ function ChemicalList(props) {
           }}
           key={c.name + " " + c.total}
         >
-          {c.name} ({c.total} lbs)
+          {c.name} ({c.total.toLocaleString()} lbs)
         </li>
       );
     });
@@ -172,23 +179,10 @@ const App = (props) => {
 
   const executeScroll = (ref) => scrollToRef(ref);
 
-  const handleScroll = (event) => {
-    const cur = event.target.scrollingElement.scrollTop;
-    if (cur <= summaryRef.current.offsetTop) {
-      dispatch(setActiveTab(0));
-    } else if (cur <= graphRef.current.offsetTop) {
-      dispatch(setActiveTab(1));
-    } else {
-      dispatch(setActiveTab(2));
-    }
-  };
-
   // fetches data when component is updated
   React.useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-
     if (state.viewport === null) geocodeLocation(state.location);
-  }, [state.location, state.viewport]);
+  }, []);
 
   function handleSearchSubmit(location) {
     geocodeLocation(location)
@@ -225,28 +219,6 @@ const App = (props) => {
               <div className="go-home">
                 <Link to="/"> &lt; Back to home</Link>
               </div>
-              {/* <div className="flex-item">
-                <div className="alt-input">
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSearchSubmit(altLocationInput.current.value);
-                    }}
-                  >
-                    <label htmlFor="alt-input">Location:</label>
-                    <input
-                      type="text"
-                      name="alt-input"
-                      id=""
-                      value={state.altLocation}
-                      onChange={(event) => {
-                        dispatch(setAltLocation(event.target.value));
-                      }}
-                      ref={altLocationInput}
-                    />
-                  </form>
-                </div>
-              </div> */}
               <ul>
                 <li
                   className={state.activeTab === 0 ? "active" : ""}
@@ -277,26 +249,20 @@ const App = (props) => {
                 </li>
               </ul>
             </div>
-            {/* <div className="title">
-              <div className="go-home">
-                <Link to="/"> &lt; Back to home</Link>
-              </div>
-              <div className="hamburger">
-                <img
-                  src={require("./../src/assets/hamburger_icon.svg")}
-                  alt=""
-                />
-              </div>
-            </div> */}
             <div className="map-view">
-              <div className="filter-wrapper">
+              <div className="flex-item filter-wrapper">
                 {/* VET MAP FILTER */}
                 <div className="filters" ref={summaryRef}>
+                  <div className="header">
+                    {/* Search Bar Title and Image */}
+                    <span>{state.numFacilities || 0}</span> Facilities found
+                  </div>
                   <UserControlPanel
                     chemicals={state.selectedChemicalList}
-                    filters={Object.assign({}, state.filters)}
-                    numFacilities={state.numFacilities}
-                    onFilterChange={(filters) => dispatch(setFilters(filters))}
+                    filters={state.filters}
+                    onFilterChange={(filters) =>
+                      dispatch(setFilters(Object.assign({}, filters)))
+                    }
                   ></UserControlPanel>
                 </div>
                 {state.showPubchemInfo ? (
@@ -336,38 +302,43 @@ const App = (props) => {
                 )}
               </div>
               {/* GOOGLE MAPS RENDER */}
-              <div className="map-wrapper">
+              <div className="flex-item map-wrapper">
                 {state.viewport && (
                   <MapContainer
                     filters={Object.assign({}, state.filters)}
                     center={state.center}
                     viewport={state.viewport}
+                    onLoad={() => dispatch(loadGraphs())}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                    onTilesLoaded={() => dispatch(loadGraphs())}
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
-                    // onFetchPoints={(chemicals) => {
-                    //   dispatch(setChemicals(chemicals));
-                    // }}
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(facilityId) => {
-                      getChemicals(facilityId).then((chemicals) =>
+                      getChemicals(facilityId, state.filters).then((chemicals) =>
                         dispatch(setChemicals(chemicals))
                       );
                     }}
                   />
                 )}
               </div>
+              <div className="flex-item"></div>
             </div>
             {/* VET GRAPHS */}
             <div className="graph-view" ref={graphRef}>
-              <GraphView
-                viewport={state.viewport}
-                year={state.filters.year}
-              ></GraphView>
+              {state.graphsLoaded && (
+                <GraphView
+                  viewport={state.viewport}
+                  filters={state.filters}
+                  onFilterChange={(filters) =>
+                    dispatch(setFilters(Object.assign({}, filters)))
+                  }
+                ></GraphView>
+              )}
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            {/* <div className="thematic-map-view" ref={thematicRef}>
-              <ThematicMapView year={state.filters.year}></ThematicMapView>
-            </div> */}
+            <div className="thematic-map-view" ref={thematicRef}>
+              {/* <ThematicMapView year={state.filters.year}></ThematicMapView> */}
+            </div>
             {/* <Footer /> */}
           </Route>
           <Route path="/">

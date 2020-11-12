@@ -1,22 +1,32 @@
 .graph-container {
   position: relative;
-
-  /* overflow-y: auto; */
+  background: #fff;
 }
+
+.graph-container h1 {
+  text-align: center;
+  font-size: 40px;
+}
+
 .graph-container .graph {
   position: relative;
+
   justify-content: center;
-  padding: 50px;
-  width: 50%;
-  margin: 0 auto;
+  padding: 0 50px;
+  padding-top: 75px;
+  padding-bottom: 40px;
+  width: 60vw;
+  margin: 20px auto;
+  border-radius: 25px;
   box-sizing: border-box;
 }
 
 .graph-container .header {
   position: absolute;
-  top: 0;
+  top: 20px;
   left: 0;
   font-size: 30px;
+  font-weight: bold;
   text-align: center;
   width: 100%;
 }
@@ -34,7 +44,9 @@
 }
 
 .graph-container .summary {
-  width: 100%;
+  /* width: 100%; */
+  margin: 0 20px;
+  box-sizing: border-box;
 }
 
 .graph-container .summary th,
@@ -55,4 +67,17 @@
 
 .graph-container .top-ten {
   position: relative;
+}
+
+.graph-container .fixed-filter {
+  position: fixed;
+  top: 72px;
+  width: 20vw;
+  left: 0;
+  z-index: 100;
+  border: 2px solid #d05ce3;
+}
+
+.graph-container .fixed-filter.hidden {
+  display: none;
 }

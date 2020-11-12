@@ -2,28 +2,59 @@
   padding: 0 20px;
 }
 
-h1 {
+.pubChemFields.loading {
+  display: none;
+}
+
+.pubChemFields h1 {
   border-bottom: 2px solid var(--blue);
 }
 
-ul {
+.pubChemFields ul {
   list-style-type: square;
 }
 
-.pictograms {
+.pubChemFields .pictograms {
   margin: 10px 0;
 }
 
-a {
+.pubChemFields .pictograms .pictogram {
+  display: inline-block;
+}
+
+.pubChemFields a {
   text-decoration: none;
 }
 
-.link-icon {
+.pubChemFields .link-icon {
   position: relative;
   top: 2px;
   display: inline-block;
   margin: 0 8px;
 }
-.link-icon img {
+.pubChemFields .link-icon img {
   width: 16px;
+}
+
+/* Tooltip text */
+.tooltiptext {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 20px;
+  border-radius: 6px;
+
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  /* width: 120px; */
+  bottom: 100%;
+  left: 100%;
+  margin-left: -60px;
+  z-index: 10;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.pictogram:hover .tooltiptext {
+  visibility: visible;
 }
