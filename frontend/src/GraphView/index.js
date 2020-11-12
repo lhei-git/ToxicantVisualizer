@@ -81,12 +81,12 @@ function GraphContainer(props) {
   let [graph, setGraph] = useState(null);
   let graphProp = props.graph;
   let viewportProp = props.viewport;
-  let yearProp = props.filters.year;
+  let filterProp = props.filters;
 
   let innerProps = {
     graph: graphProp,
     viewport: viewportProp,
-    year: yearProp,
+    filters: filterProp,
   };
 
   useEffect(() => {
@@ -100,7 +100,7 @@ function GraphContainer(props) {
     fetchData();
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, yearProp]); /* eslint-disable-line */
+  }, [graphProp, viewportProp, filterProp]); /* eslint-disable-line */
 
   return (
     graph !== null && (
@@ -120,6 +120,10 @@ async function TimelineTotal(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/total`, {
       params,
@@ -441,6 +445,10 @@ async function TimelineTopFacilities(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
       params,
@@ -527,6 +535,10 @@ async function TimelineTopParents(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/parent_releases`, {
       params,
@@ -615,6 +627,10 @@ async function TimelineTopChemicals(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/top_chemicals`, {
       params,
