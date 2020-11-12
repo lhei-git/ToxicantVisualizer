@@ -112,8 +112,18 @@ const setCurrentChemical = (payload) => ({
   payload,
 });
 
-const getChemicals = async (facilityId) => {
-  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`);
+const getChemicals = async (facilityId, filters) => {
+
+  const params = {
+    carcinogen: filters.carcinogens || null,
+    dioxin: filters.pbtsAndDioxins || null,
+    pbt: filters.pbtsAndDioxins || null,
+    release_type: filters.releaseType,
+    year: filters.year,
+  };
+
+
+  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`, { params });
   const chemicals = res.data;
   return chemicals;
 };
@@ -304,7 +314,7 @@ const App = (props) => {
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(facilityId) => {
-                      getChemicals(facilityId).then((chemicals) =>
+                      getChemicals(facilityId, state.filters).then((chemicals) =>
                         dispatch(setChemicals(chemicals))
                       );
                     }}
