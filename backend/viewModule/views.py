@@ -181,7 +181,7 @@ def top_parentco_releases(request):
 
     # queryset = release.objects.filter(f).order_by('-total').distinct('facility')
     # seems that the DISTINCT ON expression(s) must match the leftmost ORDER BY expression
-    queryset = release.objects.filter(f).order_by('facility', '-total').distinct('facility')
+    queryset = release.objects.filter(f).values('facility__parent_co_name', 'total').order_by('facility', '-total').distinct('facility')
     '''
     queryset = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
                                   & Q(longitude__lt=ne_lng)
@@ -189,7 +189,7 @@ def top_parentco_releases(request):
                                   & Q(year=y) & ~Q(parent_co_name="NA")).values('parent_co_name').annotate(total=Sum('vet_total_releases_onsite')).annotate(land=Sum('vet_total_releases_land')).annotate(air=Sum('vet_total_releases_air')).annotate(water=Sum('total_releases_water')).order_by('-total')[:10]
     '''
     # JsonResponse is breaking the return as it can't serialize the custom queryset (from cte)
-    return HttpResponse(szs.serialize('json', queryset), content_type='application/json')
+    return HttpResponse(json.dumps(list(queryset), cls=DjangoJSONEncoder), content_type='application/json')
 
 
 '''
