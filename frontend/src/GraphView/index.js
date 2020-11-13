@@ -44,7 +44,7 @@ class CustomizedXAxisTick extends Component {
           x={0}
           y={0}
           dx={-10}
-          fill="#FFF"
+          // fill="#FFF"
         >
           <tspan textAnchor="end" x="0" dy="0">
             {payload.value}
@@ -175,13 +175,12 @@ async function GraphSummary(props) {
 
   try {
     const { northeast, southwest } = props.viewport;
-    const { year } = props;
     const params = {
       ne_lat: northeast.lat,
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      year,
+      year: props.filters.year,
     };
     const res = await vetapi.get(`/stats/location/summary`, {
       params,
@@ -248,13 +247,16 @@ async function GraphSummary(props) {
 async function GraphTopTenFacilities(props) {
   try {
     const { northeast, southwest } = props.viewport;
-    const { year } = props;
     const params = {
       ne_lat: northeast.lat,
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      year,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
     };
     const res = await vetapi.get(`/stats/location/facility_releases`, {
       params,
@@ -264,7 +266,7 @@ async function GraphTopTenFacilities(props) {
       .map((d, i) => {
         const f = d;
         return {
-          name: f.facility,
+          name: f.facility__name,
           av: f.air,
           bv: f.water,
           cv: f.land,
@@ -312,13 +314,16 @@ async function GraphTopTenFacilities(props) {
 async function GraphTopTenParents(props) {
   try {
     const { northeast, southwest } = props.viewport;
-    const { year } = props;
     const params = {
       ne_lat: northeast.lat,
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      year,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
     };
     const res = await vetapi.get(`/stats/location/parent_releases`, {
       params,
@@ -377,13 +382,16 @@ async function GraphTopTenParents(props) {
 async function GraphTopTenChemicals(props) {
   try {
     const { northeast, southwest } = props.viewport;
-    const { year } = props;
     const params = {
       ne_lat: northeast.lat,
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      year,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
     };
     const res = await vetapi.get(`/stats/location/top_chemicals`, { params });
     const data = res.data
@@ -453,17 +461,19 @@ async function TimelineTopFacilities(props) {
     const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
       params,
     });
-    const data = res.data.reduce((acc, cur) => {
-      const existing = acc.find((e) => e.year === cur.year);
-      const formatted = cur["facility__name"];
-      if (existing) {
-        existing[formatted] = cur.total;
-      } else {
-        const newLine = { year: cur.year, [formatted]: cur.total };
-        acc.push(newLine);
-      }
-      return acc;
-    }, []);
+    const data = res.data
+      .reduce((acc, cur) => {
+        const existing = acc.find((e) => e.year === cur.year);
+        const formatted = cur["facility__name"];
+        if (existing) {
+          existing[formatted] = cur.total;
+        } else {
+          const newLine = { year: cur.year, [formatted]: cur.total };
+          acc.push(newLine);
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => a.year - b.year);
     const keys = Object.keys(data[0]);
     const lines = keys
       .filter((k) => k !== "year")
@@ -543,17 +553,20 @@ async function TimelineTopParents(props) {
     const res = await vetapi.get(`/stats/location/timeline/parent_releases`, {
       params,
     });
-    const data = res.data.reduce((acc, cur) => {
-      const existing = acc.find((e) => e.year === cur.year);
-      const formatted = cur["facility__parent_co_name"];
-      if (existing) {
-        existing[formatted] = cur.total;
-      } else {
-        const newLine = { year: cur.year, [formatted]: cur.total };
-        acc.push(newLine);
-      }
-      return acc;
-    }, []);
+    const data = res.data
+      .reduce((acc, cur) => {
+        const existing = acc.find((e) => e.year === cur.year);
+        const formatted = cur["facility__parent_co_name"];
+        if (existing) {
+          existing[formatted] = cur.total;
+        } else {
+          const newLine = { year: cur.year, [formatted]: cur.total };
+          acc.push(newLine);
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => a.year - b.year);
+
     const keys = Object.keys(data[0]);
     const lines = keys
       .filter((k) => k !== "year")
@@ -637,7 +650,7 @@ async function TimelineTopChemicals(props) {
     });
     const data = res.data.reduce((acc, cur) => {
       const existing = acc.find((e) => e.year === cur.year);
-      const formatted = formatChemical(cur["chemical__name"]);
+      const formatted = formatChemical(cur["chemical__name"]).toUpperCase();
       if (existing) {
         existing[formatted] = cur.total;
       } else {

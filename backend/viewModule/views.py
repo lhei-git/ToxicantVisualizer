@@ -129,7 +129,6 @@ def filterReleases(request):
         filters.add(Q(chemical__classification='Dioxin'), filters.connector)
     elif pbt is not None:
         filters.add(Q(chemical__classification='PBT'), filters.connector)
-
     return filters
 
 
@@ -264,8 +263,7 @@ def top_parentco_releases(request):
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
 
-    queryset = release.objects.select_related('facility').select_related(
-        'chemical').filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
+    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
         air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
@@ -283,9 +281,10 @@ def timeline_top_parentco_releases(request):
     filters = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
 
-    facilities = list(release.objects.filter(filters & filterReleases(request) & Q(year=2018)).values_list(
-        'facility__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
-    response = release.objects.filter(filters & filterReleases(request) & Q(facility__id__in=facilities)).values(
+    parents = list(release.objects.filter(filters & filterReleases(request) & Q(year=2018)).values_list(
+        'facility__parent_co_name', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
+    print(parents)
+    response = release.objects.filter(filters & filterReleases(request) & Q(facility__parent_co_name__in=parents)).values(
         'year', 'facility__parent_co_name').order_by('facility__parent_co_name', 'year').annotate(total=Sum('total'))
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
 
