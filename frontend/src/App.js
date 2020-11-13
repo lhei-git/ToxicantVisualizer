@@ -113,7 +113,6 @@ const setCurrentChemical = (payload) => ({
 });
 
 const getChemicals = async (facilityId, filters) => {
-
   const params = {
     carcinogen: filters.carcinogens || null,
     dioxin: filters.pbtsAndDioxins || null,
@@ -122,8 +121,9 @@ const getChemicals = async (facilityId, filters) => {
     year: filters.year,
   };
 
-
-  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`, { params });
+  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`, {
+    params,
+  });
   const chemicals = res.data;
   return chemicals;
 };
@@ -155,29 +155,8 @@ function ChemicalList(props) {
   );
 }
 
-const Footer = () => {
-  const React = require("react");
-  return (
-    <div className="footer">
-      &#169;{" "}
-      <span>
-        VET was developed in 2018 for the Lab for Health and Environmental
-        Information
-      </span>
-    </div>
-  );
-};
-
-const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
-// General scroll to element function
-
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const summaryRef = useRef();
-  const graphRef = useRef();
-  const thematicRef = useRef();
-
-  const executeScroll = (ref) => scrollToRef(ref);
 
   // fetches data when component is updated
   React.useEffect(() => {
@@ -189,7 +168,7 @@ const App = (props) => {
       .then(() => {
         dispatch(setError(false));
         dispatch(setLastSearch(location));
-        history.push("/fullview");
+        history.push("/maps");
       })
       .catch((err) => {
         dispatch(setError(true));
@@ -213,46 +192,28 @@ const App = (props) => {
   return (
     <Router history={history}>
       <div className="app-container">
+        <div className="navigation">
+          <div className="go-home">
+            <Link to="/"> &lt; Back to home</Link>
+          </div>
+          <ul>
+            <li className={state.activeTab === 0 ? "active" : ""}>
+              <Link to="/maps">Summary</Link>
+            </li>
+            <li className={state.activeTab === 1 ? "active" : ""}>
+              <Link to="/graphs">Graphs</Link>
+            </li>
+            <li className={state.activeTab === 2 ? "active" : ""}>
+              <Link to="/thematicmaps">Thematic Maps</Link>
+            </li>
+          </ul>
+        </div>
         <Switch>
-          <Route path="/fullview">
-            <div className="navigation">
-              <div className="go-home">
-                <Link to="/"> &lt; Back to home</Link>
-              </div>
-              <ul>
-                <li
-                  className={state.activeTab === 0 ? "active" : ""}
-                  onClick={() => {
-                    executeScroll(summaryRef);
-                    dispatch(setActiveTab(0));
-                  }}
-                >
-                  Summary
-                </li>
-                <li
-                  className={state.activeTab === 1 ? "active" : ""}
-                  onClick={() => {
-                    executeScroll(graphRef);
-                    dispatch(setActiveTab(1));
-                  }}
-                >
-                  Graphs
-                </li>
-                <li
-                  className={state.activeTab === 2 ? "active" : ""}
-                  onClick={() => {
-                    executeScroll(thematicRef);
-                    dispatch(setActiveTab(2));
-                  }}
-                >
-                  Thematic Maps
-                </li>
-              </ul>
-            </div>
+          <Route path="/maps">
             <div className="map-view">
               <div className="flex-item filter-wrapper">
                 {/* VET MAP FILTER */}
-                <div className="filters" ref={summaryRef}>
+                <div className="filters">
                   <div className="header">
                     {/* Search Bar Title and Image */}
                     <span>{state.numFacilities || 0}</span> Facilities found
@@ -314,32 +275,34 @@ const App = (props) => {
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(facilityId) => {
-                      getChemicals(facilityId, state.filters).then((chemicals) =>
-                        dispatch(setChemicals(chemicals))
-                      );
+                      getChemicals(
+                        facilityId,
+                        state.filters
+                      ).then((chemicals) => dispatch(setChemicals(chemicals)));
                     }}
                   />
                 )}
               </div>
               <div className="flex-item"></div>
             </div>
+          </Route>
+          <Route path="/graphs">
             {/* VET GRAPHS */}
-            <div className="graph-view" ref={graphRef}>
-              {state.graphsLoaded && (
-                <GraphView
-                  viewport={state.viewport}
-                  filters={state.filters}
-                  onFilterChange={(filters) =>
-                    dispatch(setFilters(Object.assign({}, filters)))
-                  }
-                ></GraphView>
-              )}
+            <div className="graph-view">
+              <GraphView
+                viewport={state.viewport}
+                filters={state.filters}
+                onFilterChange={(filters) =>
+                  dispatch(setFilters(Object.assign({}, filters)))
+                }
+              ></GraphView>
             </div>
+          </Route>
+          <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <div className="thematic-map-view" ref={thematicRef}>
-              {/* <ThematicMapView year={state.filters.year}></ThematicMapView> */}
+            <div className="thematic-map-view">
+              <ThematicMapView year={state.filters.year}></ThematicMapView>
             </div>
-            {/* <Footer /> */}
           </Route>
           <Route path="/">
             <Home
@@ -347,7 +310,6 @@ const App = (props) => {
               onSearchChange={(search) => dispatch(setLocation(search))}
               onSearchSubmit={() => handleSearchSubmit(state.location)}
             />
-            <Footer />
           </Route>
         </Switch>
       </div>

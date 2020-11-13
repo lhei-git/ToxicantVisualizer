@@ -17,6 +17,19 @@ function Home(props) {
     props.onSearchSubmit();
   }
 
+  const Footer = () => {
+    const React = require("react");
+    return (
+      <div className="footer">
+        &#169;{" "}
+        <span>
+          VET was developed in 2020 for the Lab for Health and Environmental
+          Information
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="home-container">
       <div className="background">
@@ -59,6 +72,7 @@ function Home(props) {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

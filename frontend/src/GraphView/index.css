@@ -1,6 +1,11 @@
 .graph-container {
   position: relative;
+  top: 72px;
   background: #fff;
+  height: calc(100vh - 72px);
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .graph-container h1 {
@@ -8,17 +13,39 @@
   font-size: 40px;
 }
 
+.graph-container .flex-container {
+  position: relative;
+  height: 100%;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-direction: row;
+}
+
+.graph-container .flex-container .flex-item {
+  height: 100%;
+}
+
+.graph-container .flex-container .flex-item.left {
+  flex: 3;
+}
+
+.graph-container .flex-container .flex-item.right {
+  flex: 5;
+  overflow-y: scroll;
+}
+
+.graph-container .graphs {
+  width: 100%;
+}
+
 .graph-container .graph {
   position: relative;
-
   justify-content: center;
-  padding: 0 50px;
   padding-top: 75px;
   padding-bottom: 40px;
-  width: 60vw;
-  margin: 20px auto;
+  width: 80%;
   border-radius: 25px;
-  box-sizing: border-box;
 }
 
 .graph-container .header {
@@ -43,12 +70,6 @@
   transform-origin: 60% 50%;
 }
 
-.graph-container .summary {
-  /* width: 100%; */
-  margin: 0 20px;
-  box-sizing: border-box;
-}
-
 .graph-container .summary th,
 .graph-container .summary td {
   border: 2px solid var(--blue);
@@ -69,15 +90,7 @@
   position: relative;
 }
 
-.graph-container .fixed-filter {
-  position: fixed;
-  top: 72px;
-  width: 20vw;
+.graph-container .filter-container {
+  width: 100%;
   left: 0;
-  z-index: 100;
-  border: 2px solid #d05ce3;
-}
-
-.graph-container .fixed-filter.hidden {
-  display: none;
 }
