@@ -1,6 +1,7 @@
 import "./index.css";
 import React, { Component, useEffect, useState } from "react";
 import UserControlPanel from "../UserControlPanel";
+import GraphSummary from "../Graphs/GraphSummary";
 const vetapi = require("../api/vetapi");
 const { formatChemical, intToString } = require("../helpers");
 const {
@@ -55,28 +56,6 @@ class CustomizedXAxisTick extends Component {
   }
 }
 
-// class CustomizedYAxisTick extends Component {
-//   render() {
-//     const { x, y, payload } = this.props;
-//     return (
-//       <g transform={`translate(${x},${y})`}>
-//         <text
-//           fontSize="12"
-//           transform="rotate(35)"
-//           x={0}
-//           y={0}
-//           dy={16}
-//           fill="#FFF"
-//         >
-//           <tspan textAnchor="beginning" x="0" dy="0">
-//             {payload.value}
-//           </tspan>
-//         </text>
-//       </g>
-//     );
-//   }
-// }
-
 function GraphContainer(props) {
   let [graph, setGraph] = useState(null);
   let graphProp = props.graph;
@@ -129,7 +108,7 @@ async function TimelineTotal(props) {
       params,
     });
     return (
-      <div className="top-ten facilities">
+      <div>
         <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
             width={500}
@@ -137,14 +116,18 @@ async function TimelineTotal(props) {
             data={res.data}
             margin={{
               top: 5,
-              right: 50,
               left: 50,
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis type="number" unit="lbs" />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
             <Tooltip
               contentStyle={{ color: "#000" }}
               isAnimationActive={false}
@@ -160,82 +143,6 @@ async function TimelineTotal(props) {
             ></Line>
           </LineChart>
         </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-    return null;
-  }
-}
-
-async function GraphSummary(props) {
-  function format(x) {
-    return x.toLocaleString();
-  }
-
-  try {
-    const { northeast, southwest } = props.viewport;
-    const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      year: props.filters.year,
-    };
-    const res = await vetapi.get(`/stats/location/summary`, {
-      params,
-    });
-    const body = (
-      <tbody>
-        <tr>
-          <td>Facilities</td>
-          <td>{res.data["num_facilities"]}</td>
-        </tr>
-        <tr>
-          <td>Distinct Chemicals</td>
-          <td>{res.data["num_distinct_chemicals"]}</td>
-        </tr>
-        <tr>
-          <td>Total Disposal Amount</td>
-          <td>{format(res.data["total"])} lbs</td>
-        </tr>
-        <tr>
-          <td>On-Site Releases</td>
-          <td>{format(res.data["total_on_site"])} lbs</td>
-        </tr>
-        <tr>
-          <td>Off-Site Releases</td>
-          <td>{format(res.data["total_off_site"])} lbs</td>
-        </tr>
-        <tr>
-          <td>Air Releases</td>
-          <td>{format(res.data["total_air"])} lbs</td>
-        </tr>
-        <tr>
-          <td>Water Releases</td>
-          <td>{format(res.data["total_water"])} lbs</td>
-        </tr>
-        <tr>
-          <td>Land Releases</td>
-          <td>{format(res.data["total_land"])} lbs</td>
-        </tr>
-        <tr>
-          <td>Carcinogenic Releases</td>
-          <td>{format(res.data["total_carcinogen"])} lbs</td>
-        </tr>
-      </tbody>
-    );
-    return (
-      <div className="summary">
-        <table>
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Current Location</th>
-            </tr>
-          </thead>
-          {body}
-        </table>
       </div>
     );
   } catch (err) {
@@ -273,25 +180,30 @@ async function GraphTopTenFacilities(props) {
         };
       });
     return (
-      <div className="top-ten facilities">
+      <div>
         <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
             margin={{
               top: 30,
-              right: 50,
+              // right: 50,
               left: 50,
               bottom: 200,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
               type="category"
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
             <Tooltip
               contentStyle={{ color: "#000" }}
               isAnimationActive={false}
@@ -340,26 +252,31 @@ async function GraphTopTenParents(props) {
         };
       });
     return (
-      <div className="top-ten parents">
+      <div>
         <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
             // layout="vertical"
             margin={{
               top: 30,
-              right: 50,
+              // right: 50,
               left: 50,
               bottom: 200,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
               type="category"
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
             <Tooltip
               contentStyle={{ color: "#000" }}
               isAnimationActive={false}
@@ -403,26 +320,30 @@ async function GraphTopTenChemicals(props) {
       })
       .sort((a, b) => b.pv - a.pv);
     return (
-      <div className="top-ten chemicals">
+      <div>
         <ResponsiveContainer width="100%" aspect={16 / 9}>
           <BarChart
             data={data}
-            // layout="vertical"
             margin={{
               top: 30,
-              right: 50,
+              // right: 50,
               left: 50,
-              bottom: 200,
+              bottom: 100,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
               type="category"
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
-            <YAxis type="number" unit="lbs" />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
             <Tooltip
               contentStyle={{ color: "#000" }}
               isAnimationActive={false}
@@ -489,14 +410,14 @@ async function TimelineTopFacilities(props) {
         ></Line>
       ));
     return (
-      <div className="top-ten facilities">
+      <div>
         <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
             data={data}
             margin={{
               top: 5,
               right: 50,
-              left: 50,
+              // left: 50,
               bottom: 5,
             }}
           >
@@ -582,7 +503,7 @@ async function TimelineTopParents(props) {
         ></Line>
       ));
     return (
-      <div className="top-ten parents">
+      <div>
         <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
             width={500}
@@ -591,7 +512,7 @@ async function TimelineTopParents(props) {
             margin={{
               top: 5,
               right: 50,
-              left: 50,
+              // left: 50,
               bottom: 5,
             }}
           >
@@ -675,7 +596,7 @@ async function TimelineTopChemicals(props) {
         ></Line>
       ));
     return (
-      <div className="top-ten chemicals">
+      <div>
         <ResponsiveContainer width="100%" aspect={16 / 7}>
           <LineChart
             width={500}
@@ -684,7 +605,7 @@ async function TimelineTopChemicals(props) {
             margin={{
               top: 5,
               right: 50,
-              left: 50,
+              // left: 50,
               bottom: 5,
             }}
           >
@@ -725,93 +646,77 @@ async function TimelineTopChemicals(props) {
 }
 
 function GraphView(props) {
-  const [visible, setVisible] = React.useState(false);
-  const graphRef = React.useRef();
-
-  const handleScroll = (event) => {
-    try {
-      const cur = event.target.scrollingElement.scrollTop;
-      if (graphRef && cur >= graphRef.current.offsetTop) {
-        setVisible(true);
-      } else {
-        setVisible(false);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  React.useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <div className="graph-container" ref={graphRef}>
-      <h1>Location Insights</h1>
-      <div className={`fixed-filter ${visible ? "" : "hidden"}`}>
-        <UserControlPanel
-          chemicals={[]}
-          filters={props.filters}
-          onFilterChange={props.onFilterChange}
-        ></UserControlPanel>
+    <div className="graph-container">
+      <div className="flex-container">
+        <div className="flex-item left">
+          <h1>Location Insights</h1>
+          <div className="filter-container">
+            <UserControlPanel
+              chemicals={[]}
+              filters={props.filters}
+              onFilterChange={props.onFilterChange}
+            ></UserControlPanel>
+          </div>
+          <GraphSummary
+            viewport={props.viewport}
+            filters={props.filters}
+          ></GraphSummary>
+        </div>
+        <div className="flex-item right">
+          <div className="graphs">
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="timeline_total"
+              graph={TimelineTotal}
+              title="Total Releases"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_facilities"
+              graph={GraphTopTenFacilities}
+              title="Total On-Site Releases for Top 10 Facilities (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="timeline_facilities"
+              graph={TimelineTopFacilities}
+              title="Total Releases Over Time for Top Ten Facilities (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_parents"
+              graph={GraphTopTenParents}
+              title="Total On-Site Releases for Top 10 Parent Companies (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="timeline_parents"
+              graph={TimelineTopParents}
+              title="Total Releases Over Time for Top Ten Parent Companies (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_chemicals"
+              graph={GraphTopTenChemicals}
+              title="Top Ten Chemicals (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="timeline_chemicals"
+              graph={TimelineTopChemicals}
+              title="Top Ten Chemicals Over Time (in lbs)"
+            ></GraphContainer>
+          </div>
+        </div>
       </div>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="summary"
-        hidden={false}
-        graph={GraphSummary}
-        title="Summary"
-      ></GraphContainer>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="total_facilities"
-        graph={TimelineTotal}
-        title="Total Releases"
-      ></GraphContainer>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="total_facilities"
-        graph={GraphTopTenFacilities}
-        title="Total On-Site Releases for Top 10 Facilities (in lbs)"
-      ></GraphContainer>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="total_parents"
-        graph={GraphTopTenParents}
-        title="Total On-Site Releases for Top 10 Parent Companies (in lbs)"
-      ></GraphContainer>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="top_graphs"
-        graph={GraphTopTenChemicals}
-        title="Top Ten Chemicals (in lbs)"
-      ></GraphContainer>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="top_graphs"
-        graph={TimelineTopFacilities}
-        title="Total Releases Over Time for Top Ten Facilities (in lbs)"
-      ></GraphContainer>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="top_graphs"
-        graph={TimelineTopParents}
-        title="Total Releases Over Time for Top Ten Parent Companies (in lbs)"
-      ></GraphContainer>
-      <GraphContainer
-        viewport={props.viewport}
-        filters={props.filters}
-        name="top_graphs"
-        graph={TimelineTopChemicals}
-        title="Top Ten Chemicals Over Time (in lbs)"
-      ></GraphContainer>
     </div>
   );
 }
