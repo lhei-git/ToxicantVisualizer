@@ -195,11 +195,7 @@ class ThematicMapView extends Component {
     var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-<<<<<<< HEAD
-    await vetapi
-=======
     vetapi
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
         l = response.data;
@@ -218,14 +214,8 @@ class ThematicMapView extends Component {
           countyMin: minValue,
           countyMax: maxValue,
         });
-<<<<<<< HEAD
-      });
-
-    alert(maxValue);
-=======
       })
       .catch((err) => console.log(err));
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
   }
 
   getStateData() {
@@ -235,23 +225,6 @@ class ThematicMapView extends Component {
     var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-<<<<<<< HEAD
-    await vetapi.get("/stats/state/all?year=" + filterYear).then((response) => {
-      l = response.data;
-      d = Object.values(l);
-      response.data.forEach((st, i) => {
-        if (response.data[i][filterType] > maxValue)
-          maxValue = response.data[i][filterType];
-        if (
-          response.data[i][filterType] < minValue &&
-          response.data[i][filterType] !== 0
-        )
-          minValue = response.data[i][filterType];
-      });
-
-      this.setState({ stateData: d, stateMin: minValue, stateMax: maxValue });
-    });
-=======
     vetapi
       .get("/stats/state/all?year=" + filterYear)
       .then((response) => {
@@ -270,7 +243,6 @@ class ThematicMapView extends Component {
         this.setState({ stateData: d, stateMin: minValue, stateMax: maxValue });
       })
       .catch((err) => console.log(err));
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
   }
 }
 

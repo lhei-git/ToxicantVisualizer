@@ -16,25 +16,16 @@ import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
-<<<<<<< HEAD
 import ThematicStateMap from "./ThematicStateMap/index.js";
-import { useReducer, useRef } from "react";
-=======
 import { useReducer } from "react";
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
 import { formatChemical } from "./helpers";
 import vetapi from "./api/vetapi";
 const React = require("react");
 
 const initialState = {
-<<<<<<< HEAD
-  location: sessionStorage.getItem("searchedLocation") || "",
-  altLocation: "",
   stateName: "",
-=======
   location: "",
   map: JSON.parse(sessionStorage.getItem("map")),
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
   numFacilities: 0,
   showPubchemInfo: false,
   chemicals: [],
@@ -58,15 +49,12 @@ const reducer = (state, action) => {
       return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
-<<<<<<< HEAD
     case "setStateName":
       return { ...state, stateName: action.payload };
     case "setStateLongName":
       return { ...state, stateLongName: action.payload };
     case "setAltLocation":
       return { ...state, altLocation: action.payload };
-=======
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
@@ -101,14 +89,11 @@ const reducer = (state, action) => {
       throw new Error();
   }
 };
-<<<<<<< HEAD
 
 const setLocation = (payload) => ({ type: "setLocation", payload });
 const setStateName = (payload) => ({ type: "setStateName", payload });
 const setStateLongName = (payload) => ({ type: "setStateLongName", payload });
 const setError = (payload) => ({ type: "setError", payload });
-=======
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
@@ -167,52 +152,11 @@ function ChemicalList(props) {
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-<<<<<<< HEAD
-  function handleSearchSubmit(location) {
-    geocodeLocation(location)
-      .then(() => {
-        dispatch(setError(false));
-        dispatch(setLastSearch(location));
-        history.push("/fullview");
-      })
-      .catch((err) => {
-        dispatch(setError(true));
-        setTimeout(() => {
-          dispatch(setError(false));
-        }, 5000);
-        console.log(err);
-      });
-  }
 
-  async function geocodeLocation(location) {
-    const res = await geocoder.get(`/json?address=${location}`);
-    var i;
-    for (i = 0; i < 5; i++)
-      if (typeof res.data.results[0].address_components[i] !== "undefined")
-        if (
-          res.data.results[0].address_components[i].types[0] ===
-          "administrative_area_level_1"
-        ) {
-          dispatch(
-            setStateName(res.data.results[0].address_components[i].short_name)
-          );
-          dispatch(
-            setStateLongName(
-              res.data.results[0].address_components[i].long_name
-            )
-          );
-        }
-    dispatch(
-      setMapView({
-        center: res.data.results[0].geometry.location,
-        viewport: res.data.results[0].geometry.viewport,
-      })
-    );
-=======
   function handleSuccess(map) {
     dispatch(setMap(map));
     history.push("/map");
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
+
   }
 
   return (
@@ -327,7 +271,6 @@ const App = (props) => {
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-<<<<<<< HEAD
             <ThematicStateMap
               year={state.filters.year}
               type={state.filters.releaseType}
@@ -337,11 +280,6 @@ const App = (props) => {
               {" "}
             </ThematicStateMap>
             {/* <Footer /> */}
-=======
-            <div className="thematic-map-view">
-              <ThematicMapView year={state.filters.year}></ThematicMapView>
-            </div>
->>>>>>> 98952a65ba3a171c42dd5abbd18c3cdf8e906dd1
           </Route>
           <Route path="/thematicmaps">
             <ThematicMapView
