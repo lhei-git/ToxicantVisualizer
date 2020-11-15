@@ -45,7 +45,7 @@ class MapContainer extends Component {
     newState.markers = this.createMarkers(oldPoints);
 
     const mapsApi = this.props.google.maps;
-    const viewport = this.props.viewport;
+    const viewport = this.props.map.viewport;
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
@@ -66,16 +66,16 @@ class MapContainer extends Component {
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
       this.setState({ isLoading: true }, () => {
-        this.fetchPoints(this.props.viewport, this.props.filters);
+        this.fetchPoints(this.props.map.viewport, this.props.filters);
       });
       newState.showingInfoWindow = false;
       this.setState(newState);
     }
 
     const mapsApi = this.props.google.maps;
-    if (!shallowEqual(prevProps.viewport, this.props.viewport)) {
+    if (!shallowEqual(prevProps.map.viewport, this.props.map.viewport)) {
       try {
-        const b = this.createLatLngBounds(this.props.viewport, mapsApi);
+        const b = this.createLatLngBounds(this.props.map.viewport, mapsApi);
         this.map.fitBounds(b);
       } catch (err) {
         console.log(err);
@@ -148,13 +148,13 @@ class MapContainer extends Component {
       });
     }, 1000);
 
-    // const viewport = this.props.viewport;
+    // const viewport = this.props.map.viewport;
     this.adjustMap(mapProps, map);
   }
 
   adjustMap(mapProps, map) {
     const mapsApi = this.props.google.maps;
-    const viewport = this.props.viewport;
+    const viewport = this.props.map.viewport;
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
@@ -237,14 +237,15 @@ class MapContainer extends Component {
           <Map
             onReady={this.handleMount}
             onTilesloaded={this.props.onTilesLoaded}
-            google={this.props.google}
+            // google={this.props.google}
+            google={window.google}
             streetViewControl={false}
             styles={silver}
             draggable={true}
             fullscreenControl={false}
             zoom={5}
             minZoom={5}
-            initialCenter={this.props.center}
+            initialCenter={this.props.map.center}
             containerStyle={containerStyle}
           >
             {this.state.markers.length > 0 && (

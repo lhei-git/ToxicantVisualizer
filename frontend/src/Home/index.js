@@ -1,22 +1,46 @@
 import "./index.css";
+import PlacesAutocomplete from "react-places-autocomplete";
+const geocoder = require("../api/geocoder");
 const React = require("react");
 
 function Home(props) {
-  let [searchValue, setSearchValue] = React.useState(
-    sessionStorage.getItem("searchedLocation") || ""
-  );
+  let [location, setLocation] = React.useState("");
+  let [errorMessage, setErrorMessage] = React.useState("");
 
-  function onSearchChange(event) {
-    setSearchValue(event.target.value);
-    props.onSearchChange(event.target.value);
+  async function geocodeLocation(location) {
+    try {
+      const res = await geocoder.get(`/json?address=${location}`);
+      const map = {
+        address: res.data.results[0].formatted_address,
+        center: res.data.results[0].geometry.location,
+        viewport: res.data.results[0].geometry.viewport,
+      };
+      return map;
+    } catch (err) {
+      throw new Error("no results");
+    }
   }
 
-  function onSearchSubmit(event) {
-    event.preventDefault();
-    if (searchValue.length === 0) return;
-    props.onSearchSubmit();
+  function handleChange(location) {
+    if (errorMessage.length > 0) setErrorMessage("");
+    setLocation(location);
   }
 
+  function handleSelect(location) {
+    geocodeLocation(location)
+      .then((map) => props.onSuccess(map))
+      .catch((error) => console.error("Error", error));
+  }
+
+  function handleCloseClick() {
+    setLocation("");
+  }
+
+  function handleError(status, clearSuggestions) {
+    console.log("Error from Google Maps API", status); // eslint-disable-line no-console
+    if (status === "ZERO_RESULTS") setErrorMessage("No results found");
+    clearSuggestions();
+  }
   const Footer = () => {
     const React = require("react");
     return (
@@ -49,27 +73,97 @@ function Home(props) {
           relevant information and analyses.
         </div>
         <div className="search-bar">
-          {props.isError && (
-            <div className="error">ERROR: location not found</div>
+          <PlacesAutocomplete
+            onChange={handleChange}
+            value={location}
+            onSelect={handleSelect}
+            onError={handleError}
+            shouldFetchSuggestions={location.length > 2}
+            searchOptions={{
+              componentRestrictions: {
+                country: "us",
+              },
+            }}
+          >
+            {({ getInputProps, suggestions, getSuggestionItemProps }) => {
+              return (
+                <div className="search-bar-container">
+                  <div className="search-input-container">
+                    <input
+                      {...getInputProps({
+                        placeholder: "Search Places...",
+                        className: "search-input",
+                      })}
+                    />
+                    {location.length > 0 && (
+                      <button
+                        className="clear-button"
+                        onClick={handleCloseClick}
+                      >
+                        x
+                      </button>
+                    )}
+                  </div>
+                  {suggestions.length > 0 && (
+                    <div className="autocomplete-container">
+                      {suggestions.map((suggestion, i) => {
+                        const className = `suggestion-item ${
+                          suggestion.active ? "active" : ""
+                        }`;
+
+                        return (
+                          /* eslint-disable react/jsx-key */
+                          <div
+                            key={"suggestion-" + i}
+                            {...getSuggestionItemProps(suggestion, {
+                              className,
+                            })}
+                          >
+                            <strong>
+                              {suggestion.formattedSuggestion.mainText}
+                            </strong>{" "}
+                            <small>
+                              {suggestion.formattedSuggestion.secondaryText}
+                            </small>
+                          </div>
+                        );
+                        /* eslint-enable react/jsx-key */
+                      })}
+                      {/* <div className="dropdown-footer">
+                        <div>
+                          <img
+                            src={require("../images/powered_by_google_default.png")}
+                            className="dropdown-footer-image"
+                          />
+                        </div>
+                      </div> */}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          </PlacesAutocomplete>
+          {errorMessage.length > 0 && (
+            <div className="error-message">{errorMessage}</div>
           )}
-          <form onSubmit={onSearchSubmit}>
+          {/* <form onSubmit={handleSubmit}>
             <label htmlFor="search">
               Enter a zip code; a city, state combination; or a state.
             </label>
             <input
               type="text"
               id="search"
-              value={searchValue}
-              onChange={onSearchChange}
+              value={location}
+              onChange={handleChange}
             />
-            {/* <label htmlFor="search">Blank box defaults to entire U.S.</label> */}
+            <label htmlFor="search">Blank box defaults to entire U.S.</label> 
             <button
               type="submit"
-              className={searchValue.length === 0 ? "hidden" : ""}
+              className={location.length === 0 ? "hidden" : ""}
             >
               Submit
             </button>
-          </form>
+          </form> */}
         </div>
       </div>
       <Footer />
