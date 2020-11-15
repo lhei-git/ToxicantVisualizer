@@ -16,24 +16,15 @@ import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
-import { useReducer, useRef } from "react";
+import { useReducer } from "react";
 import { formatChemical } from "./helpers";
 import vetapi from "./api/vetapi";
-const geocoder = require("./api/geocoder");
 const React = require("react");
 
-const INITIAL_CENTER = {
-  lat: 39.8283,
-  lng: -98.5795,
-};
-
 const initialState = {
-  location: sessionStorage.getItem("searchedLocation") || "",
-  altLocation: "",
+  location: "",
+  map: JSON.parse(sessionStorage.getItem("map")),
   numFacilities: 0,
-  lastSearch: "",
-  center: INITIAL_CENTER,
-  viewport: null,
   showPubchemInfo: false,
   chemicals: [],
   selectedChemicalList: [],
@@ -56,19 +47,17 @@ const reducer = (state, action) => {
       return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
-    case "setAltLocation":
-      return { ...state, altLocation: action.payload };
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
       return { ...state, filters: action.payload };
     case "setCurrentChemical":
       return { ...state, currentChemical: action.payload };
-    case "setMapView":
+    case "setMap":
+      sessionStorage.setItem("map", JSON.stringify(action.payload));
       return {
         ...state,
-        center: action.payload.center,
-        viewport: action.payload.viewport,
+        map: action.payload,
       };
     case "setChemicals":
       return {
@@ -76,9 +65,6 @@ const reducer = (state, action) => {
         showPubchemInfo: false,
         chemicals: action.payload,
       };
-    case "setLastSearch":
-      sessionStorage.setItem("searchedLocation", state.location);
-      return { ...state, lastSearch: action.payload };
     case "showPubchemInfo":
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
     case "setActiveTab":
@@ -95,25 +81,19 @@ const reducer = (state, action) => {
       throw new Error();
   }
 };
-
-const setLocation = (payload) => ({ type: "setLocation", payload });
-const setError = (payload) => ({ type: "setError", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
-const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
-const setMapView = (payload) => ({ type: "setMapView", payload });
+const setMap = (payload) => ({ type: "setMap", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
 const loadGraphs = () => ({ type: "loadGraphs" });
-const setActiveTab = (payload) => ({ type: "setActiveTab", payload });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
 });
 
 const getChemicals = async (facilityId, filters) => {
-
   const params = {
     carcinogen: filters.carcinogens || null,
     dioxin: filters.pbtsAndDioxins || null,
@@ -122,8 +102,9 @@ const getChemicals = async (facilityId, filters) => {
     year: filters.year,
   };
 
-
-  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`, { params });
+  const res = await vetapi.get(`/facilities/${facilityId}/chemicals`, {
+    params,
+  });
   const chemicals = res.data;
   return chemicals;
 };
@@ -155,104 +136,39 @@ function ChemicalList(props) {
   );
 }
 
-const Footer = () => {
-  const React = require("react");
-  return (
-    <div className="footer">
-      &#169;{" "}
-      <span>
-        VET was developed in 2018 for the Lab for Health and Environmental
-        Information
-      </span>
-    </div>
-  );
-};
-
-const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
-// General scroll to element function
-
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const summaryRef = useRef();
-  const graphRef = useRef();
-  const thematicRef = useRef();
 
-  const executeScroll = (ref) => scrollToRef(ref);
-
-  // fetches data when component is updated
-  React.useEffect(() => {
-    if (state.viewport === null) geocodeLocation(state.location);
-  }, []);
-
-  function handleSearchSubmit(location) {
-    geocodeLocation(location)
-      .then(() => {
-        dispatch(setError(false));
-        dispatch(setLastSearch(location));
-        history.push("/fullview");
-      })
-      .catch((err) => {
-        dispatch(setError(true));
-        setTimeout(() => {
-          dispatch(setError(false));
-        }, 5000);
-        console.log(err);
-      });
-  }
-
-  async function geocodeLocation(location) {
-    const res = await geocoder.get(`/json?address=${location}`);
-    dispatch(
-      setMapView({
-        center: res.data.results[0].geometry.location,
-        viewport: res.data.results[0].geometry.viewport,
-      })
-    );
+  function handleSuccess(map) {
+    dispatch(setMap(map));
+    history.push("/map");
   }
 
   return (
     <Router history={history}>
       <div className="app-container">
+        <div className="navigation">
+          <div className="go-home">
+            <Link to="/"> &lt; Back to home</Link>
+          </div>
+          <ul>
+            <li className={state.activeTab === 0 ? "active" : ""}>
+              <Link to="/map">Map</Link>
+            </li>
+            <li className={state.activeTab === 1 ? "active" : ""}>
+              <Link to="/graphs">Graphs</Link>
+            </li>
+            <li className={state.activeTab === 2 ? "active" : ""}>
+              <Link to="/thematicmaps">Thematic Maps</Link>
+            </li>
+          </ul>
+        </div>
         <Switch>
-          <Route path="/fullview">
-            <div className="navigation">
-              <div className="go-home">
-                <Link to="/"> &lt; Back to home</Link>
-              </div>
-              <ul>
-                <li
-                  className={state.activeTab === 0 ? "active" : ""}
-                  onClick={() => {
-                    executeScroll(summaryRef);
-                    dispatch(setActiveTab(0));
-                  }}
-                >
-                  Summary
-                </li>
-                <li
-                  className={state.activeTab === 1 ? "active" : ""}
-                  onClick={() => {
-                    executeScroll(graphRef);
-                    dispatch(setActiveTab(1));
-                  }}
-                >
-                  Graphs
-                </li>
-                <li
-                  className={state.activeTab === 2 ? "active" : ""}
-                  onClick={() => {
-                    executeScroll(thematicRef);
-                    dispatch(setActiveTab(2));
-                  }}
-                >
-                  Thematic Maps
-                </li>
-              </ul>
-            </div>
+          <Route exact path="/map">
             <div className="map-view">
               <div className="flex-item filter-wrapper">
                 {/* VET MAP FILTER */}
-                <div className="filters" ref={summaryRef}>
+                <div className="filters">
                   <div className="header">
                     {/* Search Bar Title and Image */}
                     <span>{state.numFacilities || 0}</span> Facilities found
@@ -303,51 +219,49 @@ const App = (props) => {
               </div>
               {/* GOOGLE MAPS RENDER */}
               <div className="flex-item map-wrapper">
-                {state.viewport && (
+                {state.map && (
                   <MapContainer
                     filters={Object.assign({}, state.filters)}
-                    center={state.center}
-                    viewport={state.viewport}
+                    map={state.map}
                     onLoad={() => dispatch(loadGraphs())}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                     onTilesLoaded={() => dispatch(loadGraphs())}
                     onUpdate={(num) => dispatch(setNumFacilities(num))}
                     onRefresh={() => dispatch(refresh())}
                     onMarkerClick={(facilityId) => {
-                      getChemicals(facilityId, state.filters).then((chemicals) =>
-                        dispatch(setChemicals(chemicals))
-                      );
+                      getChemicals(
+                        facilityId,
+                        state.filters
+                      ).then((chemicals) => dispatch(setChemicals(chemicals)));
                     }}
                   />
                 )}
               </div>
               <div className="flex-item"></div>
             </div>
+          </Route>
+          <Route path="/graphs">
             {/* VET GRAPHS */}
-            <div className="graph-view" ref={graphRef}>
-              {state.graphsLoaded && (
+            {state.map && (
+              <div className="graph-view">
                 <GraphView
-                  viewport={state.viewport}
+                  viewport={state.map.viewport}
                   filters={state.filters}
                   onFilterChange={(filters) =>
                     dispatch(setFilters(Object.assign({}, filters)))
                   }
                 ></GraphView>
-              )}
-            </div>
+              </div>
+            )}
+          </Route>
+          <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <div className="thematic-map-view" ref={thematicRef}>
-              {/* <ThematicMapView year={state.filters.year}></ThematicMapView> */}
+            <div className="thematic-map-view">
+              <ThematicMapView year={state.filters.year}></ThematicMapView>
             </div>
-            {/* <Footer /> */}
           </Route>
           <Route path="/">
-            <Home
-              isError={state.error}
-              onSearchChange={(search) => dispatch(setLocation(search))}
-              onSearchSubmit={() => handleSearchSubmit(state.location)}
-            />
-            <Footer />
+            <Home isError={state.error} onSuccess={handleSuccess} />
           </Route>
         </Switch>
       </div>

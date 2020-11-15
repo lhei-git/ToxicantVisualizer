@@ -1,5 +1,12 @@
+const chemicalMap = {
+  "certain glycol ethers": "Glycol",
+  "polycyclic aromatic compounds": "Polycyclic Aromatic Compounds",
+};
+
 // cleans up string format and removes unsearchable words
 module.exports.formatChemical = (entry) => {
+  if (chemicalMap[entry]) return chemicalMap[entry];
+
   let trimmed = entry.toLowerCase().replace(/ *\([^)]*\) */g, "");
   const i = trimmed.search(/\band|compounds\b/);
   if (i !== -1) trimmed = trimmed.slice(0, i);
@@ -7,9 +14,6 @@ module.exports.formatChemical = (entry) => {
     .replace(/\b\w/g, (l) => l.toUpperCase())
     .replace(/"/gi, "")
     .trim();
-
-  if (trimmed.toUpperCase() === "POLYCYCLIC AROMATIC")
-    return "Polycyclic Aromatic Compounds";
   return trimmed;
 };
 
