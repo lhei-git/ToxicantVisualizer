@@ -24,6 +24,7 @@ const React = require("react");
 
 const initialState = {
   stateName: "",
+  stateNameLong: "",
   location: "",
   map: JSON.parse(sessionStorage.getItem("map")),
   numFacilities: 0,
@@ -156,8 +157,13 @@ const App = (props) => {
   function handleSuccess(map) {
     dispatch(setMap(map));
     history.push("/map");
-
   }
+
+      function getStateNames(props)
+    {
+        dispatch(setStateName(props.short_name));
+        dispatch(setStateLongName(props.long_name));
+    }
 
   return (
     <Router history={history}>
@@ -290,7 +296,7 @@ const App = (props) => {
             </ThematicMapView>
           </Route>
           <Route path="/">
-            <Home isError={state.error} onSuccess={handleSuccess} />
+            <Home isError={state.error} onSuccess={handleSuccess} getStateNames={getStateNames}/>
           </Route>
         </Switch>
       </div>
