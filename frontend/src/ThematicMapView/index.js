@@ -133,15 +133,15 @@ class ThematicMapView extends Component {
     );
   }
 
-  async getCountyData() {
+  getCountyData() {
     var l = {};
     var d = [];
     var maxValue = 0;
     var minValue = 100000000000000;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-    await vetapi
-      .get("/stats/county/all?year=" + filterYear) //TODO: CHANGE ME TO THE CORRECT LINK
+    vetapi
+      .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
         l = response.data;
         d = Object.values(l);
@@ -159,18 +159,19 @@ class ThematicMapView extends Component {
           countyMin: minValue,
           countyMax: maxValue,
         });
-      });
+      })
+      .catch((err) => console.log(err));
   }
 
-  async getStateData() {
+  getStateData() {
     var l = {};
     var d = [];
     var maxValue = 0;
     var minValue = 100000000000000;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-    await vetapi
-      .get("/stats/state/all?year=" + filterYear) //TODO: CHANGE ME TO THE CORRECT LINK
+    vetapi
+      .get("/stats/state/all?year=" + filterYear)
       .then((response) => {
         l = response.data;
         d = Object.values(l);
@@ -185,7 +186,8 @@ class ThematicMapView extends Component {
         });
 
         this.setState({ stateData: d, stateMin: minValue, stateMax: maxValue });
-      });
+      })
+      .catch((err) => console.log(err));
   }
 }
 
