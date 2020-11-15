@@ -8,12 +8,6 @@ import data from '../data/stateLocationData.json'
 const React = require("react");
 const Component = React.Component;
 
-// state and county map topographical data
-const stateGeoUrl =
-  "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers.json";
-const countyGeoUrl =
-  "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers-counties.json";
-
 class ThematicStateMap extends Component {
   constructor(props) {
     super(props);
@@ -48,7 +42,7 @@ class ThematicStateMap extends Component {
 
   //call this function to apply new filters to the thematic maps
   //valid types: totalonsite, air, water, land, totaloffsite, total
-  //valid years: 6 - 2018
+  //valid years: 6 - 2019
   constApplyFilter(props) {
     if (props.year) this.setState({ filterYear: props.year });
     if (props.type) this.setState({ filterType: props.type });
@@ -57,12 +51,6 @@ class ThematicStateMap extends Component {
   componentDidMount() {
     this.getCountyData();
   }
-
-//  getGeoURL(name)
-//  {
-//    if (stateGeoUrls.hasOwnProperty(name))
-//        return stateGeoUrls.[name]
-//  }
 
   getFilterText(filterType)
   {
@@ -83,7 +71,6 @@ class ThematicStateMap extends Component {
       default:
         return "All On Site Releases"
     }
-
   }
 
   fixFilterName( type )
@@ -95,9 +82,9 @@ class ThematicStateMap extends Component {
       case "water":
       case "land":
         return type;
-      case "off-site":
+      case "off_site":
         return "totaloffsite";
-    case "on-site":
+    case "on_site":
         return "totalonsite";
     default:
         return "total"
@@ -201,12 +188,10 @@ class ThematicStateMap extends Component {
         l = response.data;
         d = Object.values(l);
         response.data.map((st, i) => {
-          if (response.data[i].[filterType] > maxValue && response.data[i].state === this.props.stateName)
-            maxValue = response.data[i][filterType];
-          if (
-            response.data[i].[filterType] < minValue && response.data[i].state === this.props.stateName)
-
-            minValue = response.data[i][filterType];
+          if (response.data[i].[filterType] > maxValue && response.data[i].state === this.state.stateName)
+            maxValue = response.data[i].[filterType];
+          if (response.data[i].[filterType] < minValue && response.data[i].state === this.state.stateName)
+            minValue = response.data[i].[filterType];
         });
         this.setState({
           countyData: d,

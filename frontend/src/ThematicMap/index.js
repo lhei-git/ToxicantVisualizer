@@ -19,10 +19,8 @@ const thematicMap = (props) => {
   if (!props.data) return null;
 
   //change the scale domain based on whether states or counties are being viewed
-  //TODO: determine why minVal to maxVal doesn't work well as a domain, or see if there is a better scaling option
   var domain = [];
-  if (props.type !== "states") domain = [1000, 1000000];
-  else domain = [props.minValue * 2, props.maxValue / 2];
+  domain = [props.minValue, props.maxValue];
 
   //removes inconsistencies in county name, slow af
   //LEFT IN FOR PROTOTYPE 1 BECAUSE LOUSIANA STUCK OUT
@@ -32,10 +30,8 @@ const thematicMap = (props) => {
       return name.substring(0, name.length - 7); //parish
     //else if (res.toUpperCase() === "S AREA") return name.substring(0, name.length -12)      //census area
     //else if (res.toUpperCase() === "PALITY") return name.substring(0, name.length -13)      //municipality
-
     //res = name.substring(name.length -9 , name.length);
     //if (res.toUpperCase() === " BOROUGH") alert( name.substring(0, name.length -13) )     //borough
-
     return name;
   };
 
@@ -101,7 +97,7 @@ const thematicMap = (props) => {
   ]);
 
   const filterType =
-    props.filterType !== null ? props.filterType : "totalonsite";
+    props.filterType !== null ? props.filterType : "total";
 
   // used to render the state based map
   if (props.type === "states")
@@ -186,7 +182,7 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur.totalonsite : "#ECECEC")}
+                        fill={colorScale(cur ? cur.[filterType] : "#ECECEC")}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
@@ -276,7 +272,7 @@ const thematicMap = (props) => {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill={colorScale(cur ? cur.totalonsite : "#ECECEC")}
+                    fill={colorScale(cur ? cur.[filterType] : "#ECECEC")}
                     stroke={"#000"}
                     onMouseEnter={() => {
                       props.setTooltipContent(null);
@@ -344,38 +340,6 @@ const thematicMap = (props) => {
     );
     }
 };
-
-//function findCentroid(parsedPath)
-//{
-//var centroid= {x:0,y:0};
-//var pointCount=0;
-//for( var i=0; i< parsedPath.length; i++ ){
-//    var point= parsedPath[i];
-//
-//    if( point.relative == true){
-//        if( i > 0 ){
-//            point.x += +parsedPath[i-1].x;
-//            point.y += +parsedPath[i-1].y;
-//        }
-//    }
-//    if( point.x && point.y ){
-//
-//        centroid.x += point.x;
-//        centroid.y += point.y;
-//
-//        placePoint(point , "blue" , 0.2 );
-//
-//        pointCount++
-//    }else{
-//        // close pathes -> ignored
-//    }
-//
-//}
-//centroid.x /= pointCount;
-//centroid.y /= pointCount;
-//}
-
-
 
 function Legend(props)
 {
