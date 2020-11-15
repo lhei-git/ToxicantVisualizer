@@ -16,24 +16,15 @@ import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
-import { useReducer, useRef } from "react";
+import { useReducer } from "react";
 import { formatChemical } from "./helpers";
 import vetapi from "./api/vetapi";
-const geocoder = require("./api/geocoder");
 const React = require("react");
 
-const INITIAL_CENTER = {
-  lat: 39.8283,
-  lng: -98.5795,
-};
-
 const initialState = {
-  location: sessionStorage.getItem("searchedLocation") || "",
-  altLocation: "",
+  location: "",
+  map: JSON.parse(sessionStorage.getItem("map")),
   numFacilities: 0,
-  lastSearch: "",
-  center: INITIAL_CENTER,
-  viewport: null,
   showPubchemInfo: false,
   chemicals: [],
   selectedChemicalList: [],
@@ -56,19 +47,17 @@ const reducer = (state, action) => {
       return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
-    case "setAltLocation":
-      return { ...state, altLocation: action.payload };
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
       return { ...state, filters: action.payload };
     case "setCurrentChemical":
       return { ...state, currentChemical: action.payload };
-    case "setMapView":
+    case "setMap":
+      sessionStorage.setItem("map", JSON.stringify(action.payload));
       return {
         ...state,
-        center: action.payload.center,
-        viewport: action.payload.viewport,
+        map: action.payload,
       };
     case "setChemicals":
       return {
@@ -76,9 +65,6 @@ const reducer = (state, action) => {
         showPubchemInfo: false,
         chemicals: action.payload,
       };
-    case "setLastSearch":
-      sessionStorage.setItem("searchedLocation", state.location);
-      return { ...state, lastSearch: action.payload };
     case "showPubchemInfo":
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
     case "setActiveTab":
@@ -95,18 +81,13 @@ const reducer = (state, action) => {
       throw new Error();
   }
 };
-
-const setLocation = (payload) => ({ type: "setLocation", payload });
-const setError = (payload) => ({ type: "setError", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
-const setLastSearch = (payload) => ({ type: "setLastSearch", payload });
-const setMapView = (payload) => ({ type: "setMapView", payload });
+const setMap = (payload) => ({ type: "setMap", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
 const loadGraphs = () => ({ type: "loadGraphs" });
-const setActiveTab = (payload) => ({ type: "setActiveTab", payload });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
@@ -158,36 +139,9 @@ function ChemicalList(props) {
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // fetches data when component is updated
-  React.useEffect(() => {
-    if (state.viewport === null) geocodeLocation(state.location);
-  }, []);
-
-  function handleSearchSubmit(location) {
-    geocodeLocation(location)
-      .then(() => {
-        dispatch(setError(false));
-        dispatch(setLastSearch(location));
-        history.push(`/map`);
-      })
-      .catch((err) => {
-        dispatch(setError(true));
-        setTimeout(() => {
-          dispatch(setError(false));
-        }, 5000);
-        console.log(err);
-      });
-  }
-
-  async function geocodeLocation(location) {
-    const res = await geocoder.get(`/json?address=${location}`);
-    console.log('res.data :>> ', res.data);
-    dispatch(
-      setMapView({
-        center: res.data.results[0].geometry.location,
-        viewport: res.data.results[0].geometry.viewport,
-      })
-    );
+  function handleSuccess(map) {
+    dispatch(setMap(map));
+    history.push("/map");
   }
 
   return (
@@ -265,11 +219,10 @@ const App = (props) => {
               </div>
               {/* GOOGLE MAPS RENDER */}
               <div className="flex-item map-wrapper">
-                {state.viewport && (
+                {state.map && (
                   <MapContainer
                     filters={Object.assign({}, state.filters)}
-                    center={state.center}
-                    viewport={state.viewport}
+                    map={state.map}
                     onLoad={() => dispatch(loadGraphs())}
                     apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                     onTilesLoaded={() => dispatch(loadGraphs())}
@@ -289,15 +242,17 @@ const App = (props) => {
           </Route>
           <Route path="/graphs">
             {/* VET GRAPHS */}
-            <div className="graph-view">
-              <GraphView
-                viewport={state.viewport}
-                filters={state.filters}
-                onFilterChange={(filters) =>
-                  dispatch(setFilters(Object.assign({}, filters)))
-                }
-              ></GraphView>
-            </div>
+            {state.map && (
+              <div className="graph-view">
+                <GraphView
+                  viewport={state.map.viewport}
+                  filters={state.filters}
+                  onFilterChange={(filters) =>
+                    dispatch(setFilters(Object.assign({}, filters)))
+                  }
+                ></GraphView>
+              </div>
+            )}
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
@@ -306,11 +261,7 @@ const App = (props) => {
             </div>
           </Route>
           <Route path="/">
-            <Home
-              isError={state.error}
-              onSearchChange={(search) => dispatch(setLocation(search))}
-              onSearchSubmit={() => handleSearchSubmit(state.location)}
-            />
+            <Home isError={state.error} onSuccess={handleSuccess} />
           </Route>
         </Switch>
       </div>
