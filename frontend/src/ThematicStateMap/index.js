@@ -15,14 +15,14 @@ class ThematicStateMap extends Component {
       contentState: "",
       contentCounty: "",
       geoUrl: "",
-      stateName: "",
+      stateName: "MI",
       prevStateName: "",
       countyData: null,
       countyMax: null,
       countyMin: null,
       filterYear: null,
       prevYear: null,
-      filterType: null, //valid options: totalonsite, air, water, land, totaloffsite, total
+      filterType: "total", //valid options: totalonsite, air, water, land, totaloffsite, total
       prevType: null,
       countyMap: null,
       stateMap: null,
@@ -33,11 +33,13 @@ class ThematicStateMap extends Component {
 
     this.handleContentState = this.handleContentState.bind(this);
     this.handleContentCounty = this.handleContentCounty.bind(this);
-    this.state.filterYear = props.year;
-    //this.state.filterYear = props.year;
-    this.state.filterType = "totalonsite";
-    this.state.stateName = props.stateName;
-    //this.state.filterType = "totalonsite";
+
+    if(props.year)
+        this.state.filterYear = props.year;
+    if(props.filterType)
+        this.state.filterType = "totalonsite";
+    if(props.stateName)
+        this.state.stateName = props.stateName;
   }
 
   //call this function to apply new filters to the thematic maps
@@ -95,7 +97,8 @@ class ThematicStateMap extends Component {
   componentDidUpdate() {
     // update filters from parent
     this.state.filterYear = this.props.year;
-    this.state.stateName = this.props.stateName;
+    if(this.props.stateName)
+        this.state.stateName = this.props.stateName;
     this.state.filterType = this.fixFilterName(this.props.type);
     if (
       this.state.prevYear !== this.state.filterYear ||
@@ -119,9 +122,10 @@ class ThematicStateMap extends Component {
     data.forEach(e => {
         if (e.state == this.state.stateName)
             this.setState({ lat: e.latitude,
-                           lon: e.longitude,
+                            lon: e.longitude,
                             scale: e.scale,
-                            geoUrl: e.geoUrl})
+                            geoUrl: e.geoUrl,
+                            stateLongName: e.name})
     })}
   }
 
