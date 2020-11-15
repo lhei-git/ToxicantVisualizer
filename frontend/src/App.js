@@ -61,7 +61,7 @@ const reducer = (state, action) => {
       return { ...state, location: action.payload };
     case "setStateName":
       return { ...state, stateName: action.payload };
-  case "setStateLongName":
+    case "setStateLongName":
       return { ...state, stateLongName: action.payload };
     case "setAltLocation":
       return { ...state, altLocation: action.payload };
@@ -222,11 +222,21 @@ const App = (props) => {
   async function geocodeLocation(location) {
     const res = await geocoder.get(`/json?address=${location}`);
     var i;
-    for(i = 0; i <5; i++)
-        if(typeof res.data.results[0].address_components[i] !== "undefined")
-            if(res.data.results[0].address_components[i].types[0] ==="administrative_area_level_1") {
-            dispatch(setStateName(res.data.results[0].address_components[i].short_name))
-            dispatch(setStateLongName(res.data.results[0].address_components[i].long_name))}
+    for (i = 0; i < 5; i++)
+      if (typeof res.data.results[0].address_components[i] !== "undefined")
+        if (
+          res.data.results[0].address_components[i].types[0] ===
+          "administrative_area_level_1"
+        ) {
+          dispatch(
+            setStateName(res.data.results[0].address_components[i].short_name)
+          );
+          dispatch(
+            setStateLongName(
+              res.data.results[0].address_components[i].long_name
+            )
+          );
+        }
     dispatch(
       setMapView({
         center: res.data.results[0].geometry.location,
@@ -385,12 +395,23 @@ const App = (props) => {
               )}
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <ThematicStateMap year={state.filters.year} type={state.filters.releaseType} stateName={state.stateName} stateLongName={state.stateLongName}> </ThematicStateMap>
-            {/* <ThematicMapView year={state.filters.year} type ={state.filters.releaseType}> </ThematicMapView>*/}
+            <ThematicStateMap
+              year={state.filters.year}
+              type={state.filters.releaseType}
+              stateName={state.stateName}
+              stateLongName={state.stateLongName}
+            >
+              {" "}
+            </ThematicStateMap>
             {/* <Footer /> */}
           </Route>
-                    <Route path="/thematicmaps">
-          <ThematicStateMap year={state.filters.year} type ={state.filters.releaseType} stateName={state.stateName}> </ThematicStateMap>
+          <Route path="/thematicmaps">
+            <ThematicMapView
+              year={state.filters.year}
+              type={state.filters.releaseType}
+            >
+              {" "}
+            </ThematicMapView>
           </Route>
           <Route path="/">
             <Home
