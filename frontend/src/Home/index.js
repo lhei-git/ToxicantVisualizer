@@ -11,9 +11,9 @@ function Home(props) {
     try {
       const res = await geocoder.get(`/json?address=${location}`);
 
+      //get the state name, which google labels as administrative_area_level_1
       var short_name
       var long_name
-
       var i
       for (i = 0; i < 5; i++)
       if (typeof res.data.results[0].address_components[i] !== "undefined")
