@@ -39,9 +39,9 @@
 
 .home-container .content-group {
   position: absolute;
-  top: 50%;
+  top: 20vh;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 
 .home-container .header {
@@ -56,53 +56,96 @@
   margin: 40px auto;
 }
 
-.home-container .search-bar {
-  display: block;
-  text-align: center;
+/* AUTOCOMPLETE */
+.suggestion-item {
+  color: #3f3844;
 }
 
-.home-container .search-bar form {
-  display: inline-block;
-  margin: 0 auto;
+.home-container .suggestion-icon {
+  margin-right: 8px;
 }
 
-.home-container .search-bar form label {
-  font-size: 24px;
+.home-container .search-bar-container {
+  width: 90%;
+  max-width: 700px;
+  margin: 40px auto 0;
 }
 
-.home-container .search-bar form label:nth-of-type(2) {
-  opacity: 0.5;
+.home-container .search-input-container {
+  position: relative;
 }
 
-.home-container .search-bar form input {
+.home-container .search-input,
+.home-container .search-input:focus,
+.home-container .search-input:active {
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
+  border: honeydew;
   display: block;
   width: 100%;
-  padding: 0 10px;
-  margin: 10px 0;
-  height: 60px;
-  font-size: 40px;
-  border-radius: 10px;
-  border: 0;
-  background: rgba(255, 255, 255, 0.7);
+  padding: 16px;
+  font-size: 16px;
+  border-radius: 2px;
+  outline: none;
 }
 
-.home-container .error {
+.home-container .clear-button,
+.home-container .clear-button:active,
+.home-container .clear-button:focus {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-weight: 600;
+  color: #999;
+}
+
+.home-container .autocomplete-container {
+  border-bottom: honeydew;
+  border-left: honeydew;
+  border-right: honeydew;
+  border-top: 1px solid #e6e6e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border-radius: 0 0 2px 2px;
+}
+
+.home-container .suggestion-item {
+  padding: 10px;
+  text-align: left;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.home-container .suggestion-item.active {
+  background-color: #fafafa;
+}
+
+.home-container .dropdown-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px;
+}
+
+.home-container .dropdown-footer-image {
+  display: inline-block;
+  width: 150px;
+}
+
+.home-container .spinner {
+  color: #18bc9c;
+  font-size: 30px;
+}
+
+.home-container .error-message {
   font-size: 24px;
   color: red;
-  /* font-weight: bold; */
+  margin: 5px 0;
 }
 
-.home-container .search-bar form button {
-  margin: 5px auto;
-  display: block;
-  padding: 10px 40px;
-  font-size: 28px;
-  border-radius: 10px;
-  color: #3f3844;
-  border: 0;
+.home-container .geocode-result-header {
+  font-size: 20px;
+  color: #222222;
 }
 
-.home-container .search-bar form button.hidden {
-  opacity: 0.5;
-  pointer-events: none;
-}

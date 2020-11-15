@@ -1,11 +1,11 @@
 import "./index.css";
 import "../index.css";
-import mapStyles from "./standard";
+import { light, dark, silver } from "./mapstyles";
 import MarkerCluster from "./MarkerClusterer";
 import LoadingSpinner from "../LoadingSpinner";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
-const { shallowEqual, intToString } = require("../helpers");
+const { shallowEqual } = require("../helpers");
 const Component = React.Component;
 const { Map, InfoWindow, GoogleApiWrapper } = require("google-maps-react");
 
@@ -45,7 +45,7 @@ class MapContainer extends Component {
     newState.markers = this.createMarkers(oldPoints);
 
     const mapsApi = this.props.google.maps;
-    const viewport = this.props.viewport;
+    const viewport = this.props.map.viewport;
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
@@ -66,27 +66,16 @@ class MapContainer extends Component {
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
       this.setState({ isLoading: true }, () => {
-        this.fetchPoints(this.props.viewport, this.props.filters);
+        this.fetchPoints(this.props.map.viewport, this.props.filters);
       });
-      // if (this.props.filters.year !== prevProps.filters.year) {
-      //   this.setState({ isLoading: true }, () => {
-      //     this.fetchPoints(
-      //       this.props.viewport,
-      //       this.props.filters
-      //     );
-      //   });
-      // } else {
-      //   const oldPoints = this.state.points;
-      //   newState.markers = this.createMarkers(oldPoints);
-      // }
       newState.showingInfoWindow = false;
       this.setState(newState);
     }
 
     const mapsApi = this.props.google.maps;
-    if (!shallowEqual(prevProps.viewport, this.props.viewport)) {
+    if (!shallowEqual(prevProps.map.viewport, this.props.map.viewport)) {
       try {
-        const b = this.createLatLngBounds(this.props.viewport, mapsApi);
+        const b = this.createLatLngBounds(this.props.map.viewport, mapsApi);
         this.map.fitBounds(b);
       } catch (err) {
         console.log(err);
@@ -131,8 +120,8 @@ class MapContainer extends Component {
       sw_lat: viewport.southwest.lat,
       sw_lng: viewport.southwest.lng,
       carcinogen: filters.carcinogens || null,
-      dioxin: filters.dioxins || null,
-      pbt: filters.pbts || null,
+      dioxin: filters.pbtsAndDioxins || null,
+      pbt: filters.pbtsAndDioxins || null,
       release_type: filters.releaseType,
       year: filters.year,
     };
@@ -159,13 +148,13 @@ class MapContainer extends Component {
       });
     }, 1000);
 
-    // const viewport = this.props.viewport;
+    // const viewport = this.props.map.viewport;
     this.adjustMap(mapProps, map);
   }
 
   adjustMap(mapProps, map) {
     const mapsApi = this.props.google.maps;
-    const viewport = this.props.viewport;
+    const viewport = this.props.map.viewport;
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
@@ -190,53 +179,6 @@ class MapContainer extends Component {
     const n = new api.LatLng(viewport.northeast.lat, viewport.northeast.lng);
     const s = new api.LatLng(viewport.southwest.lat, viewport.southwest.lng);
     return new api.LatLngBounds(s, n);
-  }
-
-  // passesFilter(chemical, filters) {
-  //   if (
-  //     (filters.chemical !== "all" &&
-  //       chemical.name.toUpperCase() !== filters.chemical.toUpperCase()) ||
-  //     (filters.carcinogens && chemical.carcinogen === "NO") ||
-  //     (filters.pbts && chemical.classification.toUpperCase() !== "PBT") ||
-  //     (filters.dioxins && chemical.classification.toUpperCase() !== "DIOXIN") ||
-  //     (filters.releaseType === "air" &&
-  //       chemical.vet_total_releases_air === 0) ||
-  //     (filters.releaseType === "water" &&
-  //       chemical.total_releases_water === 0) ||
-  //     (filters.releaseType === "land" &&
-  //       chemical.vet_total_releases_land === 0) ||
-  //     (filters.releaseType === "on-site" &&
-  //       chemical.vet_total_releases_onsite === 0) ||
-  //     (filters.releaseType === "off-site" &&
-  //       chemical.vet_total_releases_offsite === 0)
-  //   )
-  //     return false;
-  //   return true;
-  // }
-
-  // filterChemicalList(list, filters) {
-  //   const newList = [];
-  //   list.forEach((chemical) => {
-  //     if (this.passesFilter(chemical, filters)) newList.push(chemical);
-  //   });
-  //   return newList;
-  // }
-
-  filterFacilities(facilities) {
-    return facilities.map((f, i) => {
-      const total = f.total;
-      let color = 1;
-
-      if (total < 100) color = 1;
-      else if (total < 100) color = 2;
-      else if (total < 10000) color = 3;
-      else if (total < 100000) color = 4;
-      else if (total < 1000000) color = 5;
-      else color = 6;
-
-      f.color = color;
-      return f;
-    });
   }
 
   getColor(total) {
@@ -271,7 +213,6 @@ class MapContainer extends Component {
       },
       () => {
         this.props.onUpdate(markers.length);
-        this.props.onLoad();
       }
     );
     return markers;
@@ -295,14 +236,16 @@ class MapContainer extends Component {
         <div className="map">
           <Map
             onReady={this.handleMount}
-            google={this.props.google}
+            onTilesloaded={this.props.onTilesLoaded}
+            // google={this.props.google}
+            google={window.google}
             streetViewControl={false}
-            styles={mapStyles}
+            styles={silver}
             draggable={true}
             fullscreenControl={false}
             zoom={5}
             minZoom={5}
-            initialCenter={this.props.center}
+            initialCenter={this.props.map.center}
             containerStyle={containerStyle}
           >
             {this.state.markers.length > 0 && (
