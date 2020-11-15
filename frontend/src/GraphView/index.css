@@ -28,7 +28,7 @@
 
 .graph-container .flex-container .flex-item.left {
   flex: 3;
-  border-right: 2px solid #9c27b0;
+  border-right: 1px solid #3f3844;
 }
 
 .graph-container .flex-container .flex-item.right {
@@ -94,4 +94,5 @@
 .graph-container .filter-container {
   width: 100%;
   left: 0;
+  border-bottom: 1px solid #3f3844;
 }
