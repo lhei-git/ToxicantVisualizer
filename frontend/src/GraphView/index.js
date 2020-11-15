@@ -659,14 +659,10 @@ function GraphView(props) {
               onFilterChange={props.onFilterChange}
             ></UserControlPanel>
           </div>
-          <GraphContainer
+          <GraphSummary
             viewport={props.viewport}
             filters={props.filters}
-            name="summary"
-            hidden={false}
-            graph={GraphSummary}
-            title="Summary"
-          ></GraphContainer>
+          ></GraphSummary>
         </div>
         <div className="flex-item right">
           <div className="graphs">
