@@ -12,8 +12,8 @@ function Home(props) {
   }
 
   function onSearchSubmit(event) {
-    if (searchValue.length === 0) return;
     event.preventDefault();
+    if (searchValue.length === 0) return;
     props.onSearchSubmit();
   }
 

@@ -168,7 +168,7 @@ const App = (props) => {
       .then(() => {
         dispatch(setError(false));
         dispatch(setLastSearch(location));
-        history.push("/maps");
+        history.push(`/map`);
       })
       .catch((err) => {
         dispatch(setError(true));
@@ -181,6 +181,7 @@ const App = (props) => {
 
   async function geocodeLocation(location) {
     const res = await geocoder.get(`/json?address=${location}`);
+    console.log('res.data :>> ', res.data);
     dispatch(
       setMapView({
         center: res.data.results[0].geometry.location,
@@ -198,7 +199,7 @@ const App = (props) => {
           </div>
           <ul>
             <li className={state.activeTab === 0 ? "active" : ""}>
-              <Link to="/maps">Summary</Link>
+              <Link to="/map">Map</Link>
             </li>
             <li className={state.activeTab === 1 ? "active" : ""}>
               <Link to="/graphs">Graphs</Link>
@@ -209,7 +210,7 @@ const App = (props) => {
           </ul>
         </div>
         <Switch>
-          <Route path="/maps">
+          <Route exact path="/map">
             <div className="map-view">
               <div className="flex-item filter-wrapper">
                 {/* VET MAP FILTER */}
