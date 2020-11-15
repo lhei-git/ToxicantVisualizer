@@ -1,7 +1,8 @@
 import React, { memo } from "react";
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import { ComposableMap, ZoomableGroup, Geographies, Geography } from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
 import "./index.css";
+import axios from 'axios';
 
 // used to produce more easily readable numbers
 const rounded = (num) => {
@@ -20,7 +21,7 @@ const thematicMap = (props) => {
   //change the scale domain based on whether states or counties are being viewed
   //TODO: determine why minVal to maxVal doesn't work well as a domain, or see if there is a better scaling option
   var domain = [];
-  if (props.type === "counties") domain = [1000, 1000000];
+  if (props.type !== "states") domain = [1000, 1000000];
   else domain = [props.minValue * 2, props.maxValue / 2];
 
   //removes inconsistencies in county name, slow af
@@ -166,7 +167,7 @@ const thematicMap = (props) => {
       </>
     );
   //used to render the county based map
-  else
+  else if (props.type === "counties")
     return (
       <>
         <div className="thematic-map-container">
@@ -251,7 +252,130 @@ const thematicMap = (props) => {
         </div>
       </>
     );
+    //covers single state
+    else{
+    return (
+      <>
+        <div className="thematic-map-container">
+          <ComposableMap data-tip="" projection="geoMercator"
+                  projectionConfig={{
+                  rotate: [0,0,0],
+                  center: [props.lon, props.lat],
+                  scale: props.scale,
+    }}>
+        <Geographies geography={props.geoUrl}>
+          {({ geographies }) =>
+            geographies.map((geo) => {
+              var cur = props.data.find(
+                (s) =>
+                  fixCountyName(s.county) ===
+                    geo.properties.NAME.toUpperCase()
+              );
+              if (cur !== undefined) {
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill={colorScale(cur ? cur.totalonsite : "#ECECEC")}
+                    stroke={"#000"}
+                    onMouseEnter={() => {
+                      props.setTooltipContent(null);
+                      const { NAME, POP_EST } = geo.properties;
+                      props.setTooltipContent(`<h1><p style="text-align:center;">${
+                        cur.county
+                      } COUNTY</p></h1><span class="geography-attributes"><br />
+                                            Onsite: ${rounded(
+                                              Math.trunc(cur.totalonsite)
+                                            )} lbs. <br />
+                                            Air: ${rounded(
+                                              Math.trunc(cur.air)
+                                            )} lbs. <br />
+                                            Water: ${rounded(
+                                              Math.trunc(cur.water)
+                                            )} lbs. <br />
+                                            Land: ${rounded(
+                                              Math.trunc(cur.land)
+                                            )} lbs. <br />
+                                            Offsite: ${rounded(
+                                              Math.trunc(cur.totaloffsite)
+                                            )} lbs. <br />
+                                            Total: ${rounded(
+                                              Math.trunc(cur.total)
+                                            )} lbs. <br />
+                                            Facilities: ${rounded(
+                                              Math.trunc(
+                                                cur.numtrifacilities
+                                              )
+                                            )} </span>
+                `);
+                    }}
+                    onMouseLeave={() => {
+                      props.setTooltipContent("");
+                    }}
+                  />
+                );
+              } else {
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill={"#D3D3D3"}
+                    stroke={"#000"}
+                    onMouseEnter={() => {
+                      props.setTooltipContent(null);
+                      const { NAME, POP_EST } = geo.properties;
+                      props.setTooltipContent(`<h1><p style="text-align:center;">${NAME.toUpperCase()} COUNTY</p></h1><br />
+                                         <span class="geography-attributes"> No data available at this time </span>
+                `);
+                    }}
+                    onMouseLeave={() => {
+                      props.setTooltipContent("");
+                    }}
+                  />
+                );
+              }
+            })
+          }
+        </Geographies>
+          </ComposableMap>
+          <Legend colorScale={colorScale} filterType={filterType} maxVal={props.maxValue} minVal={props.minValue}></Legend>
+        </div>
+      </>
+    );
+    }
 };
+
+//function findCentroid(parsedPath)
+//{
+//var centroid= {x:0,y:0};
+//var pointCount=0;
+//for( var i=0; i< parsedPath.length; i++ ){
+//    var point= parsedPath[i];
+//
+//    if( point.relative == true){
+//        if( i > 0 ){
+//            point.x += +parsedPath[i-1].x;
+//            point.y += +parsedPath[i-1].y;
+//        }
+//    }
+//    if( point.x && point.y ){
+//
+//        centroid.x += point.x;
+//        centroid.y += point.y;
+//
+//        placePoint(point , "blue" , 0.2 );
+//
+//        pointCount++
+//    }else{
+//        // close pathes -> ignored
+//    }
+//
+//}
+//centroid.x /= pointCount;
+//centroid.y /= pointCount;
+//}
+
+
 
 function Legend(props)
 {

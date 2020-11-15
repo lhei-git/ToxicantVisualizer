@@ -16,6 +16,7 @@ import "./App.css";
 import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
+import ThematicStateMap from "./ThematicStateMap/index.js";
 import { useReducer, useRef } from "react";
 import { formatChemical } from "./helpers";
 import vetapi from "./api/vetapi";
@@ -60,6 +61,8 @@ const reducer = (state, action) => {
       return { ...state, location: action.payload };
     case "setStateName":
       return { ...state, stateName: action.payload };
+  case "setStateLongName":
+      return { ...state, stateLongName: action.payload };
     case "setAltLocation":
       return { ...state, altLocation: action.payload };
     case "setNumFacilities":
@@ -102,6 +105,7 @@ const reducer = (state, action) => {
 
 const setLocation = (payload) => ({ type: "setLocation", payload });
 const setStateName = (payload) => ({ type: "setStateName", payload });
+const setStateLongName = (payload) => ({ type: "setStateLongName", payload });
 const setError = (payload) => ({ type: "setError", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
@@ -217,7 +221,12 @@ const App = (props) => {
 
   async function geocodeLocation(location) {
     const res = await geocoder.get(`/json?address=${location}`);
-    dispatch(setStateName(res.data.results[0].address_components[2].short_name))
+    var i;
+    for(i = 0; i <5; i++)
+        if(typeof res.data.results[0].address_components[i] !== "undefined")
+            if(res.data.results[0].address_components[i].types[0] ==="administrative_area_level_1") {
+            dispatch(setStateName(res.data.results[0].address_components[i].short_name))
+            dispatch(setStateLongName(res.data.results[0].address_components[i].long_name))}
     dispatch(
       setMapView({
         center: res.data.results[0].geometry.location,
@@ -376,8 +385,12 @@ const App = (props) => {
               )}
             </div>
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <ThematicMapView year={state.filters.year} type ={state.filters.releaseType}> </ThematicMapView>
+            <ThematicStateMap year={state.filters.year} type={state.filters.releaseType} stateName={state.stateName} stateLongName={state.stateLongName}> </ThematicStateMap>
+            {/* <ThematicMapView year={state.filters.year} type ={state.filters.releaseType}> </ThematicMapView>*/}
             {/* <Footer /> */}
+          </Route>
+                    <Route path="/thematicmaps">
+          <ThematicStateMap year={state.filters.year} type ={state.filters.releaseType} stateName={state.stateName}> </ThematicStateMap>
           </Route>
           <Route path="/">
             <Home
