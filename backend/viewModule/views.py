@@ -318,11 +318,15 @@ def top_facility_releases(request):
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=2018))
+    all = int(request.GET.get('all', default=0))
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
-
-    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
-        air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
+    if all == 1:
+        queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
+            air=Sum('air')).annotate(water=Sum('water')).order_by('-total')
+    else:
+        queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(
+            total=Sum('on_site')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
