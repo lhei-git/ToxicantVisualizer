@@ -80,6 +80,8 @@ class Facility(models.Model):
     industry_sector_code = models.TextField(blank=True, null=True)
     industry_sector = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return self.name
 
     class Meta:
         db_table = 'facilities'
@@ -95,6 +97,9 @@ class Chemical(models.Model):
     carcinogen = models.TextField(blank=True, null=True)
     unit_of_measure = models.TextField(blank=True, null=True)
     facilities = models.ManyToManyField(Facility, through='Release')
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         db_table = 'chemicals'
@@ -118,6 +123,9 @@ class Release(models.Model):
         db_column="offsite_release_total", blank=True, null=True)
     total = models.FloatField(
         db_column="total_releases", blank=True, null=True)
+
+    def __str__(self):
+        return 'Release at: {}'.format(self.facility)
 
     class Meta:
         db_table = 'releases'
