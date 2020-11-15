@@ -12,7 +12,6 @@ const stateGeoUrl =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers.json";
 const countyGeoUrl =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers-counties.json";
-//const countyGeoUrl = "https://raw.githubusercontent.com/jgoodall/us-maps/master/topojson/county.topo.json"
 
 class ThematicMapView extends Component {
   constructor(props) {
@@ -44,7 +43,7 @@ class ThematicMapView extends Component {
 
   //call this function to apply new filters to the thematic maps
   //valid types: totalonsite, air, water, land, totaloffsite, total
-  //valid years: 6 - 2018
+  //valid years: 6 - 2019
   constApplyFilter(props) {
     if (props.year) this.setState({ filterYear: props.year });
     if (props.type) this.setState({ filterType: props.type });
@@ -55,30 +54,28 @@ class ThematicMapView extends Component {
     this.getCountyData();
   }
 
-getFilterText(filterType)
-  {
-  //valid types: totalonsite, air, water, land, totaloffsite, total
-      switch(filterType) {
+  getFilterText(filterType) {
+    //valid types: totalonsite, air, water, land, totaloffsite, total
+    switch (filterType) {
       case "totalonsite":
-        return "All On Site Releases"
+        return "All On Site Releases";
       case "air":
-        return "All Air Releases"
+        return "All Air Releases";
       case "water":
-        return "All Water Releases"
+        return "All Water Releases";
       case "land":
-        return "All Land Releases"
+        return "All Land Releases";
       case "totaloffsite":
-        return "All Off Site Releases"
+        return "All Off Site Releases";
       case "total":
-        return "All Releases"
+        return "All Releases";
       default:
-        return "All On Site Releases"
+        return "All On Site Releases";
     }
   }
 
-  fixFilterName( type )
-  {
-    switch(type) {
+  fixFilterName(type) {
+    switch (type) {
       case "all":
         return "total";
       case "air":
@@ -87,11 +84,11 @@ getFilterText(filterType)
         return type;
       case "off_site":
         return "totaloffsite";
-    case "on_site":
+      case "on_site":
         return "totalonsite";
-    default:
-        return "total"
-}
+      default:
+        return "total";
+    }
   }
 
   //refetch data if the year or release type filter changed
@@ -123,7 +120,7 @@ getFilterText(filterType)
     this.setState({ content: content });
   }
 
-    //sets tooltip content for the maps
+  //sets tooltip content for the maps
   handleContentCounty(content) {
     this.setState({ content: content });
   }
@@ -137,7 +134,10 @@ getFilterText(filterType)
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
-          <h1>{this.props.stateLongName} Total Releases By County ({this.getFilterText(this.state.filterType)})</h1>
+          <h1>
+            Total Releases By State ({this.getFilterText(this.state.filterType)}
+            )
+          </h1>
           {this.state.stateData ? (
             <>
               <ThematicMap
@@ -160,7 +160,10 @@ getFilterText(filterType)
         </div>
 
         <div className="flex-item">
-          <h1>Total Releases By County (all types)</h1>
+          <h1>
+            Total Releases By State ({this.getFilterText(this.state.filterType)}
+            )
+          </h1>
           {this.state.countyData ? (
             <>
               <ThematicMap
@@ -189,7 +192,7 @@ getFilterText(filterType)
     var l = {};
     var d = [];
     var maxValue = 0;
-    var minValue = 100000000000000;
+    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
     await vetapi
@@ -212,6 +215,8 @@ getFilterText(filterType)
           countyMax: maxValue,
         });
       });
+
+    alert(maxValue);
   }
 
   async getStateData() {
@@ -221,23 +226,21 @@ getFilterText(filterType)
     var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-    await vetapi
-      .get("/stats/state/all?year=" + filterYear)
-      .then((response) => {
-        l = response.data;
-        d = Object.values(l);
-        response.data.forEach((st, i) => {
-          if (response.data[i][filterType] > maxValue)
-            maxValue = response.data[i][filterType];
-          if (
-            response.data[i][filterType] < minValue &&
-            response.data[i][filterType] !== 0
-          )
-            minValue = response.data[i][filterType];
-        });
-
-        this.setState({ stateData: d, stateMin: minValue, stateMax: maxValue });
+    await vetapi.get("/stats/state/all?year=" + filterYear).then((response) => {
+      l = response.data;
+      d = Object.values(l);
+      response.data.forEach((st, i) => {
+        if (response.data[i][filterType] > maxValue)
+          maxValue = response.data[i][filterType];
+        if (
+          response.data[i][filterType] < minValue &&
+          response.data[i][filterType] !== 0
+        )
+          minValue = response.data[i][filterType];
       });
+
+      this.setState({ stateData: d, stateMin: minValue, stateMax: maxValue });
+    });
   }
 }
 

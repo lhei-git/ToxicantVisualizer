@@ -1,8 +1,8 @@
 import React, { memo } from "react";
-import { ComposableMap, ZoomableGroup, Geographies, Geography } from "react-simple-maps";
+import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
 import "./index.css";
-import axios from 'axios';
+import axios from "axios";
 
 // used to produce more easily readable numbers
 const rounded = (num) => {
@@ -96,8 +96,7 @@ const thematicMap = (props) => {
     //"#270201",
   ]);
 
-  const filterType =
-    props.filterType !== null ? props.filterType : "total";
+  const filterType = props.filterType !== null ? props.filterType : "total";
 
   // used to render the state based map
   if (props.type === "states")
@@ -158,7 +157,12 @@ const thematicMap = (props) => {
               }
             </Geographies>
           </ComposableMap>
-          <Legend colorScale={colorScale} filterType={filterType} maxVal={props.maxValue} minVal={props.minValue}></Legend>
+          <Legend
+            colorScale={colorScale}
+            filterType={filterType}
+            maxVal={props.maxValue}
+            minVal={props.minValue}
+          ></Legend>
         </div>
       </>
     );
@@ -182,7 +186,7 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur.[filterType] : "#ECECEC")}
+                        fill={colorScale(cur ? cur[filterType] : "#ECECEC")}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
@@ -244,42 +248,50 @@ const thematicMap = (props) => {
               }
             </Geographies>
           </ComposableMap>
-          <Legend colorScale={colorScale} filterType={filterType} maxVal={props.maxValue} minVal={props.minValue}></Legend>
+          <Legend
+            colorScale={colorScale}
+            filterType={filterType}
+            maxVal={props.maxValue}
+            minVal={props.minValue}
+          ></Legend>
         </div>
       </>
     );
-    //covers single state
-    else{
+  //covers single state
+  else {
     return (
       <>
         <div className="thematic-map-container">
-          <ComposableMap data-tip="" projection="geoMercator"
-                  projectionConfig={{
-                  rotate: [0,0,0],
-                  center: [props.lon, props.lat],
-                  scale: props.scale,
-    }}>
-        <Geographies geography={props.geoUrl}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
-              var cur = props.data.find(
-                (s) =>
-                  fixCountyName(s.county) ===
-                    geo.properties.NAME.toUpperCase()
-              );
-              if (cur !== undefined) {
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={colorScale(cur ? cur.[filterType] : "#ECECEC")}
-                    stroke={"#000"}
-                    onMouseEnter={() => {
-                      props.setTooltipContent(null);
-                      const { NAME, POP_EST } = geo.properties;
-                      props.setTooltipContent(`<h1><p style="text-align:center;">${
-                        cur.county
-                      } COUNTY</p></h1><span class="geography-attributes"><br />
+          <ComposableMap
+            data-tip=""
+            projection="geoMercator"
+            projectionConfig={{
+              rotate: [0, 0, 0],
+              center: [props.lon, props.lat],
+              scale: props.scale,
+            }}
+          >
+            <Geographies geography={props.geoUrl}>
+              {({ geographies }) =>
+                geographies.map((geo) => {
+                  var cur = props.data.find(
+                    (s) =>
+                      fixCountyName(s.county) ===
+                      geo.properties.NAME.toUpperCase()
+                  );
+                  if (cur !== undefined) {
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill={colorScale(cur ? cur[filterType] : "#ECECEC")}
+                        stroke={"#000"}
+                        onMouseEnter={() => {
+                          props.setTooltipContent(null);
+                          const { NAME, POP_EST } = geo.properties;
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${
+                            cur.county
+                          } COUNTY</p></h1><span class="geography-attributes"><br />
                                             Onsite: ${rounded(
                                               Math.trunc(cur.totalonsite)
                                             )} lbs. <br />
@@ -299,63 +311,92 @@ const thematicMap = (props) => {
                                               Math.trunc(cur.total)
                                             )} lbs. <br />
                                             Facilities: ${rounded(
-                                              Math.trunc(
-                                                cur.numtrifacilities
-                                              )
+                                              Math.trunc(cur.numtrifacilities)
                                             )} </span>
                 `);
-                    }}
-                    onMouseLeave={() => {
-                      props.setTooltipContent("");
-                    }}
-                  />
-                );
-              } else {
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={"#D3D3D3"}
-                    stroke={"#000"}
-                    onMouseEnter={() => {
-                      props.setTooltipContent(null);
-                      const { NAME, POP_EST } = geo.properties;
-                      props.setTooltipContent(`<h1><p style="text-align:center;">${NAME.toUpperCase()} COUNTY</p></h1><br />
+                        }}
+                        onMouseLeave={() => {
+                          props.setTooltipContent("");
+                        }}
+                      />
+                    );
+                  } else {
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill={"#D3D3D3"}
+                        stroke={"#000"}
+                        onMouseEnter={() => {
+                          props.setTooltipContent(null);
+                          const { NAME, POP_EST } = geo.properties;
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${NAME.toUpperCase()} COUNTY</p></h1><br />
                                          <span class="geography-attributes"> No data available at this time </span>
                 `);
-                    }}
-                    onMouseLeave={() => {
-                      props.setTooltipContent("");
-                    }}
-                  />
-                );
+                        }}
+                        onMouseLeave={() => {
+                          props.setTooltipContent("");
+                        }}
+                      />
+                    );
+                  }
+                })
               }
-            })
-          }
-        </Geographies>
+            </Geographies>
           </ComposableMap>
-          <Legend colorScale={colorScale} filterType={filterType} maxVal={props.maxValue} minVal={props.minValue}></Legend>
+          <Legend
+            colorScale={colorScale}
+            filterType={filterType}
+            maxVal={props.maxValue}
+            minVal={props.minValue}
+          ></Legend>
         </div>
       </>
     );
-    }
+  }
 };
 
-function Legend(props)
-{
-    return(
-        <svg height="25" width="100%" margin="5px">
-          <defs>
-            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={props.colorScale(0)} stopOpacity="1" />
-              <stop offset="100%" stopColor={props.colorScale(Number.MAX_SAFE_INTEGER)} stopOpacity="1" />
-            </linearGradient>1
-          </defs>
-          <rect height="100" width="100%" fill="url(#grad2)" stroke-width="1" stroke="black" />
-          <text x="3%" y="50%" fill="black" dominant-baseline="middle" text-anchor="start">{rounded(Math.trunc(props.minVal))}</text>
-          <text x="97%" y="50%" fill="white" dominant-baseline="middle" text-anchor="end">{rounded(Math.trunc(props.maxVal))}</text>
-        </svg>
-    )
+function Legend(props) {
+  return (
+    <svg height="25" width="100%" margin="5px">
+      <defs>
+        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={props.colorScale(0)} stopOpacity="1" />
+          <stop
+            offset="100%"
+            stopColor={props.colorScale(Number.MAX_SAFE_INTEGER)}
+            stopOpacity="1"
+          />
+        </linearGradient>
+        1
+      </defs>
+      <rect
+        height="100"
+        width="100%"
+        fill="url(#grad2)"
+        stroke-width="1"
+        stroke="black"
+      />
+      <text
+        x="1%"
+        y="50%"
+        fill="black"
+        dominant-baseline="middle"
+        text-anchor="start"
+      >
+        {rounded(Math.trunc(props.minVal))} lbs.
+      </text>
+      <text
+        x="99%"
+        y="50%"
+        fill="white"
+        dominant-baseline="middle"
+        text-anchor="end"
+      >
+        {rounded(Math.trunc(props.maxVal))} lbs.
+      </text>
+    </svg>
+  );
 }
 
 export default memo(thematicMap);
