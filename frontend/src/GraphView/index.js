@@ -223,6 +223,80 @@ async function GraphTopTenFacilities(props) {
   }
 }
 
+async function GraphAllFacilities(props) {
+  try {
+    const { northeast, southwest } = props.viewport;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
+      all: 1,
+    };
+    const res = await vetapi.get(`/stats/location/facility_releases`, {
+      params,
+    });
+    const data = res.data
+      .sort((a, b) => b.total - a.total)
+      .map((d, i) => {
+        const f = d;
+        return {
+          name: f.facility__name,
+          av: f.air,
+          bv: f.water,
+          cv: f.land,
+        };
+      });
+    return (
+      <div width="100%" height="180px" style={{"overflow":"scroll", "max-height":"400px"}}>
+        <ResponsiveContainer width="100%" height={res.data.length * 40}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{
+              top: 30,
+              // right: 50,
+              left: 50,
+              bottom: 200,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <YAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              tick={<CustomizedXAxisTick />}
+            />
+            <XAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => intToString(val) + " "}
+            />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
+            <Legend align="right" verticalAlign="top" />
+            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
+            <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
+            <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
 async function GraphTopTenParents(props) {
   try {
     const { northeast, southwest } = props.viewport;
@@ -713,6 +787,13 @@ function GraphView(props) {
               name="timeline_chemicals"
               graph={TimelineTopChemicals}
               title="Top Ten Chemicals Over Time (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_parents"
+              graph={GraphAllFacilities}
+              title="Total On-Site Releases for all Companies (in lbs)"
             ></GraphContainer>
           </div>
         </div>
