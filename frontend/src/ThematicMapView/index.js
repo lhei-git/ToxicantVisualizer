@@ -55,6 +55,27 @@ class ThematicMapView extends Component {
     this.getCountyData();
   }
 
+getFilterText(filterType)
+  {
+  //valid types: totalonsite, air, water, land, totaloffsite, total
+      switch(filterType) {
+      case "totalonsite":
+        return "All On Site Releases"
+      case "air":
+        return "All Air Releases"
+      case "water":
+        return "All Water Releases"
+      case "land":
+        return "All Land Releases"
+      case "totaloffsite":
+        return "All Off Site Releases"
+      case "total":
+        return "All Releases"
+      default:
+        return "All On Site Releases"
+    }
+  }
+
   fixFilterName( type )
   {
     switch(type) {
@@ -64,9 +85,9 @@ class ThematicMapView extends Component {
       case "water":
       case "land":
         return type;
-      case "off-site":
+      case "off_site":
         return "totaloffsite";
-    case "on-site":
+    case "on_site":
         return "totalonsite";
     default:
         return "total"
@@ -116,7 +137,7 @@ class ThematicMapView extends Component {
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
-          <h1>Total Releases By State (all types)</h1>
+          <h1>{this.props.stateLongName} Total Releases By County ({this.getFilterText(this.state.filterType)})</h1>
           {this.state.stateData ? (
             <>
               <ThematicMap
@@ -197,7 +218,7 @@ class ThematicMapView extends Component {
     var l = {};
     var d = [];
     var maxValue = 0;
-    var minValue = 100000000000000;
+    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
     await vetapi
