@@ -124,12 +124,16 @@
 }
 
 .even-overflow-column{
+   border: 1px solid black;
+   border-collapse: collapse;
     width:40%;
     min-width:200px;
     background-color: #DDD;
 }
 
 .odd-overflow-column{
+   border: 1px solid black;
+   border-collapse: collapse;
     width:40%;
     min-width:200px;
     background-color: #FFF;

@@ -14,6 +14,7 @@ const {
   Bar,
   LineChart,
   Line,
+  LabelList,
   ResponsiveContainer,
 } = require("recharts");
 
@@ -239,6 +240,7 @@ async function GraphAllFacilities(props) {
       year: props.filters.year,
       all: 1,
     };
+
     const res = await vetapi.get(`/stats/location/facility_releases`, {
       params,
     });
@@ -272,6 +274,7 @@ async function GraphAllFacilities(props) {
               type="category"
               interval={0}
               tick={<CustomizedXAxisTick />}
+              margin={{top:60}}
             />
             <XAxis
               type="number"
@@ -284,7 +287,7 @@ async function GraphAllFacilities(props) {
               isAnimationActive={false}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
+            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8"  />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
             <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
           </BarChart>
@@ -827,7 +830,7 @@ function GraphView(props) {
               filters={props.filters}
               name="top_facilities"
               graph={GraphTopTenFacilities}
-              title="Total On-Site Releases for Top 10 Facilities (in lbs)"
+              title="Total Releases for Top 10 Facilities (in lbs)"
             ></GraphContainer>
             <GraphContainer
               viewport={props.viewport}
@@ -841,7 +844,7 @@ function GraphView(props) {
               filters={props.filters}
               name="top_parents"
               graph={GraphTopTenParents}
-              title="Total On-Site Releases for Top 10 Parent Companies (in lbs)"
+              title="Total Releases for Top 10 Parent Companies (in lbs)"
             ></GraphContainer>
             <GraphContainer
               viewport={props.viewport}
@@ -869,14 +872,14 @@ function GraphView(props) {
               filters={props.filters}
               name="top_parents"
               graph={GraphAllFacilities}
-              title="Total On-Site Releases for all Companies (in lbs)"
+              title="Total Releases for all Facilities (in lbs)"
             ></GraphContainer>
             <GraphContainer
               viewport={props.viewport}
               filters={props.filters}
               name="top_parents"
               graph={TableAllFacilities}
-              title="Total On-Site Releases for all Companies (in lbs)"
+              title="Total Releases for all Facilities (in lbs)"
             ></GraphContainer>
           </div>
         </div>
@@ -884,5 +887,6 @@ function GraphView(props) {
     </div>
   );
 }
+
 
 export default GraphView;
