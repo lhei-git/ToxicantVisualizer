@@ -16,11 +16,14 @@ import GraphView from "./GraphView";
 import PubChemFields from "./PubChemFields";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
+import ThematicStateMap from "./ThematicStateMap/index.js";
 import React, { useReducer } from "react";
-const { formatChemical, formatAmount } = require("./helpers");
-const vetapi = require("./api/vetapi");
+import { formatChemical, formatAmount } from "./helpers";
+import vetapi from "./api/vetapi";
 
 const initialState = {
+  stateName: "",
+  stateNameLong: "",
   location: "",
   map: JSON.parse(sessionStorage.getItem("map")),
   numFacilities: 0,
@@ -36,7 +39,7 @@ const initialState = {
     pbtsAndDioxins: false,
     carcinogens: false,
     releaseType: "all",
-    year: 2018,
+    year: 2019,
   },
 };
 
@@ -46,6 +49,12 @@ const reducer = (state, action) => {
       return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
+    case "setStateName":
+      return { ...state, stateName: action.payload };
+    case "setStateLongName":
+      return { ...state, stateLongName: action.payload };
+    case "setAltLocation":
+      return { ...state, altLocation: action.payload };
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
@@ -80,6 +89,11 @@ const reducer = (state, action) => {
       throw new Error();
   }
 };
+
+const setLocation = (payload) => ({ type: "setLocation", payload });
+const setStateName = (payload) => ({ type: "setStateName", payload });
+const setStateLongName = (payload) => ({ type: "setStateLongName", payload });
+const setError = (payload) => ({ type: "setError", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
@@ -141,6 +155,11 @@ const App = (props) => {
   function handleSuccess(map) {
     dispatch(setMap(map));
     history.push("/map");
+  }
+
+  function getStateNames(props) {
+    dispatch(setStateName(props.short_name));
+    dispatch(setStateLongName(props.long_name));
   }
 
   return (
@@ -255,12 +274,30 @@ const App = (props) => {
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <div className="thematic-map-view">
-              <ThematicMapView year={state.filters.year}></ThematicMapView>
-            </div>
+            <ThematicStateMap
+              year={state.filters.year}
+              type={state.filters.releaseType}
+              stateName={state.stateName}
+              stateLongName={state.stateLongName}
+            >
+              {" "}
+            </ThematicStateMap>
+            {/* <Footer /> */}
+          </Route>
+          <Route path="/thematicmaps">
+            <ThematicMapView
+              year={state.filters.year}
+              type={state.filters.releaseType}
+            >
+              {" "}
+            </ThematicMapView>
           </Route>
           <Route path="/">
-            <Home isError={state.error} onSuccess={handleSuccess} />
+            <Home
+              isError={state.error}
+              onSuccess={handleSuccess}
+              getStateNames={getStateNames}
+            />
           </Route>
         </Switch>
       </div>
