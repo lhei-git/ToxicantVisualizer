@@ -418,6 +418,17 @@ def top_chemicals(request):
 
 """ Returns the total release amount over time for the top 10 chemicals released in 2018. """
 
+def top_pbt_chemicals(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    y = int(request.GET.get('year', default=2018))
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    raw = release.objects.filter(window & filterReleases(request) & Q(year=y) & Q(chemical__classification='PBT')).values(
+        'chemical__name').annotate(total=Sum('total')).order_by('-total')[:10]
+    return JsonResponse(list(raw), content_type='application/json', safe=False)
 
 def timeline_top_chemicals(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
@@ -427,6 +438,19 @@ def timeline_top_chemicals(request):
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
     chemicals = list(release.objects.filter(window & filterReleases(request) & Q(year=2018)).values_list(
+        'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
+    response = release.objects.filter(window & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
+        'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
+    return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
+
+def timeline_top_pbt_chemicals(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    chemicals = list(release.objects.filter(window & filterReleases(request) & Q(year=2018) & Q(chemical__classification='PBT')).values_list(
         'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(window & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
         'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
