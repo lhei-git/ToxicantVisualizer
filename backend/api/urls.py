@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import points, get_facilities, get_chemicals, attr, num_facilities, state_total_releases, timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, all_county_total_releases
+from viewModule.views import points, get_facilities, get_chemicals, attr, num_facilities, state_total_releases, timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_totalReleases
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,4 +35,10 @@ urlpatterns = [
     path('stats/state/all', all_state_total_releases),
     # return release all counties, individually -- FIXME - RAW SQL
     path('stats/county/all', all_county_total_releases),
+    # return all chemicals and respective total releases (by type) in queried location {Graph 13}
+    path('stats/chemicals/total_release_types', all_chemicals_releases),
+    # return all facilities and respective total release amounts in queried location {Graph 15}
+    path('stats/facilites/total_releases', all_facility_releases),
+    # return all chemicals and respective total release amounts in queried location {Grpah 14}
+    path('stats/chemicals/totalReleases', all_chemicals_totalReleases)
 ]

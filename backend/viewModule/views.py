@@ -234,8 +234,6 @@ def all_state_total_releases(request):
 
 
 # stats/county/all
-
-
 def all_county_total_releases(request):
     d = []
     y = int(request.GET.get('year', default=2018))
@@ -249,11 +247,22 @@ def all_county_total_releases(request):
     return JsonResponse(list(d), safe=False)
 
 
+''' Returns all chemicals and respective total release (by type) amounts for queried location {Graph 13} '''
+def all_chemicals_releases(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    y = int(request.GET.get('year', default=2018))
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    qs = release.objects.filter(window & Q(year=y)).values('chemical__name').annotate(Sum('air'), Sum('water'), Sum('land'), Sum('off_site'))
+    #print(qs.query)
+    return JsonResponse(list(qs), content_type='application/json', safe=False)
+
 '''
 Return top 10 companies in total releases by geo window & year
 '''
-
-
 def top_parentco_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
