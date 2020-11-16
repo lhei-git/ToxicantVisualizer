@@ -108,7 +108,7 @@ const thematicMap = (props) => {
               {({ geographies }) =>
                 geographies.map((geo) => {
                   var cur = props.data.find(
-                    (s) => s.name === geo.properties.iso_3166_2
+                    (s) => s.facility__state === geo.properties.iso_3166_2
                   );
                   if (cur !== undefined) {
                     return (
@@ -123,7 +123,7 @@ const thematicMap = (props) => {
                           const total = cur.total;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br /><span class="geography-attributes">
                                                 Onsite: ${rounded(
-                                                  Math.trunc(cur.totalonsite)
+                                                  Math.trunc(cur.on_site)
                                                 )} lbs. <br />
                                                 Air: ${rounded(
                                                   Math.trunc(cur.air)
@@ -135,14 +135,14 @@ const thematicMap = (props) => {
                                                   Math.trunc(cur.land)
                                                 )} lbs. <br />
                                                 Offsite: ${rounded(
-                                                  Math.trunc(cur.totaloffsite)
+                                                  Math.trunc(cur.off_site)
                                                 )} lbs. <br />
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
                                                 Facilities: ${rounded(
                                                   Math.trunc(
-                                                    cur.numtrifacilities
+                                                    cur.num_facilities
                                                   )
                                                 )} </span>
                                                 `);
@@ -177,9 +177,9 @@ const thematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                      fixCountyName(s.county) ===
+                      fixCountyName(s.facility__county) ===
                         geo.properties.name.toUpperCase() &&
-                      s.state === geo.properties.iso_3166_2
+                      s.facility__state === geo.properties.iso_3166_2
                   );
                   if (cur !== undefined) {
                     return (
@@ -192,10 +192,10 @@ const thematicMap = (props) => {
                           props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
-                            cur.county
+                            cur.facility__county
                           } COUNTY</p></h1><span class="geography-attributes"><br />
                                                 Onsite: ${rounded(
-                                                  Math.trunc(cur.totalonsite)
+                                                  Math.trunc(cur.on_site)
                                                 )} lbs. <br />
                                                 Air: ${rounded(
                                                   Math.trunc(cur.air)
@@ -207,14 +207,14 @@ const thematicMap = (props) => {
                                                   Math.trunc(cur.land)
                                                 )} lbs. <br />
                                                 Offsite: ${rounded(
-                                                  Math.trunc(cur.totaloffsite)
+                                                  Math.trunc(cur.off_site)
                                                 )} lbs. <br />
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
                                                 Facilities: ${rounded(
                                                   Math.trunc(
-                                                    cur.numtrifacilities
+                                                    cur.num_facilities
                                                   )
                                                 )} </span>
                     `);
@@ -276,7 +276,7 @@ const thematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                      fixCountyName(s.county) ===
+                      fixCountyName(s.facility__county) ===
                       geo.properties.NAME.toUpperCase()
                   );
                   if (cur !== undefined) {
@@ -290,10 +290,10 @@ const thematicMap = (props) => {
                           props.setTooltipContent(null);
                           const { NAME, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
-                            cur.county
+                            cur.facility__county
                           } COUNTY</p></h1><span class="geography-attributes"><br />
                                             Onsite: ${rounded(
-                                              Math.trunc(cur.totalonsite)
+                                              Math.trunc(cur.on_site)
                                             )} lbs. <br />
                                             Air: ${rounded(
                                               Math.trunc(cur.air)
@@ -305,13 +305,13 @@ const thematicMap = (props) => {
                                               Math.trunc(cur.land)
                                             )} lbs. <br />
                                             Offsite: ${rounded(
-                                              Math.trunc(cur.totaloffsite)
+                                              Math.trunc(cur.off_site)
                                             )} lbs. <br />
                                             Total: ${rounded(
                                               Math.trunc(cur.total)
                                             )} lbs. <br />
                                             Facilities: ${rounded(
-                                              Math.trunc(cur.numtrifacilities)
+                                              Math.trunc(cur.num_facilities)
                                             )} </span>
                 `);
                         }}

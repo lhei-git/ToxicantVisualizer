@@ -22,7 +22,7 @@ class ThematicStateMap extends Component {
       countyMin: null,
       filterYear: null,
       prevYear: null,
-      filterType: "total", //valid options: totalonsite, air, water, land, totaloffsite, total
+      filterType: "total", //valid options: on_site, air, water, land, off_site, total
       prevType: null,
       countyMap: null,
       stateMap: null,
@@ -43,7 +43,7 @@ class ThematicStateMap extends Component {
   }
 
   //call this function to apply new filters to the thematic maps
-  //valid types: totalonsite, air, water, land, totaloffsite, total
+  //valid types: on_site, air, water, land, off_site, total
   //valid years: 6 - 2019
   constApplyFilter(props) {
     if (props.year) this.setState({ filterYear: props.year });
@@ -56,9 +56,9 @@ class ThematicStateMap extends Component {
 
   getFilterText(filterType)
   {
-  //valid types: totalonsite, air, water, land, totaloffsite, total
+  //valid options: on_site, air, water, land, off_site, total
       switch(filterType) {
-      case "totalonsite":
+      case "on_site":
         return "All On Site Releases"
       case "air":
         return "All Air Releases"
@@ -66,7 +66,7 @@ class ThematicStateMap extends Component {
         return "All Water Releases"
       case "land":
         return "All Land Releases"
-      case "totaloffsite":
+      case "off_site":
         return "All Off Site Releases"
       case "total":
         return "All Releases"
@@ -85,9 +85,9 @@ class ThematicStateMap extends Component {
       case "land":
         return type;
       case "off_site":
-        return "totaloffsite";
+        return "off_site";
     case "on_site":
-        return "totalonsite";
+        return "on_site";
     default:
         return "total"
 }
@@ -192,9 +192,9 @@ class ThematicStateMap extends Component {
         l = response.data;
         d = Object.values(l);
         response.data.map((st, i) => {
-          if (response.data[i].[filterType] > maxValue && response.data[i].state === this.state.stateName)
+          if (response.data[i].[filterType] > maxValue && response.data[i].facility__state === this.state.stateName)
             maxValue = response.data[i].[filterType];
-          if (response.data[i].[filterType] < minValue && response.data[i].state === this.state.stateName)
+          if (response.data[i].[filterType] < minValue && response.data[i].facility__state === this.state.stateName)
             minValue = response.data[i].[filterType];
         });
         this.setState({

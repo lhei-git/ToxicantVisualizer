@@ -282,15 +282,16 @@ const App = (props) => {
             >
               {" "}
             </ThematicStateMap>
-            {/* <Footer /> */}
-          </Route>
-          <Route path="/thematicmaps">
-            <ThematicMapView
+                        <ThematicMapView
               year={state.filters.year}
               type={state.filters.releaseType}
             >
               {" "}
             </ThematicMapView>
+            {/* <Footer /> */}
+          </Route>
+          <Route path="/thematicmaps">
+
           </Route>
           <Route path="/">
             <Home
