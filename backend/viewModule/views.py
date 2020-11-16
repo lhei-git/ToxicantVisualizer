@@ -273,6 +273,19 @@ def all_chemicals_totalReleases(request):
     print(qs.query)
     return JsonResponse(list(qs), content_type='application/json', safe=False)
 
+''' Returns all facilities and respective total release (not by type / only total) amounts in queried location {Graph 15} '''
+def all_facility_releases(request):
+    ne_lat = float(request.GET.get('ne_lat', default=0.0))
+    ne_lng = float(request.GET.get('ne_lng', default=0.0))
+    sw_lat = float(request.GET.get('sw_lat', default=0.0))
+    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    y = int(request.GET.get('year', default=2018))
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    qs = release.objects.filter(window & Q(year=y)).values('facility__name').annotate(Sum('total')).order_by('-facility__name')
+    print(qs.query)
+    return JsonResponse(list(qs), content_type='application/json', safe=False)
+
 '''
 Return top 10 companies in total releases by geo window & year
 '''
