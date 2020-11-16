@@ -1,7 +1,11 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import points, get_facilities, get_chemicals, attr, num_facilities, state_total_releases, timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_totalReleases
-
+from viewModule.views import points, get_facilities, get_chemicals, attr, num_facilities, state_total_releases, \
+    timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, \
+    location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, \
+    all_county_total_releases, timeline_top_pbt_chemicals, top_pbt_chemicals, all_state_total_releases, \
+    all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_totalReleases
+    
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('attr/<slug:attribute>', attr),
@@ -15,6 +19,8 @@ urlpatterns = [
     path('stats/location/summary', location_summary),
     # return amount of each chemical within: window -- FIXED
     path('stats/location/top_chemicals', top_chemicals),
+    # return amount of each PBT chemical within: window -- FIXED
+    path('stats/location/top_pbt_chemicals', top_pbt_chemicals),
     # return number of reports by: coord window OR state -- FIXED
     path('stats/location/num_facilities', num_facilities),
     # return top ten polluting facilities by: window -- FIXED
@@ -25,6 +31,8 @@ urlpatterns = [
     path('stats/location/timeline/total', timeline_total),
     # return top ten chemicals over time by: window -- FIXED
     path('stats/location/timeline/top_chemicals', timeline_top_chemicals),
+    # return top ten PBT chemicals over time by: window
+    path('stats/location/timeline/top_pbt_chemicals', timeline_top_pbt_chemicals),
     # return top ten polluting facilities over time by: window -- FIXED
     path('stats/location/timeline/facility_releases', timeline_top_facility_releases),
     # return top ten polluting parent companies over time by: window -- FIXED
