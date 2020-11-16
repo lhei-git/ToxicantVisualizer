@@ -47,5 +47,7 @@ module.exports.amountAsLabel = (value) => {
 };
 
 module.exports.formatAmount = (value) => {
-  return (+value.toFixed(2)).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+  return (+value.toFixed(2))
+    .toString()
+    .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 };

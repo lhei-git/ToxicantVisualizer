@@ -125,7 +125,7 @@ class ThematicMapView extends Component {
 
   render() {
     const filterYear =
-      this.state.filterYear !== null ? this.state.filterYear : 2018;
+      this.state.filterYear !== null ? this.state.filterYear : 2019;
     const filterType =
       this.state.filterType !== null ? this.state.filterType : "total";
 
@@ -190,7 +190,7 @@ class ThematicMapView extends Component {
     var l = {};
     var d = [];
     var maxValue = 0;
-    var minValue = Number.MAX_SAFE_INTEGER ;
+    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
     await vetapi
@@ -198,11 +198,11 @@ class ThematicMapView extends Component {
       .then((response) => {
         l = response.data;
         d = Object.values(l);
-        response.data.map((st, i) => {
-          if (response.data[i].[filterType] > maxValue)
-            maxValue = response.data[i].[filterType];
-          if (response.data[i].[filterType] < minValue)
-            minValue = response.data[i].[filterType];
+        response.data.forEach((st, i) => {
+          if (response.data[i][filterType] > maxValue)
+            maxValue = response.data[i][filterType];
+          if (response.data[i][filterType] < minValue)
+            minValue = response.data[i][filterType];
         });
         this.setState({
           countyData: d,

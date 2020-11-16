@@ -22,8 +22,6 @@ import { formatChemical, formatAmount } from "./helpers";
 import vetapi from "./api/vetapi";
 
 const initialState = {
-  stateName: "",
-  stateNameLong: "",
   location: "",
   map: JSON.parse(sessionStorage.getItem("map")),
   numFacilities: 0,
@@ -90,10 +88,8 @@ const reducer = (state, action) => {
   }
 };
 
-const setLocation = (payload) => ({ type: "setLocation", payload });
 const setStateName = (payload) => ({ type: "setStateName", payload });
 const setStateLongName = (payload) => ({ type: "setStateLongName", payload });
-const setError = (payload) => ({ type: "setError", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
@@ -155,11 +151,6 @@ const App = (props) => {
   function handleSuccess(map) {
     dispatch(setMap(map));
     history.push("/map");
-  }
-
-  function getStateNames(props) {
-    dispatch(setStateName(props.short_name));
-    dispatch(setStateLongName(props.long_name));
   }
 
   return (
@@ -277,12 +268,12 @@ const App = (props) => {
             <ThematicStateMap
               year={state.filters.year}
               type={state.filters.releaseType}
-              stateName={state.stateName}
-              stateLongName={state.stateLongName}
+              stateName={state.map.stateShort}
+              stateLongName={state.map.stateLong}
             >
               {" "}
             </ThematicStateMap>
-                        <ThematicMapView
+            <ThematicMapView
               year={state.filters.year}
               type={state.filters.releaseType}
             >
@@ -290,14 +281,10 @@ const App = (props) => {
             </ThematicMapView>
             {/* <Footer /> */}
           </Route>
-          <Route path="/thematicmaps">
-
-          </Route>
           <Route path="/">
             <Home
               isError={state.error}
               onSuccess={handleSuccess}
-              getStateNames={getStateNames}
             />
           </Route>
         </Switch>
