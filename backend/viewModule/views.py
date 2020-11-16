@@ -1,6 +1,6 @@
 # This page handles requests by individual "view" functions
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q, Sum, Subquery, Count
+from django.db.models import Q, Sum, Subquery, Count, Avg
 from viewModule.models import Tri as tri
 from viewModule.models import Facility as facility
 from viewModule.models import Chemical as chemical
@@ -11,7 +11,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 import re
 
-latest_year = 2019;
+latest_year = 2019
 
 
 # SAMPLE coords-> ?ne_lat=13.3950&sw_lat=13.3948&sw_lng=144.7070&ne_lng=144.7072 {Yields 6 records in GUAM}
@@ -221,32 +221,56 @@ def state_total_releases(request):
 # FIXME - replace raw queries with ORM calls
 # stats/state/all
 
+""" 
+[
+    {
+        "facility__state": "AK",
+        "total": 852184855.0,
+        "air": 324647.0,
+        "water": 317972.0,
+        "land": 1702596055.0,
+        "off_site": 566525.0,
+        "on_site": 851618331.0,
+        "num_facilities": 260
+    }
+]
+ """
+
 
 def all_state_total_releases(request):
-    d = []
     y = int(request.GET.get('year', default=latest_year))
-    results = tri.objects.raw(
-        'SELECT max("t_ID") as "t_ID", st, sum(vet_total_releases_onsite) as totalonsite, sum(vet_total_releases) as total, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = ' + str(
-            y) + ' GROUP BY st')
-    for res in results:
-        l = {"name": res.st, "totalonsite": res.totalonsite, "air": res.air, "water": res.water, "land": res.land,
-             "totaloffsite": res.offsite, "numtrifacilities": res.facility, "total": res.total}
-        d.append(l)
-    return JsonResponse(list(d), safe=False)
+    raw = release.objects.filter(year=y).values('facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
+        'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__state')
+    print(len(raw))
+    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
+    return HttpResponse(response, content_type='application/json')
 
 
-# stats/county/all
+""" 
+[
+    {
+        "facility__county": "ABBEVILLE",
+        "facility__state": "SC",
+        "total": 7480.0,
+        "air": 2171.0,
+        "water": 1596.0,
+        "land": 3768.0,
+        "off_site": 3713.0,
+        "on_site": 3768.0,
+        "num_facilities": 13
+    }
+]
+
+ """
+
+
 def all_county_total_releases(request):
-    d = []
     y = int(request.GET.get('year', default=latest_year))
-    results = tri.objects.raw(
-        'SELECT max("t_ID") as "t_ID", st, county, sum(vet_total_releases_onsite) as totalonsite, sum(vet_total_releases) as total, sum(vet_total_releases_air) as air, sum(total_releases_water) as water, sum(vet_total_releases_land) as land, sum(vet_total_releases_offsite) as offsite, count(distinct(facility)) as facility FROM public."TRI_DATA" WHERE YEAR = ' + str(
-            y) + ' GROUP BY st, county')
-    for res in results:
-        l = {"state": res.st, "county": res.county, "totalonsite": res.totalonsite, "air": res.air, "water": res.water,
-             "land": res.land, "totaloffsite": res.offsite, "numtrifacilities": res.facility, "total": res.total}
-        d.append(l)
-    return JsonResponse(list(d), safe=False)
+    raw = release.objects.filter(year=y).values('facility__county', 'facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
+        'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__county')
+    print(len(raw))
+    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
+    return HttpResponse(response, content_type='application/json')
 
 
 ''' Returns all chemicals and respective total release (by type) amounts for queried location {Graph 13} '''
@@ -330,8 +354,8 @@ def top_parentco_releases(request):
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
 
-    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
-        air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
+    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('total')).annotate(land=Sum('land')).annotate(
+        air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
@@ -350,7 +374,6 @@ def timeline_top_parentco_releases(request):
 
     parents = list(release.objects.filter(filters & filterReleases(request) & Q(year=latest_year)).values_list(
         'facility__parent_co_name', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
-    print(parents)
     response = release.objects.filter(filters & filterReleases(request) & Q(facility__parent_co_name__in=parents)).values(
         'year', 'facility__parent_co_name').order_by('facility__parent_co_name', 'year').annotate(total=Sum('total'))
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
@@ -384,12 +407,16 @@ def top_facility_releases(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    all = int(request.GET.get('all', default=0))
     y = int(request.GET.get('year', default=latest_year))
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
-
-    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
-        air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
+    if all == 1:
+        queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
+            air=Sum('air')).annotate(water=Sum('water')).annotate(vet_total_releases_offsite=Sum('off_site')).order_by('-total')
+    else:
+        queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(
+            total=Sum('on_site')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
@@ -406,11 +433,15 @@ def timeline_top_facility_releases(request):
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
     release_list = release.objects.filter(window & filterReleases(request) & Q(
-        year=latest_year)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
-    facilities = [x['facility__id'] for x in release_list][:10]
-    response = release.objects.filter(window & filterReleases(request) & Q(facility__id__in=facilities)).values(
+        year=2018)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
+    top_facilities = [x['facility__id'] for x in release_list][:10]
+    lines = release.objects.filter(window & filterReleases(request) & Q(facility__id__in=top_facilities)).values(
         'year', 'facility__name').order_by('facility__name', 'year').annotate(total=Sum('total'))
-    return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
+
+    if(get_averages):
+        averages = facility.objects.filter(Q(id__in=top_facilities)).values(
+            'name').annotate(avg=Avg('release__total')).order_by('-avg')
+    return HttpResponse(json.dumps({'averages': list(averages) if get_averages else None, 'lines': list(lines)}, cls=DjangoJSONEncoder), content_type='application/json')
 
 # stats/location/num_facilities
 

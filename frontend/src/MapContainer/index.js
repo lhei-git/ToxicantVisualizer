@@ -44,7 +44,7 @@ class MapContainer extends Component {
     const oldPoints = this.state.points;
     newState.markers = this.createMarkers(oldPoints);
 
-    const mapsApi = this.props.google.maps;
+    const mapsApi = window.google.maps;
     const viewport = this.props.map.viewport;
     if (viewport) {
       try {
@@ -72,7 +72,7 @@ class MapContainer extends Component {
       this.setState(newState);
     }
 
-    const mapsApi = this.props.google.maps;
+    const mapsApi = window.google.maps;
     if (!shallowEqual(prevProps.map.viewport, this.props.map.viewport)) {
       try {
         const b = this.createLatLngBounds(this.props.map.viewport, mapsApi);
@@ -141,7 +141,7 @@ class MapContainer extends Component {
 
   handleMount(mapProps, map) {
     this.map = map;
-    const mapsApi = this.props.google.maps;
+    const mapsApi = window.google.maps;
     setTimeout(() => {
       mapsApi.event.addListener(map, "center_changed", () => {
         this.setState({ hasMoved: true });
@@ -153,7 +153,7 @@ class MapContainer extends Component {
   }
 
   adjustMap(mapProps, map) {
-    const mapsApi = this.props.google.maps;
+    const mapsApi = window.google.maps;
     const viewport = this.props.map.viewport;
     if (viewport) {
       try {
@@ -230,14 +230,14 @@ class MapContainer extends Component {
         )}
         {this.state.hasMoved && (
           <div className="refresh" onClick={this.onRefresh}>
-            RESET
+            RECENTER
           </div>
         )}
         <div className="map">
           <Map
             onReady={this.handleMount}
             onTilesloaded={this.props.onTilesLoaded}
-            // google={this.props.google}
+            // google={window.google}
             google={window.google}
             streetViewControl={false}
             styles={silver}
@@ -294,6 +294,8 @@ class MapContainer extends Component {
   }
 }
 
-export default GoogleApiWrapper((props) => ({
-  apiKey: props.apiKey,
-}))(MapContainer);
+// export default GoogleApiWrapper((props) => ({
+//   apiKey: props.apiKey,
+// }))(MapContainer);
+
+export default MapContainer;
