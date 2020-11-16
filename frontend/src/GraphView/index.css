@@ -96,3 +96,41 @@
   left: 0;
   border-bottom: 1px solid #3f3844;
 }
+
+.dynamic-table {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.sticky-header{
+  border-collapse: collapse;
+  background-color: #CCC;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  padding: 0.25em 0.5em 0.25em 1em;
+}
+
+.odd-row{
+  border: 1px solid black;
+  border-collapse: collapse;
+  background-color: #FFF;
+}
+
+.even-row{
+  border: 1px solid black;
+  border-collapse: collapse;
+  background-color: #DDD;
+}
+
+.even-overflow-column{
+    width:40%;
+    min-width:200px;
+    background-color: #DDD;
+}
+
+.odd-overflow-column{
+    width:40%;
+    min-width:200px;
+    background-color: #FFF;
+}
