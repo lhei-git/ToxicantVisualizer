@@ -27,7 +27,7 @@ class ThematicMapView extends Component {
       countyMin: null,
       filterYear: null,
       prevYear: null,
-      filterType: null, //valid options: totalonsite, air, water, land, totaloffsite, total
+      filterType: null, //valid options: on_site, air, water, land, off_site, total
       prevType: null,
       countyMap: null,
       stateMap: null,
@@ -36,9 +36,7 @@ class ThematicMapView extends Component {
     this.handleContentState = this.handleContentState.bind(this);
     this.handleContentCounty = this.handleContentCounty.bind(this);
     this.state.filterYear = props.year;
-    //this.state.filterYear = props.year;
-    this.state.filterType = "totalonsite";
-    //this.state.filterType = "totalonsite";
+    this.state.filterType = "total";
   }
 
   //call this function to apply new filters to the thematic maps
@@ -57,7 +55,7 @@ class ThematicMapView extends Component {
   getFilterText(filterType) {
     //valid types: totalonsite, air, water, land, totaloffsite, total
     switch (filterType) {
-      case "totalonsite":
+      case "on_site":
         return "All On Site Releases";
       case "air":
         return "All Air Releases";
@@ -65,7 +63,7 @@ class ThematicMapView extends Component {
         return "All Water Releases";
       case "land":
         return "All Land Releases";
-      case "totaloffsite":
+      case "off_site":
         return "All Off Site Releases";
       case "total":
         return "All Releases";
@@ -83,9 +81,9 @@ class ThematicMapView extends Component {
       case "land":
         return type;
       case "off_site":
-        return "totaloffsite";
+        return "off_site";
       case "on_site":
-        return "totalonsite";
+        return "on_site";
       default:
         return "total";
     }
@@ -129,7 +127,7 @@ class ThematicMapView extends Component {
     const filterYear =
       this.state.filterYear !== null ? this.state.filterYear : 2018;
     const filterType =
-      this.state.filterType !== null ? this.state.filterType : "totalonsite";
+      this.state.filterType !== null ? this.state.filterType : "total";
 
     return (
       <div className="thematic-view-container">
@@ -188,34 +186,30 @@ class ThematicMapView extends Component {
     );
   }
 
-  getCountyData() {
+  async getCountyData() {
     var l = {};
     var d = [];
     var maxValue = 0;
-    var minValue = Number.MAX_SAFE_INTEGER;
+    var minValue = Number.MAX_SAFE_INTEGER ;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-    vetapi
+    await vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
         l = response.data;
         d = Object.values(l);
         response.data.map((st, i) => {
-          if (response.data[i][filterType] > maxValue)
-            maxValue = response.data[i][filterType];
-          if (
-            response.data[i][filterType] < minValue &&
-            response.data[i][filterType] !== 0
-          )
-            minValue = response.data[i][filterType];
+          if (response.data[i].[filterType] > maxValue)
+            maxValue = response.data[i].[filterType];
+          if (response.data[i].[filterType] < minValue)
+            minValue = response.data[i].[filterType];
         });
         this.setState({
           countyData: d,
           countyMin: minValue,
           countyMax: maxValue,
         });
-      })
-      .catch((err) => console.log(err));
+      });
   }
 
   getStateData() {
