@@ -323,7 +323,7 @@ def top_facility_releases(request):
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
     if all == 1:
         queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
-            air=Sum('air')).annotate(water=Sum('water')).order_by('-total')
+            air=Sum('air')).annotate(water=Sum('water')).annotate(vet_total_releases_offsite=Sum('off_site')).order_by('-total')
     else:
         queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(
             total=Sum('on_site')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
