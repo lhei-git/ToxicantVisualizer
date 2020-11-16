@@ -12,17 +12,32 @@
 }
 
 .navigation {
-  /* display: flex; */
-  position: fixed;
+  position: relative;
   z-index: 100;
   width: 100%;
   margin: 0;
   padding: 0;
   top: 0;
-  color: var(--black);
-  background: #fff;
-  border-bottom: 2px solid var(--primary-light);
+  color: #fff;
+  background: var(--primary-dark);
+  /* border-bottom: 2px solid var(--primary-dark); */
   /* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23); */
+}
+
+.navigation .logo {
+  position: relative;
+  top: 8px;
+  float: right;
+  cursor: pointer;
+  height: 100%;
+  margin: 0 20px;
+  font-size: 38px;
+  font-weight: bold;
+}
+
+.navigation a {
+  text-decoration: none;
+  color: #fff;
 }
 
 .navigation .flex-item {
@@ -32,10 +47,9 @@
 .navigation ul {
   display: inline-block;
   margin: 0;
-  margin-left: 50px;
   padding: 0;
-  height: 72px;
-  line-height: 72px;
+  height: 60px;
+  line-height: 60px;
 }
 
 .navigation li,
@@ -43,7 +57,7 @@
   display: inline-block;
   padding: 0 20px;
   height: 100%;
-  font-size: 20px;
+  font-size: 18px;
   box-sizing: border-box;
   cursor: pointer;
 }
@@ -64,14 +78,13 @@
 .map-view {
   position: relative;
   display: flex;
-  height: 90vh;
-  padding-top: 72px;
+  height: 85vh;
   margin-bottom: 50px;
   background: #fff;
   box-sizing: border-box;
   z-index: 99;
   border-bottom: 1px solid rgba(32, 33, 36, 0.28);
-  box-shadow: 0 0.75rem 2rem rgba(25, 23, 40, 0.15);
+  /* box-shadow: 0 0.75rem 2rem rgba(25, 23, 40, 0.15); */
 }
 
 .flex-item {

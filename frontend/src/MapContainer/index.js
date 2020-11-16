@@ -230,7 +230,7 @@ class MapContainer extends Component {
         )}
         {this.state.hasMoved && (
           <div className="refresh" onClick={this.onRefresh}>
-            RESET
+            RECENTER
           </div>
         )}
         <div className="map">
