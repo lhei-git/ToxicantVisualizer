@@ -6,6 +6,7 @@ import {
   Route,
   Link,
   withRouter,
+  useLocation,
 } from "react-router-dom";
 import "./App.css";
 import "./index.css";
@@ -88,8 +89,6 @@ const reducer = (state, action) => {
   }
 };
 
-const setStateName = (payload) => ({ type: "setStateName", payload });
-const setStateLongName = (payload) => ({ type: "setStateLongName", payload });
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
@@ -157,18 +156,20 @@ const App = (props) => {
     <Router history={history}>
       <div className="app-container">
         <div className="navigation">
-          <div className="go-home">
-            <Link to="/"> &lt; Back to home</Link>
-          </div>
+          <div className="logo">VET.</div>
+
           <ul>
-            <li className={state.activeTab === 0 ? "active" : ""}>
-              <Link to="/map">Map</Link>
+            <li>
+              <Link to="/">Search</Link>
             </li>
-            <li className={state.activeTab === 1 ? "active" : ""}>
-              <Link to="/graphs">Graphs</Link>
+            <li>
+              <Link to="/map">Facility Map</Link>
             </li>
-            <li className={state.activeTab === 2 ? "active" : ""}>
-              <Link to="/thematicmaps">Thematic Maps</Link>
+            <li>
+              <Link to="/graphs">Location Insights</Link>
+            </li>
+            <li>
+              <Link to="/thematicmaps">National Insights</Link>
             </li>
           </ul>
         </div>
@@ -282,10 +283,7 @@ const App = (props) => {
             {/* <Footer /> */}
           </Route>
           <Route path="/">
-            <Home
-              isError={state.error}
-              onSuccess={handleSuccess}
-            />
+            <Home isError={state.error} onSuccess={handleSuccess} />
           </Route>
         </Switch>
       </div>
