@@ -121,9 +121,12 @@ const thematicMap = (props) => {
                           const { name, POP_EST } = geo.properties;
                           const total = cur.total;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br /><span class="geography-attributes">
-                                                Onsite: ${rounded(
-                                                  Math.trunc(cur.on_site)
+                                                Total: ${rounded(
+                                                  Math.trunc(cur.total)
                                                 )} lbs. <br />
+                                                Facilities: ${rounded(
+                                                  Math.trunc(cur.num_facilities)
+                                                )} </br>
                                                 Air: ${rounded(
                                                   Math.trunc(cur.air)
                                                 )} lbs. <br />
@@ -136,12 +139,9 @@ const thematicMap = (props) => {
                                                 Offsite: ${rounded(
                                                   Math.trunc(cur.off_site)
                                                 )} lbs. <br />
-                                                Total: ${rounded(
-                                                  Math.trunc(cur.total)
-                                                )} lbs. <br />
-                                                Facilities: ${rounded(
-                                                  Math.trunc(cur.num_facilities)
-                                                )} </span>
+                                                Onsite: ${rounded(
+                                                  Math.trunc(cur.on_site)
+                                                )} lbs. <span />
                                                 `);
                         }}
                         onMouseLeave={() => {
