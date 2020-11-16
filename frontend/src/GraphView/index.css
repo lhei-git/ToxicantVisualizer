@@ -50,13 +50,11 @@
 }
 
 .graph-container .graph .header {
-  position: absolute;
-  top: 20px;
-  left: 0;
   font-size: 30px;
   font-weight: bold;
   text-align: center;
   width: 100%;
+  margin: 20px 0;
 }
 
 .graph-container .dropdown-icon {

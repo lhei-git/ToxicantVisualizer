@@ -1,6 +1,6 @@
 # This page handles requests by individual "view" functions
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q, Sum, Subquery, Count
+from django.db.models import Q, Sum, Subquery, Count, Avg
 from viewModule.models import Tri as tri
 from viewModule.models import Facility as facility
 from viewModule.models import Chemical as chemical
@@ -263,8 +263,8 @@ def top_parentco_releases(request):
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
 
-    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
-        air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
+    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('total')).annotate(land=Sum('land')).annotate(
+        air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
@@ -283,7 +283,6 @@ def timeline_top_parentco_releases(request):
 
     parents = list(release.objects.filter(filters & filterReleases(request) & Q(year=2018)).values_list(
         'facility__parent_co_name', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
-    print(parents)
     response = release.objects.filter(filters & filterReleases(request) & Q(facility__parent_co_name__in=parents)).values(
         'year', 'facility__parent_co_name').order_by('facility__parent_co_name', 'year').annotate(total=Sum('total'))
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
@@ -321,8 +320,8 @@ def top_facility_releases(request):
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
 
-    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
-        air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
+    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('total')).annotate(land=Sum('land')).annotate(
+        air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
@@ -336,14 +335,18 @@ def timeline_top_facility_releases(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    get_averages = bool(request.GET.get('averages'))
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
     release_list = release.objects.filter(window & filterReleases(request) & Q(
         year=2018)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
-    facilities = [x['facility__id'] for x in release_list][:10]
-    response = release.objects.filter(window & filterReleases(request) & Q(facility__id__in=facilities)).values(
+    top_facilities = [x['facility__id'] for x in release_list][:10]
+    lines = release.objects.filter(window & filterReleases(request) & Q(facility__id__in=top_facilities)).values(
         'year', 'facility__name').order_by('facility__name', 'year').annotate(total=Sum('total'))
-    return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
+
+    if(get_averages):
+        averages = facility.objects.filter(Q(id__in=top_facilities)).values('name').annotate(avg=Avg('release__total')).order_by('-avg')
+    return HttpResponse(json.dumps({'averages': list(averages) if get_averages else None, 'lines': list(lines)}, cls=DjangoJSONEncoder), content_type='application/json')
 
 # stats/location/num_facilities
 
