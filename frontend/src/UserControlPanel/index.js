@@ -1,10 +1,9 @@
 import "./index.css";
 import "../index.css";
 const React = require("react");
-const { shallowEqual } = require("../helpers");
 
-const startYear = 2006;
-const endYear = 2018;
+const startYear = 2005;
+const endYear = 2019;
 const types = ["all", "air", "water", "land", "off_site", "on_site"];
 
 //search button and text box
