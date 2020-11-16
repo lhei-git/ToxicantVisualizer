@@ -102,39 +102,39 @@
   border-collapse: collapse;
 }
 
-.sticky-header{
+.sticky-header {
   border-collapse: collapse;
-  background-color: #CCC;
+  background-color: #ccc;
   position: -webkit-sticky;
   position: sticky;
   top: 0;
   padding: 0.25em 0.5em 0.25em 1em;
 }
 
-.odd-row{
+.odd-row {
   border: 1px solid black;
   border-collapse: collapse;
-  background-color: #FFF;
+  background-color: #fff;
 }
 
-.even-row{
+.even-row {
   border: 1px solid black;
   border-collapse: collapse;
-  background-color: #DDD;
+  background-color: #ddd;
 }
 
-.even-overflow-column{
-   border: 1px solid black;
-   border-collapse: collapse;
-    width:40%;
-    min-width:200px;
-    background-color: #DDD;
+.even-overflow-column {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 40%;
+  min-width: 200px;
+  background-color: #ddd;
 }
 
-.odd-overflow-column{
-   border: 1px solid black;
-   border-collapse: collapse;
-    width:40%;
-    min-width:200px;
-    background-color: #FFF;
+.odd-overflow-column {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 40%;
+  min-width: 200px;
+  background-color: #fff;
 }
