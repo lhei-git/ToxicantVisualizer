@@ -1,12 +1,10 @@
 import React from "react";
 import "./index.css";
 import { useEffect } from "react";
+import { formatAmount } from '../helpers';
 const vetapi = require("../api/vetapi");
 
 function GraphSummary(props) {
-  function format(x) {
-    return x.toLocaleString();
-  }
 
   const [body, setBody] = React.useState(null);
 
@@ -46,31 +44,31 @@ function GraphSummary(props) {
           </tr>
           <tr>
             <td>Total Disposal Amount</td>
-            <td>{format(res.data["total"])} lbs</td>
+            <td>{formatAmount(res.data["total"])} lbs</td>
           </tr>
           <tr>
             <td>On-Site Releases</td>
-            <td>{format(res.data["total_on_site"])} lbs</td>
+            <td>{formatAmount(res.data["total_on_site"])} lbs</td>
           </tr>
           <tr>
             <td>Off-Site Releases</td>
-            <td>{format(res.data["total_off_site"])} lbs</td>
+            <td>{formatAmount(res.data["total_off_site"])} lbs</td>
           </tr>
           <tr>
             <td>Air Releases</td>
-            <td>{format(res.data["total_air"])} lbs</td>
+            <td>{formatAmount(res.data["total_air"])} lbs</td>
           </tr>
           <tr>
             <td>Water Releases</td>
-            <td>{format(res.data["total_water"])} lbs</td>
+            <td>{formatAmount(res.data["total_water"])} lbs</td>
           </tr>
           <tr>
             <td>Land Releases</td>
-            <td>{format(res.data["total_land"])} lbs</td>
+            <td>{formatAmount(res.data["total_land"])} lbs</td>
           </tr>
           <tr>
             <td>Carcinogenic Releases</td>
-            <td>{format(res.data["total_carcinogen"])} lbs</td>
+            <td>{formatAmount(res.data["total_carcinogen"])} lbs</td>
           </tr>
         </tbody>
       );
@@ -84,7 +82,7 @@ function GraphSummary(props) {
 
   return (
     body !== null && (
-      <div className="summary">
+      <div className="standalone summary">
         <div className="header">Summary</div>
         <table>
           <thead>

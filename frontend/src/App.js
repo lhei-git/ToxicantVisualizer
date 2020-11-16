@@ -7,19 +7,18 @@ import {
   Link,
   withRouter,
 } from "react-router-dom";
+import "./App.css";
+import "./index.css";
 import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
 import GraphView from "./GraphView";
 import PubChemFields from "./PubChemFields";
-import "./App.css";
-import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
-import { useReducer } from "react";
-import { formatChemical } from "./helpers";
-import vetapi from "./api/vetapi";
-const React = require("react");
+import React, { useReducer } from "react";
+const { formatChemical, formatAmount } = require("./helpers");
+const vetapi = require("./api/vetapi");
 
 const initialState = {
   location: "",
@@ -125,7 +124,7 @@ function ChemicalList(props) {
           }}
           key={c.name + " " + c.total}
         >
-          {c.name} ({c.total.toLocaleString()} lbs)
+          {c.name} ({formatAmount(c.total)} lbs)
         </li>
       );
     });
