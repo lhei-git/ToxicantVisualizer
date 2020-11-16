@@ -261,7 +261,7 @@ def all_chemicals_releases(request):
     return JsonResponse(list(qs), content_type='application/json', safe=False)
 
 ''' Returns all chemicals and respective total release (not by type / only total) amounts in queried location {Graph 14} '''
-def all_chemicals_totalReleases(request):
+def all_chemicals_total_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
