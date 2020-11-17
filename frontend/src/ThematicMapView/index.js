@@ -66,7 +66,7 @@ class ThematicMapView extends Component {
   componentDidUpdate() {
     this.state.filterYear = this.props.year;
     this.state.filterType =
-        (this.props.type === "all" ? 'total' : this.props.type);
+      this.props.type === "all" ? "total" : this.props.type;
     if (
       this.state.prevYear !== this.state.filterYear ||
       this.state.prevType !== this.state.filterType
@@ -132,8 +132,8 @@ class ThematicMapView extends Component {
 
         <div className="flex-item">
           <h1>
-            Total Releases By County ({this.getFilterText(this.state.filterType)}
-            )
+            Total Releases By County (
+            {this.getFilterText(this.state.filterType)})
           </h1>
           {this.state.countyData ? (
             <>

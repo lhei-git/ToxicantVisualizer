@@ -19,7 +19,8 @@ const thematicMap = (props) => {
 
   //change high end of color scale for US counties, as outliers always skew the data in this map
   var domain = [];
-  var maxDomain =  (props.type === "counties" ? props.maxValue / 6 : props.maxValue)
+  var maxDomain =
+    props.type === "counties" ? props.maxValue / 8 : props.maxValue;
   domain = [props.minValue, maxDomain];
 
   //returns a geography color based on the scale and given value
@@ -162,8 +163,11 @@ const thematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                    (s.facility__county).split(" ").[0].split(".")[0] ===
-                      geo.properties.name.toUpperCase().split(" ").[0].split(".")[0]  &&
+                      s.facility__county.split(" ")[0].split(".")[0] ===
+                        geo.properties.name
+                          .toUpperCase()
+                          .split(" ")[0]
+                          .split(".")[0] &&
                       s.facility__state === geo.properties.iso_3166_2
                   );
                   if (cur !== undefined) {
@@ -212,13 +216,15 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={"#D3D3D3"}
+                        fill={colorScale(0)}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name.toUpperCase()} COUNTY</p></h1><br />
-                                             <span class="geography-attributes"> No data available at this time </span>
+                                             <span class="geography-attributes"> No releases reported in ${
+                                               props.filterYear
+                                             }</span>
                     `);
                         }}
                         onMouseLeave={() => {
@@ -259,8 +265,10 @@ const thematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                      s.facility__county.split(" ").[0].split(".")[0] ===
-                      geo.properties.NAME.toUpperCase().split(" ").[0].split(".")[0]
+                      s.facility__county.split(" ")[0].split(".")[0] ===
+                      geo.properties.NAME.toUpperCase()
+                        .split(" ")[0]
+                        .split(".")[0]
                   );
                   if (cur !== undefined) {
                     return (
@@ -308,13 +316,15 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={"#D3D3D3"}
+                        fill={colorScale(0)}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
                           const { NAME, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${NAME.toUpperCase()} COUNTY</p></h1><br />
-                                         <span class="geography-attributes"> No data available at this time </span>
+                                         <span class="geography-attributes"> No releases reported in ${
+                                           props.filterYear
+                                         }</span>
                 `);
                         }}
                         onMouseLeave={() => {
@@ -338,7 +348,6 @@ const thematicMap = (props) => {
     );
   }
 };
-
 
 // creates svg gradient legen based on min and max values and color scale
 function Legend(props) {
