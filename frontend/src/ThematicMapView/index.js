@@ -1,13 +1,12 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
-// import Loader from 'react-loader-spinner';
 import LoadingSpinner from "../LoadingSpinner";
 import vetapi from "../api/vetapi";
 import "./index.css";
 const React = require("react");
 const Component = React.Component;
 
-// state and county map topographical data
+// state and county map topographical data, used to create svg map
 const stateGeoUrl =
   "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/united-states/us-albers.json";
 const countyGeoUrl =
@@ -36,15 +35,7 @@ class ThematicMapView extends Component {
     this.handleContentState = this.handleContentState.bind(this);
     this.handleContentCounty = this.handleContentCounty.bind(this);
     this.state.filterYear = props.year;
-    this.state.filterType = "total";
-  }
-
-  //call this function to apply new filters to the thematic maps
-  //valid types: totalonsite, air, water, land, totaloffsite, total
-  //valid years: 6 - 2019
-  constApplyFilter(props) {
-    if (props.year) this.setState({ filterYear: props.year });
-    if (props.type) this.setState({ filterType: props.type });
+    this.state.filterType = props.type;
   }
 
   componentDidMount() {
@@ -53,7 +44,7 @@ class ThematicMapView extends Component {
   }
 
   getFilterText(filterType) {
-    //valid types: totalonsite, air, water, land, totaloffsite, total
+    //valid options: total, air, water, land, off_site, off_site
     switch (filterType) {
       case "on_site":
         return "All On Site Releases";
@@ -66,34 +57,16 @@ class ThematicMapView extends Component {
       case "off_site":
         return "All Off Site Releases";
       case "total":
+      default:
         return "All Releases";
-      default:
-        return "All On Site Releases";
-    }
-  }
-
-  fixFilterName(type) {
-    switch (type) {
-      case "all":
-        return "total";
-      case "air":
-      case "water":
-      case "land":
-        return type;
-      case "off_site":
-        return "off_site";
-      case "on_site":
-        return "on_site";
-      default:
-        return "total";
     }
   }
 
   //refetch data if the year or release type filter changed
   componentDidUpdate() {
-    // update filters from parent
     this.state.filterYear = this.props.year;
-    this.state.filterType = this.fixFilterName(this.props.type);
+    this.state.filterType =
+      this.props.type === "all" ? "total" : this.props.type;
     if (
       this.state.prevYear !== this.state.filterYear ||
       this.state.prevType !== this.state.filterType
@@ -159,8 +132,8 @@ class ThematicMapView extends Component {
 
         <div className="flex-item">
           <h1>
-            Total Releases By State ({this.getFilterText(this.state.filterType)}
-            )
+            Total Releases By County (
+            {this.getFilterText(this.state.filterType)})
           </h1>
           {this.state.countyData ? (
             <>
@@ -186,6 +159,7 @@ class ThematicMapView extends Component {
     );
   }
 
+  // retrieves and filters county release data from the database
   async getCountyData() {
     var l = {};
     var d = [];
@@ -213,6 +187,7 @@ class ThematicMapView extends Component {
       });
   }
 
+  // retrieves and filters state release data from the database
   getStateData() {
     var l = {};
     var d = [];
@@ -249,7 +224,6 @@ function LoadSpinner() {
         alignItems: "center",
       }}
     >
-      {/* <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" /> */}
       <LoadingSpinner></LoadingSpinner>
     </div>
   );
