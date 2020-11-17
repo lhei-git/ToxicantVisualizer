@@ -125,7 +125,7 @@ class ThematicMapView extends Component {
 
   render() {
     const filterYear =
-      this.state.filterYear !== null ? this.state.filterYear : 2018;
+      this.state.filterYear !== null ? this.state.filterYear : 2019;
     const filterType =
       this.state.filterType !== null ? this.state.filterType : "total";
 
@@ -190,19 +190,20 @@ class ThematicMapView extends Component {
     var l = {};
     var d = [];
     var maxValue = 0;
-    var minValue = Number.MAX_SAFE_INTEGER ;
+    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
+    console.log("filterType :>> ", filterType);
     await vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
         l = response.data;
         d = Object.values(l);
-        response.data.map((st, i) => {
-          if (response.data[i].[filterType] > maxValue)
-            maxValue = response.data[i].[filterType];
-          if (response.data[i].[filterType] < minValue)
-            minValue = response.data[i].[filterType];
+        response.data.forEach((st) => {
+          if (st[filterType] > maxValue) {
+            console.log("st.facility__county :>> ", st.facility__county);
+            maxValue = st[filterType];
+          } else if (st[filterType] < minValue) minValue = st[filterType];
         });
         this.setState({
           countyData: d,
@@ -225,13 +226,9 @@ class ThematicMapView extends Component {
         l = response.data;
         d = Object.values(l);
         response.data.forEach((st, i) => {
-          if (response.data[i][filterType] > maxValue)
-            maxValue = response.data[i][filterType];
-          if (
-            response.data[i][filterType] < minValue &&
-            response.data[i][filterType] !== 0
-          )
-            minValue = response.data[i][filterType];
+          if (st[filterType] > maxValue) maxValue = st[filterType];
+          if (st[filterType] < minValue && st[filterType] !== 0)
+            minValue = st[filterType];
         });
 
         this.setState({ stateData: d, stateMin: minValue, stateMax: maxValue });

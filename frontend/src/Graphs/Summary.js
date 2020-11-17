@@ -1,11 +1,10 @@
 import React from "react";
 import "./index.css";
 import { useEffect } from "react";
-import { formatAmount } from '../helpers';
+import { formatAmount } from "../helpers";
 const vetapi = require("../api/vetapi");
 
 function GraphSummary(props) {
-
   const [body, setBody] = React.useState(null);
 
   let graphProp = props.graph;
