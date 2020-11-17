@@ -62,7 +62,7 @@ class ThematicStateMap extends Component {
     this.state.filterYear = this.props.year;
     if (this.props.stateName) this.state.stateName = this.props.stateName;
     this.state.filterType =
-        (this.props.type === "all" ? 'total' : this.props.type);
+      this.props.type === "all" ? "total" : this.props.type;
     if (
       this.state.prevYear !== this.state.filterYear ||
       this.state.prevType !== this.state.filterType
@@ -151,16 +151,18 @@ class ThematicStateMap extends Component {
     await vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
-        l = response.data.filter(county => county.facility__state === this.props.stateName);
+        l = response.data.filter(
+          (county) => county.facility__state === this.props.stateName
+        );
         d = Object.values(l);
         response.data.map((st, i) => {
           if (
-            response.data[i].[filterType] > maxValue &&
+            response.data[i][filterType] > maxValue &&
             response.data[i].facility__state === this.props.stateName
           )
-            maxValue = response.data[i].[filterType];
+            maxValue = response.data[i][filterType];
           if (
-            response.data[i].[filterType] < minValue &&
+            response.data[i][filterType] < minValue &&
             response.data[i].facility__state === this.props.stateName
           )
             minValue = response.data[i][filterType];
