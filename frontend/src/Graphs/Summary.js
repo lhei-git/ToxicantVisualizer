@@ -3,6 +3,7 @@ import "./index.css";
 import { useEffect } from "react";
 import { formatAmount } from "../helpers";
 const vetapi = require("../api/vetapi");
+const unitedStates = require("./unitedStates");
 
 function GraphSummary(props) {
   const [body, setBody] = React.useState(null);
@@ -20,54 +21,72 @@ function GraphSummary(props) {
 
   const fetchData = async (mounted) => {
     try {
+      const { year } = props.filters;
       const { northeast, southwest } = props.viewport;
       const params = {
         ne_lat: northeast.lat,
         ne_lng: northeast.lng,
         sw_lat: southwest.lat,
         sw_lng: southwest.lng,
-        year: props.filters.year,
+        year,
       };
       const res = await vetapi.get(`/stats/location/summary`, {
         params,
+      });
+      const data = res.data;
+      Object.keys(data).forEach((k) => {
+        data[k] = formatAmount(data[k]);
+      });
+      const country = unitedStates[year];
+      Object.keys(country).forEach((k) => {
+        country[k] = formatAmount(country[k]);
       });
       const body = (
         <tbody>
           <tr>
             <td>Facilities</td>
-            <td>{res.data["num_facilities"]}</td>
+            <td>{data["num_facilities"]}</td>
+            <td>{country["num_facilities"]}</td>
           </tr>
           <tr>
             <td>Distinct Chemicals</td>
-            <td>{res.data["num_distinct_chemicals"]}</td>
+            <td>{data["num_distinct_chemicals"]}</td>
+            <td>{country["num_distinct_chemicals"]}</td>
           </tr>
           <tr>
             <td>Total Disposal Amount</td>
-            <td>{formatAmount(res.data["total"])} lbs</td>
+            <td>{data["total"]}</td>
+            <td>{country["total"]}</td>
           </tr>
           <tr>
             <td>On-Site Releases</td>
-            <td>{formatAmount(res.data["total_on_site"])} lbs</td>
+            <td>{data["total_on_site"]}</td>
+            <td>{country["total_on_site"]}</td>
           </tr>
           <tr>
             <td>Off-Site Releases</td>
-            <td>{formatAmount(res.data["total_off_site"])} lbs</td>
+            <td>{data["total_off_site"]}</td>
+            <td>{country["total_off_site"]}</td>
           </tr>
           <tr>
             <td>Air Releases</td>
-            <td>{formatAmount(res.data["total_air"])} lbs</td>
+            <td>{data["total_air"]}</td>
+            <td>{country["total_air"]}</td>
           </tr>
           <tr>
             <td>Water Releases</td>
-            <td>{formatAmount(res.data["total_water"])} lbs</td>
+            <td>{data["total_water"]}</td>
+            <td>{country["total_water"]}</td>
           </tr>
           <tr>
             <td>Land Releases</td>
-            <td>{formatAmount(res.data["total_land"])} lbs</td>
+            <td>{data["total_land"]}</td>
+            <td>{country["total_land"]}</td>
           </tr>
           <tr>
             <td>Carcinogenic Releases</td>
-            <td>{formatAmount(res.data["total_carcinogen"])} lbs</td>
+            <td>{res.data["total_carcinogen"]}</td>
+            <td>{country["total_carcinogen"]}</td>
           </tr>
         </tbody>
       );
@@ -88,6 +107,7 @@ function GraphSummary(props) {
             <tr>
               <th>Metric</th>
               <th>Current Location</th>
+              <th>United States</th>
             </tr>
           </thead>
           {body}
