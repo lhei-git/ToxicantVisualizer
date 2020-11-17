@@ -1,0 +1,402 @@
+[
+  {
+    "state": "AK",
+    "name": "Alaska",
+    "latitude": 62.385,
+    "longitude": -152.2683,
+    "scale": 700,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/AK-02-alaska-counties.json"
+  },
+  {
+    "state": "AL",
+    "name": "Alabama",
+    "latitude": 32.799,
+    "longitude": -86.8073,
+    "scale": 5000,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/AL-01-alabama-counties.json"
+  },
+  {
+    "state": "AR",
+    "name": "Arkansas",
+    "latitude": 34.9513,
+    "longitude": -92.3809,
+    "scale": 6800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/AR-05-arkansas-counties.json"
+  },
+  {
+    "state": "AZ",
+    "name": "Arizona",
+    "latitude": 33.7712,
+    "longitude": -111.3877,
+    "scale": 4200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/AZ-04-arizona-counties.json"
+  },
+  {
+    "state": "CA",
+    "name": "California",
+    "latitude": 37.17,
+    "longitude": -119.7462,
+    "scale": 2600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/CA-06-california-counties.json"
+  },
+  {
+    "state": "CO",
+    "name": "Colorado",
+    "latitude": 39.0646,
+    "longitude": -105.3272,
+    "scale": 5900,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/CO-08-colorado-counties.json"
+  },
+  {
+    "state": "CT",
+    "name": "Connecticut",
+    "latitude": 41.5834,
+    "longitude": -72.7622,
+    "scale": 19900,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/CT-09-connecticut-counties.json"
+  },
+  {
+    "state": "DE",
+    "name": "Deleware",
+    "latitude": 39.3498,
+    "longitude": -75.5148,
+    "scale": 12900,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/DE-10-delaware-counties.json"
+  },
+  {
+    "state": "FL",
+    "name": "Florida",
+    "latitude": 27.6648,
+    "longitude": -81.717,
+    "scale": 4000,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/FL-12-florida-counties.json"
+  },
+  {
+    "state": "GA",
+    "name": "Georgia",
+    "latitude": 32.5866,
+    "longitude": -83.6487,
+    "scale": 5600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/GA-13-georgia-counties.json"
+  },
+  {
+    "state": "HI",
+    "name": "Hawaii",
+    "latitude": 21.1098,
+    "longitude": -157.5311,
+    "scale": 6600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/HI-15-hawaii-counties.json"
+  },
+  {
+    "state": "IA",
+    "name": "Iowa",
+    "latitude": 42.0046,
+    "longitude": -93.614,
+    "scale": 7000,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/IA-19-iowa-counties.json"
+  },
+  {
+    "state": "ID",
+    "name": "Idaho",
+    "latitude": 45.7394,
+    "longitude": -114.5103,
+    "scale": 3200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/ID-16-idaho-counties.json"
+  },
+  {
+    "state": "IL",
+    "name": "Illinois",
+    "latitude": 39.8363,
+    "longitude": -89.0022,
+    "scale": 4500,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/IL-17-illinois-counties.json"
+  },
+  {
+    "state": "IN",
+    "name": "Indiana",
+    "latitude": 39.8647,
+    "longitude": -86.2604,
+    "scale": 6200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/IN-18-indiana-counties.json"
+  },
+  {
+    "state": "KS",
+    "name": "Kansas",
+    "latitude": 38.5111,
+    "longitude": -98.4005,
+    "scale": 5800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/KS-20-kansas-counties.json"
+  },
+  {
+    "state": "KY",
+    "name": "Kentucky",
+    "latitude": 37.669,
+    "longitude": -85.6514,
+    "scale": 5800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/KY-21-kentucky-counties.json"
+  },
+  {
+    "state": "LA",
+    "name": "Louisiana",
+    "latitude": 31.1801,
+    "longitude": -91.8749,
+    "scale": 6200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/LA-22-louisiana-parishes.json"
+  },
+  {
+    "state": "MA",
+    "name": "Massachusetts",
+    "latitude": 42.2373,
+    "longitude": -71.5314,
+    "scale": 10200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/MA-25-massachusetts-counties.json"
+  },
+  {
+    "state": "MD",
+    "name": "Maryland",
+    "latitude": 39.0724,
+    "longitude": -77.3502,
+    "scale": 9900,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/MD-24-maryland-counties.json"
+  },
+  {
+    "state": "ME",
+    "name": "Maine",
+    "latitude": 45.3074,
+    "longitude": -69.3977,
+    "scale": 4900,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/ME-23-maine-counties.json"
+  },
+  {
+    "state": "MI",
+    "name": "Michigan",
+    "latitude": 45.3504,
+    "longitude": -85.5603,
+    "scale": 3400,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/MI-26-michigan-counties.json"
+  },
+  {
+    "state": "MN",
+    "name": "Minnesota",
+    "latitude": 46.5326,
+    "longitude": -93.9196,
+    "scale": 3800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/MN-27-minnesota-counties.json"
+  },
+  {
+    "state": "MO",
+    "name": "Missouri",
+    "latitude": 38.4623,
+    "longitude": -92.302,
+    "scale": 5300,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/MO-29-missouri-counties.json"
+  },
+  {
+    "state": "MS",
+    "name": "Mississippi",
+    "latitude": 32.7673,
+    "longitude": -89.6812,
+    "scale": 5500,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/MS-28-mississippi-counties.json"
+  },
+  {
+    "state": "MT",
+    "name": "Montana",
+    "latitude": 46.9048,
+    "longitude": -110.3261,
+    "scale": 3500,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/MT-30-montana-counties.json"
+  },
+  {
+    "state": "NC",
+    "name": "North Carolina",
+    "latitude": 35.6411,
+    "longitude": -79.8431,
+    "scale": 5500,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/NC-37-north-carolina-counties.json"
+  },
+  {
+    "state": "ND",
+    "name": "North Dakota",
+    "latitude": 47.5362,
+    "longitude": -100.393,
+    "scale": 5500,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/ND-38-north-dakota-counties.json"
+  },
+  {
+    "state": "NE",
+    "name": "Nebraska",
+    "latitude": 41.6289,
+    "longitude": -99.6883,
+    "scale": 5200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/NE-31-nebraska-counties.json"
+  },
+  {
+    "state": "NH",
+    "name": "New Hampshire",
+    "latitude": 44.0108,
+    "longitude": -71.5653,
+    "scale": 7800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/NH-33-new-hampshire-counties.json"
+  },
+  {
+    "state": "NJ",
+    "name": "New Jersey",
+    "latitude": 40.114,
+    "longitude": -74.5089,
+    "scale": 9800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/NJ-34-new-jersey-counties.json"
+  },
+  {
+    "state": "NM",
+    "name": "New Mexico",
+    "latitude": 34.1375,
+    "longitude": -106.2371,
+    "scale": 4600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/NM-35-new-mexico-counties.json"
+  },
+  {
+    "state": "NV",
+    "name": "Nevada",
+    "latitude": 38.4199,
+    "longitude": -117.1219,
+    "scale": 3600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/NV-32-nevada-counties.json"
+  },
+  {
+    "state": "NY",
+    "name": "New York",
+    "latitude": 42.8497,
+    "longitude": -75.9384,
+    "scale": 5400,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/NY-36-new-york-counties.json"
+  },
+  {
+    "state": "OH",
+    "name": "Ohio",
+    "latitude": 40.3736,
+    "longitude": -82.7755,
+    "scale": 6300,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/OH-39-ohio-counties.json"
+  },
+  {
+    "state": "OK",
+    "name": "Oklahoma",
+    "latitude": 35.5376,
+    "longitude": -98.7247,
+    "scale": 5200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/OK-40-oklahoma-counties.json"
+  },
+  {
+    "state": "OR",
+    "name": "Oregon",
+    "latitude": 44.5672,
+    "longitude": -120.6269,
+    "scale": 4600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/OR-41-oregon-counties.json"
+  },
+  {
+    "state": "PA",
+    "name": "Pennsylvania",
+    "latitude": 41.0773,
+    "longitude": -77.764,
+    "scale": 7600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/PA-42-pennsylvania-counties.json"
+  },
+  {
+    "state": "RI",
+    "name": "Rhode Island",
+    "latitude": 41.6772,
+    "longitude": -71.5101,
+    "scale": 22600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/RI-44-rhode-island-counties.json"
+  },
+  {
+    "state": "SC",
+    "name": "South Carolina",
+    "latitude": 33.8191,
+    "longitude": -80.9066,
+    "scale": 7600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/SC-45-south-carolina-counties.json"
+  },
+  {
+    "state": "SD",
+    "name": "South Dakota",
+    "latitude": 44.2853,
+    "longitude": -100.2632,
+    "scale": 5400,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/SD-46-south-dakota-counties.json"
+  },
+  {
+    "state": "TN",
+    "name": "Tennessee",
+    "latitude": 35.7449,
+    "longitude": -85.7489,
+    "scale": 5000,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/TN-47-tennessee-counties.json"
+  },
+  {
+    "state": "TX",
+    "name": "Texas",
+    "latitude": 31.106,
+    "longitude": -99.6475,
+    "scale": 2600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/TX-48-texas-counties.json"
+  },
+  {
+    "state": "UT",
+    "name": "Utah",
+    "latitude": 39.5135,
+    "longitude": -111.8535,
+    "scale": 4800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/UT-49-utah-counties.json"
+  },
+  {
+    "state": "VA",
+    "name": "Virginia",
+    "latitude": 37.768,
+    "longitude": -79.6057,
+    "scale": 5600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/VA-51-virginia-counties.json"
+  },
+  {
+    "state": "VT",
+    "name": "Vermont",
+    "latitude": 44.0407,
+    "longitude": -72.7093,
+    "scale": 9200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/VT-50-vermont-counties.json"
+  },
+  {
+    "state": "WA",
+    "name": "Washington",
+    "latitude": 47.3917,
+    "longitude": -120.5708,
+    "scale": 5200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/WA-53-washington-counties.json"
+  },
+  {
+    "state": "WI",
+    "name": "Wisconsin",
+    "latitude": 44.8563,
+    "longitude": -89.6385,
+    "scale": 5200,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/WI-55-wisconsin-counties.json"
+  },
+  {
+    "state": "WV",
+    "name": "West Virginia",
+    "latitude": 39.068,
+    "longitude": -80.5696,
+    "scale": 6800,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/WV-54-west-virginia-counties.json"
+  },
+  {
+    "state": "WY",
+    "name": "Wyoming",
+    "latitude": 43.0475,
+    "longitude": -107.5085,
+    "scale": 5600,
+    "geoUrl": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/us-states/WY-56-wyoming-counties.json"
+  }
+]

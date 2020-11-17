@@ -62,7 +62,7 @@ class Tri(models.Model):
 
     class Meta:
         # managed = False
-        db_table = 'TRI_DATA'
+        db_table = 'tt_tri_dump'
 
 
 class Facility(models.Model):
