@@ -187,16 +187,16 @@ class ThematicStateMap extends Component {
     await vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
-        l = response.data;
+        l = response.data.filter(county => county.facility__state === this.state.stateName);
         d = Object.values(l);
         response.data.map((st, i) => {
           if (
-            response.data[i][filterType] > maxValue &&
+            response.data[i].[filterType] > maxValue &&
             response.data[i].facility__state === this.state.stateName
           )
-            maxValue = response.data[i][filterType];
+            maxValue = response.data[i].[filterType];
           if (
-            response.data[i][filterType] < minValue &&
+            response.data[i].[filterType] < minValue &&
             response.data[i].facility__state === this.state.stateName
           )
             minValue = response.data[i][filterType];
