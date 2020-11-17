@@ -403,6 +403,7 @@ def timeline_top_facility_releases(request):
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    get_averages = bool(request.GET.get('averages'))
     window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
         facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
     release_list = release.objects.filter(window & filterReleases(request) & Q(
