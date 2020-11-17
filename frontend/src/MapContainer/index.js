@@ -237,7 +237,6 @@ class MapContainer extends Component {
           <Map
             onReady={this.handleMount}
             onTilesloaded={this.props.onTilesLoaded}
-            // google={window.google}
             google={window.google}
             streetViewControl={false}
             styles={silver}
@@ -245,7 +244,6 @@ class MapContainer extends Component {
             fullscreenControl={false}
             zoom={5}
             minZoom={5}
-            initialCenter={this.props.map.center}
             containerStyle={containerStyle}
           >
             {this.state.markers.length > 0 && (

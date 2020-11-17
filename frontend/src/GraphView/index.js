@@ -213,7 +213,11 @@ async function GraphAllFacilities(props) {
         };
       });
     return (
-      <div width="100%" height="180px" style={{"overflow-y":"scroll", "max-height":"400px"}}>
+      <div
+        width="100%"
+        height="180px"
+        style={{ "overflow-y": "scroll", "max-height": "400px" }}
+      >
         <ResponsiveContainer width="100%" height={res.data.length * 40}>
           <BarChart
             data={data}
@@ -231,7 +235,7 @@ async function GraphAllFacilities(props) {
               type="category"
               interval={0}
               tick={<CustomizedXAxisTick />}
-              margin={{top:60}}
+              margin={{ top: 60 }}
             />
             <XAxis
               type="number"
@@ -244,7 +248,7 @@ async function GraphAllFacilities(props) {
               isAnimationActive={false}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8"  />
+            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
             <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
           </BarChart>
@@ -259,7 +263,7 @@ async function GraphAllFacilities(props) {
 }
 
 //Chart 12 - Table of all facilities and total releases
-async function TableAllFacilities(props){
+async function TableAllFacilities(props) {
   try {
     const { northeast, southwest } = props.viewport;
     const params = {
@@ -289,39 +293,45 @@ async function TableAllFacilities(props){
         };
       });
     return (
-      <div width="100%" height="50vh" style={{"overflow-y":"scroll", "max-height":"50vh"}}>
+      <div
+        width="100%"
+        height="50vh"
+        style={{ "overflow-y": "scroll", "max-height": "50vh" }}
+      >
         <table class="dynamic-table">
-        <thead>
-             <tr>
-                <th className="sticky-header">Facility Name</th>
-                <th className="sticky-header">Land</th>
-                <th className="sticky-header">Air</th>
-                <th className="sticky-header">Water</th>
-                <th className="sticky-header">Off-Site</th>
-             </tr>
-        </thead>
-        <tbody>
-             {res.data.map(function(d, i){
-             if (i % 2 != 0){
-             return (
-             <tr>
-                <td className="odd-overflow-column">{d.facility__name}</td>
-                <td className="odd-row">{d.land}</td>
-                <td className="odd-row">{d.air}</td>
-                <td className="odd-row">{d.water}</td>
-                <td className="odd-row">{d.vet_total_releases_offsite}</td>
-            </tr>)}
-            else return(
-             <tr>
-                <td className="even-overflow-column">{d.facility__name}</td>
-                <td className="even-row">{d.land}</td>
-                <td className="even-row">{d.air}</td>
-                <td className="even-row">{d.water}</td>
-                <td className="even-row">{d.vet_total_releases_offsite}</td>
-            </tr>)}
-            )
-           }
-           </tbody>
+          <thead>
+            <tr>
+              <th className="sticky-header">Facility Name</th>
+              <th className="sticky-header">Land</th>
+              <th className="sticky-header">Air</th>
+              <th className="sticky-header">Water</th>
+              <th className="sticky-header">Off-Site</th>
+            </tr>
+          </thead>
+          <tbody>
+            {res.data.map(function (d, i) {
+              if (i % 2 != 0) {
+                return (
+                  <tr>
+                    <td className="odd-overflow-column">{d.facility__name}</td>
+                    <td className="odd-row">{d.land}</td>
+                    <td className="odd-row">{d.air}</td>
+                    <td className="odd-row">{d.water}</td>
+                    <td className="odd-row">{d.vet_total_releases_offsite}</td>
+                  </tr>
+                );
+              } else
+                return (
+                  <tr>
+                    <td className="even-overflow-column">{d.facility__name}</td>
+                    <td className="even-row">{d.land}</td>
+                    <td className="even-row">{d.air}</td>
+                    <td className="even-row">{d.water}</td>
+                    <td className="even-row">{d.vet_total_releases_offsite}</td>
+                  </tr>
+                );
+            })}
+          </tbody>
         </table>
       </div>
     );
@@ -330,7 +340,6 @@ async function TableAllFacilities(props){
 
     return null;
   }
-
 }
 
 async function GraphTopTenParents(props) {
@@ -866,6 +875,5 @@ function GraphView(props) {
     </div>
   );
 }
-
 
 export default GraphView;

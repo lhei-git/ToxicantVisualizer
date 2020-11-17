@@ -1,6 +1,5 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
-// import Loader from 'react-loader-spinner';
 import LoadingSpinner from "../LoadingSpinner";
 import vetapi from "../api/vetapi";
 import "./index.css";
@@ -12,7 +11,6 @@ class ThematicStateMap extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      contentState: "",
       contentCounty: "",
       geoUrl: "",
       stateName: "MI",
@@ -22,29 +20,17 @@ class ThematicStateMap extends Component {
       countyMin: null,
       filterYear: null,
       prevYear: null,
-      filterType: "total", //valid options: on_site, air, water, land, off_site, total
+      filterType: "total", //valid options: total, air, water, land, off_site, off_site  DEFAULT: total
       prevType: null,
-      countyMap: null,
-      stateMap: null,
       scale: null,
       lat: null,
       lon: null,
     };
 
-    this.handleContentState = this.handleContentState.bind(this);
-    this.handleContentCounty = this.handleContentCounty.bind(this);
+    this.handleContentCountyState = this.handleContentCountyState.bind(this);
 
     if (props.year) this.state.filterYear = props.year;
-    if (props.filterType) this.state.filterType = "totalonsite";
-    if (props.stateName) this.state.stateName = props.stateName;
-  }
-
-  //call this function to apply new filters to the thematic maps
-  //valid types: on_site, air, water, land, off_site, total
-  //valid years: 6 - 2019
-  constApplyFilter(props) {
-    if (props.year) this.setState({ filterYear: props.year });
-    if (props.type) this.setState({ filterType: props.type });
+    if (props.type) this.state.filterType = props.type;
   }
 
   componentDidMount() {
@@ -52,7 +38,7 @@ class ThematicStateMap extends Component {
   }
 
   getFilterText(filterType) {
-    //valid options: on_site, air, water, land, off_site, total
+    //valid options: total, air, water, land, off_site, off_site
     switch (filterType) {
       case "on_site":
         return "All On Site Releases";
@@ -71,29 +57,12 @@ class ThematicStateMap extends Component {
     }
   }
 
-  fixFilterName(type) {
-    switch (type) {
-      case "all":
-        return "total";
-      case "air":
-      case "water":
-      case "land":
-        return type;
-      case "off_site":
-        return "off_site";
-      case "on_site":
-        return "on_site";
-      default:
-        return "total";
-    }
-  }
-
-  //refetch data if the year or release type filter changed
+  // refetches data if the year or release type filter changed
   componentDidUpdate() {
-    // update filters from parent
     this.state.filterYear = this.props.year;
     if (this.props.stateName) this.state.stateName = this.props.stateName;
-    this.state.filterType = this.fixFilterName(this.props.type);
+    this.state.filterType =
+      this.props.type === "all" ? "total" : this.props.type;
     if (
       this.state.prevYear !== this.state.filterYear ||
       this.state.prevType !== this.state.filterType
@@ -125,13 +94,8 @@ class ThematicStateMap extends Component {
     }
   }
 
-  //sets tooltip content for the maps
-  handleContentState(content) {
-    this.setState({ content: content });
-  }
-
-  //sets tooltip content for the maps
-  handleContentCounty(content) {
+  // sets tooltip content for the maps
+  handleContentCountyState(content) {
     this.setState({ content: content });
   }
 
@@ -139,8 +103,7 @@ class ThematicStateMap extends Component {
     const filterYear =
       this.state.filterYear !== null ? this.state.filterYear : 2019;
     const filterType =
-      this.state.filterType !== null ? this.state.filterType : "totalonsite";
-    const filterState = this.props.state;
+      this.state.filterType !== null ? this.state.filterType : "total";
 
     return (
       <div className="thematic-view-container">
@@ -152,7 +115,7 @@ class ThematicStateMap extends Component {
           {this.state.countyData ? (
             <>
               <ThematicMap
-                setTooltipContent={this.handleContentCounty}
+                setTooltipContent={this.handleContentCountyState}
                 data={this.state.countyData}
                 maxValue={this.state.countyMax}
                 minValue={this.state.countyMin}
@@ -177,6 +140,7 @@ class ThematicStateMap extends Component {
     );
   }
 
+  // retrieves and filters county release data from the database
   async getCountyData() {
     var l = {};
     var d = [];
@@ -187,17 +151,19 @@ class ThematicStateMap extends Component {
     await vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
-        l = response.data;
+        l = response.data.filter(
+          (county) => county.facility__state === this.props.stateName
+        );
         d = Object.values(l);
         response.data.map((st, i) => {
           if (
             response.data[i][filterType] > maxValue &&
-            response.data[i].facility__state === this.state.stateName
+            response.data[i].facility__state === this.props.stateName
           )
             maxValue = response.data[i][filterType];
           if (
             response.data[i][filterType] < minValue &&
-            response.data[i].facility__state === this.state.stateName
+            response.data[i].facility__state === this.props.stateName
           )
             minValue = response.data[i][filterType];
         });
@@ -222,7 +188,6 @@ function LoadSpinner() {
         alignItems: "center",
       }}
     >
-      {/* <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" /> */}
       <LoadingSpinner></LoadingSpinner>
     </div>
   );
