@@ -6,20 +6,21 @@ import {
   Route,
   Link,
   withRouter,
+  useLocation,
 } from "react-router-dom";
+import "./App.css";
+import "./index.css";
 import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
 import GraphView from "./GraphView";
 import PubChemFields from "./PubChemFields";
-import "./App.css";
-import "./index.css";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
-import { useReducer } from "react";
-import { formatChemical } from "./helpers";
+import ThematicStateMap from "./ThematicStateMap/index.js";
+import React, { useReducer } from "react";
+import { formatChemical, formatAmount } from "./helpers";
 import vetapi from "./api/vetapi";
-const React = require("react");
 
 const initialState = {
   location: "",
@@ -37,7 +38,7 @@ const initialState = {
     pbtsAndDioxins: false,
     carcinogens: false,
     releaseType: "all",
-    year: 2018,
+    year: 2019,
   },
 };
 
@@ -47,6 +48,12 @@ const reducer = (state, action) => {
       return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
+    case "setStateName":
+      return { ...state, stateName: action.payload };
+    case "setStateLongName":
+      return { ...state, stateLongName: action.payload };
+    case "setAltLocation":
+      return { ...state, altLocation: action.payload };
     case "setNumFacilities":
       return { ...state, numFacilities: action.payload };
     case "setFilters":
@@ -81,6 +88,7 @@ const reducer = (state, action) => {
       throw new Error();
   }
 };
+
 const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
 const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
@@ -125,7 +133,7 @@ function ChemicalList(props) {
           }}
           key={c.name + " " + c.total}
         >
-          {c.name} ({c.total.toLocaleString()} lbs)
+          {c.name} ({formatAmount(c.total)} lbs)
         </li>
       );
     });
@@ -148,18 +156,20 @@ const App = (props) => {
     <Router history={history}>
       <div className="app-container">
         <div className="navigation">
-          <div className="go-home">
-            <Link to="/"> &lt; Back to home</Link>
-          </div>
+          <div className="logo">VET.</div>
+
           <ul>
-            <li className={state.activeTab === 0 ? "active" : ""}>
-              <Link to="/map">Map</Link>
+            <li>
+              <Link to="/">Search</Link>
             </li>
-            <li className={state.activeTab === 1 ? "active" : ""}>
-              <Link to="/graphs">Graphs</Link>
+            <li>
+              <Link to="/map">Facility Map</Link>
             </li>
-            <li className={state.activeTab === 2 ? "active" : ""}>
-              <Link to="/thematicmaps">Thematic Maps</Link>
+            <li>
+              <Link to="/graphs">Location Insights</Link>
+            </li>
+            <li>
+              <Link to="/thematicmaps">National Insights</Link>
             </li>
           </ul>
         </div>
@@ -256,9 +266,21 @@ const App = (props) => {
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <div className="thematic-map-view">
-              <ThematicMapView year={state.filters.year}></ThematicMapView>
-            </div>
+            <ThematicStateMap
+              year={state.filters.year}
+              type={state.filters.releaseType}
+              stateName={state.map.stateShort}
+              stateLongName={state.map.stateLong}
+            >
+              {" "}
+            </ThematicStateMap>
+            <ThematicMapView
+              year={state.filters.year}
+              type={state.filters.releaseType}
+            >
+              {" "}
+            </ThematicMapView>
+            {/* <Footer /> */}
           </Route>
           <Route path="/">
             <Home isError={state.error} onSuccess={handleSuccess} />
