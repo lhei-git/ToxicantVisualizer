@@ -65,7 +65,6 @@ function Home(props) {
     <div className="home-container">
       <div className="background">
         <div className="overlay"></div>
-        <img src={require("./../../src/assets/vet_la.png")} alt="" />
       </div>
       <div className="content-group">
         <div className="header">Visualizer of Environmental Toxicants</div>

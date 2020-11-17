@@ -144,8 +144,35 @@ function ChemicalList(props) {
   );
 }
 
+const Navbar = (props) => {
+  const location = useLocation();
+
+  return (
+    <div
+      className={`navigation ${location.pathname === "/" ? "transparent" : ""}`}
+    >
+      <div className="logo">VET.</div>
+      <ul>
+        <li>
+          <Link to="/">Search</Link>
+        </li>
+        <li>
+          <Link to="/map">Facility Map</Link>
+        </li>
+        <li>
+          <Link to="/graphs">Location Insights</Link>
+        </li>
+        <li>
+          <Link to="/thematicmaps">National Insights</Link>
+        </li>
+      </ul>
+    </div>
+  );
+};
+
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  // const currentPage = useLocation();
 
   function handleSuccess(map) {
     dispatch(setMap(map));
@@ -155,24 +182,7 @@ const App = (props) => {
   return (
     <Router history={history}>
       <div className="app-container">
-        <div className="navigation">
-          <div className="logo">VET.</div>
-
-          <ul>
-            <li>
-              <Link to="/">Search</Link>
-            </li>
-            <li>
-              <Link to="/map">Facility Map</Link>
-            </li>
-            <li>
-              <Link to="/graphs">Location Insights</Link>
-            </li>
-            <li>
-              <Link to="/thematicmaps">National Insights</Link>
-            </li>
-          </ul>
-        </div>
+        <Navbar />
         <Switch>
           <Route exact path="/map">
             <div className="map-view">
@@ -186,9 +196,9 @@ const App = (props) => {
                   <UserControlPanel
                     chemicals={state.selectedChemicalList}
                     filters={state.filters}
-                    onFilterChange={(filters) =>
-                      dispatch(setFilters(Object.assign({}, filters)))
-                    }
+                    onFilterChange={(filters) => {
+                      dispatch(setFilters(Object.assign({}, filters)));
+                    }}
                   ></UserControlPanel>
                 </div>
                 {state.showPubchemInfo ? (
@@ -266,14 +276,15 @@ const App = (props) => {
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <ThematicStateMap
-              year={state.filters.year}
-              type={state.filters.releaseType}
-              stateName={state.map.stateShort}
-              stateLongName={state.map.stateLong}
-            >
-              {" "}
-            </ThematicStateMap>
+            {state.map && (
+              <ThematicStateMap
+                year={state.filters.year}
+                type={state.filters.releaseType}
+                stateName={state.map.stateShort}
+                stateLongName={state.map.stateLong}
+              ></ThematicStateMap>
+            )}
+
             <ThematicMapView
               year={state.filters.year}
               type={state.filters.releaseType}
