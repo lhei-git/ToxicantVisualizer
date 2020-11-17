@@ -17,9 +17,10 @@ const rounded = (num) => {
 const thematicMap = (props) => {
   if (!props.data) return null;
 
-  //change the scale domain based on whether states or counties are being viewed
+  //change high end of color scale for US counties, as outliers always skew the data in this map
   var domain = [];
-  domain = [props.minValue, props.maxValue];
+  var maxDomain =  (props.type === "counties" ? props.maxValue / 6 : props.maxValue)
+  domain = [props.minValue, maxDomain];
 
   //removes inconsistencies in county name, slow af
   //LEFT IN FOR PROTOTYPE 1 BECAUSE LOUSIANA STUCK OUT

@@ -72,28 +72,12 @@ class ThematicMapView extends Component {
     }
   }
 
-  fixFilterName(type) {
-    switch (type) {
-      case "all":
-        return "total";
-      case "air":
-      case "water":
-      case "land":
-        return type;
-      case "off_site":
-        return "off_site";
-      case "on_site":
-        return "on_site";
-      default:
-        return "total";
-    }
-  }
-
   //refetch data if the year or release type filter changed
   componentDidUpdate() {
     // update filters from parent
     this.state.filterYear = this.props.year;
-    this.state.filterType = this.fixFilterName(this.props.type);
+    this.state.filterType =
+        (this.props.type === "all" ? 'total' : this.props.type);
     if (
       this.state.prevYear !== this.state.filterYear ||
       this.state.prevType !== this.state.filterType
