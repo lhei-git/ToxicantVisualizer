@@ -481,30 +481,17 @@ def num_facilities(request):
 Return summary points within window
 '''
 
+
 def country_summary(request):
     y = int(request.GET.get('year', default=latest_year))
-    summary = {}
-    facility_list = facility.objects.all()
-    release_list = release.objects.filter(Q(year=y))
-
-    """ TODO: filter out facilities that have a total_releases amount of zero """
-    summary['num_facilities'] = facility_list.annotate(
-        total=Sum('release__total')).filter(total__gt=0).count()
-    summary['num_distinct_chemicals'] = release_list.values(
-        'chemical_id').distinct().count()
-    summary['total'] = release_list.aggregate(total=Sum('total'))['total']
-    summary['total_on_site'] = release_list.aggregate(
-        on_site=Sum('on_site'))['on_site']
-    summary['total_off_site'] = release_list.aggregate(
-        off_site=Sum('off_site'))['off_site']
-    summary['total_air'] = release_list.aggregate(air=Sum('air'))['air']
-    summary['total_water'] = release_list.aggregate(water=Sum('water'))[
-        'water']
-    summary['total_land'] = release_list.aggregate(land=Sum('land'))['land']
-    summary['total_carcinogen'] = release_list.filter(
-        chemical__carcinogen='YES').aggregate(carcinogen=Sum('total'))['carcinogen']
-    response = json.dumps(summary)
+    raw = release.objects.filter(Q(year=y)).aggregate(total=Sum(
+        'total'), num_facilities=Count('facility__id', distinct=True), num_chemicals=Count('chemical__id', distinct=True),
+        total_air=Sum('air'), total_water=Sum('water'), total_land=Sum('land'), total_on_site=Sum('on_site'), total_off_site=Sum('off_site'))
+    raw['total_carcinogen'] = release.objects.filter( Q(year=y) & Q(
+        chemical__carcinogen='YES')).aggregate(carcinogen=Sum('total'))['carcinogen']
+    response = json.dumps(raw, cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
+
 
 def location_summary(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
@@ -512,29 +499,14 @@ def location_summary(request):
     sw_lat = float(request.GET.get('sw_lat', default=0.0))
     sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=latest_year))
-    summary = {}
-    facility_list = facility.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                                            & Q(longitude__lt=ne_lng) & Q(longitude__gt=sw_lng))
-    release_list = release.objects.filter(Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-                                          & Q(facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng) & Q(year=y))
-
-    """ TODO: filter out facilities that have a total_releases amount of zero """
-    summary['num_facilities'] = facility_list.annotate(
-        total=Sum('release__total')).filter(total__gt=0).count()
-    summary['num_distinct_chemicals'] = release_list.values(
-        'chemical_id').distinct().count()
-    summary['total'] = release_list.aggregate(total=Sum('total'))['total']
-    summary['total_on_site'] = release_list.aggregate(
-        on_site=Sum('on_site'))['on_site']
-    summary['total_off_site'] = release_list.aggregate(
-        off_site=Sum('off_site'))['off_site']
-    summary['total_air'] = release_list.aggregate(air=Sum('air'))['air']
-    summary['total_water'] = release_list.aggregate(water=Sum('water'))[
-        'water']
-    summary['total_land'] = release_list.aggregate(land=Sum('land'))['land']
-    summary['total_carcinogen'] = release_list.filter(
-        chemical__carcinogen='YES').aggregate(carcinogen=Sum('total'))['carcinogen']
-    response = json.dumps(summary)
+    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
+        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
+    raw = release.objects.filter(window & Q(year=y)).aggregate(total=Sum(
+        'total'), num_facilities=Count('facility__id', distinct=True), num_chemicals=Count('chemical__id', distinct=True),
+        total_air=Sum('air'), total_water=Sum('water'), total_land=Sum('land'), total_on_site=Sum('on_site'), total_off_site=Sum('off_site'))
+    raw['total_carcinogen'] = release.objects.filter(window & Q(year=y) & Q(
+        chemical__carcinogen='YES')).aggregate(carcinogen=Sum('total'))['carcinogen']
+    response = json.dumps(raw, cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
 
 
