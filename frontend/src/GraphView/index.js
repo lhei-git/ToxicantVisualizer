@@ -15,6 +15,7 @@ const {
   Bar,
   LineChart,
   Line,
+  LabelList,
   ResponsiveContainer,
 } = require("recharts");
 
@@ -178,6 +179,158 @@ async function GraphTopTenFacilities(props) {
 
     return null;
   }
+}
+
+//Chart 14 - Graph of all facilities and total releases in descending order
+async function GraphAllFacilities(props) {
+  try {
+    const { northeast, southwest } = props.viewport;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
+      all: 1,
+    };
+
+    const res = await vetapi.get(`/stats/location/facility_releases`, {
+      params,
+    });
+    const data = res.data
+      .sort((a, b) => b.total - a.total)
+      .map((d, i) => {
+        const f = d;
+        return {
+          name: f.facility__name,
+          av: f.air,
+          bv: f.water,
+          cv: f.land,
+        };
+      });
+    return (
+      <div width="100%" height="180px" style={{"overflow-y":"scroll", "max-height":"400px"}}>
+        <ResponsiveContainer width="100%" height={res.data.length * 40}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{
+              top: 30,
+              // right: 50,
+              left: 50,
+              bottom: 200,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <YAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              tick={<CustomizedXAxisTick />}
+              margin={{top:60}}
+            />
+            <XAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => formatAmount(val) + " "}
+            />
+            <Tooltip
+              contentStyle={{ color: "#000" }}
+              isAnimationActive={false}
+            />
+            <Legend align="right" verticalAlign="top" />
+            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8"  />
+            <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
+            <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+//Chart 12 - Table of all facilities and total releases
+async function TableAllFacilities(props){
+  try {
+    const { northeast, southwest } = props.viewport;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      dioxin: props.filters.pbtsAndDioxins || null,
+      pbt: props.filters.pbtsAndDioxins || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
+      all: 1,
+    };
+    const res = await vetapi.get(`/stats/location/facility_releases`, {
+      params,
+    });
+    const data = res.data
+      .sort((a, b) => b.total - a.total)
+      .map((d, i) => {
+        const f = d;
+        return {
+          name: f.facility__name,
+          av: f.air,
+          bv: f.water,
+          cv: f.land,
+        };
+      });
+    return (
+      <div width="100%" height="50vh" style={{"overflow-y":"scroll", "max-height":"50vh"}}>
+        <table class="dynamic-table">
+        <thead>
+             <tr>
+                <th className="sticky-header">Facility Name</th>
+                <th className="sticky-header">Land</th>
+                <th className="sticky-header">Air</th>
+                <th className="sticky-header">Water</th>
+                <th className="sticky-header">Off-Site</th>
+             </tr>
+        </thead>
+        <tbody>
+             {res.data.map(function(d, i){
+             if (i % 2 != 0){
+             return (
+             <tr>
+                <td className="odd-overflow-column">{d.facility__name}</td>
+                <td className="odd-row">{d.land}</td>
+                <td className="odd-row">{d.air}</td>
+                <td className="odd-row">{d.water}</td>
+                <td className="odd-row">{d.vet_total_releases_offsite}</td>
+            </tr>)}
+            else return(
+             <tr>
+                <td className="even-overflow-column">{d.facility__name}</td>
+                <td className="even-row">{d.land}</td>
+                <td className="even-row">{d.air}</td>
+                <td className="even-row">{d.water}</td>
+                <td className="even-row">{d.vet_total_releases_offsite}</td>
+            </tr>)}
+            )
+           }
+           </tbody>
+        </table>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+
 }
 
 async function GraphTopTenParents(props) {
@@ -656,7 +809,7 @@ function GraphView(props) {
               filters={props.filters}
               name="top_facilities"
               graph={GraphTopTenFacilities}
-              title="Total On-Site Releases for Top 10 Facilities (in lbs)"
+              title="Total Releases for Top 10 Facilities (in lbs)"
             ></GraphContainer>
             <GraphContainer
               viewport={props.viewport}
@@ -693,11 +846,26 @@ function GraphView(props) {
               graph={TimelineTopChemicals}
               title="Top Ten Chemicals Over Time (in lbs)"
             ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_parents"
+              graph={GraphAllFacilities}
+              title="Total Releases for all Facilities (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_parents"
+              graph={TableAllFacilities}
+              title="Total Releases for all Facilities (in lbs)"
+            ></GraphContainer>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 
 export default GraphView;

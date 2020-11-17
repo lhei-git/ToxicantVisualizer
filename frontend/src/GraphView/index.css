@@ -1,8 +1,7 @@
 .graph-container {
   position: relative;
-  top: 72px;
   background: #fff;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 60px);
   max-height: 100%;
   margin: 0;
   padding: 0;
@@ -93,4 +92,46 @@
   width: 100%;
   left: 0;
   border-bottom: 1px solid #3f3844;
+}
+
+.dynamic-table {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.sticky-header {
+  border-collapse: collapse;
+  background-color: #ccc;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  padding: 0.25em 0.5em 0.25em 1em;
+}
+
+.odd-row {
+  border: 1px solid black;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+.even-row {
+  border: 1px solid black;
+  border-collapse: collapse;
+  background-color: #ddd;
+}
+
+.even-overflow-column {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 40%;
+  min-width: 200px;
+  background-color: #ddd;
+}
+
+.odd-overflow-column {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 40%;
+  min-width: 200px;
+  background-color: #fff;
 }

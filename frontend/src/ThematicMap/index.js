@@ -2,7 +2,6 @@ import React, { memo } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
 import "./index.css";
-import axios from "axios";
 
 // used to produce more easily readable numbers
 const rounded = (num) => {
@@ -122,9 +121,12 @@ const thematicMap = (props) => {
                           const { name, POP_EST } = geo.properties;
                           const total = cur.total;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br /><span class="geography-attributes">
-                                                Onsite: ${rounded(
-                                                  Math.trunc(cur.on_site)
+                                                Total: ${rounded(
+                                                  Math.trunc(cur.total)
                                                 )} lbs. <br />
+                                                Facilities: ${rounded(
+                                                  Math.trunc(cur.num_facilities)
+                                                )} </br>
                                                 Air: ${rounded(
                                                   Math.trunc(cur.air)
                                                 )} lbs. <br />
@@ -137,14 +139,9 @@ const thematicMap = (props) => {
                                                 Offsite: ${rounded(
                                                   Math.trunc(cur.off_site)
                                                 )} lbs. <br />
-                                                Total: ${rounded(
-                                                  Math.trunc(cur.total)
-                                                )} lbs. <br />
-                                                Facilities: ${rounded(
-                                                  Math.trunc(
-                                                    cur.num_facilities
-                                                  )
-                                                )} </span>
+                                                Onsite: ${rounded(
+                                                  Math.trunc(cur.on_site)
+                                                )} lbs. <span />
                                                 `);
                         }}
                         onMouseLeave={() => {
@@ -213,9 +210,7 @@ const thematicMap = (props) => {
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
                                                 Facilities: ${rounded(
-                                                  Math.trunc(
-                                                    cur.num_facilities
-                                                  )
+                                                  Math.trunc(cur.num_facilities)
                                                 )} </span>
                     `);
                         }}
@@ -374,15 +369,15 @@ function Legend(props) {
         height="100"
         width="100%"
         fill="url(#grad2)"
-        stroke-width="1"
+        strokeWidth="1"
         stroke="black"
       />
       <text
         x="1%"
         y="50%"
         fill="black"
-        dominant-baseline="middle"
-        text-anchor="start"
+        dominantBaseline="middle"
+        textAnchor="start"
       >
         {rounded(Math.trunc(props.minVal))} lbs.
       </text>
@@ -390,8 +385,8 @@ function Legend(props) {
         x="99%"
         y="50%"
         fill="white"
-        dominant-baseline="middle"
-        text-anchor="end"
+        dominantBaseline="middle"
+        textAnchor="end"
       >
         {rounded(Math.trunc(props.maxVal))} lbs.
       </text>
