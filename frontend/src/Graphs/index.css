@@ -9,3 +9,7 @@
 .timeline-total {
   width: 90%;
 }
+
+.summary td {
+  text-align: center;
+}

@@ -123,6 +123,7 @@ class MapContainer extends Component {
       dioxin: filters.pbtsAndDioxins || null,
       pbt: filters.pbtsAndDioxins || null,
       release_type: filters.releaseType,
+      chemical: filters.chemical,
       year: filters.year,
     };
     vetapi
