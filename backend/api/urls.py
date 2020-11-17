@@ -1,22 +1,26 @@
 from django.contrib import admin
 from django.urls import path
-from viewModule.views import points, get_facilities, get_chemicals, attr, num_facilities, state_total_releases, \
+from viewModule.views import points, get_facilities, get_chemicals, num_facilities, state_total_releases, \
     timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, \
     location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, \
     all_county_total_releases, timeline_top_pbt_chemicals, top_pbt_chemicals, all_state_total_releases, \
-    all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_total_releases, all_facility_total_releases
+    all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_total_releases, \
+    all_facility_total_releases, get_chemicals_in_window, country_summary
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('attr/<slug:attribute>', attr),
     # return distinct facilities within: window, state -- FIXME - Do we need this?
     path('points', points),
     # return distinct facilities within window -- FIXED
     path('facilities', get_facilities),
+    # return distinct facilities within window -- FIXED
+    path('chemicals', get_chemicals_in_window),
     # return all chemical releases for a specific facility -- FIXED
     path('facilities/<str:facility_id>/chemicals', get_chemicals),
-    # return summary within: window -- FIXME - ?
+    # return summary within: window
     path('stats/location/summary', location_summary),
+    # return summary within: window
+    path('stats/summary', country_summary),
     # return amount of each chemical within: window -- FIXED
     path('stats/location/top_chemicals', top_chemicals),
     # return amount of each PBT chemical within: window -- FIXED
