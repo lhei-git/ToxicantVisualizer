@@ -1,5 +1,5 @@
 import "./index.css";
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserControlPanel from "../UserControlPanel";
 import GraphSummary from "../Graphs/Summary";
 import TimelineTotal from "../Graphs/TimelineTotal";
@@ -15,7 +15,6 @@ const {
   Bar,
   LineChart,
   Line,
-  LabelList,
   ResponsiveContainer,
 } = require("recharts");
 
@@ -111,6 +110,7 @@ async function GraphTopTenFacilities(props) {
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
       release_type: props.filters.releaseType,
+      chemical: props.filters.chemical,
       year: props.filters.year,
     };
     const res = await vetapi.get(`/stats/location/facility_releases`, {
@@ -194,6 +194,7 @@ async function GraphAllFacilities(props) {
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
       release_type: props.filters.releaseType,
+      chemical: props.filters.chemical,
       year: props.filters.year,
       all: 1,
     };
@@ -216,7 +217,7 @@ async function GraphAllFacilities(props) {
       <div
         width="100%"
         height="180px"
-        style={{ "overflow-y": "scroll", "max-height": "400px" }}
+        style={{ overflowY: "scroll", maxHeight: "400px" }}
       >
         <ResponsiveContainer width="100%" height={res.data.length * 40}>
           <BarChart
@@ -275,30 +276,31 @@ async function TableAllFacilities(props) {
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
       release_type: props.filters.releaseType,
+      chemical: props.filters.chemical,
       year: props.filters.year,
       all: 1,
     };
     const res = await vetapi.get(`/stats/location/facility_releases`, {
       params,
     });
-    const data = res.data
-      .sort((a, b) => b.total - a.total)
-      .map((d, i) => {
-        const f = d;
-        return {
-          name: f.facility__name,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-        };
-      });
+    // const data = res.data
+    //   .sort((a, b) => b.total - a.total)
+    //   .map((d, i) => {
+    //     const f = d;
+    //     return {
+    //       name: f.facility__name,
+    //       av: f.air,
+    //       bv: f.water,
+    //       cv: f.land,
+    //     };
+    //   });
     return (
       <div
         width="100%"
         height="50vh"
-        style={{ "overflow-y": "scroll", "max-height": "50vh" }}
+        style={{ overflowY: "scroll", maxHeight: "50vh" }}
       >
-        <table class="dynamic-table">
+        <table className="dynamic-table">
           <thead>
             <tr>
               <th className="sticky-header">Facility Name</th>
@@ -310,9 +312,9 @@ async function TableAllFacilities(props) {
           </thead>
           <tbody>
             {res.data.map(function (d, i) {
-              if (i % 2 != 0) {
+              if (i % 2 !== 0) {
                 return (
-                  <tr>
+                  <tr key={d + "-" + i}>
                     <td className="odd-overflow-column">{d.facility__name}</td>
                     <td className="odd-row">{d.land}</td>
                     <td className="odd-row">{d.air}</td>
@@ -322,7 +324,7 @@ async function TableAllFacilities(props) {
                 );
               } else
                 return (
-                  <tr>
+                  <tr key={d + "-" + i}>
                     <td className="even-overflow-column">{d.facility__name}</td>
                     <td className="even-row">{d.land}</td>
                     <td className="even-row">{d.air}</td>
@@ -354,6 +356,7 @@ async function GraphTopTenParents(props) {
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
       release_type: props.filters.releaseType,
+      chemical: props.filters.chemical,
       year: props.filters.year,
     };
     const res = await vetapi.get(`/stats/location/parent_releases`, {
@@ -513,6 +516,7 @@ async function TimelineTopFacilities(props) {
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
+      chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
       averages: true,
     };
@@ -609,6 +613,7 @@ async function TimelineTopParents(props) {
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
+      chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/parent_releases`, {
@@ -711,17 +716,19 @@ async function TimelineTopChemicals(props) {
     const res = await vetapi.get(`/stats/location/timeline/top_chemicals`, {
       params,
     });
-    const data = res.data.reduce((acc, cur) => {
-      const existing = acc.find((e) => e.year === cur.year);
-      const formatted = formatChemical(cur["chemical__name"]).toUpperCase();
-      if (existing) {
-        existing[formatted] = cur.total;
-      } else {
-        const newLine = { year: cur.year, [formatted]: cur.total };
-        acc.push(newLine);
-      }
-      return acc;
-    }, []);
+    const data = res.data
+      .reduce((acc, cur) => {
+        const existing = acc.find((e) => e.year === cur.year);
+        const formatted = formatChemical(cur["chemical__name"]).toUpperCase();
+        if (existing) {
+          existing[formatted] = cur.total;
+        } else {
+          const newLine = { year: cur.year, [formatted]: cur.total };
+          acc.push(newLine);
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => a.year - b.year);
 
     const keys = Object.keys(data[0]);
     const lines = keys
@@ -798,6 +805,7 @@ function GraphView(props) {
           <div className="filter-container">
             <UserControlPanel
               chemicals={[]}
+              viewport={props.viewport}
               filters={props.filters}
               onFilterChange={props.onFilterChange}
             ></UserControlPanel>
