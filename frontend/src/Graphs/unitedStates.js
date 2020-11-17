@@ -1,7 +1,7 @@
 module.exports = {
   2005: {
     num_facilities: 29528,
-    num_distinct_chemicals: 512,
+    num_chemicals: 512,
     total: 4466731250,
     total_on_site: 3842246672,
     total_off_site: 624484521,
@@ -12,7 +12,7 @@ module.exports = {
   },
   2006: {
     num_facilities: 29528,
-    num_distinct_chemicals: 519,
+    num_chemicals: 519,
     total: 4456251322,
     total_on_site: 3801823721,
     total_off_site: 654420627,
@@ -23,7 +23,7 @@ module.exports = {
   },
   2007: {
     num_facilities: 29528,
-    num_distinct_chemicals: 498,
+    num_chemicals: 498,
     total: 4251128714,
     total_on_site: 3580454170,
     total_off_site: 670674457,
@@ -34,7 +34,7 @@ module.exports = {
   },
   2008: {
     num_facilities: 29528,
-    num_distinct_chemicals: 491,
+    num_chemicals: 491,
     total: 3977377428,
     total_on_site: 3401636402,
     total_off_site: 575740982,
@@ -45,7 +45,7 @@ module.exports = {
   },
   2009: {
     num_facilities: 29528,
-    num_distinct_chemicals: 488,
+    num_chemicals: 488,
     total: 3436785468,
     total_on_site: 3038766094,
     total_off_site: 398019256,
@@ -56,7 +56,7 @@ module.exports = {
   },
   2010: {
     num_facilities: 29528,
-    num_distinct_chemicals: 496,
+    num_chemicals: 496,
     total: 3849515331,
     total_on_site: 3401851784,
     total_off_site: 447659290,
@@ -67,7 +67,7 @@ module.exports = {
   },
   2011: {
     num_facilities: 29528,
-    num_distinct_chemicals: 513,
+    num_chemicals: 513,
     total: 4150304230,
     total_on_site: 3701677611,
     total_off_site: 448625038,
@@ -78,7 +78,7 @@ module.exports = {
   },
   2012: {
     num_facilities: 29528,
-    num_distinct_chemicals: 502,
+    num_chemicals: 502,
     total: 3683211624,
     total_on_site: 3232394767,
     total_off_site: 450816802,
@@ -89,7 +89,7 @@ module.exports = {
   },
   2013: {
     num_facilities: 29528,
-    num_distinct_chemicals: 524,
+    num_chemicals: 524,
     total: 4199937541,
     total_on_site: 3727440061,
     total_off_site: 472497411,
@@ -100,7 +100,7 @@ module.exports = {
   },
   2014: {
     num_facilities: 29528,
-    num_distinct_chemicals: 504,
+    num_chemicals: 504,
     total: 4037995904,
     total_on_site: 3545661980,
     total_off_site: 492333147,
@@ -112,7 +112,7 @@ module.exports = {
 
   2015: {
     num_facilities: 29528,
-    num_distinct_chemicals: 499,
+    num_chemicals: 499,
     total: 3493906777.6471977,
     total_on_site: 2979752347.0186954,
     total_off_site: 514152720.5778954,
@@ -123,7 +123,7 @@ module.exports = {
   },
   2016: {
     num_facilities: 29528,
-    num_distinct_chemicals: 502,
+    num_chemicals: 502,
     total: 3565171745.4497623,
     total_on_site: 3126912006.6277084,
     total_off_site: 438259730.8219621,
@@ -134,7 +134,7 @@ module.exports = {
   },
   2017: {
     num_facilities: 29528,
-    num_distinct_chemicals: 499,
+    num_chemicals: 499,
     total: 3968622905.0699573,
     total_on_site: 3534183816.491985,
     total_off_site: 434439052.5775382,
@@ -145,7 +145,7 @@ module.exports = {
   },
   2018: {
     num_facilities: 29528,
-    num_distinct_chemicals: 493,
+    num_chemicals: 493,
     total: 3771274630.773736,
     total_on_site: 3305264000.581205,
     total_off_site: 466010630.2195683,
@@ -156,7 +156,7 @@ module.exports = {
   },
   2019: {
     num_facilities: 29528,
-    num_distinct_chemicals: 490,
+    num_chemicals: 490,
     total: 3432825183,
     total_on_site: 2962522881,
     total_off_site: 470302236,

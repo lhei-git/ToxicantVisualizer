@@ -10,14 +10,14 @@ function GraphSummary(props) {
 
   let graphProp = props.graph;
   let viewportProp = props.viewport;
-  let filterProp = props.filters;
+  let yearProp = props.filters.year;
 
   useEffect(() => {
     let mounted = true;
     fetchData(mounted);
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, filterProp]); /* eslint-disable-line */
+  }, [graphProp, viewportProp, yearProp]); /* eslint-disable-line */
 
   const fetchData = async (mounted) => {
     try {
@@ -50,8 +50,8 @@ function GraphSummary(props) {
           </tr>
           <tr>
             <td>Distinct Chemicals</td>
-            <td>{data["num_distinct_chemicals"]}</td>
-            <td>{country["num_distinct_chemicals"]}</td>
+            <td>{data["num_chemicals"]}</td>
+            <td>{country["num_chemicals"]}</td>
           </tr>
           <tr>
             <td>Total Disposal Amount</td>
