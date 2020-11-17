@@ -22,23 +22,10 @@ const thematicMap = (props) => {
   var maxDomain =  (props.type === "counties" ? props.maxValue / 6 : props.maxValue)
   domain = [props.minValue, maxDomain];
 
-  //removes inconsistencies in county name, slow af
-  //LEFT IN FOR PROTOTYPE 1 BECAUSE LOUSIANA STUCK OUT
-  const fixCountyName = (name) => {
-    var res = name.substring(name.length - 6, name.length);
-    if (res.toUpperCase() === "PARISH")
-      return name.substring(0, name.length - 7); //parish
-    //else if (res.toUpperCase() === "S AREA") return name.substring(0, name.length -12)      //census area
-    //else if (res.toUpperCase() === "PALITY") return name.substring(0, name.length -13)      //municipality
-    //res = name.substring(name.length -9 , name.length);
-    //if (res.toUpperCase() === " BOROUGH") alert( name.substring(0, name.length -13) )     //borough
-    return name;
-  };
-
   //returns a geography color based on the scale and given value
   const colorScale = scaleQuantile().domain(domain).range([
-    "#fef3f3",
-    "#feeceb",
+    //"#fef3f3",
+    //"#feeceb",
     "#fee4e3",
     "#fddcdb",
     "#fdd5d3",
@@ -98,7 +85,7 @@ const thematicMap = (props) => {
 
   const filterType = props.filterType !== null ? props.filterType : "total";
 
-  // used to render the state based map
+  //////  used to render the state based map  //////
   if (props.type === "states")
     return (
       <>
@@ -164,7 +151,7 @@ const thematicMap = (props) => {
         </div>
       </>
     );
-  //used to render the county based map
+  //////  used to render the county based map  //////
   else if (props.type === "counties")
     return (
       <>
@@ -175,7 +162,7 @@ const thematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                    fixCountyName(s.facility__county).split(" ").[0].split(".")[0] ===
+                    (s.facility__county).split(" ").[0].split(".")[0] ===
                       geo.properties.name.toUpperCase().split(" ").[0].split(".")[0]  &&
                       s.facility__state === geo.properties.iso_3166_2
                   );
@@ -253,7 +240,7 @@ const thematicMap = (props) => {
         </div>
       </>
     );
-  //covers single state
+  //////  covers single state  //////
   else {
     return (
       <>
@@ -272,7 +259,7 @@ const thematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                      fixCountyName(s.facility__county).split(" ").[0].split(".")[0] ===
+                      s.facility__county.split(" ").[0].split(".")[0] ===
                       geo.properties.NAME.toUpperCase().split(" ").[0].split(".")[0]
                   );
                   if (cur !== undefined) {
@@ -352,6 +339,8 @@ const thematicMap = (props) => {
   }
 };
 
+
+// creates svg gradient legen based on min and max values and color scale
 function Legend(props) {
   return (
     <svg height="25" width="100%" margin="5px">
