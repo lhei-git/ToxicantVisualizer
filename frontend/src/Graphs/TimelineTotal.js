@@ -37,6 +37,7 @@ function TimelineTotal(props) {
         sw_lng: southwest.lng,
         carcinogen: props.filters.carcinogens || null,
         dioxin: props.filters.pbtsAndDioxins || null,
+        chemical: props.filters.chemical,
         pbt: props.filters.pbtsAndDioxins || null,
         release_type: props.filters.releaseType,
       };

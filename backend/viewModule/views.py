@@ -47,7 +47,7 @@ def filterFacilities(request):
             filters.add(Q(release__off_site__gt=0), filters.connector)
 
     # filter by chemicals
-    if chemical is not None:
+    if chemical is not None and chemical != "all":
         filters.add(Q(chemical__name=chemical), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
@@ -84,7 +84,7 @@ def filterChemicals(request):
             filters.add(Q(release__off_site__gt=0), filters.connector)
 
     # filter by chemicals
-    if chemical is not None:
+    if chemical is not None and chemical != "all":
         filters.add(Q(name=chemical), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
@@ -121,7 +121,7 @@ def filterReleases(request):
             filters.add(Q(off_site__gt=0), filters.connector)
 
     # filter by chemicals
-    if chemical is not None:
+    if chemical is not None and chemical != "all":
         filters.add(Q(chemical__name=chemical), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
@@ -487,7 +487,7 @@ def country_summary(request):
     raw = release.objects.filter(Q(year=y)).aggregate(total=Sum(
         'total'), num_facilities=Count('facility__id', distinct=True), num_chemicals=Count('chemical__id', distinct=True),
         total_air=Sum('air'), total_water=Sum('water'), total_land=Sum('land'), total_on_site=Sum('on_site'), total_off_site=Sum('off_site'))
-    raw['total_carcinogen'] = release.objects.filter( Q(year=y) & Q(
+    raw['total_carcinogen'] = release.objects.filter(Q(year=y) & Q(
         chemical__carcinogen='YES')).aggregate(carcinogen=Sum('total'))['carcinogen']
     response = json.dumps(raw, cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
