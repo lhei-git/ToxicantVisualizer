@@ -31,8 +31,7 @@ class ThematicStateMap extends Component {
       lon: null,
     };
 
-    this.handleContentState = this.handleContentState.bind(this);
-    this.handleContentCounty = this.handleContentCounty.bind(this);
+    this.handleContentCountyState = this.handleContentCountyState.bind(this);
 
     if (props.year) this.state.filterYear = props.year;
     if (props.filterType) this.state.filterType = "totalonsite";
@@ -126,12 +125,7 @@ class ThematicStateMap extends Component {
   }
 
   //sets tooltip content for the maps
-  handleContentState(content) {
-    this.setState({ content: content });
-  }
-
-  //sets tooltip content for the maps
-  handleContentCounty(content) {
+  handleContentCountyState(content) {
     this.setState({ content: content });
   }
 
@@ -152,7 +146,7 @@ class ThematicStateMap extends Component {
           {this.state.countyData ? (
             <>
               <ThematicMap
-                setTooltipContent={this.handleContentCounty}
+                setTooltipContent={this.handleContentCountyState}
                 data={this.state.countyData}
                 maxValue={this.state.countyMax}
                 minValue={this.state.countyMin}
