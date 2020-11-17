@@ -28,7 +28,6 @@ const initialState = {
   numFacilities: 0,
   showPubchemInfo: false,
   chemicals: [],
-  selectedChemicalList: [],
   currentChemical: "",
   activeTab: 0,
   error: false,
@@ -107,6 +106,7 @@ const getChemicals = async (facilityId, filters) => {
     dioxin: filters.pbtsAndDioxins || null,
     pbt: filters.pbtsAndDioxins || null,
     release_type: filters.releaseType,
+    chemical: filters.chemical,
     year: filters.year,
   };
 
@@ -194,7 +194,7 @@ const App = (props) => {
                     <span>{state.numFacilities || 0}</span> Facilities found
                   </div>
                   <UserControlPanel
-                    chemicals={state.selectedChemicalList}
+                    viewport={state.map ? state.map.viewport : null}
                     filters={state.filters}
                     onFilterChange={(filters) => {
                       dispatch(setFilters(Object.assign({}, filters)));
