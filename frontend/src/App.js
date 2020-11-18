@@ -14,6 +14,7 @@ import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
 import GraphView from "./GraphView";
+import GraphSummary from "./Graphs/Summary";
 import PubChemFields from "./PubChemFields";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
@@ -133,12 +134,16 @@ function ChemicalList(props) {
           }}
           key={c.name + " " + c.total}
         >
-          {c.name} ({formatAmount(c.total)} lbs)
+          <div className="dots">
+            <span className="align-left">{c.name}</span>{" "}
+          </div>
+          <span className="align-right">{formatAmount(c.total)} lbs</span>
+          <div style={{ clear: "both" }}></div>
         </li>
       );
     });
   return (
-    <div>
+    <div className="chemical-list">
       <ol>{listItems}</ol>
     </div>
   );
@@ -165,6 +170,9 @@ const Navbar = (props) => {
         <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
           <Link to="/thematicmaps">National Insights</Link>
         </li>
+        {/* <li className={location.pathname === "/about" ? "active" : ""}>
+          <Link to="/about">About</Link>
+        </li> */}
       </ul>
     </div>
   );
@@ -199,7 +207,7 @@ const App = (props) => {
                   }}
                 ></UserControlPanel>
               </div>
-              <div className="flex-container">
+              <div className="flex-container top">
                 <div className="flex-item pubchem-wrapper">
                   {state.showPubchemInfo ? (
                     <div className="pubchem">
@@ -260,6 +268,24 @@ const App = (props) => {
                   )}
                 </div>
               </div>
+              {state.map && (
+                <div>
+                  <div>
+                    <GraphSummary
+                      viewport={state.map.viewport}
+                      filters={state.filters}
+                    ></GraphSummary>
+                  </div>
+                  <div>
+                    <ThematicStateMap
+                      year={state.filters.year}
+                      type={state.filters.releaseType}
+                      stateName={state.map.stateShort}
+                      stateLongName={state.map.stateLong}
+                    ></ThematicStateMap>
+                  </div>
+                </div>
+              )}
             </div>
           </Route>
           <Route path="/graphs">
@@ -278,15 +304,6 @@ const App = (props) => {
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            {state.map && (
-              <ThematicStateMap
-                year={state.filters.year}
-                type={state.filters.releaseType}
-                stateName={state.map.stateShort}
-                stateLongName={state.map.stateLong}
-              ></ThematicStateMap>
-            )}
-
             <ThematicMapView
               year={state.filters.year}
               type={state.filters.releaseType}
@@ -294,12 +311,39 @@ const App = (props) => {
               {" "}
             </ThematicMapView>
           </Route>
+          {/* <Route path="/about"></Route> */}
           <Route path="/">
             <Home isError={state.error} onSuccess={handleSuccess} />
           </Route>
         </Switch>
+        <div className="footer">
+          <ul>
+            <li>
+              <a href="https://github.com/ejdejesu/ToxicantVisualizer">
+                Github
+              </a>
+            </li>
+            <li>
+              <a href="https://pubchem.ncbi.nlm.nih.gov/">Pubchem</a>
+            </li>
+            <li>
+              <a href="https://www.epa.gov/toxics-release-inventory-tri-program">
+                TRI Program
+              </a>
+            </li>
+            {/* <li>
+              <Link to="/about">About</Link>
+            </li> */}
+          </ul>
+          <div>
+            <div className="copyright">
+              &#169; VET was developed in 2020 for the Lab for Health and
+              Environmental Information by Evan de Jesus, Adwait Wadekar,
+              Richard Moore, and Calvin Brooks
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="footer"></div>
     </Router>
   );
 };
