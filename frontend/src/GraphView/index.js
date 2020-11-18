@@ -136,7 +136,6 @@ async function GraphTopTenFacilities(props) {
             data={data}
             margin={{
               top: 30,
-              // right: 50,
               left: 50,
               bottom: 200,
             }}
