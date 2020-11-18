@@ -21,7 +21,15 @@
 }
 
 .pubChemFields .pictograms .pictogram {
-  display: inline-block;
+  position: relative;
+  display: block;
+}
+
+.pubChemFields .pictograms .pictogram .description {
+  position: absolute;
+  top: 50%;
+  left: 80px;
+  transform: translateY(-50%);
 }
 
 .pubChemFields a {
