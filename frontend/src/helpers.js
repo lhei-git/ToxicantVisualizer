@@ -36,7 +36,7 @@ module.exports.shallowEqual = (obj1, obj2) => {
 
 module.exports.amountAsLabel = (value) => {
   var suffixes = ["", "K", "M", "B", "T"];
-  var suffixNum = Math.floor(("" + value).length / 3);
+  var suffixNum = Math.floor(("" + value).length / 4);
   var shortValue = parseFloat(
     (suffixNum !== 0 ? value / Math.pow(1000, suffixNum) : value).toPrecision(2)
   );
@@ -47,6 +47,7 @@ module.exports.amountAsLabel = (value) => {
 };
 
 module.exports.formatAmount = (value) => {
+  if (value == null) return 0;
   return (+value.toFixed(2))
     .toString()
     .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");

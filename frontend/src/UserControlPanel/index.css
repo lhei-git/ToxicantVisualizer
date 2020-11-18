@@ -1,5 +1,7 @@
 .control-container {
   width: 100%;
+  display: flex;
+  justify-content: flex-start;
 
   --primary: #9c27b0;
   --primary-light: #d05ce3;
@@ -10,21 +12,12 @@
 .control-container .content {
   cursor: pointer;
   border-radius: 0 0 5px 5px;
-  padding: 0 15px;
-  display: flex;
+  min-height: 30px;
   font-size: 16px;
 }
 
-.control-container .content .flex-item {
-  flex: 2;
-}
-
-.control-container .content .flex-item.two {
-  flex: 1;
-}
-
-.control-container .content div {
-  margin: 10px 0;
+.control-container .content input, .control-container .content select {
+  margin: 10px;
 }
 
 .control-container .content input[type="checkbox"] {
@@ -33,12 +26,11 @@
   margin: 5px 10px;
 }
 
-.control-container .content .selector label {
-  display: inline-block;
-  min-width: 200px;
+.control-container .content select {
+  min-width: 140px;
 }
 
-.control-container .content .selector select {
-  margin: 0 10px;
-  min-width: 120px;
+.control-container .checkbox-group {
+  display: inline-block;
+  margin: 0 20px;
 }

@@ -1,15 +1,26 @@
-.standalone .header {
-  font-size: 30px;
-  font-weight: bold;
-  text-align: center;
-  width: 100%;
-  margin: 15px 0;
+.summary {
+  --black: #3f3844;
 }
 
-.timeline-total {
-  width: 90%;
-}
-
+.summary th,
 .summary td {
-  text-align: center;
+  padding: 10px;
+}
+.summary tr {
+  min-height: 40px;
+  border-bottom: 1px solid var(--black);
+}
+
+.summary table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.summary td, .summary th {
+  text-align: right;
+}
+
+.summary td:nth-child(1), .summary th:nth-child(1) {
+  text-align: left;
 }

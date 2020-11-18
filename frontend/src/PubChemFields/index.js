@@ -47,15 +47,22 @@ function Pharmacology(props) {
     }
   }
 
+  // return pubchemData !== null ? (
+  //   <div className="pharmacology">
+  //     <a href={link}>
+  //       <h2>
+  //         Pharmacology
+  //         <Link href={link} />
+  //       </h2>
+  //     </a>
+  //     {pubchemData}
+  //   </div>
+  // ) : (
+  //   <div></div>
+  // );
   return pubchemData !== null ? (
-    <div className="pharmacology">
-      <a href={link}>
-        <h2>
-          Pharmacology
-          <Link href={link} />
-        </h2>
-      </a>
-      {pubchemData}
+    <div>
+      <div> </div>
     </div>
   ) : (
     <div></div>
@@ -214,11 +221,9 @@ function Content(props) {
 
   function increment() {
     setNumLoaded((numLoaded) => numLoaded + 1);
-    // console.log("numLoaded :>> ", numLoaded);
   }
 
   React.useEffect(() => {
-    // console.log('numLoaded :>> ', numLoaded);
     if (numLoaded === numComponents && !loaded) {
       setLoaded(true);
     }

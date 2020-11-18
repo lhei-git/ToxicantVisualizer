@@ -51,7 +51,7 @@ def filterFacilities(request):
 
     # filter by chemicals
     if chemical is not None and chemical != "all":
-        filters.add(Q(chemical__name=chemical), filters.connector)
+        filters.add(Q(chemical__name__icontains=chemical), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
     if carcinogen is not None:
@@ -88,7 +88,7 @@ def filterChemicals(request):
 
     # filter by chemicals
     if chemical is not None and chemical != "all":
-        filters.add(Q(name=chemical), filters.connector)
+        filters.add(Q(name__icontains=chemical), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
     if carcinogen is not None:
@@ -125,7 +125,7 @@ def filterReleases(request):
 
     # filter by chemicals
     if chemical is not None and chemical != "all":
-        filters.add(Q(chemical__name=chemical), filters.connector)
+        filters.add(Q(chemical__name__icontains=chemical), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
     if carcinogen is not None:

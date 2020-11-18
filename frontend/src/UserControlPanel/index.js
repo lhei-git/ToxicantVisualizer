@@ -5,10 +5,6 @@ import { useEffect } from "react";
 const React = require("react");
 const { formatChemical } = require("../helpers");
 
-const startYear = 2005;
-const endYear = 2019;
-const types = ["all", "air", "water", "land", "off_site", "on_site"];
-
 //search button and text box
 function UserControlPanel(props) {
   const [chemicals, setChemicals] = React.useState([]);
@@ -30,7 +26,8 @@ function UserControlPanel(props) {
       year: props.filters.year,
     };
     const res = await vetapi.get("/chemicals", { params });
-    setChemicals(res.data);
+    const tmp = [...new Set(res.data.map(d => formatChemical(d)))]
+    setChemicals(tmp);
   }
 
   function onFilterChange(event) {
@@ -42,6 +39,8 @@ function UserControlPanel(props) {
   }
 
   function getYears() {
+    const startYear = 2005;
+    const endYear = 2019;
     let years = [];
     for (let i = endYear; i >= startYear; i--) {
       years.push(
@@ -57,7 +56,7 @@ function UserControlPanel(props) {
     let options = [];
     options.push(
       <option defaultValue={true} key="all" value="all">
-        all
+        All chemicals
       </option>
     );
     if (chemicals.length === 0) return options;
@@ -65,7 +64,7 @@ function UserControlPanel(props) {
     for (var chemical of chemicals) {
       options.push(
         <option key={chemical} value={chemical}>
-          {formatChemical(chemical)}
+          {chemical}
         </option>
       );
     }
@@ -73,70 +72,68 @@ function UserControlPanel(props) {
     return options;
   }
 
+  function getReleaseTypes() {
+    const types = [
+      "All release types",
+      "air",
+      "water",
+      "land",
+      "off_site",
+      "on_site",
+    ];
+
+    return types.map((type) => {
+      return <option key={type}>{type}</option>;
+    });
+  }
+
   return (
     <div className="control-container">
       <div className="content">
         {/* Search Bar Content*/}
-        <div className="flex-item one">
-          <div className="selector">
-            <label htmlFor="releaseType">Release Type</label>
-            <select
-              name="releaseType"
-              value={props.filters.releaseType}
-              onChange={onFilterChange}
-              id=""
-            >
-              {(function () {
-                return types.map((type) => {
-                  return <option key={type}>{type}</option>;
-                });
-              })()}
-            </select>
-          </div>
-          <div className="selector">
-            <label htmlFor="year">Year</label>
-            <select
-              name="year"
-              value={props.filters.year}
-              onChange={onFilterChange}
-              id=""
-            >
-              {getYears()}
-            </select>
-          </div>
-          <div className="selector">
-            <label htmlFor="chemical">Chemical</label>
-            <select
-              name="chemical"
-              value={props.filters.chemical}
-              onChange={onFilterChange}
-              id=""
-            >
-              {getChemicals()}
-            </select>
-          </div>
+        <select
+          name="year"
+          value={props.filters.year}
+          onChange={onFilterChange}
+          id=""
+        >
+          {getYears()}
+        </select>
+        <select
+          name="releaseType"
+          value={props.filters.releaseType}
+          onChange={onFilterChange}
+          id=""
+        >
+          {getReleaseTypes()}
+        </select>
+        <select
+          name="chemical"
+          value={props.filters.chemical}
+          onChange={onFilterChange}
+          id=""
+        >
+          {getChemicals()}
+        </select>
+        <div className="checkbox-group">
+          <label htmlFor="carcinogens">Carcinogens only</label>
+          <input
+            type="checkbox"
+            checked={props.filters.carcinogens}
+            onChange={onFilterChange}
+            name="carcinogens"
+            id="carcinogens"
+          />
         </div>
-        <div className="flex-item two">
-          <div className="selector">
-            <label htmlFor="carcinogens">Carcinogens only</label>
-            <input
-              type="checkbox"
-              checked={props.filters.carcinogens}
-              onChange={onFilterChange}
-              name="carcinogens"
-              id="carcinogens"
-            />
-          </div>
-          <div className="selector">
-            <label htmlFor="pbtsAndDioxins">PBTs and Dioxins only</label>
-            <input
-              type="checkbox"
-              checked={props.filters.pbtsAndDioxins}
-              onChange={onFilterChange}
-              id="pbtsAndDioxins"
-              name="pbtsAndDioxins"
-            />
-          </div>
+        <div className="checkbox-group">
+          <label htmlFor="pbtsAndDioxins">PBTs and Dioxins only</label>
+          <input
+            type="checkbox"
+            checked={props.filters.pbtsAndDioxins}
+            onChange={onFilterChange}
+            id="pbtsAndDioxins"
+            name="pbtsAndDioxins"
+          />
         </div>
       </div>
     </div>
