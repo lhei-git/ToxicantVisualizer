@@ -199,6 +199,8 @@ a {
 
 .map-wrapper .legend .marker img{
   width: 20px;
+  position: relative;
+  top: 2px;
 }
 
 .pubchem {
