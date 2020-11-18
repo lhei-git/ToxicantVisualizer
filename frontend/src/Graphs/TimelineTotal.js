@@ -57,7 +57,13 @@ function TimelineTotal(props) {
                 tickFormatter={(val) => amountAsLabel(val) + " "}
               />
               <Tooltip
-                contentStyle={{ color: "#000" }}
+                contentStyle={{
+                  color: "#FFF",
+                  background: "rgba(0,0,0,0.8)",
+                  border: "none",
+                }}
+                itemStyle={{ color: "#FFF" }}
+                labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
                 isAnimationActive={false}
                 itemSorter={(a) => -a.value}
                 formatter={(value) => formatAmount(value)}
@@ -65,6 +71,7 @@ function TimelineTotal(props) {
               <Legend />
               <Line
                 type="monotone"
+                name="total releases (lbs)"
                 dataKey="total"
                 stroke="#9c27b0"
                 strokeWidth={3}
