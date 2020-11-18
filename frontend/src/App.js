@@ -181,6 +181,21 @@ const Navbar = (props) => {
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  function getColor() {
+    switch (state.filters.releaseType) {
+      case "air":
+        return "grey";
+      case "water":
+        return "green";
+      case "land":
+        return "brown";
+      case "off_site":
+        return "yellow";
+      default:
+        return "red";
+    }
+  }
+
   function handleSuccess(map) {
     dispatch(setMap(map));
     history.push("/map");
@@ -273,6 +288,81 @@ const App = (props) => {
                       }}
                     />
                   )}
+                  <div className="legend">
+                    <ul style={{ listStyle: "none" }}>
+                      <li>
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_1-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        0 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_2-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        0 - 100 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_3-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        100 - 10,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_4-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        10,000 - 100,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_5-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        100,000 - 1,000,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_6-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        &lt;1,000,000 lbs
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
               {state.map && (
