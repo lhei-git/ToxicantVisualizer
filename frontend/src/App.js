@@ -161,15 +161,21 @@ const Navbar = (props) => {
         <li className={location.pathname === "/" ? "active" : ""}>
           <Link to="/">Search</Link>
         </li>
-        <li className={location.pathname === "/map" ? "active" : ""}>
-          <Link to="/map">Facility Map</Link>
-        </li>
-        <li className={location.pathname === "/graphs" ? "active" : ""}>
-          <Link to="/graphs">Location Insights</Link>
-        </li>
-        <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
-          <Link to="/thematicmaps">National Insights</Link>
-        </li>
+        {props.visible && (
+          <li className={location.pathname === "/map" ? "active" : ""}>
+            <Link to="/map">Facility Map</Link>
+          </li>
+        )}
+        {props.visible && (
+          <li className={location.pathname === "/graphs" ? "active" : ""}>
+            <Link to="/graphs">Location Insights</Link>
+          </li>
+        )}
+        {props.visible && (
+          <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
+            <Link to="/thematicmaps">National Insights</Link>
+          </li>
+        )}
         {/* <li className={location.pathname === "/about" ? "active" : ""}>
           <Link to="/about">About</Link>
         </li> */}
@@ -204,7 +210,7 @@ const App = (props) => {
   return (
     <Router history={history}>
       <div className="app-container">
-        <Navbar />
+        <Navbar visible={!!state.map} />
         <Switch>
           <Route exact path="/map">
             <div className="map-view">
