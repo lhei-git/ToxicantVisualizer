@@ -167,7 +167,6 @@ class ThematicMapView extends Component {
     var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
-    console.log("filterType :>> ", filterType);
     await vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
@@ -175,7 +174,6 @@ class ThematicMapView extends Component {
         d = Object.values(l);
         response.data.forEach((st) => {
           if (st[filterType] > maxValue) {
-            console.log("st.facility__county :>> ", st.facility__county);
             maxValue = st[filterType];
           } else if (st[filterType] < minValue) minValue = st[filterType];
         });

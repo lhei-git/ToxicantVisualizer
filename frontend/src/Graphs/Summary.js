@@ -38,55 +38,52 @@ function GraphSummary(props) {
         data[k] = formatAmount(data[k]);
       });
       const country = unitedStates[year];
-      Object.keys(country).forEach((k) => {
-        country[k] = formatAmount(country[k]);
-      });
       const body = (
         <tbody>
           <tr>
             <td>Facilities</td>
             <td>{data["num_facilities"]}</td>
-            <td>{country["num_facilities"]}</td>
+            <td>{formatAmount(country["num_facilities"])}</td>
           </tr>
           <tr>
-            <td>Distinct Chemicals</td>
+            <td>Chemicals</td>
             <td>{data["num_chemicals"]}</td>
-            <td>{country["num_chemicals"]}</td>
+            <td>{formatAmount(country["num_chemicals"])}</td>
           </tr>
           <tr>
             <td>Total Disposal Amount</td>
             <td>{data["total"]}</td>
-            <td>{country["total"]}</td>
+            <td>{formatAmount(country["total"])}</td>
           </tr>
           <tr>
             <td>On-Site Releases</td>
             <td>{data["total_on_site"]}</td>
-            <td>{country["total_on_site"]}</td>
+            <td>{formatAmount(country["total_on_site"])}</td>
           </tr>
           <tr>
             <td>Off-Site Releases</td>
             <td>{data["total_off_site"]}</td>
-            <td>{country["total_off_site"]}</td>
+            <td>{formatAmount(country["total_off_site"])}</td>
           </tr>
           <tr>
             <td>Air Releases</td>
             <td>{data["total_air"]}</td>
-            <td>{country["total_air"]}</td>
+            <td>{formatAmount(country["total_air"])}</td>
           </tr>
           <tr>
             <td>Water Releases</td>
             <td>{data["total_water"]}</td>
-            <td>{country["total_water"]}</td>
+            <td>{formatAmount(country["total_water"])}</td>
           </tr>
           <tr>
             <td>Land Releases</td>
             <td>{data["total_land"]}</td>
-            <td>{country["total_land"]}</td>
+            <td>{formatAmount(country["total_land"])}</td>
           </tr>
           <tr>
             <td>Carcinogenic Releases</td>
             <td>{res.data["total_carcinogen"]}</td>
-            <td>{country["total_carcinogen"]}</td>
+            <td>{formatAmount(country["total_carcinogen"])}</td>
           </tr>
         </tbody>
       );
@@ -100,8 +97,8 @@ function GraphSummary(props) {
 
   return (
     body !== null && (
-      <div className="standalone summary">
-        <div className="header">Summary</div>
+      <div className="graph standalone summary">
+        <div className="header">Summary statistics of total releases for current location and U.S.</div>
         <table>
           <thead>
             <tr>
