@@ -48,18 +48,6 @@ function Home(props) {
     if (status === "ZERO_RESULTS") setErrorMessage("No results found");
     clearSuggestions();
   }
-  const Footer = () => {
-    const React = require("react");
-    return (
-      <div className="footer">
-        &#169;{" "}
-        <span>
-          VET was developed in 2020 for the Lab for Health and Environmental
-          Information
-        </span>
-      </div>
-    );
-  };
 
   return (
     <div className="home-container">
@@ -144,7 +132,6 @@ function Home(props) {
           )}
         </div>
       </div>
-      {/* <Footer /> */}
     </div>
   );
 }

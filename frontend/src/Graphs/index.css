@@ -4,12 +4,11 @@
 
 .summary th,
 .summary td {
-  border: 1px solid var(--black);
-  padding: 5px;
+  padding: 10px;
 }
-
 .summary tr {
-  min-height: 30px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--black);
 }
 
 .summary table {
@@ -18,6 +17,10 @@
   table-layout: fixed;
 }
 
-.summary td {
-  text-align: center;
+.summary td, .summary th {
+  text-align: right;
+}
+
+.summary td:nth-child(1), .summary th:nth-child(1) {
+  text-align: left;
 }

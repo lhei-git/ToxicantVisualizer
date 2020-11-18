@@ -785,10 +785,6 @@ function GraphView(props) {
             onFilterChange={props.onFilterChange}
           ></UserControlPanel>
         </div>
-        <GraphSummary
-          viewport={props.viewport}
-          filters={props.filters}
-        ></GraphSummary>
         <div className="graphs">
           <TimelineTotal
             viewport={props.viewport}
