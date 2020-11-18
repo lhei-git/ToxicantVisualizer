@@ -99,7 +99,7 @@ function Home(props) {
                   <div className="search-input-container">
                     <input
                       {...getInputProps({
-                        placeholder: "Search Places...",
+                        placeholder: "Enter a zip code; a 'city, state' combination; or a state",
                         className: "search-input",
                       })}
                     />
