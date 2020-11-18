@@ -373,14 +373,16 @@ const App = (props) => {
                       filters={state.filters}
                     ></GraphSummary>
                   </div>
-                  <div>
-                    <ThematicStateMap
-                      year={state.filters.year}
-                      type={state.filters.releaseType}
-                      stateName={state.map.stateShort}
-                      stateLongName={state.map.stateLong}
-                    ></ThematicStateMap>
-                  </div>
+                  {state.map.stateShort !== "US" && (
+                    <div>
+                      <ThematicStateMap
+                        year={state.filters.year}
+                        type={state.filters.releaseType}
+                        stateName={state.map.stateShort}
+                        stateLongName={state.map.stateLong}
+                      ></ThematicStateMap>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
