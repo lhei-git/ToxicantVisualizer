@@ -432,7 +432,7 @@ def top_facility_releases(request):
             air=Sum('air')).annotate(water=Sum('water')).annotate(vet_total_releases_offsite=Sum('off_site')).order_by('-total')
     else:
         queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__name').annotate(
-            total=Sum('on_site')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).order_by('-total')[:10]
+            total=Sum('total')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
