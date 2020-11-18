@@ -128,12 +128,12 @@ function HazardStatements(props) {
             return (
               <div className="pictogram" key={v.description}>
                 <img src={v.href} alt="" key={v.description}></img>{" "}
-                <span className="tooltiptext">{v.description}</span>
+                <div className="description">{v.description}</div>
               </div>
             );
           })}
         </div>
-        <ul>
+        <ul className="section-content">
           {pubchemData.hazardStatements.map((v, i) => {
             return <li key={JSON.stringify(v)}>{v}</li>;
           })}
@@ -174,40 +174,79 @@ function Toxicity(props) {
   }
 
   function parseToxicityData(response) {
-    var toxicity = [];
-
     //grab the section heading to be displayed
     const TOCHeading =
       response.data.Record.Section[0].Section[0].Section[1].TOCHeading;
     setHeader(TOCHeading);
 
-    const info =
-      response.data.Record.Section[0].Section[0].Section[1].Information;
+    const carcinogenicity = (
+      <div>
+        {response.data.Record.Section[0].Section[0].Section[1].Information.map(
+          (t) => t.Value.StringWithMarkup[0].String
+        )
+          .filter((t) => t.toUpperCase() !== "NOT LISTED")
+          .map((v, i) => {
+            return <li key={"toxicity-" + i}>{v}</li>;
+          })}
+      </div>
+    );
+    const healthData =
+      response.data.Record.Section[0].Section[0].Section[2].Information;
+    const healthEffects = (
+      <div>
+        <ul className="section-content">
+          {healthData
+            .find((d) => d.Name === "Health Effect Code(s)")
+            .Value.StringWithMarkup.map((s) => (
+              <li>{s.String}</li>
+            ))}
+        </ul>
+      </div>
+    );
 
-    toxicity = info
-      .map((t) => t.Value.StringWithMarkup[0].String)
-      .filter((t) => t.toUpperCase() !== "NOT LISTED");
+    const exposureData =
+      response.data.Record.Section[0].Section[0].Section[3].Information;
+    const exposureRoutes = (
+      <div>
+        <ul className="section-content">
+          {exposureData.map((s) => (
+            <li>{s.Value.StringWithMarkup[0].String}</li>
+          ))}
+        </ul>
+      </div>
+    );
 
-    return { toxicity };
+    return { carcinogenicity, healthEffects, exposureRoutes };
   }
 
   return (
     pubchemData !== null &&
-    header !== null &&
-    pubchemData.toxicity.length !== 0 && (
+    header !== null && (
       <div className="toxicity">
         <a href={link}>
           <h2>
-            {header}
+            Toxicity
             <Link href={link} />
           </h2>
         </a>
-
-        <ul>
-          {pubchemData.toxicity.map((v, i) => {
-            return <li key={"toxicity-" + i}>{v}</li>;
-          })}
-        </ul>
+        {pubchemData.healthEffects !== null && (
+          <div>
+            <h3>Health Effects</h3>
+            {pubchemData.healthEffects}
+          </div>
+        )}
+        {pubchemData.exposureRoutes !== null && (
+          <div>
+            <h3>Exposure Routes</h3>
+            {pubchemData.exposureRoutes}
+          </div>
+        )}
+        {pubchemData.carcinogenicity !== null && (
+          <div>
+            <h3>Evidence for Carcinogenicity</h3>
+            <ul className="section-content">{pubchemData.carcinogenicity}</ul>
+          </div>
+        )}
       </div>
     )
   );
@@ -239,6 +278,7 @@ function Content(props) {
         </div>
       )}
       <div className={`pubChemFields ${loaded ? "" : "loading"}`}>
+        <div style={{ fontStyle: "italic" }}>Information from PubChem:</div>
         {props.chemName !== "" && (
           <div className="name">
             <h1>{props.chemName}</h1>
@@ -326,7 +366,9 @@ class PubChemFields extends Component {
         chemName={formatChemical(this.props.chemName)}
       ></Content>
     ) : (
-      <div className="oops">Pubchem data for {this.props.chemName} could not be found.</div>
+      <div className="oops">
+        Pubchem data for {this.props.chemName} could not be found.
+      </div>
     );
   }
 }
