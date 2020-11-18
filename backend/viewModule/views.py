@@ -23,6 +23,9 @@ latest_year = 2019
 #        and NOT IN ORM QUERY. If values() (and/or distinct()) is used in ORM query a <ValuesQuerySet>
 #        is returned which is unusable by serializer, use json.dumps(list(..)) instead and return response
 
+def health_check(request):
+    return HttpResponse('OK')
+
 
 def filterFacilities(request):
     carcinogen = request.GET.get('carcinogen')
