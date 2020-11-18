@@ -2,10 +2,20 @@ import "./index.css";
 import PlacesAutocomplete from "react-places-autocomplete";
 const geocoder = require("../api/geocoder");
 const React = require("react");
+const vetapi = require("../api/vetapi");
 
 function Home(props) {
   let [location, setLocation] = React.useState("");
   let [errorMessage, setErrorMessage] = React.useState("");
+
+  /* Used to handle Elastic Beanstalk cold start */
+  React.useEffect(() => {
+    try {
+      vetapi.get("_health");
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
 
   async function geocodeLocation(location) {
     try {
