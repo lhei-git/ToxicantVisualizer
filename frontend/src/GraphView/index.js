@@ -594,6 +594,11 @@ async function GraphTopTenChemicals(props) {
   }
 }
 
+const compare = (a, b) => {
+  console.log("typeof a.year :>> ", typeof a.year);
+  return a.year - b.year;
+};
+
 async function TimelineTopFacilities(props) {
   try {
     const { northeast, southwest } = props.viewport;
@@ -613,7 +618,7 @@ async function TimelineTopFacilities(props) {
       params,
     });
 
-    const data = res.data.lines
+    let data = res.data.lines
       .reduce((acc, cur) => {
         const existing = acc.find((e) => e.year === cur.year);
         const formatted = cur["facility__name"];
@@ -625,8 +630,9 @@ async function TimelineTopFacilities(props) {
         }
         return acc;
       }, [])
-      .sort((a, b) => a.year - b.year);
-    const correctIndex = data.sort(
+      .sort(compare);
+
+    const correctIndex = [...data].sort(
       (a, b) => Object.keys(b).length - Object.keys(a).length
     )[0];
     const keys = Object.keys(correctIndex);
@@ -721,9 +727,9 @@ async function TimelineTopParents(props) {
         }
         return acc;
       }, [])
-      .sort((a, b) => a.year - b.year);
+      .sort(compare);
 
-    const correctIndex = data.sort(
+    const correctIndex = [...data].sort(
       (a, b) => Object.keys(b).length - Object.keys(a).length
     )[0];
     const keys = Object.keys(correctIndex);
@@ -817,9 +823,9 @@ async function TimelineTopChemicals(props) {
         }
         return acc;
       }, [])
-      .sort((a, b) => a.year - b.year);
+      .sort(compare);
 
-    const correctIndex = data.sort(
+    const correctIndex = [...data].sort(
       (a, b) => Object.keys(b).length - Object.keys(a).length
     )[0];
     const keys = Object.keys(correctIndex);
