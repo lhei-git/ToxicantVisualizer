@@ -213,18 +213,21 @@ async function GraphAllFacilities(props) {
     return (
       <div
         width="100%"
-        height="180px"
-        style={{ overflowY: "scroll", maxHeight: "400px" }}
+        height="300px"
+        style={{ overflowY: "auto", maxHeight: "500px" }}
       >
-        <ResponsiveContainer width="100%" height={res.data.length * 40}>
+        <ResponsiveContainer
+          width="100%"
+          height={res.data.length * 50}
+          minHeight="500px"
+        >
           <BarChart
             data={data}
             layout="vertical"
             margin={{
-              top: 30,
-              // right: 50,
-              left: 50,
-              bottom: 200,
+              left: 200,
+              right: 15,
+              bottom: 50,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -244,6 +247,8 @@ async function GraphAllFacilities(props) {
             <Tooltip
               contentStyle={{ color: "#000" }}
               isAnimationActive={false}
+              formatter={(value) => formatAmount(value)}
+              itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
@@ -542,9 +547,7 @@ async function TimelineTopFacilities(props) {
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={16 / 7}>
-          <LineChart
-            data={data}
-          >
+          <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
             <YAxis
@@ -635,11 +638,7 @@ async function TimelineTopParents(props) {
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={16 / 7}>
-          <LineChart
-            width={500}
-            height={300}
-            data={data}
-          >
+          <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
             <YAxis
@@ -729,11 +728,7 @@ async function TimelineTopChemicals(props) {
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={16 / 7}>
-          <LineChart
-            width={500}
-            height={300}
-            data={data}
-          >
+          <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
             <YAxis
@@ -773,8 +768,39 @@ async function TimelineTopChemicals(props) {
 }
 
 function GraphView(props) {
+  const [currentGroup, setCurrentGroup] = React.useState(
+    parseInt(sessionStorage.getItem("currentGroup")) || 0
+  );
+
+  function chooseTab(i) {
+    sessionStorage.setItem("currentGroup", i);
+    setCurrentGroup(i);
+  }
+
   return (
     <div className="graph-container">
+      <div className="selector">
+        <ul>
+          <li
+            onClick={() => chooseTab(0)}
+            className={currentGroup === 0 ? "active" : ""}
+          >
+            Top Tens
+          </li>
+          <li
+            onClick={() => chooseTab(1)}
+            className={currentGroup === 1 ? "active" : ""}
+          >
+            Timelines
+          </li>
+          <li
+            onClick={() => chooseTab(2)}
+            className={currentGroup === 2 ? "active" : ""}
+          >
+            Indexes
+          </li>
+        </ul>
+      </div>
       <div className="content">
         {/* <h1>Location Insights</h1> */}
         <div className="filter-container">
@@ -786,66 +812,78 @@ function GraphView(props) {
           ></UserControlPanel>
         </div>
         <div className="graphs">
-          <TimelineTotal
-            viewport={props.viewport}
-            filters={props.filters}
-          ></TimelineTotal>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_facilities"
-            graph={GraphTopTenFacilities}
-            title="Total releases for the top 10 facilities (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_parents"
-            graph={GraphTopTenParents}
-            title="Total releases for the top 10 parent companies (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_chemicals"
-            graph={GraphTopTenChemicals}
-            title="Total releases for the top 10 chemicals (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="timeline_facilities"
-            graph={TimelineTopFacilities}
-            title="TTotal releases for the top 10 facilities (in lbs) over time"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="timeline_parents"
-            graph={TimelineTopParents}
-            title="Total releases for the top 10 parent companies (in lbs) over time"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="timeline_chemicals"
-            graph={TimelineTopChemicals}
-            title="Total releases for the top 10 chemicals (in lbs) over time"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_parents"
-            graph={GraphAllFacilities}
-            title="Total Releases for all Facilities (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_parents"
-            graph={TableAllFacilities}
-            title="Total Releases for all Facilities (in lbs)"
-          ></GraphContainer>
+          {currentGroup === 0 && (
+            <div class="top-tens">
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="top_facilities"
+                graph={GraphTopTenFacilities}
+                title="Total releases for the top 10 facilities (in lbs)"
+              ></GraphContainer>
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="top_parents"
+                graph={GraphTopTenParents}
+                title="Total releases for the top 10 parent companies (in lbs)"
+              ></GraphContainer>
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="top_chemicals"
+                graph={GraphTopTenChemicals}
+                title="Total releases for the top 10 chemicals (in lbs)"
+              ></GraphContainer>
+            </div>
+          )}
+          {currentGroup === 1 && (
+            <div className="timelines">
+              <TimelineTotal
+                viewport={props.viewport}
+                filters={props.filters}
+              ></TimelineTotal>
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="timeline_facilities"
+                graph={TimelineTopFacilities}
+                title="Total releases for the top 10 facilities (in lbs) over time"
+              ></GraphContainer>
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="timeline_parents"
+                graph={TimelineTopParents}
+                title="Total releases for the top 10 parent companies (in lbs) over time"
+              ></GraphContainer>
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="timeline_chemicals"
+                graph={TimelineTopChemicals}
+                title="Total releases for the top 10 chemicals (in lbs) over time"
+              ></GraphContainer>
+            </div>
+          )}
+          {currentGroup === 2 && (
+            <div className="indexes">
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="top_parents"
+                graph={GraphAllFacilities}
+                title="Total Releases for all Facilities (in lbs)"
+              ></GraphContainer>
+              <GraphContainer
+                viewport={props.viewport}
+                filters={props.filters}
+                name="top_parents"
+                graph={TableAllFacilities}
+                title="Total Releases for all Facilities (in lbs)"
+              ></GraphContainer>
+            </div>
+          )}
         </div>
       </div>
     </div>
