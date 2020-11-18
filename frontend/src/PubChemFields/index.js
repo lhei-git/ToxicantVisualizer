@@ -295,11 +295,9 @@ function Content(props) {
 
   function increment() {
     setNumLoaded((numLoaded) => numLoaded + 1);
-    // console.log("numLoaded :>> ", numLoaded);
   }
 
   React.useEffect(() => {
-    // console.log('numLoaded :>> ', numLoaded);
     if (numLoaded === numComponents && !loaded) {
       setLoaded(true);
     }

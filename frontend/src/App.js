@@ -153,16 +153,16 @@ const Navbar = (props) => {
     >
       <div className="logo">VET.</div>
       <ul>
-        <li>
+        <li className={location.pathname === "/" ? "active" : ""}>
           <Link to="/">Search</Link>
         </li>
-        <li>
+        <li className={location.pathname === "/map" ? "active" : ""}>
           <Link to="/map">Facility Map</Link>
         </li>
-        <li>
+        <li className={location.pathname === "/graphs" ? "active" : ""}>
           <Link to="/graphs">Location Insights</Link>
         </li>
-        <li>
+        <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
           <Link to="/thematicmaps">National Insights</Link>
         </li>
       </ul>
@@ -172,7 +172,6 @@ const Navbar = (props) => {
 
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  // const currentPage = useLocation();
 
   function handleSuccess(map) {
     dispatch(setMap(map));
@@ -186,78 +185,81 @@ const App = (props) => {
         <Switch>
           <Route exact path="/map">
             <div className="map-view">
-              <div className="flex-item filter-wrapper">
-                {/* VET MAP FILTER */}
-                <div className="filters">
-                  <div className="header">
-                    {/* Search Bar Title and Image */}
-                    <span>{state.numFacilities || 0}</span> Facilities found
-                  </div>
-                  <UserControlPanel
-                    viewport={state.map ? state.map.viewport : null}
-                    filters={state.filters}
-                    onFilterChange={(filters) => {
-                      dispatch(setFilters(Object.assign({}, filters)));
-                    }}
-                  ></UserControlPanel>
+              {/* VET MAP FILTER */}
+              <div className="filters">
+                <div className="placeholder"></div>
+                <div className="header">
+                  {/* <span>{state.numFacilities || 0}</span> Facilities found */}
                 </div>
-                {state.showPubchemInfo ? (
-                  <div className="pubchem">
-                    <div
-                      className="back"
-                      onClick={() => {
-                        dispatch(showPubchemInfo());
-                      }}
-                    >
-                      &lt; Back to Chemicals
+                <UserControlPanel
+                  viewport={state.map ? state.map.viewport : null}
+                  filters={state.filters}
+                  onFilterChange={(filters) => {
+                    dispatch(setFilters(Object.assign({}, filters)));
+                  }}
+                ></UserControlPanel>
+              </div>
+              <div className="flex-container">
+                <div className="flex-item pubchem-wrapper">
+                  {state.showPubchemInfo ? (
+                    <div className="pubchem">
+                      <div
+                        className="back"
+                        onClick={() => {
+                          dispatch(showPubchemInfo());
+                        }}
+                      >
+                        &lt; Back to Chemicals
+                      </div>
+                      {/* PUBCHEM DATA */}
+                      <PubChemFields chemName={state.currentChemical} />
                     </div>
-                    {/* PUBCHEM DATA */}
-                    <PubChemFields chemName={state.currentChemical} />
-                  </div>
-                ) : (
-                  <div className="chemicals">
-                    {state.chemicals.length === 0 ? (
-                      <div className="placeholder">
-                        <div className="text-center">
-                          Click a facility on the map to see its pollutants.{" "}
+                  ) : (
+                    <div className="chemicals">
+                      {state.chemicals.length === 0 ? (
+                        <div className="placeholder">
+                          <div className="text-center">
+                            Click a facility on the map to see its pollutants.{" "}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="header">
-                        Released Toxicants (click for info)
-                      </div>
-                    )}
-                    <ChemicalList
-                      onClick={(chemical) => {
-                        dispatch(showPubchemInfo());
-                        dispatch(setCurrentChemical(chemical));
+                      ) : (
+                        <div className="header">
+                          Released Toxicants (click for info)
+                        </div>
+                      )}
+                      <ChemicalList
+                        onClick={(chemical) => {
+                          dispatch(showPubchemInfo());
+                          dispatch(setCurrentChemical(chemical));
+                        }}
+                        chemicals={state.chemicals}
+                      ></ChemicalList>
+                    </div>
+                  )}
+                </div>
+                {/* GOOGLE MAPS RENDER */}
+                <div className="flex-item map-wrapper">
+                  {state.map && (
+                    <MapContainer
+                      filters={Object.assign({}, state.filters)}
+                      map={state.map}
+                      onLoad={() => dispatch(loadGraphs())}
+                      apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                      onTilesLoaded={() => dispatch(loadGraphs())}
+                      onUpdate={(num) => dispatch(setNumFacilities(num))}
+                      onRefresh={() => dispatch(refresh())}
+                      onMarkerClick={(facilityId) => {
+                        getChemicals(
+                          facilityId,
+                          state.filters
+                        ).then((chemicals) =>
+                          dispatch(setChemicals(chemicals))
+                        );
                       }}
-                      chemicals={state.chemicals}
-                    ></ChemicalList>
-                  </div>
-                )}
+                    />
+                  )}
+                </div>
               </div>
-              {/* GOOGLE MAPS RENDER */}
-              <div className="flex-item map-wrapper">
-                {state.map && (
-                  <MapContainer
-                    filters={Object.assign({}, state.filters)}
-                    map={state.map}
-                    onLoad={() => dispatch(loadGraphs())}
-                    apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-                    onTilesLoaded={() => dispatch(loadGraphs())}
-                    onUpdate={(num) => dispatch(setNumFacilities(num))}
-                    onRefresh={() => dispatch(refresh())}
-                    onMarkerClick={(facilityId) => {
-                      getChemicals(
-                        facilityId,
-                        state.filters
-                      ).then((chemicals) => dispatch(setChemicals(chemicals)));
-                    }}
-                  />
-                )}
-              </div>
-              <div className="flex-item"></div>
             </div>
           </Route>
           <Route path="/graphs">
@@ -291,13 +293,13 @@ const App = (props) => {
             >
               {" "}
             </ThematicMapView>
-            {/* <Footer /> */}
           </Route>
           <Route path="/">
             <Home isError={state.error} onSuccess={handleSuccess} />
           </Route>
         </Switch>
       </div>
+      <div className="footer"></div>
     </Router>
   );
 };

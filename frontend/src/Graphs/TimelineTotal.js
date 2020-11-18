@@ -51,11 +51,6 @@ function TimelineTotal(props) {
               width={500}
               height={300}
               data={res.data}
-              margin={{
-                top: 5,
-                left: 50,
-                bottom: 5,
-              }}
             >
               <CartesianGrid vertical={false} />
               <XAxis dataKey="year" />
@@ -94,7 +89,7 @@ function TimelineTotal(props) {
 
   return (
     body !== null && (
-      <div className="standalone timeline-total">
+      <div className="graph standalone timeline-total">
         <div className="header">Total Releases</div>
         {body}
       </div>
