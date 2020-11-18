@@ -60,3 +60,7 @@
 .pictogram:hover .tooltiptext {
   visibility: visible;
 }
+
+.oops {
+  margin: 10px;
+}

@@ -217,7 +217,13 @@ const App = (props) => {
                           dispatch(showPubchemInfo());
                         }}
                       >
-                        &lt; Back to Chemicals
+                        <span>
+                          <img
+                            src={require("./../src/assets/leftcarat.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        Back to Chemicals
                       </div>
                       {/* PUBCHEM DATA */}
                       <PubChemFields chemName={state.currentChemical} />
@@ -232,7 +238,8 @@ const App = (props) => {
                         </div>
                       ) : (
                         <div className="caption">
-                          Click on toxicant to see detailed chemical information.
+                          Click on toxicant to see detailed chemical
+                          information.
                         </div>
                       )}
                       <ChemicalList

@@ -326,7 +326,7 @@ class PubChemFields extends Component {
         chemName={formatChemical(this.props.chemName)}
       ></Content>
     ) : (
-      <div>Pubchem data for {this.props.chemName} could not be found.</div>
+      <div className="oops">Pubchem data for {this.props.chemName} could not be found.</div>
     );
   }
 }
