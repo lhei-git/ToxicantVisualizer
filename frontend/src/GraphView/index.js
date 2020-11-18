@@ -152,7 +152,11 @@ async function GraphTopTenFacilities(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
@@ -189,11 +193,11 @@ async function GraphAllFacilities(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
-      release_type: props.filters.releaseType,
-      chemical: props.filters.chemical,
+      // carcinogen: props.filters.carcinogens || null,
+      // dioxin: props.filters.pbtsAndDioxins || null,
+      // pbt: props.filters.pbtsAndDioxins || null,
+      // release_type: props.filters.releaseType,
+      // chemical: props.filters.chemical,
       year: props.filters.year,
       all: 1,
     };
@@ -247,7 +251,11 @@ async function GraphAllFacilities(props) {
               tickFormatter={(val) => formatAmount(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
@@ -316,7 +324,11 @@ async function GraphTopTenPBTs(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
@@ -350,11 +362,11 @@ async function TableAllFacilities(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
-      release_type: props.filters.releaseType,
-      chemical: props.filters.chemical,
+      // carcinogen: props.filters.carcinogens || null,
+      // dioxin: props.filters.pbtsAndDioxins || null,
+      // pbt: props.filters.pbtsAndDioxins || null,
+      // release_type: props.filters.releaseType,
+      // chemical: props.filters.chemical,
       year: props.filters.year,
       all: 1,
     };
@@ -476,7 +488,11 @@ async function GraphTopTenParents(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
@@ -550,7 +566,11 @@ async function GraphTopTenChemicals(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
@@ -637,7 +657,11 @@ async function TimelineTopFacilities(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
@@ -730,7 +754,11 @@ async function TimelineTopParents(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
@@ -822,7 +850,11 @@ async function TimelineTopChemicals(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#FFF", background: "rgba(0,0,0,0.8)", border: "none"}}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
               itemStyle={{ color: "#FFF" }}
               labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
