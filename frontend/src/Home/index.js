@@ -22,9 +22,13 @@ function Home(props) {
       const res = await geocoder.get(`/json?address=${location}`);
       //get the state name, which google labels as administrative_area_level_1
       const results = res.data.results[0];
-      const found = results.address_components.find((c) => {
-        return c.types.includes("administrative_area_level_1");
+      let found = results.address_components.find((c) => {
+        return (
+          c.types.includes("administrative_area_level_1") ||
+          c.types.includes("country")
+        );
       });
+
       const map = {
         address: results.formatted_address,
         center: results.geometry.location,
@@ -34,7 +38,7 @@ function Home(props) {
       };
       return map;
     } catch (err) {
-      throw new Error("no results");
+      throw new Error(err);
     }
   }
 
