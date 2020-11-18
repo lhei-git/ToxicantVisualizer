@@ -91,7 +91,7 @@ function GraphContainer(props) {
   return (
     graph !== null && (
       <div className="graph">
-        <div className="header">{props.title}</div>
+        <div className="graph-header">{props.title}</div>
         <div className="rechart">{graph}</div>
       </div>
     )
@@ -812,78 +812,81 @@ function GraphView(props) {
           ></UserControlPanel>
         </div>
         <div className="graphs">
-          {currentGroup === 0 && (
-            <div class="top-tens">
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="top_facilities"
-                graph={GraphTopTenFacilities}
-                title="Total releases for the top 10 facilities (in lbs)"
-              ></GraphContainer>
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="top_parents"
-                graph={GraphTopTenParents}
-                title="Total releases for the top 10 parent companies (in lbs)"
-              ></GraphContainer>
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="top_chemicals"
-                graph={GraphTopTenChemicals}
-                title="Total releases for the top 10 chemicals (in lbs)"
-              ></GraphContainer>
-            </div>
-          )}
-          {currentGroup === 1 && (
-            <div className="timelines">
-              <TimelineTotal
-                viewport={props.viewport}
-                filters={props.filters}
-              ></TimelineTotal>
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="timeline_facilities"
-                graph={TimelineTopFacilities}
-                title="Total releases for the top 10 facilities (in lbs) over time"
-              ></GraphContainer>
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="timeline_parents"
-                graph={TimelineTopParents}
-                title="Total releases for the top 10 parent companies (in lbs) over time"
-              ></GraphContainer>
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="timeline_chemicals"
-                graph={TimelineTopChemicals}
-                title="Total releases for the top 10 chemicals (in lbs) over time"
-              ></GraphContainer>
-            </div>
-          )}
-          {currentGroup === 2 && (
-            <div className="indexes">
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="top_parents"
-                graph={GraphAllFacilities}
-                title="Total Releases for all Facilities (in lbs)"
-              ></GraphContainer>
-              <GraphContainer
-                viewport={props.viewport}
-                filters={props.filters}
-                name="top_parents"
-                graph={TableAllFacilities}
-                title="Total Releases for all Facilities (in lbs)"
-              ></GraphContainer>
-            </div>
-          )}
+          <div
+            class="top-tens"
+            style={{ display: currentGroup === 0 ? "block" : "none" }}
+          >
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_facilities"
+              graph={GraphTopTenFacilities}
+              title="Total releases for the top 10 facilities (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_parents"
+              graph={GraphTopTenParents}
+              title="Total releases for the top 10 parent companies (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_chemicals"
+              graph={GraphTopTenChemicals}
+              title="Total releases for the top 10 chemicals (in lbs)"
+            ></GraphContainer>
+          </div>
+          <div
+            className="timelines"
+            style={{ display: currentGroup === 1 ? "block" : "none" }}
+          >
+            <TimelineTotal
+              viewport={props.viewport}
+              filters={props.filters}
+            ></TimelineTotal>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="timeline_facilities"
+              graph={TimelineTopFacilities}
+              title="Total releases for the top 10 facilities (in lbs) over time"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="timeline_parents"
+              graph={TimelineTopParents}
+              title="Total releases for the top 10 parent companies (in lbs) over time"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="timeline_chemicals"
+              graph={TimelineTopChemicals}
+              title="Total releases for the top 10 chemicals (in lbs) over time"
+            ></GraphContainer>
+          </div>
+          <div
+            className="indexes"
+            style={{ display: currentGroup === 2 ? "block" : "none" }}
+          >
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_parents"
+              graph={GraphAllFacilities}
+              title="Total Releases for all Facilities (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_parents"
+              graph={TableAllFacilities}
+              title="Total Releases for all Facilities (in lbs)"
+            ></GraphContainer>
+          </div>
         </div>
       </div>
     </div>

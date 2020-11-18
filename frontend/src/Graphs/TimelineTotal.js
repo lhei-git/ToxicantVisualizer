@@ -47,11 +47,7 @@ function TimelineTotal(props) {
       const body = (
         <div>
           <ResponsiveContainer width="100%" aspect={16 / 7}>
-            <LineChart
-              width={500}
-              height={300}
-              data={res.data}
-            >
+            <LineChart width={500} height={300} data={res.data}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="year" />
               <YAxis
@@ -90,7 +86,7 @@ function TimelineTotal(props) {
   return (
     body !== null && (
       <div className="graph standalone timeline-total">
-        <div className="header">Total Releases</div>
+        <div className="graph-header">Total Releases</div>
         {body}
       </div>
     )

@@ -98,7 +98,7 @@ function GraphSummary(props) {
   return (
     body !== null && (
       <div className="graph standalone summary">
-        <div className="header">Summary statistics of total releases for current location and U.S.</div>
+        <div className="graph-header">Summary statistics of total releases for current location and U.S.</div>
         <table>
           <thead>
             <tr>

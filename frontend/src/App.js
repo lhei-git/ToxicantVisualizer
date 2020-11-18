@@ -231,8 +231,8 @@ const App = (props) => {
                           </div>
                         </div>
                       ) : (
-                        <div className="header">
-                          Released Toxicants (click for info)
+                        <div className="caption">
+                          Click on toxicant to see detailed chemical information.
                         </div>
                       )}
                       <ChemicalList
