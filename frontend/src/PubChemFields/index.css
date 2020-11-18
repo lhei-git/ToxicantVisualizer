@@ -60,3 +60,8 @@
 .pictogram:hover .tooltiptext {
   visibility: visible;
 }
+
+.oops {
+  font-style: italic;
+  margin: 10px;
+}
