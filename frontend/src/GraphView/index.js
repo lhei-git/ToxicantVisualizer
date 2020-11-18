@@ -152,7 +152,13 @@ async function GraphTopTenFacilities(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -187,11 +193,11 @@ async function GraphAllFacilities(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
-      release_type: props.filters.releaseType,
-      chemical: props.filters.chemical,
+      // carcinogen: props.filters.carcinogens || null,
+      // dioxin: props.filters.pbtsAndDioxins || null,
+      // pbt: props.filters.pbtsAndDioxins || null,
+      // release_type: props.filters.releaseType,
+      // chemical: props.filters.chemical,
       year: props.filters.year,
       all: 1,
     };
@@ -245,7 +251,13 @@ async function GraphAllFacilities(props) {
               tickFormatter={(val) => formatAmount(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -254,6 +266,82 @@ async function GraphAllFacilities(props) {
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
             <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
             <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+async function GraphTopTenPBTs(props) {
+  try {
+    const { northeast, southwest } = props.viewport;
+    const params = {
+      ne_lat: northeast.lat,
+      ne_lng: northeast.lng,
+      sw_lat: southwest.lat,
+      sw_lng: southwest.lng,
+      carcinogen: props.filters.carcinogens || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
+    };
+    const res = await vetapi.get(`/stats/location/top_pbt_chemicals`, {
+      params,
+    });
+    const data = res.data
+      .map((d) => {
+        const f = d;
+        return {
+          name: f.chemical__name,
+          pv: f.total,
+        };
+      })
+      .sort((a, b) => b.pv - a.pv);
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={16 / 9}>
+          <BarChart
+            data={data}
+            margin={{
+              bottom: 200,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              tick={<CustomizedXAxisTick />}
+            />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => amountAsLabel(val) + " "}
+            />
+            <Tooltip
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
+              isAnimationActive={false}
+              formatter={(value) => formatAmount(value)}
+              itemSorter={(a) => -a.value}
+            />
+            <Legend align="right" verticalAlign="top" />
+            <Bar
+              name="release amount (lbs)"
+              dataKey="pv"
+              stackId="a"
+              fill={barColors.purple}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -274,11 +362,11 @@ async function TableAllFacilities(props) {
       ne_lng: northeast.lng,
       sw_lat: southwest.lat,
       sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
-      release_type: props.filters.releaseType,
-      chemical: props.filters.chemical,
+      // carcinogen: props.filters.carcinogens || null,
+      // dioxin: props.filters.pbtsAndDioxins || null,
+      // pbt: props.filters.pbtsAndDioxins || null,
+      // release_type: props.filters.releaseType,
+      // chemical: props.filters.chemical,
       year: props.filters.year,
       all: 1,
     };
@@ -400,7 +488,13 @@ async function GraphTopTenParents(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -444,7 +538,7 @@ async function GraphTopTenChemicals(props) {
     const data = res.data
       .map((d, i) => {
         return {
-          name: formatChemical(d.chemical__name),
+          name: d.chemical__name,
           pv: d.total,
         };
       })
@@ -472,7 +566,13 @@ async function GraphTopTenChemicals(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -557,7 +657,13 @@ async function TimelineTopFacilities(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               itemSorter={(a) => -a.value}
               formatter={(value) => formatAmount(value)}
@@ -648,7 +754,13 @@ async function TimelineTopParents(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -738,7 +850,13 @@ async function TimelineTopChemicals(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -836,6 +954,13 @@ function GraphView(props) {
               name="top_chemicals"
               graph={GraphTopTenChemicals}
               title="Total releases for the top 10 chemicals (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              viewport={props.viewport}
+              filters={props.filters}
+              name="top_pbts"
+              graph={GraphTopTenPBTs}
+              title="Total releases for the top 10 PBT chemicals (in lbs)"
             ></GraphContainer>
           </div>
           <div
