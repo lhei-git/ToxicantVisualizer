@@ -3,6 +3,7 @@ import "./index.css";
 import LoadingSpinner from "../LoadingSpinner";
 const { formatChemical } = require("../helpers");
 const pubchem = require("../api/pubchem/index");
+const axios = require("axios");
 const React = require("react");
 const Component = React.Component;
 
@@ -136,6 +137,86 @@ function HazardStatements(props) {
   );
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* Associated Disorders and Diseases */
+function AssociatedDiseases(props) {
+  const [header, setHeader] = React.useState(null);
+  const [diseaseData, setDiseaseData] = React.useState(null);
+    const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
+    props.cid || 0
+  }#section=Associated-Disorders-and-Diseases`;
+
+  // fetches data when component is updated
+  React.useEffect(() => {
+    if (!diseaseData && props.chemName) {
+      getDiseaseData();
+    }
+  }, []);
+
+  async function getDiseaseData() {
+    try {
+    const params = {
+      inputType: "chem",
+      inputTerms: props.chemName,
+      report: "diseases_curated",
+      format: "json"
+    }
+    const response = await axios.get(
+      "http://ctdbase.org/tools/batchQuery.go", { params }
+    );
+    } catch (err) {
+      handleError(err);
+    } finally {
+      console.log("toxicity loaded");
+      props.onLoad();
+    }
+  }
+
+  function parseDiseaseData(response) {
+    var rows = [];
+
+    alert(JSON.stringify(response))
+
+    //grab the section heading to be displayed
+    const TOCHeading =
+      response.data.Record.Section[0].Section[0].Section[1].TOCHeading;
+    setHeader(TOCHeading);
+
+    const info =
+      response.data.Record.Section[0].Section[0].Section[1].Information;
+
+    rows = info
+      .map((t) => t.Value.StringWithMarkup[0].String)
+      .filter((t) => t.toUpperCase() !== "NOT LISTED");
+
+    return { rows };
+  }
+
+  return (
+    diseaseData !== null &&
+    header !== null &&
+    diseaseData.toxicity.length !== 0 && (
+      <div className="toxicity">
+        <a href={link}>
+          <h2>
+            {header}
+            <Link href={link} />
+          </h2>
+        </a>
+
+        <ul>
+          {diseaseData.toxicity.map((v, i) => {
+            return <li key={"toxicity-" + i}>{v}</li>;
+          })}
+        </ul>
+      </div>
+    )
+  );
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /* Evidence for Carcinogenicity Component */
 function Toxicity(props) {
   const [header, setHeader] = React.useState(null);
@@ -249,6 +330,7 @@ function Content(props) {
               onLoad={increment}
             ></HazardStatements>
             <Toxicity cid={props.cid} onLoad={increment}></Toxicity>
+            <AssociatedDiseases chemName={props.chemName} onLoad={increment}></AssociatedDiseases>
             {/* <div className="diseases">
               <div
                 dangerouslySetInnerHTML={{
