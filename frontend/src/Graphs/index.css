@@ -1,13 +1,21 @@
-.standalone .header {
-  font-size: 30px;
-  font-weight: bold;
-  text-align: center;
-  width: 100%;
-  margin: 15px 0;
+.summary {
+  --black: #3f3844;
 }
 
-.timeline-total {
-  width: 90%;
+.summary th,
+.summary td {
+  border: 1px solid var(--black);
+  padding: 5px;
+}
+
+.summary tr {
+  min-height: 30px;
+}
+
+.summary table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .summary td {
