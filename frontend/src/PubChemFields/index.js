@@ -128,7 +128,7 @@ function HazardStatements(props) {
             return (
               <div className="pictogram" key={v.description}>
                 <img src={v.href} alt="" key={v.description}></img>{" "}
-                <span className="tooltiptext">{v.description}</span>
+                <div className="description">{v.description}</div>
               </div>
             );
           })}
