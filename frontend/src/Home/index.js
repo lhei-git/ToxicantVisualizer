@@ -118,7 +118,6 @@ function Home(props) {
                         }`;
 
                         return (
-                          /* eslint-disable react/jsx-key */
                           <div
                             key={"suggestion-" + i}
                             {...getSuggestionItemProps(suggestion, {
@@ -133,16 +132,7 @@ function Home(props) {
                             </small>
                           </div>
                         );
-                        /* eslint-enable react/jsx-key */
                       })}
-                      {/* <div className="dropdown-footer">
-                        <div>
-                          <img
-                            src={require("../images/powered_by_google_default.png")}
-                            className="dropdown-footer-image"
-                          />
-                        </div>
-                      </div> */}
                     </div>
                   )}
                 </div>
@@ -152,27 +142,9 @@ function Home(props) {
           {errorMessage.length > 0 && (
             <div className="error-message">{errorMessage}</div>
           )}
-          {/* <form onSubmit={handleSubmit}>
-            <label htmlFor="search">
-              Enter a zip code; a city, state combination; or a state.
-            </label>
-            <input
-              type="text"
-              id="search"
-              value={location}
-              onChange={handleChange}
-            />
-            <label htmlFor="search">Blank box defaults to entire U.S.</label> 
-            <button
-              type="submit"
-              className={location.length === 0 ? "hidden" : ""}
-            >
-              Submit
-            </button>
-          </form> */}
         </div>
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
