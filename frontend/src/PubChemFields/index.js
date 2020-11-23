@@ -47,22 +47,15 @@ function Pharmacology(props) {
     }
   }
 
-  // return pubchemData !== null ? (
-  //   <div className="pharmacology">
-  //     <a href={link}>
-  //       <h2>
-  //         Pharmacology
-  //         <Link href={link} />
-  //       </h2>
-  //     </a>
-  //     {pubchemData}
-  //   </div>
-  // ) : (
-  //   <div></div>
-  // );
   return pubchemData !== null ? (
-    <div>
-      <div> </div>
+    <div className="pharmacology">
+      <a href={link}>
+        <h2>
+          Pharmacology
+          <Link href={link} />
+        </h2>
+      </a>
+      {pubchemData}
     </div>
   ) : (
     <div></div>
