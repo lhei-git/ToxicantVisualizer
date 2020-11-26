@@ -14,15 +14,7 @@ import re
 
 latest_year = 2019
 
-
 # SAMPLE coords-> ?ne_lat=13.3950&sw_lat=13.3948&sw_lng=144.7070&ne_lng=144.7072 {Yields 6 records in GUAM}
-
-# Design Pattern - Use JsonResponse(...) for returning single item querysets or singular dictionary objects
-#        Use HttpResponse(.., content_type=..) for returning querysets with multiple records
-
-# Design Pattern - For selecting certain columns, specify in SERIALIZER(.., FIELDS=('...')) param.
-#        and NOT IN ORM QUERY. If values() (and/or distinct()) is used in ORM query a <ValuesQuerySet>
-#        is returned which is unusable by serializer, use json.dumps(list(..)) instead and return response
 
 def health_check(request):
     return HttpResponse('OK')
@@ -296,37 +288,18 @@ def top_parentco_releases(request):
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
-'''
-Return top ten polluting facilities over time by: window
-'''
+''' Return top ten polluting facilities over time by: window'''
 def timeline_top_parentco_releases(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    filters = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
-        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
-
-    parents = list(release.objects.filter(filters & filterReleases(request) & Q(year=latest_year)).values_list(
+    parents = list(release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=latest_year)).values_list(
         'facility__parent_co_name', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
-    response = release.objects.filter(filters & filterReleases(request) & Q(facility__parent_co_name__in=parents)).values(
+    response = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(facility__parent_co_name__in=parents)).values(
         'year', 'facility__parent_co_name').order_by('facility__parent_co_name', 'year').annotate(total=Sum('total'))
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
 
 
 """ Returns the total releases (in lbs) in a location for each available year. """
-
-
 def timeline_total(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    window = (Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat)
-              & Q(facility__longitude__lt=ne_lng)
-              & Q(facility__longitude__gt=sw_lng))
-
-    queryset = release.objects.filter(window & filterReleases(request)).values(
+    queryset = release.objects.filter(geoFilter(request) & filterReleases(request)).values(
         'year').annotate(total=Sum('total')).order_by('year')
     response = json.dumps(list(queryset), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
