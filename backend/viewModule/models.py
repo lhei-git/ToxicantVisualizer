@@ -129,3 +129,4 @@ class Release(models.Model):
 
     class Meta:
         db_table = 'releases'
+        ordering = ['total']
