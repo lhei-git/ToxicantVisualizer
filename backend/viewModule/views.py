@@ -290,15 +290,8 @@ def all_facility_total_releases(request):
 
 ''' Return top 10 companies in total releases by geo window & year'''
 def top_parentco_releases(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=latest_year))
-    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
-        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
-
-    queryset = release.objects.filter(window & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('total')).annotate(land=Sum('land')).annotate(
+    queryset = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('total')).annotate(land=Sum('land')).annotate(
         air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total')[:10]
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
@@ -306,8 +299,6 @@ def top_parentco_releases(request):
 '''
 Return top ten polluting facilities over time by: window
 '''
-
-
 def timeline_top_parentco_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
