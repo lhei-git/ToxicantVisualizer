@@ -23,11 +23,8 @@ def geoFilter(request):
     state = request.GET.get('state')
     county = request.GET.get('county')
     city = request.GET.get('city')
-    #print(state, county, city)
-    filters = Q()
 
-    if state is None:
-        return HttpResponseBadRequest()
+    filters = Q()
 
     if state is not None:
         filters.add(Q(facility__state=state.upper()), filters.connector)

@@ -35,7 +35,7 @@ const barColors = {
   offSite: "#e9d700",
   air: "#8d8d8d",
   water: "#59954a",
-  land: "#844b11"
+  land: "#844b11",
 };
 
 function handleError(err) {
@@ -65,12 +65,12 @@ function CustomizedXAxisTick(props) {
 function GraphContainer(props) {
   let [graph, setGraph] = useState(null);
   let graphProp = props.graph;
-  let viewportProp = props.viewport;
+  let mapProp = props.map;
   let filterProp = props.filters;
 
   let innerProps = {
     graph: graphProp,
-    viewport: viewportProp,
+    map: mapProp,
     filters: filterProp,
   };
 
@@ -78,14 +78,14 @@ function GraphContainer(props) {
     let mounted = true;
 
     async function fetchData() {
-      if (!viewportProp) return;
+      if (!mapProp) return;
       const g = await graphProp(innerProps);
       if (mounted) setGraph(g);
     }
     fetchData();
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, filterProp]); /* eslint-disable-line */
+  }, [graphProp, mapProp, filterProp]); /* eslint-disable-line */
 
   return (
     graph !== null && (
@@ -99,12 +99,10 @@ function GraphContainer(props) {
 
 async function GraphTopTenFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
@@ -186,12 +184,10 @@ async function GraphTopTenFacilities(props) {
 //Chart 14 - Graph of all facilities and total releases in descending order
 async function GraphAllFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       // carcinogen: props.filters.carcinogens || null,
       // dioxin: props.filters.pbtsAndDioxins || null,
       // pbt: props.filters.pbtsAndDioxins || null,
@@ -278,12 +274,10 @@ async function GraphAllFacilities(props) {
 
 async function GraphTopTenPBTs(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       carcinogen: props.filters.carcinogens || null,
       release_type: props.filters.releaseType,
       year: props.filters.year,
@@ -355,12 +349,10 @@ async function GraphTopTenPBTs(props) {
 //Chart 12 - Table of all facilities and total releases
 async function TableAllFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       // carcinogen: props.filters.carcinogens || null,
       // dioxin: props.filters.pbtsAndDioxins || null,
       // pbt: props.filters.pbtsAndDioxins || null,
@@ -435,12 +427,10 @@ async function TableAllFacilities(props) {
 
 async function GraphTopTenParents(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
@@ -521,12 +511,10 @@ async function GraphTopTenParents(props) {
 
 async function GraphTopTenChemicals(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
@@ -601,12 +589,10 @@ const compare = (a, b) => {
 
 async function TimelineTopFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
@@ -700,12 +686,10 @@ async function TimelineTopFacilities(props) {
 
 async function TimelineTopParents(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
@@ -797,12 +781,10 @@ async function TimelineTopParents(props) {
 
 async function TimelineTopChemicals(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       carcinogen: props.filters.carcinogens || null,
       dioxin: props.filters.pbtsAndDioxins || null,
       pbt: props.filters.pbtsAndDioxins || null,
@@ -928,8 +910,7 @@ function GraphView(props) {
         {/* <h1>Location Insights</h1> */}
         <div className="filter-container">
           <UserControlPanel
-            chemicals={[]}
-            viewport={props.viewport}
+            map={props.map}
             filters={props.filters}
             onFilterChange={props.onFilterChange}
           ></UserControlPanel>
@@ -940,28 +921,28 @@ function GraphView(props) {
             style={{ display: currentGroup === 0 ? "block" : "none" }}
           >
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="top_facilities"
               graph={GraphTopTenFacilities}
               title="Total releases for the top 10 facilities (in lbs)"
             ></GraphContainer>
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="top_parents"
               graph={GraphTopTenParents}
               title="Total releases for the top 10 parent companies (in lbs)"
             ></GraphContainer>
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="top_chemicals"
               graph={GraphTopTenChemicals}
               title="Total releases for the top 10 chemicals (in lbs)"
             ></GraphContainer>
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="top_pbts"
               graph={GraphTopTenPBTs}
@@ -973,25 +954,25 @@ function GraphView(props) {
             style={{ display: currentGroup === 1 ? "block" : "none" }}
           >
             <TimelineTotal
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
             ></TimelineTotal>
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="timeline_facilities"
               graph={TimelineTopFacilities}
               title="Total releases for the top 10 facilities (in lbs) over time"
             ></GraphContainer>
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
               title="Total releases for the top 10 parent companies (in lbs) over time"
             ></GraphContainer>
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="timeline_chemicals"
               graph={TimelineTopChemicals}
@@ -1003,14 +984,14 @@ function GraphView(props) {
             style={{ display: currentGroup === 2 ? "block" : "none" }}
           >
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="top_parents"
               graph={GraphAllFacilities}
               title="Total Releases for all Facilities (in lbs)"
             ></GraphContainer>
             <GraphContainer
-              viewport={props.viewport}
+              map={props.map}
               filters={props.filters}
               name="top_parents"
               graph={TableAllFacilities}
