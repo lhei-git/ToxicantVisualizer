@@ -31,11 +31,11 @@ const timelineColors = [
 ];
 
 const barColors = {
-  red: "#ff483a",
-  beige: "#ffc684",
-  blue: "#15607a",
-  grey: "#e7e7e7",
-  purple: "#9749a5",
+  onSite: "#f65858",
+  offSite: "#e9d700",
+  air: "#8d8d8d",
+  water: "#59954a",
+  land: "#844b11"
 };
 
 function handleError(err) {
@@ -163,14 +163,14 @@ async function GraphTopTenFacilities(props) {
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.red} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.blue} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.beige} />
+            <Bar name="air" dataKey="av" stackId="a" fill={barColors.air} />
+            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.water} />
+            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.land} />
             <Bar
               name="off-site"
               dataKey="dv"
               stackId="a"
-              fill={barColors.grey}
+              fill={barColors.offSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -339,7 +339,7 @@ async function GraphTopTenPBTs(props) {
               name="release amount (lbs)"
               dataKey="pv"
               stackId="a"
-              fill={barColors.purple}
+              fill={barColors.onSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -499,14 +499,14 @@ async function GraphTopTenParents(props) {
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.red} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.blue} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.beige} />
+            <Bar name="air" dataKey="av" stackId="a" fill={barColors.air} />
+            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.water} />
+            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.land} />
             <Bar
               name="off-site"
               dataKey="dv"
               stackId="a"
-              fill={barColors.grey}
+              fill={barColors.offSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -581,7 +581,7 @@ async function GraphTopTenChemicals(props) {
               name="release amount (lbs)"
               dataKey="pv"
               stackId="a"
-              fill={barColors.purple}
+              fill={barColors.onSite}
             />
           </BarChart>
         </ResponsiveContainer>
