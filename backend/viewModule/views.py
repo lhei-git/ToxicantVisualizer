@@ -394,9 +394,6 @@ def timeline_top_chemicals(request):
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
 
 
-
-
-
 def clean_chemical_name(str):
     pattern = re.compile(r'\([^)]*\)|compounds|\"| and.*', re.IGNORECASE)
     return pattern.sub("", str).strip()
@@ -414,37 +411,5 @@ def attr(request, attribute=str()):
         return zipview(request)
 
 
-def idview(request):
-    p_id = int(request.GET.get('id'))
-    result = tri.objects.get(id=p_id)
-    serializer = t_szr(result)
-    return JsonResponse(serializer.data)
-
-
-def chemview(request):
-    p_chem = str(request.GET.get('chemical')).upper()
-    resultset = tri.objects.filter(chemical=p_chem)[:10]
-    return HttpResponse(szs.serialize('json', resultset), content_type='application/json')
-
-
-def cityview(request):
-    p_city = str(request.GET.get('city')).upper()
-    resultset = tri.objects.filter(city=p_city)[:10]
-    data = szs.serialize('json', resultset)
-    return HttpResponse(data, content_type='application/json')
-
-
-def zipview(request):
-    p_zip = int(request.GET.get('zip'))
-    resultset = tri.objects.filter(zip=p_zip)
-    data = szs.serialize('json', resultset)
-    return HttpResponse(data, content_type='application/json')
-
-
-def demo(request, tri_attr=int(-9999)):
-    if tri_attr == -9999:
-        return HttpResponse('<h1>No attribute requested</h1>')
-    else:
-        return HttpResponse('<h1>TRI data for attribute # {}</h1>'.format(tri_attr))
 
 # - https://docs.djangoproject.com/en/3.1/ref/models/querysets/#field-lookups
