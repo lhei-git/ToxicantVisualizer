@@ -16,7 +16,8 @@
   font-size: 18px;
 }
 
-.control-container .content input, .control-container .content select {
+.control-container .content input,
+.control-container .content select {
   margin: 15px;
 }
 
@@ -28,7 +29,7 @@
 
 .control-container .content select {
   min-width: 140px;
-  font-size: 18px;  
+  font-size: 18px;
 }
 
 .control-container .checkbox-group {

@@ -66,7 +66,7 @@ class MapContainer extends Component {
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
       this.setState({ isLoading: true }, () => {
-        this.fetchPoints(this.props.map.viewport, this.props.filters);
+        this.fetchPoints(this.props.map, this.props.filters);
       });
       newState.showingInfoWindow = false;
       this.setState(newState);
@@ -112,13 +112,12 @@ class MapContainer extends Component {
     });
   }
 
-  fetchPoints(viewport, filters) {
+  fetchPoints(map, filters) {
     console.log("fetching...");
     const params = {
-      ne_lat: viewport.northeast.lat,
-      ne_lng: viewport.northeast.lng,
-      sw_lat: viewport.southwest.lat,
-      sw_lng: viewport.southwest.lng,
+      state: map.state,
+      county: map.county,
+      city: map.city,
       carcinogen: filters.carcinogens || null,
       dioxin: filters.pbtsAndDioxins || null,
       pbt: filters.pbtsAndDioxins || null,
@@ -166,7 +165,7 @@ class MapContainer extends Component {
               isLoading: true,
             },
             () => {
-              this.fetchPoints(viewport, this.props.filters);
+              this.fetchPoints(this.props.map, this.props.filters);
             }
           );
         });

@@ -17,7 +17,7 @@ function TimelineTotal(props) {
   const [body, setBody] = React.useState(null);
 
   let graphProp = props.graph;
-  let viewportProp = props.viewport;
+  let mapProp = props.map;
   let filterProp = props.filters;
 
   useEffect(() => {
@@ -25,16 +25,14 @@ function TimelineTotal(props) {
     fetchData(mounted);
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, filterProp]); /* eslint-disable-line */
+  }, [graphProp, mapProp, filterProp]); /* eslint-disable-line */
 
   const fetchData = async (mounted) => {
     try {
-      const { northeast, southwest } = props.viewport;
       const params = {
-        ne_lat: northeast.lat,
-        ne_lng: northeast.lng,
-        sw_lat: southwest.lat,
-        sw_lng: southwest.lng,
+        city: props.map.city,
+        county: props.map.county,
+        state: props.map.state,
         carcinogen: props.filters.carcinogens || null,
         dioxin: props.filters.pbtsAndDioxins || null,
         chemical: props.filters.chemical,

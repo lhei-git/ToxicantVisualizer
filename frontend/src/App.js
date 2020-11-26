@@ -221,7 +221,7 @@ const App = (props) => {
                   {/* <span>{state.numFacilities || 0}</span> Facilities found */}
                 </div>
                 <UserControlPanel
-                  viewport={state.map ? state.map.viewport : null}
+                  map={state.map}
                   filters={state.filters}
                   onFilterChange={(filters) => {
                     dispatch(setFilters(Object.assign({}, filters)));
@@ -375,7 +375,7 @@ const App = (props) => {
                 <div>
                   <div>
                     <GraphSummary
-                      viewport={state.map.viewport}
+                      map={state.map}
                       filters={state.filters}
                     ></GraphSummary>
                   </div>
@@ -398,7 +398,7 @@ const App = (props) => {
             {state.map && (
               <div className="graph-view">
                 <GraphView
-                  viewport={state.map.viewport}
+                  map={state.map}
                   filters={state.filters}
                   onFilterChange={(filters) =>
                     dispatch(setFilters(Object.assign({}, filters)))
