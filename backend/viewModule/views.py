@@ -196,14 +196,8 @@ def get_chemicals(request, facility_id):
 
 
 def get_chemicals_in_window(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=latest_year))
-    w = (Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
-        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng))
-    raw = release.objects.filter(w & filterReleases(request) & Q(year=y)).values('chemical__name').distinct()
+    raw = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('chemical__name').distinct()
     response = json.dumps([x['chemical__name'] for x in raw], cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
 
