@@ -26,6 +26,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     environment: 
       DB_HOST: postgres_local
+      API_KEY: Woh5Toh4aerai6th
     volumes:
     - ./backend:/code
     ports:
