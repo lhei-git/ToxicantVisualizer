@@ -26,6 +26,23 @@ latest_year = 2019
 def health_check(request):
     return HttpResponse('OK')
 
+def geoFilter(request):
+    state = request.GET.get('state')
+    county = request.GET.get('county')
+    city = request.GET.get('city')
+    #print(state, county, city)
+    filters = Q()
+
+    if state is not None:
+        filters.add(Q(facility__state=state.upper()), filters.connector)
+    
+    if county is not None:
+        filters.add(Q(facility__county=county.upper()), filters.connector)
+
+    if city is not None:
+        filters.add(Q(facility__city=city.upper()), filters.connector)
+
+    return filters
 
 def filterFacilities(request):
     carcinogen = request.GET.get('carcinogen')
@@ -137,26 +154,18 @@ def filterReleases(request):
     return filters
 
 
-# facilities
-def points(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
-    y = int(request.GET.get('year', default=latest_year))
-    raw = tri.objects.filter(Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-                             & Q(longitude__lt=ne_lng)
-                             & Q(longitude__gt=sw_lng)
-                             & Q(year=y))
-
-    return HttpResponse(szs.serialize('json', raw), content_type='application/json')
-
+def testgeoFilter(request):
+    #state = str(request.GET.get('state')).upper()
+    #qs = release.objects.filter(Q(release__year=2014))[:5]
+    #y = request.GET.get('year')
+    qs = release.objects.filter(geoFilter(request))[:5]
+    print(qs.query)
+    #qs = release.objects.filter(Q(facility__state=state) & Q(year=y))[:5]
+    return HttpResponse(szs.serialize('json', qs), content_type='application/json')
 
 """
 Returns list of facilties filtered by geographic window, year, release type, and chemical classification.
 """
-
-
 def get_facilities(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -234,24 +243,6 @@ def state_total_releases(request):
         return JsonResponse(result)
 
 
-# FIXME - replace raw queries with ORM calls
-# stats/state/all
-
-""" 
-[
-    {
-        "facility__state": "AK",
-        "total": 852184855.0,
-        "air": 324647.0,
-        "water": 317972.0,
-        "land": 1702596055.0,
-        "off_site": 566525.0,
-        "on_site": 851618331.0,
-        "num_facilities": 260
-    }
-]
- """
-
 
 def all_state_total_releases(request):
     y = int(request.GET.get('year', default=latest_year))
@@ -260,24 +251,6 @@ def all_state_total_releases(request):
     print(len(raw))
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
-
-
-""" 
-[
-    {
-        "facility__county": "ABBEVILLE",
-        "facility__state": "SC",
-        "total": 7480.0,
-        "air": 2171.0,
-        "water": 1596.0,
-        "land": 3768.0,
-        "off_site": 3713.0,
-        "on_site": 3768.0,
-        "num_facilities": 13
-    }
-]
-
- """
 
 
 def all_county_total_releases(request):
@@ -290,8 +263,6 @@ def all_county_total_releases(request):
 
 
 ''' Returns all chemicals and respective total release (by type) amounts for queried location {Graph 13} '''
-
-
 def all_chemicals_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -308,7 +279,6 @@ def all_chemicals_releases(request):
 
 ''' Returns all chemicals and respective total release (not by type / only total) amounts in queried location {Graph 15} '''
 
-
 def all_chemicals_total_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -323,8 +293,6 @@ def all_chemicals_total_releases(request):
 
 
 ''' Returns all facilities and respective total release (not by type / only total) amounts in queried location {Graph 12} '''
-
-
 def all_facility_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
@@ -341,8 +309,6 @@ def all_facility_releases(request):
 
 
 ''' Returns all facilities and respective total release (not by type / only total) amounts in queried location {Graph 14} '''
-
-
 def all_facility_total_releases(request):
     ne_lat = float(request.GET.get('ne_lat', default=0.0))
     ne_lng = float(request.GET.get('ne_lng', default=0.0))
