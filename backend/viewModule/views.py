@@ -161,19 +161,27 @@ def testgeoFilter(request):
 
 """ Returns list of facilties filtered by geographic window, year, release type, and chemical classification."""
 def get_facilities(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
+    state = request.GET.get('state')
+    county = request.GET.get('county')
+    city = request.GET.get('city')
+    filters = Q()
+
+    if state is None:
+        return HttpResponseBadRequest()
+
+    if state is not None:
+        filters.add(Q(state=state.upper()), filters.connector)
+    
+    if county is not None:
+        filters.add(Q(county=county.upper()), filters.connector)
+
+    if city is not None:
+        filters.add(Q(city=city.upper()), filters.connector)
+
     y = int(request.GET.get('year', default=latest_year))
 
-    # filter by geographic window and year
-    window = (Q(latitude__lt=ne_lat) & Q(latitude__gt=sw_lat)
-              & Q(longitude__lt=ne_lng)
-              & Q(longitude__gt=sw_lng))
-
     # add sum of total releases for the facility with these filters
-    raw = facility.objects.filter(window & Q(release__year=y) & filterFacilities(request)).annotate(
+    raw = facility.objects.filter(filters & Q(release__year=y) & filterFacilities(request)).annotate(
         total=Sum('release__total')).values()
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
@@ -245,7 +253,7 @@ def all_county_total_releases(request):
 def all_chemicals_releases(request):
     y = int(request.GET.get('year', default=latest_year))
     qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('chemical__name').annotate(
-        Sum('air'), Sum('water'), Sum('land'), Sum('off_site'))
+        Sum('air'), Sum('water'), Sum('land'), Sum('off_site')).order_by('chemical__name')
     # print(qs.query)
     return JsonResponse(list(qs), content_type='application/json', safe=False)
 
@@ -253,17 +261,18 @@ def all_chemicals_releases(request):
 ''' Returns all chemicals and respective total release (not by type / only total) amounts in queried location {Graph 15} '''
 def all_chemicals_total_releases(request):
     y = int(request.GET.get('year', default=latest_year))
-    qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('chemical__name').annotate(Sum('total')).order_by('-total')
+    # TODO - adding an order_by('-total') introduces duplicate chemical names
+    qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('chemical__name').annotate(Sum('total')).order_by('chemical__name')
     #print(qs.query)
     return JsonResponse(list(qs), content_type='application/json', safe=False)
 
 
-''' Returns all facilities and respective total release (not by type / only total) amounts in queried location {Graph 12} '''
+''' Returns all facilities and respective total release (by type) amounts in queried location {Graph 12} '''
 def all_facility_releases(request):
     y = int(request.GET.get('year', default=latest_year))
     qs = release.objects.filter(geoFilter(request) & Q(year=y)).values(
         'facility__name').annotate(
-        Sum('air'), Sum('water'), Sum('land'), Sum('off_site'))
+        Sum('air'), Sum('water'), Sum('land'), Sum('off_site')).order_by('facility__name')
     # print(qs.query)
     return JsonResponse(list(qs), content_type='application/json', safe=False)
 
@@ -271,8 +280,8 @@ def all_facility_releases(request):
 ''' Returns all facilities and respective total release (not by type / only total) amounts in queried location {Graph 14} '''
 def all_facility_total_releases(request):
     y = int(request.GET.get('year', default=latest_year))
-    qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('facility__name').annotate(Sum('total')).order_by('-total')
-    # print(qs.query)
+    qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('facility__name').annotate(Sum('total')).order_by('-total').order_by('facility__name')
+    #print(qs.query)
     return JsonResponse(list(qs), content_type='application/json', safe=False)
 
 
@@ -280,7 +289,8 @@ def all_facility_total_releases(request):
 def top_parentco_releases(request):
     y = int(request.GET.get('year', default=latest_year))
     queryset = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('total')).annotate(land=Sum('land')).annotate(
-        air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total')[:10]
+        air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total', 'facility__parent_co_name')[:10]
+    print(queryset.query)
     return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
@@ -301,7 +311,7 @@ def timeline_total(request):
     return HttpResponse(response, content_type='application/json')
 
 
-''' Return top ten polluting facilities by: window'''
+''' Return top ten polluting facilities by geo spec. '''
 def top_facility_releases(request):
     all = int(request.GET.get('all', default=0))
     y = int(request.GET.get('year', default=latest_year))
@@ -372,16 +382,9 @@ def top_chemicals(request):
 
 
 """ Returns the total release amount over time for the top 10 chemicals released in latest_year. """
-
 def top_pbt_chemicals(request):
-    ne_lat = float(request.GET.get('ne_lat', default=0.0))
-    ne_lng = float(request.GET.get('ne_lng', default=0.0))
-    sw_lat = float(request.GET.get('sw_lat', default=0.0))
-    sw_lng = float(request.GET.get('sw_lng', default=0.0))
     y = int(request.GET.get('year', default=latest_year))
-    window = Q(facility__latitude__lt=ne_lat) & Q(facility__latitude__gt=sw_lat) & Q(
-        facility__longitude__lt=ne_lng) & Q(facility__longitude__gt=sw_lng)
-    raw = release.objects.filter(window & filterReleases(request) & Q(year=y) & Q(chemical__classification='PBT')).values(
+    raw = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y) & Q(chemical__classification='PBT')).values(
         'chemical__name').annotate(total=Sum('total')).order_by('-total')[:10]
     return JsonResponse(list(raw), content_type='application/json', safe=False)
 
