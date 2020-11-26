@@ -1,5 +1,6 @@
 # This page handles requests by individual "view" functions
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
+from rest_framework.response import Response
 from django.db.models import Q, Sum, Subquery, Count, Avg
 from viewModule.models import Tri as tri
 from viewModule.models import Facility as facility
@@ -201,22 +202,16 @@ def get_chemicals_in_window(request):
     response = json.dumps([x['chemical__name'] for x in raw], cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
 
-
 '''
 Return total stats released by state & year {graph }
 '''
-
-
-# TODO
 def state_total_releases(request):
-    st = str(request.GET.get('state')).upper()
     y = int(request.GET.get('year', default=latest_year))
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0, 0, 0, 0, 0, 0, 0, 0
     result = {}
-    if st != 'None':
-        queryset = release.objects.filter(facility__state=st, year=y)
-        t_facilitycount = int(release.objects.filter(
-            facility__state=st, year=y).values('facility').distinct().count())
+    if y != 'None':
+        queryset = release.objects.filter(geoFilter(request) & Q(year=y))
+        t_facilitycount = int(release.objects.filter(geoFilter(request) & Q(year=y)).values('facility').distinct().count())
         for q in queryset:
             if q.chemical.classification == 'Dioxin':
                 t_dioxin += q.total
