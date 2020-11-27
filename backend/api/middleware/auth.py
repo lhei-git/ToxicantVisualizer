@@ -9,8 +9,8 @@ import os
 class AuthMiddleware(MiddlewareMixin):
     def process_request(self, request):
         try:
-            decoded = base64.b64decode(request.headers.get('Authorization'))
-            if not 'Authorization' in request.headers or decoded.decode('ascii') != os.environ.get('API_KEY'):
+            header = request.headers.get('Authorization')
+            if header is None or base64.b64decode(header).decode('ascii') != os.environ.get('API_KEY'):
                 return HttpResponse('Unauthorized', status=401)
         except binascii.Error:
             return HttpResponse('Unauthorized', status=401)
