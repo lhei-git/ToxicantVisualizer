@@ -309,16 +309,36 @@ def timeline_total(request):
 
 
 ''' Return top ten polluting facilities by geo spec. '''
+
+
 def top_facility_releases(request):
     all = int(request.GET.get('all', default=0))
     y = int(request.GET.get('year', default=latest_year))
+    release_type = request.GET.get('release_type', default='all').upper()
     if all == 1:
         queryset = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
             air=Sum('air')).annotate(water=Sum('water')).annotate(vet_total_releases_offsite=Sum('off_site')).order_by('-total')
     else:
-        queryset = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('facility__name').annotate(
-            total=Sum('total')).annotate(land=Sum('land')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total')[:10]
-    return JsonResponse(list(queryset), content_type='application/json', safe=False)
+        queryset = release.objects.filter(
+            geoFilter(request) & Q(year=y)).values('facility__name')
+
+        if release_type == 'AIR':
+            queryset = queryset.annotate(air=Sum('air')).order_by('-air')
+        elif release_type == 'WATER':
+            queryset = queryset.annotate(water=Sum('water')).order_by('-water')
+        elif release_type == 'LAND':
+            queryset = queryset.annotate(land=Sum('land')).order_by('-land')
+        elif release_type == 'ON_SITE':
+            queryset = queryset.annotate(
+                on_site=Sum('on_site')).order_by('-on_site')
+        elif release_type == 'OFF_SITE':
+            queryset = queryset.annotate(
+                off_site=Sum('off_site')).order_by('-off_site')
+        else:
+            queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
+                land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
+
+    return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
 
 
 ''' Return top ten polluting facilities over time by: window'''
