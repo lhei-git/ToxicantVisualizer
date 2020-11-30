@@ -172,7 +172,8 @@ class ThematicStateMap extends Component {
           countyMin: minValue,
           countyMax: maxValue,
         });
-      });
+      })
+      .catch((err) => console.log(err));
   }
 }
 
