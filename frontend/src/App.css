@@ -13,8 +13,6 @@ a {
 
 .app-container {
   position: relative;
-  /* height: 100vh; */
-  /* max-height: 100%; */
   color: #3f3844;
   background: #fff;
 }
@@ -201,6 +199,11 @@ a {
   width: 20px;
   position: relative;
   top: 2px;
+}
+
+.map-wrapper .legend ul {
+  margin: 10px 0;
+  padding: 0;
 }
 
 .pubchem {
