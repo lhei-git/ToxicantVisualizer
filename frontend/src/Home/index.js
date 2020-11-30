@@ -10,11 +10,9 @@ function Home(props) {
 
   /* Used to handle Elastic Beanstalk cold start */
   React.useEffect(() => {
-    try {
-      vetapi.get("_health");
-    } catch (err) {
+    vetapi.get("_health").catch((err) => {
       console.log(err);
-    }
+    });
   }, []);
 
   async function geocodeLocation(location) {
@@ -69,7 +67,7 @@ function Home(props) {
   return (
     <div className="home-container">
       <div className="background">
-        <div className="cite">Photo by https://unsplash.com/@punkidu</div>  
+        <div className="cite">Photo by https://unsplash.com/@punkidu</div>
         <div className="overlay"></div>
       </div>
       <div className="content-group">

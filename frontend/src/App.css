@@ -17,6 +17,28 @@ a {
   background: #fff;
 }
 
+.app-container .error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 80%;
+  margin: 20px auto;
+  padding: 20px;
+  text-align: center;
+  z-index: 2222;
+  font-size: 22px;
+  background: rgb(255, 145, 145);
+  color: black;
+  border: 2px solid red;
+}
+
+.app-container .error div:first-child {
+  float: right;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
 .navigation {
   position: fixed;
   z-index: 100;
