@@ -122,10 +122,11 @@ async function GraphTopTenFacilities(props) {
         return {
           name: f.facility__name,
           total: f.total,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-          dv: f.off_site,
+          av: f.air || 0,
+          bv: f.water || 0,
+          cv: f.land || 0,
+          dv: f.on_site || 0,
+          ev: f.off_site || 0,
         };
       })
       .sort((a, b) => b.total - a.total);
@@ -168,8 +169,14 @@ async function GraphTopTenFacilities(props) {
             <Bar name="water" dataKey="bv" stackId="a" fill={barColors.water} />
             <Bar name="land" dataKey="cv" stackId="a" fill={barColors.land} />
             <Bar
-              name="off-site"
+              name="on-site"
               dataKey="dv"
+              stackId="a"
+              fill={barColors.onSite}
+            />
+            <Bar
+              name="off-site"
+              dataKey="ev"
               stackId="a"
               fill={barColors.offSite}
             />
