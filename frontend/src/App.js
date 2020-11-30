@@ -295,6 +295,7 @@ const App = (props) => {
                     />
                   )}
                   <div className="legend">
+                    <div>Total releases (air, water, land and off-site)</div>
                     <ul style={{ listStyle: "none" }}>
                       <li>
                         <span class="marker">
@@ -365,7 +366,7 @@ const App = (props) => {
                             alt=""
                           ></img>
                         </span>
-                        &lt;1,000,000 lbs
+                        &gt;1,000,000 lbs
                       </li>
                     </ul>
                   </div>
