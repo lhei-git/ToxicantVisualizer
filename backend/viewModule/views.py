@@ -323,17 +323,17 @@ def top_facility_releases(request):
             geoFilter(request) & Q(year=y)).values('facility__name')
 
         if release_type == 'AIR':
-            queryset = queryset.annotate(air=Sum('air')).order_by('-air')
+            queryset = queryset.annotate(total=Sum('air')).order_by('-total')
         elif release_type == 'WATER':
-            queryset = queryset.annotate(water=Sum('water')).order_by('-water')
+            queryset = queryset.annotate(total=Sum('water')).order_by('-total')
         elif release_type == 'LAND':
-            queryset = queryset.annotate(land=Sum('land')).order_by('-land')
+            queryset = queryset.annotate(total=Sum('land')).order_by('-total')
         elif release_type == 'ON_SITE':
             queryset = queryset.annotate(
-                on_site=Sum('on_site')).order_by('-on_site')
+                total=Sum('on_site')).order_by('-total')
         elif release_type == 'OFF_SITE':
             queryset = queryset.annotate(
-                off_site=Sum('off_site')).order_by('-off_site')
+                total=Sum('off_site')).order_by('-total')
         else:
             queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
                 land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
