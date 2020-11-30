@@ -38,6 +38,9 @@ const barColors = {
   land: "#844b11",
 };
 
+const barAspectRatio = 12 / 9;
+const timelineAspectRatio = 16 / 9;
+
 function handleError(err) {
   /* do something here */
 }
@@ -128,7 +131,7 @@ async function GraphTopTenFacilities(props) {
       .sort((a, b) => b.total - a.total);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -296,7 +299,7 @@ async function GraphTopTenPBTs(props) {
       .sort((a, b) => b.pv - a.pv);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -456,7 +459,7 @@ async function GraphTopTenParents(props) {
       .sort((a, b) => b.total - a.total);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -532,7 +535,7 @@ async function GraphTopTenChemicals(props) {
       .sort((a, b) => b.pv - a.pv);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -637,7 +640,7 @@ async function TimelineTopFacilities(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
@@ -732,7 +735,7 @@ async function TimelineTopParents(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
@@ -826,7 +829,7 @@ async function TimelineTopChemicals(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
