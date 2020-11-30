@@ -19,6 +19,7 @@ import PubChemFields from "./PubChemFields";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
 import ThematicStateMap from "./ThematicStateMap/index.js";
+import AboutPage from "./About/index";
 import React, { useReducer } from "react";
 import { formatChemical, formatAmount } from "./helpers";
 import vetapi from "./api/vetapi";
@@ -162,23 +163,25 @@ const Navbar = (props) => {
           <Link to="/">Search</Link>
         </li>
         {props.visible && (
-          <li className={location.pathname === "/map" ? "active" : ""}>
-            <Link to="/map">Facility Map</Link>
-          </li>
+          <>
+            <li className={location.pathname === "/map" ? "active" : ""}>
+              <Link to="/map">Facility Map</Link>
+            </li>
+            <li className={location.pathname === "/graphs" ? "active" : ""}>
+              <Link to="/graphs">Location Insights</Link>
+            </li>
+            <li
+              className={location.pathname === "/thematicmaps" ? "active" : ""}
+            >
+              <Link to="/thematicmaps">National Insights</Link>
+            </li>
+            <li
+              className={location.pathname === "/about" ? "active" : ""}
+            >
+              <Link to="/about">About</Link>
+            </li>
+          </>
         )}
-        {props.visible && (
-          <li className={location.pathname === "/graphs" ? "active" : ""}>
-            <Link to="/graphs">Location Insights</Link>
-          </li>
-        )}
-        {props.visible && (
-          <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
-            <Link to="/thematicmaps">National Insights</Link>
-          </li>
-        )}
-        {/* <li className={location.pathname === "/about" ? "active" : ""}>
-          <Link to="/about">About</Link>
-        </li> */}
       </ul>
     </div>
   );
@@ -416,6 +419,7 @@ const App = (props) => {
               {" "}
             </ThematicMapView>
           </Route>
+          <Route path="/about" component={AboutPage}></Route>
           {/* <Route path="/about"></Route> */}
           <Route path="/">
             <Home isError={state.error} onSuccess={handleSuccess} />
