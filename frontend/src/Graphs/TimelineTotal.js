@@ -44,7 +44,7 @@ function TimelineTotal(props) {
       });
       const body = (
         <div>
-          <ResponsiveContainer width="100%" aspect={16 / 7}>
+          <ResponsiveContainer width="100%" aspect={16 / 9}>
             <LineChart width={500} height={300} data={res.data}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="year" />
