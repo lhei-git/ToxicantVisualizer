@@ -1,5 +1,10 @@
 import React, { memo, useState, useEffect } from "react";
-import { ComposableMap, ZoomableGroup, Geographies, Geography } from "react-simple-maps";
+import {
+  ComposableMap,
+  ZoomableGroup,
+  Geographies,
+  Geography,
+} from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
 import "./index.css";
 
@@ -15,57 +20,44 @@ const rounded = (num) => {
 };
 
 const ThematicMap = (props) => {
-  const [position, setPosition] = useState({ coordinates: [-96,38], zoom: 1});
+  const [position, setPosition] = useState({ coordinates: [-96, 38], zoom: 1 });
 
   if (!props.data) return null;
 
   function colorScaleCounty(val) {
-    if (val == 0)
-        return "#FCDBC6";
-    else if (val < 1000 )
-        return "#FBCBCA";
-    else if (val < 10000)
-        return "#F2A598";
-    else if (val < 100000 )
-        return "#F65858";
-    else if (val <1000000)
-        return "#E00E0E";
-    else
-        return "#A60A0A";
+    if (val == 0) return "#FCDBC6";
+    else if (val < 1000) return "#FBCBCA";
+    else if (val < 10000) return "#F2A598";
+    else if (val < 100000) return "#F65858";
+    else if (val < 1000000) return "#E00E0E";
+    else return "#A60A0A";
   }
 
-    function colorScaleState(val) {
-    if (val == 0)
-        return "#FCDBC6";
-    else if (val < 1000000 )
-        return "#FBCBCA";
-    else if (val < 10000000 )
-        return "#F2A598";
-    else if (val < 50000000 )
-        return "#F65858";
-    else if (val < 100000000)
-        return "#E00E0E";
-    else
-        return "#A60A0A";
+  function colorScaleState(val) {
+    if (val == 0) return "#FCDBC6";
+    else if (val < 1000000) return "#FBCBCA";
+    else if (val < 10000000) return "#F2A598";
+    else if (val < 50000000) return "#F65858";
+    else if (val < 100000000) return "#E00E0E";
+    else return "#A60A0A";
   }
 
   function handleZoomIn() {
     if (position.zoom >= 4) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom * 2 }));
+    setPosition((pos) => ({ ...pos, zoom: pos.zoom * 2 }));
   }
 
   function handleZoomOut() {
     if (position.zoom <= 1) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom / 2 }));
+    setPosition((pos) => ({ ...pos, zoom: pos.zoom / 2 }));
   }
 
   function handleMoveEnd(position) {
     setPosition(position);
   }
 
-  function handleReturnToCenter()
-  {
-    setPosition({coordinates:[-96,38], zoom:1});
+  function handleReturnToCenter() {
+    setPosition({ coordinates: [-96, 38], zoom: 1 });
   }
 
   const filterType = props.filterType !== null ? props.filterType : "total";
@@ -91,7 +83,9 @@ const ThematicMap = (props) => {
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name}</h1></p> <br /><span class="geography-attributes">
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${
+                            geo.properties.name
+                          }</h1></p> <br /><span class="geography-attributes">
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
@@ -120,8 +114,7 @@ const ThematicMap = (props) => {
                         }}
                       />
                     );
-                  }
-                  else {
+                  } else {
                     return (
                       <Geography
                         key={geo.rsmKey}
@@ -131,9 +124,7 @@ const ThematicMap = (props) => {
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
                           props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name}</p></h1><br />
-                                         <span class="geography-attributes"> No releases reported in ${
-                                           props.filterYear
-                                         }</span>
+                                         <span class="geography-attributes"> No releases reported in ${props.filterYear}</span>
                 `);
                         }}
                         onMouseLeave={() => {
@@ -162,33 +153,31 @@ const ThematicMap = (props) => {
         <div className="thematic-map-container">
           <ComposableMap data-tip="" projection="geoAlbersUsa">
             <ZoomableGroup
-                  zoom={position.zoom}
-                  center={position.coordinates}
-                  onMoveEnd={handleMoveEnd}
+              zoom={position.zoom}
+              center={position.coordinates}
+              onMoveEnd={handleMoveEnd}
             >
-                <Geographies geography={props.geoUrl}>
-                  {({ geographies }) =>
-                    geographies.map((geo) => {
-                      var cur = props.data.find(
-                        (s) =>
-                          s.facility__county.slice(0,3) ===
-                            geo.properties.name
-                              .toUpperCase()
-                              .slice(0,3)&&
-                          s.facility__state === geo.properties.iso_3166_2
-                      );
-                      if (cur !== undefined) {
-                        return (
-                          <Geography
-                            key={geo.rsmKey}
-                            geography={geo}
-                            fill={colorScaleCounty(cur ? cur[filterType] : 0)}
-                            stroke={"#000"}
-                            onMouseEnter={() => {
-                              props.setTooltipContent(null);
-                              props.setTooltipContent(`<h1><p style="text-align:center;">${
-                                cur.facility__county
-                              } COUNTY</p></h1><span class="geography-attributes"><br />
+              <Geographies geography={props.geoUrl}>
+                {({ geographies }) =>
+                  geographies.map((geo) => {
+                    var cur = props.data.find(
+                      (s) =>
+                        s.facility__county.slice(0, 3) ===
+                          geo.properties.name.toUpperCase().slice(0, 3) &&
+                        s.facility__state === geo.properties.iso_3166_2
+                    );
+                    if (cur !== undefined) {
+                      return (
+                        <Geography
+                          key={geo.rsmKey}
+                          geography={geo}
+                          fill={colorScaleCounty(cur ? cur[filterType] : 0)}
+                          stroke={"#000"}
+                          onMouseEnter={() => {
+                            props.setTooltipContent(null);
+                            props.setTooltipContent(`<h1><p style="text-align:center;">${
+                              cur.facility__county
+                            } COUNTY</p></h1><span class="geography-attributes"><br />
                                                     Onsite: ${rounded(
                                                       Math.trunc(cur.on_site)
                                                     )} lbs. <br />
@@ -208,85 +197,90 @@ const ThematicMap = (props) => {
                                                       Math.trunc(cur.total)
                                                     )} lbs. <br />
                                                     Facilities: ${rounded(
-                                                      Math.trunc(cur.num_facilities)
+                                                      Math.trunc(
+                                                        cur.num_facilities
+                                                      )
                                                     )} </span>
                         `);
-                            }}
-                            onMouseLeave={() => {
-                              props.setTooltipContent(null);
-                            }}
-                          />
-                        );
-                      } else {
-                        return (
-                          <Geography
-                            key={geo.rsmKey}
-                            geography={geo}
-                            fill={colorScaleCounty(0)}
-                            stroke={"#000"}
-                            onMouseEnter={() => {
-                              props.setTooltipContent(null);
-                              props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name.toUpperCase()} COUNTY</p></h1><br />
+                          }}
+                          onMouseLeave={() => {
+                            props.setTooltipContent(null);
+                          }}
+                        />
+                      );
+                    } else {
+                      return (
+                        <Geography
+                          key={geo.rsmKey}
+                          geography={geo}
+                          fill={colorScaleCounty(0)}
+                          stroke={"#000"}
+                          onMouseEnter={() => {
+                            props.setTooltipContent(null);
+                            props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name.toUpperCase()} COUNTY</p></h1><br />
                                                  <span class="geography-attributes"> No releases reported in ${
                                                    props.filterYear
                                                  }</span>
                         `);
-                            }}
-                            onMouseLeave={() => {
-                              props.setTooltipContent(null);
-                            }}
-                          />
-                        );
-                      }
-                    })
-                  }
-                </Geographies>
+                          }}
+                          onMouseLeave={() => {
+                            props.setTooltipContent(null);
+                          }}
+                        />
+                      );
+                    }
+                  })
+                }
+              </Geographies>
             </ZoomableGroup>
           </ComposableMap>
           <div className="controls">
-        <button onClick={handleZoomIn}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="3"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
-        <button onClick={handleZoomOut}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="3"
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
-        <button onClick={handleReturnToCenter}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="124"
-            height="24"
-            viewBox="0 0 24 24"
-            //stroke="currentColor"
-
-          >
-            <text
-                    x="50%"
-                    y="50%"
-                    fill="black"
-                    dominantBaseline="middle"
-                    textAnchor="middle"> Return to Center </text>
-          </svg>
-        </button>
-      </div>
+            <button onClick={handleZoomIn}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+            <button onClick={handleZoomOut}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+            <button onClick={handleReturnToCenter}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="124"
+                height="24"
+                viewBox="0 0 24 24"
+                //stroke="currentColor"
+              >
+                <text
+                  x="50%"
+                  y="50%"
+                  fill="black"
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                >
+                  {" "}
+                  Return to Center{" "}
+                </text>
+              </svg>
+            </button>
+          </div>
           <Legend
             colorScale={colorScaleCounty}
             filterType={filterType}
@@ -408,39 +402,39 @@ function Legend(props) {
         stroke="black"
       />
       <rect
-      x = "16.6%"
+        x="16.6%"
         height="100"
         width="16.6%"
         fill="#FBCBCA"
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "33.2%"
+      <rect
+        x="33.2%"
         height="100"
         width="16.6%"
         fill={props.colorScale(9999)}
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "49.8%"
+      <rect
+        x="49.8%"
         height="100"
         width="16.6%"
         fill={props.colorScale(99999)}
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "66.4%"
+      <rect
+        x="66.4%"
         height="100"
         width="16.6%"
         fill={props.colorScale(999999)}
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "83%"
+      <rect
+        x="83%"
         height="100"
         width="16.6%"
         fill={props.colorScale(9999999)}
@@ -465,41 +459,41 @@ function Legend(props) {
       >
         {"<"} {rounded(Math.trunc(1000))} lbs.
       </text>
-            <text
+      <text
         x="34.3%"
         y="50%"
         fill="black"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"}  {rounded(Math.trunc(10000))} lbs.
+        {"<"} {rounded(Math.trunc(10000))} lbs.
       </text>
-            <text
+      <text
         x="50.9%"
         y="50%"
         fill="white"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"}  {rounded(Math.trunc(100000))} lbs.
+        {"<"} {rounded(Math.trunc(100000))} lbs.
       </text>
-            <text
+      <text
         x="67.5%"
         y="50%"
         fill="white"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"}  {rounded(Math.trunc(1000000))} lbs.
+        {"<"} {rounded(Math.trunc(1000000))} lbs.
       </text>
-            <text
+      <text
         x="84.1%"
         y="50%"
         fill="white"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {">"}  {rounded(Math.trunc(1000000))} lbs.
+        {">"} {rounded(Math.trunc(1000000))} lbs.
       </text>
     </svg>
   );
@@ -516,39 +510,39 @@ function LegendState(props) {
         stroke="black"
       />
       <rect
-      x = "16.6%"
+        x="16.6%"
         height="100"
         width="16.6%"
         fill={props.colorScale(999999)}
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "33.2%"
+      <rect
+        x="33.2%"
         height="100"
         width="16.6%"
         fill={props.colorScale(9999999)}
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "49.8%"
+      <rect
+        x="49.8%"
         height="100"
         width="16.6%"
         fill={props.colorScale(19999999)}
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "66.4%"
+      <rect
+        x="66.4%"
         height="100"
         width="16.6%"
         fill={props.colorScale(99999999)}
         strokeWidth="1"
         stroke="black"
       />
-            <rect
-      x = "83%"
+      <rect
+        x="83%"
         height="100"
         width="16.6%"
         fill={props.colorScale(9999999999)}
@@ -573,41 +567,41 @@ function LegendState(props) {
       >
         {"<"} {rounded(Math.trunc(1000))} lbs.
       </text>
-            <text
+      <text
         x="34.3%"
         y="50%"
         fill="black"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"}  {rounded(Math.trunc(10000))} lbs.
+        {"<"} {rounded(Math.trunc(10000))} lbs.
       </text>
-            <text
+      <text
         x="50.9%"
         y="50%"
         fill="white"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"}  {rounded(Math.trunc(100000))} lbs.
+        {"<"} {rounded(Math.trunc(100000))} lbs.
       </text>
-            <text
+      <text
         x="67.5%"
         y="50%"
         fill="white"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"}  {rounded(Math.trunc(1000000))} lbs.
+        {"<"} {rounded(Math.trunc(1000000))} lbs.
       </text>
-            <text
+      <text
         x="84.1%"
         y="50%"
         fill="white"
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {">"}  {rounded(Math.trunc(1000000))} lbs.
+        {">"} {rounded(Math.trunc(1000000))} lbs.
       </text>
     </svg>
   );
