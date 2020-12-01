@@ -120,7 +120,7 @@ const ThematicMap = (props) => {
             </Geographies>
           </ComposableMap>
           <Legend
-            colorScale={colorScale}
+            colorScale={colorScaleState}
             filterType={filterType}
             maxVal={props.maxValue}
             minVal={props.minValue}
@@ -148,7 +148,7 @@ const ThematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur[filterType] : 0)}
+                        fill={colorScaleCounty(cur ? cur[filterType] : 0)}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
