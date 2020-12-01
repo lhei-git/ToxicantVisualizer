@@ -118,13 +118,13 @@ function UserControlPanel(props) {
           />
         </div>
         <div className="checkbox-group">
-          <label htmlFor="pbtsAndDioxins">PBTs and Dioxins only</label>
+          <label htmlFor="pbts">PBTs only</label>
           <input
             type="checkbox"
-            checked={props.filters.pbtsAndDioxins}
+            checked={props.filters.pbts}
             onChange={onFilterChange}
-            id="pbtsAndDioxins"
-            name="pbtsAndDioxins"
+            id="pbts"
+            name="pbts"
           />
         </div>
       </div>

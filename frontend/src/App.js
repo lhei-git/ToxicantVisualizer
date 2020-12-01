@@ -35,7 +35,7 @@ const initialState = {
   graphsLoaded: false,
   filters: {
     chemical: "all",
-    pbtsAndDioxins: false,
+    pbts: false,
     carcinogens: false,
     releaseType: "all",
     year: 2019,
@@ -104,8 +104,8 @@ const setCurrentChemical = (payload) => ({
 const getChemicals = async (facilityId, filters) => {
   const params = {
     carcinogen: filters.carcinogens || null,
-    dioxin: filters.pbtsAndDioxins || null,
-    pbt: filters.pbtsAndDioxins || null,
+    dioxin: filters.pbts || null,
+    pbt: filters.pbts || null,
     release_type: filters.releaseType,
     chemical: filters.chemical,
     year: filters.year,
