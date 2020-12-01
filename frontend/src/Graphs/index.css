@@ -17,10 +17,12 @@
   table-layout: fixed;
 }
 
-.summary td, .summary th {
+.summary td,
+.summary th {
   text-align: right;
 }
 
-.summary td:nth-child(1), .summary th:nth-child(1) {
+.summary td:nth-child(1),
+.summary th:nth-child(1) {
   text-align: left;
 }
