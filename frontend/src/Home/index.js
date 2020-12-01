@@ -10,11 +10,9 @@ function Home(props) {
 
   /* Used to handle Elastic Beanstalk cold start */
   React.useEffect(() => {
-    try {
-      vetapi.get("_health");
-    } catch (err) {
+    vetapi.get("_health").catch((err) => {
       console.log(err);
-    }
+    });
   }, []);
 
   async function geocodeLocation(location) {
