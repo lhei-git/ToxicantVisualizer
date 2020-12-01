@@ -88,12 +88,12 @@ class ThematicMapView extends Component {
 
   //sets tooltip content for the maps
   handleContentState(content) {
-    this.setState({ content: content });
+    this.setState({ contentState: content });
   }
 
   //sets tooltip content for the maps
   handleContentCounty(content) {
-    this.setState({ content: content });
+    this.setState({ contentCounty: content });
   }
 
   render() {
@@ -148,7 +148,7 @@ class ThematicMapView extends Component {
                 type={"counties"}
               />
               <ReactTooltip multiline={true} html={true}>
-                {this.state.content}
+                {this.state.contentCounty}
               </ReactTooltip>
             </>
           ) : (
