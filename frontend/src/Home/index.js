@@ -20,21 +20,28 @@ function Home(props) {
   async function geocodeLocation(location) {
     try {
       const res = await geocoder.get(`/json?address=${location}`);
-      //get the state name, which google labels as administrative_area_level_1
+
       const results = res.data.results[0];
-      const found = results.address_components.find((c) => {
-        return c.types.includes("administrative_area_level_1");
-      });
+      const city = results.address_components.find((c) =>
+        c.types.includes("locality")
+      );
+      const county = results.address_components.find((c) =>
+        c.types.includes("administrative_area_level_2")
+      );
+      const state = results.address_components.find((c) =>
+        c.types.includes("administrative_area_level_1")
+      );
+
       const map = {
-        address: results.formatted_address,
+        city: city ? city.short_name : null,
+        county: county ? county.short_name.replace("County", "").trim() : null,
+        state: state ? state.short_name : null,
         center: results.geometry.location,
         viewport: results.geometry.viewport,
-        stateShort: found.short_name,
-        stateLong: found.long_name,
       };
       return map;
     } catch (err) {
-      throw new Error("no results");
+      throw new Error(err);
     }
   }
 
@@ -62,6 +69,7 @@ function Home(props) {
   return (
     <div className="home-container">
       <div className="background">
+        <div className="cite">Photo by https://unsplash.com/@punkidu</div>  
         <div className="overlay"></div>
       </div>
       <div className="content-group">
@@ -95,7 +103,8 @@ function Home(props) {
                   <div className="search-input-container">
                     <input
                       {...getInputProps({
-                        placeholder: "Search Places...",
+                        placeholder:
+                          "Enter a zip code; a 'city, state' combination; or a state",
                         className: "search-input",
                       })}
                     />

@@ -110,6 +110,47 @@ const ThematicMap = (props) => {
                                                 `);
                         }}
                         onMouseLeave={() => {
+                          props.setTooltipContent("");
+                        }}
+                      />
+                    );
+                  }
+                })
+              }
+            </Geographies>
+          </ComposableMap>
+          <Legend
+            colorScale={colorScale}
+            filterType={filterType}
+            maxVal={props.maxValue}
+            minVal={props.minValue}
+          ></Legend>
+        </div>
+      </>
+    );
+  //////  used to render the county based map  //////
+  else if (props.type === "counties")
+    return (
+      <>
+        <div className="thematic-map-container">
+          <ComposableMap data-tip="" projection="geoAlbersUsa">
+            <Geographies geography={props.geoUrl}>
+              {({ geographies }) =>
+                geographies.map((geo) => {
+                  var cur = props.data.find(
+                    (s) =>
+                      s.facility__county.slice(0, 3) ===
+                        geo.properties.name.toUpperCase().slice(0, 3) &&
+                      s.facility__state === geo.properties.iso_3166_2
+                  );
+                  if (cur !== undefined) {
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill={colorScale(cur ? cur[filterType] : 0)}
+                        stroke={"#000"}
+                        onMouseEnter={() => {
                           props.setTooltipContent(null);
                         }}
                       />
