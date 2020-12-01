@@ -24,9 +24,13 @@ function UserControlPanel(props) {
       state: map.state,
       year: props.filters.year,
     };
-    const res = await vetapi.get("/chemicals", { params });
-    const tmp = [...new Set(res.data.map((d) => formatChemical(d)))];
-    setChemicals(tmp);
+    try {
+      const res = await vetapi.get("/chemicals", { params });
+      const tmp = [...new Set(res.data.map((d) => formatChemical(d)))];
+      setChemicals(tmp);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   function onFilterChange(event) {
