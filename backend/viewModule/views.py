@@ -285,10 +285,26 @@ def all_facility_total_releases(request):
 ''' Return top 10 companies in total releases by geo window & year'''
 def top_parentco_releases(request):
     y = int(request.GET.get('year', default=latest_year))
-    queryset = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('facility__parent_co_name').annotate(total=Sum('total')).annotate(land=Sum('land')).annotate(
-        air=Sum('air')).annotate(water=Sum('water')).annotate(off_site=Sum('off_site')).order_by('-total', 'facility__parent_co_name')[:10]
-    print(queryset.query)
-    return JsonResponse(list(queryset), content_type='application/json', safe=False)
+    release_type = request.GET.get('release_type', default='all').upper()
+    queryset = release.objects.filter(
+        geoFilter(request) & Q(year=y)).values('facility__parent_co_name')
+
+    if release_type == 'AIR':
+        queryset = queryset.annotate(total=Sum('air')).order_by('-total')
+    elif release_type == 'WATER':
+        queryset = queryset.annotate(total=Sum('water')).order_by('-total')
+    elif release_type == 'LAND':
+        queryset = queryset.annotate(total=Sum('land')).order_by('-total')
+    elif release_type == 'ON_SITE':
+        queryset = queryset.annotate(
+            total=Sum('on_site')).order_by('-total')
+    elif release_type == 'OFF_SITE':
+        queryset = queryset.annotate(
+            total=Sum('off_site')).order_by('-total')
+    else:
+        queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
+            land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
+    return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
 
 
 ''' Return top ten polluting facilities over time by: window'''

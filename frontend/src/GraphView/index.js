@@ -165,18 +165,35 @@ async function GraphTopTenFacilities(props) {
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.air} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.water} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.land} />
+            <Bar
+              name="air"
+              dataKey={props.filters.releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey={props.filters.releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={props.filters.releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              fill={barColors.land}
+            />
             <Bar
               name="on-site"
-              dataKey="dv"
+              dataKey={
+                props.filters.releaseType === "off_site" ? "total" : "dv"
+              }
               stackId="a"
               fill={barColors.onSite}
             />
             <Bar
               name="off-site"
-              dataKey="ev"
+              dataKey={props.filters.releaseType === "on_site" ? "total" : "ev"}
               stackId="a"
               fill={barColors.offSite}
             />
@@ -457,10 +474,11 @@ async function GraphTopTenParents(props) {
         return {
           name: f.facility__parent_co_name,
           total: f.total,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-          dv: f.off_site,
+          av: f.air || 0,
+          bv: f.water || 0,
+          cv: f.land || 0,
+          dv: f.on_site || 0,
+          ev: f.off_site || 0,
         };
       })
       .sort((a, b) => b.total - a.total);
@@ -499,12 +517,35 @@ async function GraphTopTenParents(props) {
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.air} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.water} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.land} />
+            <Bar
+              name="air"
+              dataKey={props.filters.releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey={props.filters.releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={props.filters.releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              fill={barColors.land}
+            />
+            <Bar
+              name="on-site"
+              dataKey={
+                props.filters.releaseType === "off_site" ? "total" : "dv"
+              }
+              stackId="a"
+              fill={barColors.onSite}
+            />
             <Bar
               name="off-site"
-              dataKey="dv"
+              dataKey={props.filters.releaseType === "on_site" ? "total" : "ev"}
               stackId="a"
               fill={barColors.offSite}
             />
