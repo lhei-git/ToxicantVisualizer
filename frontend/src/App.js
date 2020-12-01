@@ -31,7 +31,7 @@ const initialState = {
   chemicals: [],
   currentChemical: "",
   activeTab: 0,
-  error: false,
+  errorMessage: "",
   graphsLoaded: false,
   filters: {
     chemical: "all",
@@ -44,8 +44,6 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "setError":
-      return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
     case "setStateName":
@@ -76,6 +74,8 @@ const reducer = (state, action) => {
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
     case "setActiveTab":
       return { ...state, activeTab: action.payload };
+    case "setErrorMessage":
+      return { ...state, errorMessage: action.payload };
     case "loadGraphs":
       return { ...state, graphsLoaded: true };
     case "refresh":
@@ -95,6 +95,7 @@ const refresh = () => ({ type: "refresh" });
 const setMap = (payload) => ({ type: "setMap", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
+const setErrorMessage = (payload) => ({ type: "setErrorMessage", payload });
 const loadGraphs = () => ({ type: "loadGraphs" });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
@@ -202,6 +203,13 @@ const App = (props) => {
     }
   }
 
+  function toggleError() {
+    dispatch(setErrorMessage("Server request failed, please try again later."));
+    setTimeout(() => {
+      dispatch(setErrorMessage(""));
+    }, 10000);
+  }
+
   function handleSuccess(map) {
     dispatch(setMap(map));
     history.push("/map");
@@ -210,6 +218,12 @@ const App = (props) => {
   return (
     <Router history={history}>
       <div className="app-container">
+        {state.errorMessage !== "" && (
+          <div className="error" onClick={() => dispatch(setErrorMessage(""))}>
+            {state.errorMessage}
+            <div>x</div>
+          </div>
+        )}
         <Navbar visible={!!state.map} />
         <Switch>
           <Route exact path="/map">
@@ -284,6 +298,7 @@ const App = (props) => {
                       onTilesLoaded={() => dispatch(loadGraphs())}
                       onUpdate={(num) => dispatch(setNumFacilities(num))}
                       onRefresh={() => dispatch(refresh())}
+                      onApiError={toggleError}
                       onMarkerClick={(facilityId) => {
                         getChemicals(
                           facilityId,
@@ -401,6 +416,7 @@ const App = (props) => {
                 <GraphView
                   map={state.map}
                   filters={state.filters}
+                  onApiError={toggleError}
                   onFilterChange={(filters) =>
                     dispatch(setFilters(Object.assign({}, filters)))
                   }
@@ -413,13 +429,14 @@ const App = (props) => {
             <ThematicMapView
               year={state.filters.year}
               type={state.filters.releaseType}
+              onApiError={toggleError}
             >
               {" "}
             </ThematicMapView>
           </Route>
           {/* <Route path="/about"></Route> */}
           <Route path="/">
-            <Home isError={state.error} onSuccess={handleSuccess} />
+            <Home onSuccess={handleSuccess} />
           </Route>
         </Switch>
         <div className="footer">
