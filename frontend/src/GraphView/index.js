@@ -882,6 +882,32 @@ function GraphView(props) {
     setCurrentGroup(i);
   }
 
+  function getLocationString(map) {
+    let str = map.city
+      ? map.city + ", "
+      : map.county
+      ? map.county + " County, "
+      : "";
+    str += map.state;
+    return str;
+  }
+
+  function getReleaseTypeString(releaseType) {
+    return releaseType !== "all" ? releaseType.replace("_", " ") : "";
+  }
+
+  function getProperTitle(title, props) {
+    return `Total ${getReleaseTypeString(
+      props.filters.releaseType
+    )} releases for ${title} in ${getLocationString(props.map)} in ${
+      props.filters.year
+    } - ${
+      props.filters.chemical !== "all"
+        ? props.filters.chemical
+        : "all chemicals"
+    }`;
+  }
+
   return (
     <div className="graph-container">
       <div className="selector">
@@ -925,28 +951,36 @@ function GraphView(props) {
               filters={props.filters}
               name="top_facilities"
               graph={GraphTopTenFacilities}
-              title="Total releases for the top 10 facilities (in lbs)"
+              title={getProperTitle("10 top facilities", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_parents"
               graph={GraphTopTenParents}
-              title="Total releases for the top 10 parent companies (in lbs)"
+              title={getProperTitle("10 top parent companies", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_chemicals"
               graph={GraphTopTenChemicals}
-              title="Total releases for the top 10 chemicals (in lbs)"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top chemicals in ${getLocationString(
+                props.map
+              )} in ${props.filters.year}`}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_pbts"
               graph={GraphTopTenPBTs}
-              title="Total releases for the top 10 PBT chemicals (in lbs)"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top PBT chemicals in ${getLocationString(
+                props.map
+              )} in ${props.filters.year}`}
             ></GraphContainer>
           </div>
           <div
