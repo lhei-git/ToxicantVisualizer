@@ -1,88 +1,72 @@
-import React, { memo } from "react";
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import React, { memo, useState, useEffect } from "react";
+import { ComposableMap, ZoomableGroup, Geographies, Geography } from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
 import "./index.css";
 
 // used to produce more easily readable numbers
 const rounded = (num) => {
-  if (num > 1000000000) {
+  if (num >= 1000000000) {
     return Math.round(num / 100000000) / 10 + "Bn";
-  } else if (num > 1000000) {
+  } else if (num >= 1000000) {
     return Math.round(num / 100000) / 10 + "M";
-  } else if (num > 1000) {
+  } else if (num >= 1000) {
     return Math.round(num / 100) / 10 + "K";
   } else return num;
 };
 
-const thematicMap = (props) => {
+const ThematicMap = (props) => {
+  const [position, setPosition] = useState({ coordinates: [-96,38], zoom: 1});
+
   if (!props.data) return null;
 
-  //change high end of color scale for US counties, as outliers always skew the data in this map
-  var domain = [];
-  var maxDomain =
-    props.type === "counties" ? props.maxValue / 8 : props.maxValue;
-  domain = [props.minValue, maxDomain];
+  function colorScaleCounty(val) {
+    if (val == 0)
+        return "#FCDBC6";
+    else if (val < 1000 )
+        return "#FBCBCA";
+    else if (val < 10000)
+        return "#F2A598";
+    else if (val < 100000 )
+        return "#F65858";
+    else if (val <1000000)
+        return "#E00E0E";
+    else
+        return "#A60A0A";
+  }
 
-  //returns a geography color based on the scale and given value
-  const colorScale = scaleQuantile().domain(domain).range([
-    //"#fef3f3",
-    //"#feeceb",
-    "#fee4e3",
-    "#fddcdb",
-    "#fdd5d3",
-    "#fdc6c3",
-    "#fcbebb",
-    "#fcb6b3",
-    "#fcafab",
-    "#fca7a3",
-    "#fba09c",
-    "#fb9894",
-    "#fb908c",
-    "#fb8984",
-    "#fb817c",
-    "#fa7a74",
-    "#fa726c",
-    "#fa6a64",
-    "#fa635c",
-    "#f95b54",
-    "#f9544c",
-    "#f94c44",
-    "#f9443c",
-    "#f83d35",
-    "#f82e25",
-    "#f8352d",
-    "#f8261d",
-    "#f7170d",
-    "#f51107",
-    "#f71e15",
-    "#ed1007",
-    "#e51006",
-    "#dd0f06",
-    "#d50f06",
-    "#cd0e06",
-    "#c50e06",
-    "#be0d05",
-    "#b60c05",
-    "#ae0c05",
-    "#a60b05",
-    "#9e0b04",
-    "#960a04",
-    "#8e0a04",
-    "#860904",
-    //"#7e0903",
-    //"#760803",
-    //"#6e0703",
-    //"#660703",
-    //"#5f0602",
-    //"#570602",
-    //"#4f0502",
-    //"#470502",
-    //"#3f0401",
-    //"#370301",
-    //"#2f0301",
-    //"#1f0200",
-    //"#270201",
-  ]);
+    function colorScaleState(val) {
+    if (val == 0)
+        return "#FCDBC6";
+    else if (val < 1000000 )
+        return "#FBCBCA";
+    else if (val < 10000000 )
+        return "#F2A598";
+    else if (val < 50000000 )
+        return "#F65858";
+    else if (val < 100000000)
+        return "#E00E0E";
+    else
+        return "#A60A0A";
+  }
+
+  function handleZoomIn() {
+    if (position.zoom >= 4) return;
+    setPosition(pos => ({ ...pos, zoom: pos.zoom * 2 }));
+  }
+
+  function handleZoomOut() {
+    if (position.zoom <= 1) return;
+    setPosition(pos => ({ ...pos, zoom: pos.zoom / 2 }));
+  }
+
+  function handleMoveEnd(position) {
+    setPosition(position);
+  }
+
+  function handleReturnToCenter()
+  {
+    setPosition({coordinates:[-96,38], zoom:1});
+  }
 
   const filterType = props.filterType !== null ? props.filterType : "total";
 
@@ -103,13 +87,11 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur[filterType] : "#ECECEC")}
+                        fill={colorScaleState(cur ? cur[filterType] : 0)}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
-                          const { name, POP_EST } = geo.properties;
-                          const total = cur.total;
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br /><span class="geography-attributes">
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name}</h1></p> <br /><span class="geography-attributes">
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
@@ -134,7 +116,28 @@ const thematicMap = (props) => {
                                                 `);
                         }}
                         onMouseLeave={() => {
-                          props.setTooltipContent("");
+                          props.setTooltipContent(null);
+                        }}
+                      />
+                    );
+                  }
+                  else {
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill={colorScaleState(0)}
+                        stroke={"#000"}
+                        onMouseEnter={() => {
+                          props.setTooltipContent(null);
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name}</p></h1><br />
+                                         <span class="geography-attributes"> No releases reported in ${
+                                           props.filterYear
+                                         }</span>
+                `);
+                        }}
+                        onMouseLeave={() => {
+                          props.setTooltipContent(null);
                         }}
                       />
                     );
@@ -143,12 +146,12 @@ const thematicMap = (props) => {
               }
             </Geographies>
           </ComposableMap>
-          <Legend
-            colorScale={colorScale}
+          <LegendState
+            colorScale={colorScaleState}
             filterType={filterType}
             maxVal={props.maxValue}
             minVal={props.minValue}
-          ></Legend>
+          ></LegendState>
         </div>
       </>
     );
@@ -158,86 +161,134 @@ const thematicMap = (props) => {
       <>
         <div className="thematic-map-container">
           <ComposableMap data-tip="" projection="geoAlbersUsa">
-            <Geographies geography={props.geoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  var cur = props.data.find(
-                    (s) =>
-                      s.facility__county.slice(0,3) ===
-                        geo.properties.name
-                          .toUpperCase()
-                          .slice(0,3)&&
-                      s.facility__state === geo.properties.iso_3166_2
-                  );
-                  if (cur !== undefined) {
-                    return (
-                      <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        fill={colorScale(cur ? cur[filterType] : "#ECECEC")}
-                        stroke={"#000"}
-                        onMouseEnter={() => {
-                          props.setTooltipContent(null);
-                          const { name, POP_EST } = geo.properties;
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${
-                            cur.facility__county
-                          } COUNTY</p></h1><span class="geography-attributes"><br />
-                                                Onsite: ${rounded(
-                                                  Math.trunc(cur.on_site)
-                                                )} lbs. <br />
-                                                Air: ${rounded(
-                                                  Math.trunc(cur.air)
-                                                )} lbs. <br />
-                                                Water: ${rounded(
-                                                  Math.trunc(cur.water)
-                                                )} lbs. <br />
-                                                Land: ${rounded(
-                                                  Math.trunc(cur.land)
-                                                )} lbs. <br />
-                                                Offsite: ${rounded(
-                                                  Math.trunc(cur.off_site)
-                                                )} lbs. <br />
-                                                Total: ${rounded(
-                                                  Math.trunc(cur.total)
-                                                )} lbs. <br />
-                                                Facilities: ${rounded(
-                                                  Math.trunc(cur.num_facilities)
-                                                )} </span>
-                    `);
-                        }}
-                        onMouseLeave={() => {
-                          props.setTooltipContent("");
-                        }}
-                      />
-                    );
-                  } else {
-                    return (
-                      <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        fill={colorScale(0)}
-                        stroke={"#000"}
-                        onMouseEnter={() => {
-                          props.setTooltipContent(null);
-                          const { name, POP_EST } = geo.properties;
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${name.toUpperCase()} COUNTY</p></h1><br />
-                                             <span class="geography-attributes"> No releases reported in ${
-                                               props.filterYear
-                                             }</span>
-                    `);
-                        }}
-                        onMouseLeave={() => {
-                          props.setTooltipContent("");
-                        }}
-                      />
-                    );
+            <ZoomableGroup
+                  zoom={position.zoom}
+                  center={position.coordinates}
+                  onMoveEnd={handleMoveEnd}
+            >
+                <Geographies geography={props.geoUrl}>
+                  {({ geographies }) =>
+                    geographies.map((geo) => {
+                      var cur = props.data.find(
+                        (s) =>
+                          s.facility__county.slice(0,3) ===
+                            geo.properties.name
+                              .toUpperCase()
+                              .slice(0,3)&&
+                          s.facility__state === geo.properties.iso_3166_2
+                      );
+                      if (cur !== undefined) {
+                        return (
+                          <Geography
+                            key={geo.rsmKey}
+                            geography={geo}
+                            fill={colorScaleCounty(cur ? cur[filterType] : 0)}
+                            stroke={"#000"}
+                            onMouseEnter={() => {
+                              props.setTooltipContent(null);
+                              props.setTooltipContent(`<h1><p style="text-align:center;">${
+                                cur.facility__county
+                              } COUNTY</p></h1><span class="geography-attributes"><br />
+                                                    Onsite: ${rounded(
+                                                      Math.trunc(cur.on_site)
+                                                    )} lbs. <br />
+                                                    Air: ${rounded(
+                                                      Math.trunc(cur.air)
+                                                    )} lbs. <br />
+                                                    Water: ${rounded(
+                                                      Math.trunc(cur.water)
+                                                    )} lbs. <br />
+                                                    Land: ${rounded(
+                                                      Math.trunc(cur.land)
+                                                    )} lbs. <br />
+                                                    Offsite: ${rounded(
+                                                      Math.trunc(cur.off_site)
+                                                    )} lbs. <br />
+                                                    Total: ${rounded(
+                                                      Math.trunc(cur.total)
+                                                    )} lbs. <br />
+                                                    Facilities: ${rounded(
+                                                      Math.trunc(cur.num_facilities)
+                                                    )} </span>
+                        `);
+                            }}
+                            onMouseLeave={() => {
+                              props.setTooltipContent(null);
+                            }}
+                          />
+                        );
+                      } else {
+                        return (
+                          <Geography
+                            key={geo.rsmKey}
+                            geography={geo}
+                            fill={colorScaleCounty(0)}
+                            stroke={"#000"}
+                            onMouseEnter={() => {
+                              props.setTooltipContent(null);
+                              props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name.toUpperCase()} COUNTY</p></h1><br />
+                                                 <span class="geography-attributes"> No releases reported in ${
+                                                   props.filterYear
+                                                 }</span>
+                        `);
+                            }}
+                            onMouseLeave={() => {
+                              props.setTooltipContent(null);
+                            }}
+                          />
+                        );
+                      }
+                    })
                   }
-                })
-              }
-            </Geographies>
+                </Geographies>
+            </ZoomableGroup>
           </ComposableMap>
+          <div className="controls">
+        <button onClick={handleZoomIn}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="3"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+        <button onClick={handleZoomOut}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="3"
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+        <button onClick={handleReturnToCenter}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="124"
+            height="24"
+            viewBox="0 0 24 24"
+            //stroke="currentColor"
+
+          >
+            <text
+                    x="50%"
+                    y="50%"
+                    fill="black"
+                    dominantBaseline="middle"
+                    textAnchor="middle"> Return to Center </text>
+          </svg>
+        </button>
+      </div>
           <Legend
-            colorScale={colorScale}
+            colorScale={colorScaleCounty}
             filterType={filterType}
             maxVal={props.maxValue}
             minVal={props.minValue}
@@ -274,11 +325,9 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur[filterType] : "#ECECEC")}
+                        fill={colorScaleCounty(cur ? cur[filterType] : 0)}
                         stroke={"#000"}
                         onMouseEnter={() => {
-                          props.setTooltipContent(null);
-                          const { NAME, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.facility__county
                           } COUNTY</p></h1><span class="geography-attributes"><br />
@@ -306,7 +355,7 @@ const thematicMap = (props) => {
                 `);
                         }}
                         onMouseLeave={() => {
-                          props.setTooltipContent("");
+                          props.setTooltipContent(null);
                         }}
                       />
                     );
@@ -315,19 +364,18 @@ const thematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(0)}
+                        fill={colorScaleCounty(0)}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
-                          const { NAME, POP_EST } = geo.properties;
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${NAME.toUpperCase()} COUNTY</p></h1><br />
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.NAME.toUpperCase()} COUNTY</p></h1><br />
                                          <span class="geography-attributes"> No releases reported in ${
                                            props.filterYear
                                          }</span>
                 `);
                         }}
                         onMouseLeave={() => {
-                          props.setTooltipContent("");
+                          props.setTooltipContent(null);
                         }}
                       />
                     );
@@ -337,7 +385,7 @@ const thematicMap = (props) => {
             </Geographies>
           </ComposableMap>
           <Legend
-            colorScale={colorScale}
+            colorScale={colorScaleCounty}
             filterType={filterType}
             maxVal={props.maxValue}
             minVal={props.minValue}
@@ -352,21 +400,50 @@ const thematicMap = (props) => {
 function Legend(props) {
   return (
     <svg height="25" width="100%" margin="5px">
-      <defs>
-        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={props.colorScale(0)} stopOpacity="1" />
-          <stop
-            offset="100%"
-            stopColor={props.colorScale(Number.MAX_SAFE_INTEGER)}
-            stopOpacity="1"
-          />
-        </linearGradient>
-        1
-      </defs>
       <rect
         height="100"
-        width="100%"
-        fill="url(#grad2)"
+        width="16.6%"
+        fill={props.colorScale(0)}
+        strokeWidth="1"
+        stroke="black"
+      />
+      <rect
+      x = "16.6%"
+        height="100"
+        width="16.6%"
+        fill="#FBCBCA"
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "33.2%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(9999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "49.8%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(99999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "66.4%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(999999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "83%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(9999999)}
         strokeWidth="1"
         stroke="black"
       />
@@ -377,19 +454,163 @@ function Legend(props) {
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {rounded(Math.trunc(props.minVal))} lbs.
+        0 lbs.
       </text>
       <text
-        x="99%"
+        x="17.7%"
+        y="50%"
+        fill="black"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {"<"} {rounded(Math.trunc(1000))} lbs.
+      </text>
+            <text
+        x="34.3%"
+        y="50%"
+        fill="black"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {"<"}  {rounded(Math.trunc(10000))} lbs.
+      </text>
+            <text
+        x="50.9%"
         y="50%"
         fill="white"
         dominantBaseline="middle"
-        textAnchor="end"
+        textAnchor="start"
       >
-        {rounded(Math.trunc(props.maxVal))} lbs.
+        {"<"}  {rounded(Math.trunc(100000))} lbs.
+      </text>
+            <text
+        x="67.5%"
+        y="50%"
+        fill="white"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {"<"}  {rounded(Math.trunc(1000000))} lbs.
+      </text>
+            <text
+        x="84.1%"
+        y="50%"
+        fill="white"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {">"}  {rounded(Math.trunc(1000000))} lbs.
       </text>
     </svg>
   );
 }
 
-export default memo(thematicMap);
+function LegendState(props) {
+  return (
+    <svg height="25" width="100%" margin="5px">
+      <rect
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(0)}
+        strokeWidth="1"
+        stroke="black"
+      />
+      <rect
+      x = "16.6%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(999999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "33.2%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(9999999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "49.8%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(19999999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "66.4%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(99999999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+            <rect
+      x = "83%"
+        height="100"
+        width="16.6%"
+        fill={props.colorScale(9999999999)}
+        strokeWidth="1"
+        stroke="black"
+      />
+      <text
+        x="1%"
+        y="50%"
+        fill="black"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        0 lbs.
+      </text>
+      <text
+        x="17.7%"
+        y="50%"
+        fill="black"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {"<"} {rounded(Math.trunc(1000))} lbs.
+      </text>
+            <text
+        x="34.3%"
+        y="50%"
+        fill="black"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {"<"}  {rounded(Math.trunc(10000))} lbs.
+      </text>
+            <text
+        x="50.9%"
+        y="50%"
+        fill="white"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {"<"}  {rounded(Math.trunc(100000))} lbs.
+      </text>
+            <text
+        x="67.5%"
+        y="50%"
+        fill="white"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {"<"}  {rounded(Math.trunc(1000000))} lbs.
+      </text>
+            <text
+        x="84.1%"
+        y="50%"
+        fill="white"
+        dominantBaseline="middle"
+        textAnchor="start"
+      >
+        {">"}  {rounded(Math.trunc(1000000))} lbs.
+      </text>
+    </svg>
+  );
+}
+
+export default memo(ThematicMap);
