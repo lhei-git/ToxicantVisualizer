@@ -24,9 +24,13 @@ function UserControlPanel(props) {
       state: map.state,
       year: props.filters.year,
     };
-    const res = await vetapi.get("/chemicals", { params });
-    const tmp = [...new Set(res.data.map((d) => formatChemical(d)))];
-    setChemicals(tmp);
+    try {
+      const res = await vetapi.get("/chemicals", { params });
+      const tmp = [...new Set(res.data.map((d) => formatChemical(d)))];
+      setChemicals(tmp);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   function onFilterChange(event) {
@@ -72,14 +76,7 @@ function UserControlPanel(props) {
   }
 
   function getReleaseTypes() {
-    const types = [
-      "All release types",
-      "air",
-      "water",
-      "land",
-      "off_site",
-      "on_site",
-    ];
+    const types = ["all", "air", "water", "land", "off_site", "on_site"];
 
     return types.map((type) => {
       return <option key={type}>{type}</option>;
@@ -125,13 +122,13 @@ function UserControlPanel(props) {
           />
         </div>
         <div className="checkbox-group">
-          <label htmlFor="pbtsAndDioxins">PBTs and Dioxins only</label>
+          <label htmlFor="pbts">PBTs only</label>
           <input
             type="checkbox"
-            checked={props.filters.pbtsAndDioxins}
+            checked={props.filters.pbts}
             onChange={onFilterChange}
-            id="pbtsAndDioxins"
-            name="pbtsAndDioxins"
+            id="pbts"
+            name="pbts"
           />
         </div>
       </div>

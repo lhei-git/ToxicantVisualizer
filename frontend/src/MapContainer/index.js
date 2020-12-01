@@ -1,13 +1,13 @@
 import "./index.css";
 import "../index.css";
-import { light, dark, silver } from "./mapstyles";
+import { silver } from "./mapstyles";
 import MarkerCluster from "./MarkerClusterer";
 import LoadingSpinner from "../LoadingSpinner";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
 const { shallowEqual } = require("../helpers");
 const Component = React.Component;
-const { Map, InfoWindow, GoogleApiWrapper } = require("google-maps-react");
+const { Map, InfoWindow } = require("google-maps-react");
 
 const containerStyle = {
   position: "relative",
@@ -119,8 +119,7 @@ class MapContainer extends Component {
       county: map.county,
       city: map.city,
       carcinogen: filters.carcinogens || null,
-      dioxin: filters.pbtsAndDioxins || null,
-      pbt: filters.pbtsAndDioxins || null,
+      pbt: filters.pbts || null,
       release_type: filters.releaseType,
       chemical: filters.chemical,
       year: filters.year,
@@ -136,6 +135,7 @@ class MapContainer extends Component {
       })
       .catch((err) => {
         console.log(err);
+        if (this.props.onApiError) this.props.onApiError();
       });
   }
 
