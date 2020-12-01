@@ -105,10 +105,10 @@ class ThematicMapView extends Component {
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
-          <h1>
+          <div className="graph-header">
             Total Releases By State ({this.getFilterText(this.state.filterType)}
             )
-          </h1>
+          </div>
           {this.state.stateData ? (
             <>
               <ThematicMap
@@ -131,10 +131,10 @@ class ThematicMapView extends Component {
         </div>
 
         <div className="flex-item">
-          <h1>
+          <div className="graph-header">
             Total Releases By County (
             {this.getFilterText(this.state.filterType)})
-          </h1>
+          </div>
           {this.state.countyData ? (
             <>
               <ThematicMap

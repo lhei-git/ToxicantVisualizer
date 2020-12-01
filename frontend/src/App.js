@@ -161,15 +161,21 @@ const Navbar = (props) => {
         <li className={location.pathname === "/" ? "active" : ""}>
           <Link to="/">Search</Link>
         </li>
-        <li className={location.pathname === "/map" ? "active" : ""}>
-          <Link to="/map">Facility Map</Link>
-        </li>
-        <li className={location.pathname === "/graphs" ? "active" : ""}>
-          <Link to="/graphs">Location Insights</Link>
-        </li>
-        <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
-          <Link to="/thematicmaps">National Insights</Link>
-        </li>
+        {props.visible && (
+          <li className={location.pathname === "/map" ? "active" : ""}>
+            <Link to="/map">Facility Map</Link>
+          </li>
+        )}
+        {props.visible && (
+          <li className={location.pathname === "/graphs" ? "active" : ""}>
+            <Link to="/graphs">Location Insights</Link>
+          </li>
+        )}
+        {props.visible && (
+          <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
+            <Link to="/thematicmaps">National Insights</Link>
+          </li>
+        )}
         {/* <li className={location.pathname === "/about" ? "active" : ""}>
           <Link to="/about">About</Link>
         </li> */}
@@ -181,6 +187,21 @@ const Navbar = (props) => {
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  function getColor() {
+    switch (state.filters.releaseType) {
+      case "air":
+        return "grey";
+      case "water":
+        return "green";
+      case "land":
+        return "brown";
+      case "off_site":
+        return "yellow";
+      default:
+        return "red";
+    }
+  }
+
   function handleSuccess(map) {
     dispatch(setMap(map));
     history.push("/map");
@@ -189,7 +210,7 @@ const App = (props) => {
   return (
     <Router history={history}>
       <div className="app-container">
-        <Navbar />
+        <Navbar visible={!!state.map} />
         <Switch>
           <Route exact path="/map">
             <div className="map-view">
@@ -200,7 +221,7 @@ const App = (props) => {
                   {/* <span>{state.numFacilities || 0}</span> Facilities found */}
                 </div>
                 <UserControlPanel
-                  viewport={state.map ? state.map.viewport : null}
+                  map={state.map}
                   filters={state.filters}
                   onFilterChange={(filters) => {
                     dispatch(setFilters(Object.assign({}, filters)));
@@ -273,24 +294,102 @@ const App = (props) => {
                       }}
                     />
                   )}
+                  <div className="legend">
+                    <div>Total releases (air, water, land and off-site)</div>
+                    <ul style={{ listStyle: "none" }}>
+                      <li>
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_1-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        0 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_2-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        0 - 100 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_3-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        100 - 10,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_4-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        10,000 - 100,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_5-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        100,000 - 1,000,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_6-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        &gt;1,000,000 lbs
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
               {state.map && (
                 <div>
                   <div>
                     <GraphSummary
-                      viewport={state.map.viewport}
+                      map={state.map}
                       filters={state.filters}
                     ></GraphSummary>
                   </div>
-                  <div>
-                    <ThematicStateMap
-                      year={state.filters.year}
-                      type={state.filters.releaseType}
-                      stateName={state.map.stateShort}
-                      stateLongName={state.map.stateLong}
-                    ></ThematicStateMap>
-                  </div>
+                  {state.map.stateShort !== "US" && (
+                    <div>
+                      <ThematicStateMap
+                        year={state.filters.year}
+                        type={state.filters.releaseType}
+                        stateName={state.map.stateShort}
+                        stateLongName={state.map.stateLong}
+                      ></ThematicStateMap>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -300,7 +399,7 @@ const App = (props) => {
             {state.map && (
               <div className="graph-view">
                 <GraphView
-                  viewport={state.map.viewport}
+                  map={state.map}
                   filters={state.filters}
                   onFilterChange={(filters) =>
                     dispatch(setFilters(Object.assign({}, filters)))

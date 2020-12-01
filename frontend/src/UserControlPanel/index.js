@@ -14,19 +14,18 @@ function UserControlPanel(props) {
   }, [props.filters]);
 
   useEffect(() => {
-    if (props.viewport) fetchChemicalList(props.viewport);
+    if (props.map) fetchChemicalList(props.map);
   }, []);
 
-  async function fetchChemicalList(viewport) {
+  async function fetchChemicalList(map) {
     const params = {
-      ne_lat: viewport.northeast.lat,
-      ne_lng: viewport.northeast.lng,
-      sw_lat: viewport.southwest.lat,
-      sw_lng: viewport.southwest.lng,
+      city: map.city,
+      county: map.county,
+      state: map.state,
       year: props.filters.year,
     };
     const res = await vetapi.get("/chemicals", { params });
-    const tmp = [...new Set(res.data.map(d => formatChemical(d)))]
+    const tmp = [...new Set(res.data.map((d) => formatChemical(d)))];
     setChemicals(tmp);
   }
 

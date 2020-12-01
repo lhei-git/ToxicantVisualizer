@@ -9,7 +9,7 @@ function GraphSummary(props) {
   const [body, setBody] = React.useState(null);
 
   let graphProp = props.graph;
-  let viewportProp = props.viewport;
+  let mapProp = props.map;
   let yearProp = props.filters.year;
 
   useEffect(() => {
@@ -17,17 +17,15 @@ function GraphSummary(props) {
     fetchData(mounted);
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, yearProp]); /* eslint-disable-line */
+  }, [graphProp, mapProp, yearProp]); /* eslint-disable-line */
 
   const fetchData = async (mounted) => {
     try {
       const { year } = props.filters;
-      const { northeast, southwest } = props.viewport;
       const params = {
-        ne_lat: northeast.lat,
-        ne_lng: northeast.lng,
-        sw_lat: southwest.lat,
-        sw_lng: southwest.lng,
+        city: props.map.city,
+        county: props.map.county,
+        state: props.map.state,
         year,
       };
       const res = await vetapi.get(`/stats/location/summary`, {
@@ -98,7 +96,9 @@ function GraphSummary(props) {
   return (
     body !== null && (
       <div className="graph standalone summary">
-        <div className="graph-header">Summary statistics of total releases for current location and U.S.</div>
+        <div className="graph-header">
+          Summary statistics of total releases for current location and U.S.
+        </div>
         <table>
           <thead>
             <tr>
