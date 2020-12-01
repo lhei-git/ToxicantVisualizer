@@ -38,6 +38,9 @@ const barColors = {
   land: "#844b11",
 };
 
+const barAspectRatio = 12 / 9;
+const timelineAspectRatio = 16 / 9;
+
 function handleError(err) {
   /* do something here */
 }
@@ -119,16 +122,17 @@ async function GraphTopTenFacilities(props) {
         return {
           name: f.facility__name,
           total: f.total,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-          dv: f.off_site,
+          av: f.air || 0,
+          bv: f.water || 0,
+          cv: f.land || 0,
+          dv: f.on_site || 0,
+          ev: f.off_site || 0,
         };
       })
       .sort((a, b) => b.total - a.total);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -161,12 +165,35 @@ async function GraphTopTenFacilities(props) {
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.air} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.water} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.land} />
+            <Bar
+              name="air"
+              dataKey={props.filters.releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey={props.filters.releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={props.filters.releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              fill={barColors.land}
+            />
+            <Bar
+              name="on-site"
+              dataKey={
+                props.filters.releaseType === "off_site" ? "total" : "dv"
+              }
+              stackId="a"
+              fill={barColors.onSite}
+            />
             <Bar
               name="off-site"
-              dataKey="dv"
+              dataKey={props.filters.releaseType === "on_site" ? "total" : "ev"}
               stackId="a"
               fill={barColors.offSite}
             />
@@ -296,7 +323,7 @@ async function GraphTopTenPBTs(props) {
       .sort((a, b) => b.pv - a.pv);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -447,16 +474,17 @@ async function GraphTopTenParents(props) {
         return {
           name: f.facility__parent_co_name,
           total: f.total,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-          dv: f.off_site,
+          av: f.air || 0,
+          bv: f.water || 0,
+          cv: f.land || 0,
+          dv: f.on_site || 0,
+          ev: f.off_site || 0,
         };
       })
       .sort((a, b) => b.total - a.total);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -489,12 +517,35 @@ async function GraphTopTenParents(props) {
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.air} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.water} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.land} />
+            <Bar
+              name="air"
+              dataKey={props.filters.releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey={props.filters.releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={props.filters.releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              fill={barColors.land}
+            />
+            <Bar
+              name="on-site"
+              dataKey={
+                props.filters.releaseType === "off_site" ? "total" : "dv"
+              }
+              stackId="a"
+              fill={barColors.onSite}
+            />
             <Bar
               name="off-site"
-              dataKey="dv"
+              dataKey={props.filters.releaseType === "on_site" ? "total" : "ev"}
               stackId="a"
               fill={barColors.offSite}
             />
@@ -532,7 +583,7 @@ async function GraphTopTenChemicals(props) {
       .sort((a, b) => b.pv - a.pv);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
@@ -637,7 +688,7 @@ async function TimelineTopFacilities(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
@@ -732,7 +783,7 @@ async function TimelineTopParents(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
@@ -826,7 +877,7 @@ async function TimelineTopChemicals(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
