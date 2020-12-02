@@ -54,7 +54,7 @@ const ThematicMap = (props) => {
     setPosition((pos) => ({ ...pos, zoom: pos.zoom / 2 }));
   }
   function handleMoveEnd(position) {
-    setPosition({coordinates: [x,y], zoom: position.zoom});
+    setPosition(position);
   }
   function handleReturnToCenter() {
     setPosition({ coordinates: [-96, 38], zoom: 1 });

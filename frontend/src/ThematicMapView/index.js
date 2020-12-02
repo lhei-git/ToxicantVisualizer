@@ -159,8 +159,9 @@ class ThematicMapView extends Component {
     vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
-        this.setState({   countyData: response.data  });
-      }).catch((err) => console.log(err));
+        this.setState({ countyData: response.data });
+      })
+      .catch((err) => console.log(err));
   }
 
   // retrieves and filters state release data from the database
@@ -169,7 +170,7 @@ class ThematicMapView extends Component {
     vetapi
       .get("/stats/state/all?year=" + filterYear)
       .then((response) => {
-        this.setState({ stateData: response.data});
+        this.setState({ stateData: response.data });
       })
       .catch((err) => console.log(err));
   }
