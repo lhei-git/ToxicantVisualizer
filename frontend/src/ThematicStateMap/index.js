@@ -13,7 +13,7 @@ class ThematicStateMap extends Component {
     this.state = {
       contentCounty: "",
       geoUrl: "",
-      stateName: "MI",
+      stateName: "",
       prevStateName: "",
       countyData: null,
       filterYear: null,
@@ -142,10 +142,15 @@ class ThematicStateMap extends Component {
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
     await vetapi
-      .get("/stats/county/all?year=" + filterYear + "&state=" + this.state.stateName)
+      .get(
+        "/stats/county/all?year=" +
+          filterYear +
+          "&state=" +
+          this.state.stateName
+      )
       .then((response) => {
         this.setState({
-          countyData: response.data
+          countyData: response.data,
         });
       })
       .catch((err) => console.log(err));
