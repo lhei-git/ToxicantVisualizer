@@ -118,7 +118,7 @@ def filterReleases(request):
     chemical = request.GET.get('chemical')
     release_type = request.GET.get('release_type')
 
-    filters = Q()
+    filters = Q(total__gt=0)
 
     # filter by release_type
     if release_type is not None:
@@ -138,7 +138,7 @@ def filterReleases(request):
         filters.add(Q(chemical__name__icontains=chemical), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
-    if carcinogen is not None:
+    if carcinogen is not None and str(carcinogen).lower() == 'true':
         filters.add(Q(chemical__carcinogen='YES'), filters.connector)
     elif dioxin is not None:
         filters.add(Q(chemical__classification='Dioxin'), filters.connector)
@@ -196,7 +196,7 @@ def get_chemicals(request, facility_id):
 ''' '''
 def get_chemicals_in_window(request):
     y = int(request.GET.get('year', default=latest_year))
-    raw = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('chemical__name').distinct()
+    raw = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('chemical__name').order_by('chemical__name').distinct()
     response = json.dumps([x['chemical__name'] for x in raw], cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
 
@@ -209,13 +209,10 @@ def state_total_releases(request):
         queryset = release.objects.filter(geoFilter(request) & Q(year=y))
         t_facilitycount = int(release.objects.filter(geoFilter(request) & Q(year=y)).values('facility').distinct().count())
         for q in queryset:
+            if q.chemical.carcinogen == 'YES':
+                t_carc += q.total
             if q.chemical.classification == 'Dioxin':
                 t_dioxin += q.total
-                if q.chemical.carcinogen == 'YES':
-                    t_carc += q.total
-            else:
-                if q.chemical.carcinogen == 'YES':
-                    t_carc += q.total
                 t_onsite += q.on_site
                 t_offsite += q.off_site
                 t_air += q.air
@@ -284,10 +281,31 @@ def all_facility_total_releases(request):
 
 ''' Return top 10 companies in total releases by geo window & year'''
 def top_parentco_releases(request):
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
     y = int(request.GET.get('year', default=latest_year))
     release_type = request.GET.get('release_type', default='all').upper()
-    queryset = release.objects.filter(
-        geoFilter(request) & Q(year=y)).values('facility__parent_co_name')
+    queryset = release.objects.filter(filterReleases(request) &
+                                      geoFilter(request) & Q(year=y)).values('facility__parent_co_name')
+
+    filters = Q()
+
+        # filter by chemicals
+    if chemical is not None and chemical != "all":
+        filters.add(Q(chemical__name__icontains=chemical), filters.connector)
+    # filter by carcinogens, PBTs, or dioxins only
+
+    if carcinogen is not None:
+        filters.add(Q(chemical__carcinogen='YES'), filters.connector)
+    elif dioxin is not None:
+        filters.add(Q(chemical__classification='Dioxin'), filters.connector)
+    elif pbt is not None:
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
+
+        queryset = release.objects.filter(filters &
+                                          geoFilter(request) & Q(year=y)).values('facility__name')
 
     if release_type == 'AIR':
         queryset = queryset.annotate(total=Sum('air')).order_by('-total')
@@ -328,6 +346,10 @@ def timeline_total(request):
 
 
 def top_facility_releases(request):
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
     all = int(request.GET.get('all', default=0))
     y = int(request.GET.get('year', default=latest_year))
     release_type = request.GET.get('release_type', default='all').upper()
@@ -335,8 +357,22 @@ def top_facility_releases(request):
         queryset = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
             air=Sum('air')).annotate(water=Sum('water')).annotate(vet_total_releases_offsite=Sum('off_site')).order_by('-total')
     else:
-        queryset = release.objects.filter(
-            geoFilter(request) & Q(year=y)).values('facility__name')
+        filters = Q()
+
+        # filter by chemicals
+        if chemical is not None and chemical != "all":
+            filters.add(Q(chemical__name__icontains=chemical), filters.connector)
+
+        # filter by carcinogens, PBTs, or dioxins only
+        if carcinogen is not None:
+            filters.add(Q(chemical__carcinogen='YES'), filters.connector)
+        elif dioxin is not None:
+            filters.add(Q(chemical__classification='Dioxin'), filters.connector)
+        elif pbt is not None:
+            filters.add(Q(chemical__classification='PBT'), filters.connector)
+
+        queryset = release.objects.filter(filters &
+                                          geoFilter(request) & Q(year=y)).values('facility__name')
 
         if release_type == 'AIR':
             queryset = queryset.annotate(total=Sum('air')).order_by('-total')
