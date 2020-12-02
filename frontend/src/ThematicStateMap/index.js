@@ -108,10 +108,10 @@ class ThematicStateMap extends Component {
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
-          <h1>
+          <div className="graph-header">
             {this.props.stateLongName} Total Releases By County (
             {this.getFilterText(this.state.filterType)})
-          </h1>
+          </div>
           {this.state.countyData ? (
             <>
               <ThematicMap
@@ -172,7 +172,8 @@ class ThematicStateMap extends Component {
           countyMin: minValue,
           countyMax: maxValue,
         });
-      });
+      })
+      .catch((err) => console.log(err));
   }
 }
 

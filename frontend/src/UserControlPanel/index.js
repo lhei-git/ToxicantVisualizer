@@ -1,7 +1,6 @@
 import "./index.css";
 import "../index.css";
 import vetapi from "../api/vetapi";
-import { useEffect } from "react";
 const React = require("react");
 const { formatChemical } = require("../helpers");
 
@@ -10,31 +9,34 @@ function UserControlPanel(props) {
   const [chemicals, setChemicals] = React.useState([]);
 
   React.useEffect(() => {
-    console.log("filters changed");
-  }, [props.filters]);
+    async function fetchChemicalList(map) {
+      const params = {
+        city: map.city,
+        county: map.county,
+        state: map.state,
+        year: props.filters.year,
+        release_type: props.filters.releaseType,
+        pbts: props.filters.pbts,
+        carcinogen: props.filters.carcinogen || null,
+      };
+      try {
+        const res = await vetapi.get("/chemicals", { params });
+        const tmp = [...new Set(res.data.map((d) => formatChemical(d)).sort())];
+        setChemicals(tmp);
+      } catch (err) {
+        console.log(err);
+      }
+    }
 
-  useEffect(() => {
-    if (props.viewport) fetchChemicalList(props.viewport);
-  }, []);
-
-  async function fetchChemicalList(viewport) {
-    const params = {
-      ne_lat: viewport.northeast.lat,
-      ne_lng: viewport.northeast.lng,
-      sw_lat: viewport.southwest.lat,
-      sw_lng: viewport.southwest.lng,
-      year: props.filters.year,
-    };
-    const res = await vetapi.get("/chemicals", { params });
-    const tmp = [...new Set(res.data.map(d => formatChemical(d)))]
-    setChemicals(tmp);
-  }
+    if (props.map) fetchChemicalList(props.map);
+  }, [props.filters, props.map]);
 
   function onFilterChange(event) {
     const target = event.target;
     const filters = props.filters;
     const value = target.type === "checkbox" ? target.checked : target.value;
-    filters[target.name] = value;
+    if (target.name === "year") filters[target.name] = parseInt(value);
+    else filters[target.name] = value;
     props.onFilterChange(filters);
   }
 
@@ -68,19 +70,11 @@ function UserControlPanel(props) {
         </option>
       );
     }
-
     return options;
   }
 
   function getReleaseTypes() {
-    const types = [
-      "All release types",
-      "air",
-      "water",
-      "land",
-      "off_site",
-      "on_site",
-    ];
+    const types = ["all", "air", "water", "land", "off_site", "on_site"];
 
     return types.map((type) => {
       return <option key={type}>{type}</option>;
@@ -105,6 +99,9 @@ function UserControlPanel(props) {
           onChange={onFilterChange}
           id=""
         >
+          <option defaultValue={true} key="all" value="all">
+            All release types
+          </option>
           {getReleaseTypes()}
         </select>
         <select
@@ -116,23 +113,23 @@ function UserControlPanel(props) {
           {getChemicals()}
         </select>
         <div className="checkbox-group">
-          <label htmlFor="carcinogens">Carcinogens only</label>
+          <label htmlFor="carcinogen">Carcinogens only</label>
           <input
             type="checkbox"
-            checked={props.filters.carcinogens}
+            checked={props.filters.carcinogen}
             onChange={onFilterChange}
-            name="carcinogens"
-            id="carcinogens"
+            name="carcinogen"
+            id="carcinogen"
           />
         </div>
         <div className="checkbox-group">
-          <label htmlFor="pbtsAndDioxins">PBTs and Dioxins only</label>
+          <label htmlFor="pbts">PBTs only</label>
           <input
             type="checkbox"
-            checked={props.filters.pbtsAndDioxins}
+            checked={props.filters.pbts}
             onChange={onFilterChange}
-            id="pbtsAndDioxins"
-            name="pbtsAndDioxins"
+            id="pbts"
+            name="pbts"
           />
         </div>
       </div>

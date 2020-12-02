@@ -2,29 +2,44 @@ import "./index.css";
 import PlacesAutocomplete from "react-places-autocomplete";
 const geocoder = require("../api/geocoder");
 const React = require("react");
+const vetapi = require("../api/vetapi");
 
 function Home(props) {
   let [location, setLocation] = React.useState("");
   let [errorMessage, setErrorMessage] = React.useState("");
 
+  /* Used to handle Elastic Beanstalk cold start */
+  React.useEffect(() => {
+    vetapi.get("_health").catch((err) => {
+      console.log(err);
+    });
+  }, []);
+
   async function geocodeLocation(location) {
     try {
       const res = await geocoder.get(`/json?address=${location}`);
-      //get the state name, which google labels as administrative_area_level_1
+
       const results = res.data.results[0];
-      const found = results.address_components.find((c) => {
-        return c.types.includes("administrative_area_level_1");
-      });
+      const city = results.address_components.find((c) =>
+        c.types.includes("locality")
+      );
+      const county = results.address_components.find((c) =>
+        c.types.includes("administrative_area_level_2")
+      );
+      const state = results.address_components.find((c) =>
+        c.types.includes("administrative_area_level_1")
+      );
+
       const map = {
-        address: results.formatted_address,
+        city: city ? city.short_name : null,
+        county: county ? county.short_name.replace("County", "").trim() : null,
+        state: state ? state.short_name : null,
         center: results.geometry.location,
         viewport: results.geometry.viewport,
-        stateShort: found.short_name,
-        stateLong: found.long_name,
       };
       return map;
     } catch (err) {
-      throw new Error("no results");
+      throw new Error(err);
     }
   }
 
@@ -48,22 +63,11 @@ function Home(props) {
     if (status === "ZERO_RESULTS") setErrorMessage("No results found");
     clearSuggestions();
   }
-  const Footer = () => {
-    const React = require("react");
-    return (
-      <div className="footer">
-        &#169;{" "}
-        <span>
-          VET was developed in 2020 for the Lab for Health and Environmental
-          Information
-        </span>
-      </div>
-    );
-  };
 
   return (
     <div className="home-container">
       <div className="background">
+        <div className="cite">Photo by https://unsplash.com/@punkidu</div>
         <div className="overlay"></div>
       </div>
       <div className="content-group">
@@ -97,7 +101,8 @@ function Home(props) {
                   <div className="search-input-container">
                     <input
                       {...getInputProps({
-                        placeholder: "Search Places...",
+                        placeholder:
+                          "Enter a zip code; a 'city, state' combination; or a state",
                         className: "search-input",
                       })}
                     />
@@ -144,7 +149,6 @@ function Home(props) {
           )}
         </div>
       </div>
-      {/* <Footer /> */}
     </div>
   );
 }
