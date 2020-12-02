@@ -33,7 +33,7 @@ function TimelineTotal(props) {
         city: props.map.city,
         county: props.map.county,
         state: props.map.state,
-        carcinogen: props.filters.carcinogens || null,
+        carcinogen: props.filters.carcinogen || null,
         chemical: props.filters.chemical,
         pbt: props.filters.pbts || null,
         release_type: props.filters.releaseType,
@@ -68,7 +68,7 @@ function TimelineTotal(props) {
               <Legend />
               <Line
                 type="monotone"
-                name="total releases (lbs)"
+                name="total (lbs)"
                 dataKey="total"
                 stroke="#9c27b0"
                 strokeWidth={3}
@@ -90,7 +90,7 @@ function TimelineTotal(props) {
   return (
     body !== null && (
       <div className="graph standalone timeline-total">
-        <div className="graph-header">Total Releases</div>
+        <div className="graph-header">{props.title}</div>
         {body}
       </div>
     )

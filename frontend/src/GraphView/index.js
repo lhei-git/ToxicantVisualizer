@@ -106,7 +106,7 @@ async function GraphTopTenFacilities(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
@@ -121,11 +121,11 @@ async function GraphTopTenFacilities(props) {
         return {
           name: f.facility__name,
           total: f.total,
-          av: f.air || 0,
-          bv: f.water || 0,
-          cv: f.land || 0,
-          dv: f.on_site || 0,
-          ev: f.off_site || 0,
+          av: f.air || null,
+          bv: f.water || null,
+          cv: f.land || null,
+          dv: f.on_site || null,
+          ev: f.off_site || null,
         };
       })
       .sort((a, b) => b.total - a.total);
@@ -135,7 +135,9 @@ async function GraphTopTenFacilities(props) {
           <BarChart
             data={data}
             margin={{
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -299,7 +301,7 @@ async function GraphTopTenPBTs(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       release_type: props.filters.releaseType,
       year: props.filters.year,
     };
@@ -321,7 +323,9 @@ async function GraphTopTenPBTs(props) {
           <BarChart
             data={data}
             margin={{
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -437,8 +441,7 @@ async function GraphTopTenParents(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
-
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
@@ -453,11 +456,11 @@ async function GraphTopTenParents(props) {
         return {
           name: f.facility__parent_co_name,
           total: f.total,
-          av: f.air || 0,
-          bv: f.water || 0,
-          cv: f.land || 0,
-          dv: f.on_site || 0,
-          ev: f.off_site || 0,
+          av: f.air || null,
+          bv: f.water || null,
+          cv: f.land || null,
+          dv: f.on_site || null,
+          ev: f.off_site || null,
         };
       })
       .sort((a, b) => b.total - a.total);
@@ -467,7 +470,9 @@ async function GraphTopTenParents(props) {
           <BarChart
             data={data}
             margin={{
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -545,7 +550,7 @@ async function GraphTopTenChemicals(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
@@ -566,7 +571,9 @@ async function GraphTopTenChemicals(props) {
           <BarChart
             data={data}
             margin={{
-              bottom: 100,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -622,12 +629,10 @@ async function TimelineTopFacilities(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
-
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
-      averages: true,
     };
     const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
       params,
@@ -719,7 +724,7 @@ async function TimelineTopParents(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
@@ -814,7 +819,7 @@ async function TimelineTopChemicals(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
@@ -911,6 +916,32 @@ function GraphView(props) {
     setCurrentGroup(i);
   }
 
+  function getLocationString(map) {
+    let str = map.city
+      ? map.city + ", "
+      : map.county
+      ? map.county + " County, "
+      : "";
+    str += map.state;
+    return str;
+  }
+
+  function getReleaseTypeString(releaseType) {
+    return releaseType !== "all" ? releaseType.replace("_", " ") : "";
+  }
+
+  function getProperTitle(title, props) {
+    return `Total ${getReleaseTypeString(
+      props.filters.releaseType
+    )} releases for ${title} in ${getLocationString(props.map)} in ${
+      props.filters.year
+    } - ${
+      props.filters.chemical !== "all"
+        ? props.filters.chemical
+        : "all chemicals"
+    }`;
+  }
+
   return (
     <div className="graph-container">
       <div className="selector">
@@ -946,7 +977,7 @@ function GraphView(props) {
         </div>
         <div className="graphs">
           <div
-            class="top-tens"
+            className="top-tens"
             style={{ display: currentGroup === 0 ? "block" : "none" }}
           >
             <GraphContainer
@@ -954,28 +985,36 @@ function GraphView(props) {
               filters={props.filters}
               name="top_facilities"
               graph={GraphTopTenFacilities}
-              title="Total releases for the top 10 facilities (in lbs)"
+              title={getProperTitle("10 top facilities", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_parents"
               graph={GraphTopTenParents}
-              title="Total releases for the top 10 parent companies (in lbs)"
+              title={getProperTitle("10 top parent companies", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_chemicals"
               graph={GraphTopTenChemicals}
-              title="Total releases for the top 10 chemicals (in lbs)"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top chemicals in ${getLocationString(
+                props.map
+              )} in ${props.filters.year}`}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_pbts"
               graph={GraphTopTenPBTs}
-              title="Total releases for the top 10 PBT chemicals (in lbs)"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top PBT chemicals in ${getLocationString(
+                props.map
+              )} in ${props.filters.year}`}
             ></GraphContainer>
           </div>
           <div
@@ -985,27 +1024,58 @@ function GraphView(props) {
             <TimelineTotal
               map={props.map}
               filters={props.filters}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases over time in ${getLocationString(props.map)} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></TimelineTotal>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_facilities"
               graph={TimelineTopFacilities}
-              title="Total releases for the top 10 facilities (in lbs) over time"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top facilities over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title="Total releases for the top 10 parent companies (in lbs) over time"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top parent companies over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_chemicals"
               graph={TimelineTopChemicals}
-              title="Total releases for the top 10 chemicals (in lbs) over time"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top chemicals over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></GraphContainer>
           </div>
           <div
