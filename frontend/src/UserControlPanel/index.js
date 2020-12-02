@@ -101,6 +101,9 @@ function UserControlPanel(props) {
           onChange={onFilterChange}
           id=""
         >
+          <option defaultValue={true} key="all" value="all">
+            All release types
+          </option>
           {getReleaseTypes()}
         </select>
         <select
