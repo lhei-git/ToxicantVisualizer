@@ -33,7 +33,7 @@ function TimelineTotal(props) {
         city: props.map.city,
         county: props.map.county,
         state: props.map.state,
-        carcinogen: props.filters.carcinogens || null,
+        carcinogen: props.filters.carcinogen || null,
         chemical: props.filters.chemical,
         pbt: props.filters.pbts || null,
         release_type: props.filters.releaseType,
