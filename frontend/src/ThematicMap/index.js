@@ -24,6 +24,7 @@ const ThematicMap = (props) => {
 
   if (!props.data) return null;
 
+  //color scale for counties, has smaller values than states
   function colorScaleCounty(val) {
     if (val == 0) return "#FCDBC6";
     else if (val < 1000) return "#FBCBCA";
@@ -33,6 +34,7 @@ const ThematicMap = (props) => {
     else return "#A60A0A";
   }
 
+  //color scale for states, has larger values than counties
   function colorScaleState(val) {
     if (val == 0) return "#FCDBC6";
     else if (val < 1000000) return "#FBCBCA";
@@ -42,20 +44,18 @@ const ThematicMap = (props) => {
     else return "#A60A0A";
   }
 
+  //zoom and pan functions for the county based thematic map
   function handleZoomIn() {
     if (position.zoom >= 4) return;
     setPosition((pos) => ({ ...pos, zoom: pos.zoom * 2 }));
   }
-
   function handleZoomOut() {
     if (position.zoom <= 1) return;
     setPosition((pos) => ({ ...pos, zoom: pos.zoom / 2 }));
   }
-
   function handleMoveEnd(position) {
-    setPosition(position);
+    setPosition({coordinates: [x,y], zoom: position.zoom});
   }
-
   function handleReturnToCenter() {
     setPosition({ coordinates: [-96, 38], zoom: 1 });
   }
@@ -119,70 +119,9 @@ const ThematicMap = (props) => {
               }
             </Geographies>
           </ComposableMap>
-          <Legend
-            colorScale={colorScaleState}
-            filterType={filterType}
-            maxVal={props.maxValue}
-            minVal={props.minValue}
-          ></Legend>
-        </div>
-      </>
-    );
-  //////  used to render the county based map  //////
-  else if (props.type === "counties")
-    return (
-      <>
-        <div className="thematic-map-container">
-          <ComposableMap data-tip="" projection="geoAlbersUsa">
-            <Geographies geography={props.geoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  var cur = props.data.find(
-                    (s) =>
-                      s.facility__county.slice(0, 3) ===
-                        geo.properties.name.toUpperCase().slice(0, 3) &&
-                      s.facility__state === geo.properties.iso_3166_2
-                  );
-                  if (cur !== undefined) {
-                    return (
-                      <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        fill={colorScaleCounty(cur ? cur[filterType] : 0)}
-                        stroke={"#000"}
-                        onMouseEnter={() => {
-                          props.setTooltipContent(null);
-                        }}
-                      />
-                    );
-                  } else {
-                    return (
-                      <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        fill={colorScaleState(0)}
-                        stroke={"#000"}
-                        onMouseEnter={() => {
-                          props.setTooltipContent(null);
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name}</p></h1><br />
-                                         <span class="geography-attributes"> No releases reported in ${props.filterYear}</span>
-                `);
-                        }}
-                        onMouseLeave={() => {
-                          props.setTooltipContent(null);
-                        }}
-                      />
-                    );
-                  }
-                })
-              }
-            </Geographies>
-          </ComposableMap>
           <LegendState
             colorScale={colorScaleState}
             filterType={filterType}
-            maxVal={props.maxValue}
-            minVal={props.minValue}
           ></LegendState>
         </div>
       </>
@@ -325,8 +264,6 @@ const ThematicMap = (props) => {
           <Legend
             colorScale={colorScaleCounty}
             filterType={filterType}
-            maxVal={props.maxValue}
-            minVal={props.minValue}
           ></Legend>
         </div>
       </>
@@ -422,8 +359,6 @@ const ThematicMap = (props) => {
           <Legend
             colorScale={colorScaleCounty}
             filterType={filterType}
-            maxVal={props.maxValue}
-            minVal={props.minValue}
           ></Legend>
         </div>
       </>
@@ -431,7 +366,7 @@ const ThematicMap = (props) => {
   }
 };
 
-// creates svg gradient legen based on min and max values and color scale
+// creates svg gradient legend based on min and max values and color scale
 function Legend(props) {
   return (
     <svg height="25" width="100%" margin="5px">
@@ -606,7 +541,7 @@ function LegendState(props) {
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"} {rounded(Math.trunc(1000))} lbs.
+        {"<"} {rounded(Math.trunc(1000000))} lbs.
       </text>
       <text
         x="34.3%"
@@ -615,7 +550,7 @@ function LegendState(props) {
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"} {rounded(Math.trunc(10000))} lbs.
+        {"<"} {rounded(Math.trunc(10000000))} lbs.
       </text>
       <text
         x="50.9%"
@@ -624,7 +559,7 @@ function LegendState(props) {
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"} {rounded(Math.trunc(100000))} lbs.
+        {"<"} {rounded(Math.trunc(50000000))} lbs.
       </text>
       <text
         x="67.5%"
@@ -633,7 +568,7 @@ function LegendState(props) {
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {"<"} {rounded(Math.trunc(1000000))} lbs.
+        {"<"} {rounded(Math.trunc(100000000))} lbs.
       </text>
       <text
         x="84.1%"
@@ -642,7 +577,7 @@ function LegendState(props) {
         dominantBaseline="middle"
         textAnchor="start"
       >
-        {">"} {rounded(Math.trunc(1000000))} lbs.
+        {">"} {rounded(Math.trunc(100000000))} lbs.
       </text>
     </svg>
   );

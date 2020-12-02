@@ -16,11 +16,9 @@ class ThematicStateMap extends Component {
       stateName: "MI",
       prevStateName: "",
       countyData: null,
-      countyMax: null,
-      countyMin: null,
       filterYear: null,
       prevYear: null,
-      filterType: "total", //valid options: total, air, water, land, off_site, off_site  DEFAULT: total
+      filterType: "total", //valid options: total, air, water, land, off_site, on_site  DEFAULT: total
       prevType: null,
       scale: null,
       lat: null,
@@ -38,7 +36,7 @@ class ThematicStateMap extends Component {
   }
 
   getFilterText(filterType) {
-    //valid options: total, air, water, land, off_site, off_site
+    //valid options: total, air, water, land, on_site, off_site
     switch (filterType) {
       case "on_site":
         return "All On Site Releases";
@@ -79,6 +77,7 @@ class ThematicStateMap extends Component {
         }
       );
     }
+    //sets scaling and positioning for the map projection
     if (this.state.prevStateName !== this.state.stateName) {
       this.setState({ prevStateName: this.state.stateName });
       data.forEach((e) => {
@@ -94,7 +93,7 @@ class ThematicStateMap extends Component {
     }
   }
 
-  // sets tooltip content for the maps
+  // sets tooltip content for the map
   handleContentCountyState(content) {
     this.setState({ content: content });
   }
@@ -117,8 +116,6 @@ class ThematicStateMap extends Component {
               <ThematicMap
                 setTooltipContent={this.handleContentCountyState}
                 data={this.state.countyData}
-                maxValue={this.state.countyMax}
-                minValue={this.state.countyMin}
                 filterYear={filterYear}
                 filterType={filterType}
                 geoUrl={this.state.geoUrl}
@@ -142,35 +139,13 @@ class ThematicStateMap extends Component {
 
   // retrieves and filters county release data from the database
   async getCountyData() {
-    var l = {};
-    var d = [];
-    var maxValue = 0;
-    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
     await vetapi
-      .get("/stats/county/all?year=" + filterYear)
-      .then((response) => {  alert(this.props.stateName)
-        l = response.data.filter(
-          (county) => county.facility__state === this.props.stateName
-        );
-        d = Object.values(l);
-        response.data.map((st, i) => {
-          if (
-            response.data[i][filterType] > maxValue &&
-            response.data[i].facility__state === this.props.stateName
-          )
-            maxValue = response.data[i][filterType];
-          if (
-            response.data[i][filterType] < minValue &&
-            response.data[i].facility__state === this.props.stateName
-          )
-            minValue = response.data[i][filterType];
-        });
+      .get("/stats/county/all?year=" + filterYear + "&state=" + this.state.stateName)
+      .then((response) => {
         this.setState({
-          countyData: d,
-          countyMin: minValue,
-          countyMax: maxValue,
+          countyData: response.data
         });
       })
       .catch((err) => console.log(err));
