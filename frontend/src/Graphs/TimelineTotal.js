@@ -68,7 +68,7 @@ function TimelineTotal(props) {
               <Legend />
               <Line
                 type="monotone"
-                name="total releases (lbs)"
+                name="total (lbs)"
                 dataKey="total"
                 stroke="#9c27b0"
                 strokeWidth={3}
@@ -90,7 +90,7 @@ function TimelineTotal(props) {
   return (
     body !== null && (
       <div className="graph standalone timeline-total">
-        <div className="graph-header">Total Releases</div>
+        <div className="graph-header">{props.title}</div>
         {body}
       </div>
     )
