@@ -106,7 +106,7 @@ async function GraphTopTenFacilities(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
@@ -302,7 +302,7 @@ async function GraphTopTenPBTs(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       release_type: props.filters.releaseType,
       year: props.filters.year,
     };
@@ -440,7 +440,7 @@ async function GraphTopTenParents(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
@@ -549,7 +549,7 @@ async function GraphTopTenChemicals(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
@@ -628,7 +628,7 @@ async function TimelineTopFacilities(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
@@ -724,7 +724,7 @@ async function TimelineTopParents(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
@@ -820,7 +820,7 @@ async function TimelineTopChemicals(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
@@ -979,7 +979,7 @@ function GraphView(props) {
         </div>
         <div className="graphs">
           <div
-            class="top-tens"
+            className="top-tens"
             style={{ display: currentGroup === 0 ? "block" : "none" }}
           >
             <GraphContainer
@@ -1028,9 +1028,7 @@ function GraphView(props) {
               filters={props.filters}
               title={`Total ${getReleaseTypeString(
                 props.filters.releaseType
-              )} releases over time in ${getLocationString(
-                props.map
-              )} - ${
+              )} releases over time in ${getLocationString(props.map)} - ${
                 props.filters.chemical !== "all"
                   ? props.filters.chemical
                   : "all chemicals"
