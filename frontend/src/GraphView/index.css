@@ -20,6 +20,7 @@
 
 .graph-container .selector li {
   display: inline-block;
+  cursor: pointer;
   margin: 0 30px;
   background: #dddddd;
   border: 1px solid #969696;
@@ -33,7 +34,9 @@
 }
 
 .graph-container > .content {
-  width: 50vw;
+  min-width: 1000px;
+  max-width: 50vw;
+  overflow-x: visible;
   margin: 0 auto;
 }
 
@@ -87,7 +90,7 @@
   width: 100%;
   left: 0;
   background: #fff;
-  border-bottom: 1px solid #3f3844;
+  border-bottom: 1px solid rgba(32, 33, 36, 0.28);
 }
 
 .graph-container .filter-container .control-container {
