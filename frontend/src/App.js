@@ -36,7 +36,7 @@ const initialState = {
   filters: {
     chemical: "all",
     pbts: false,
-    carcinogens: false,
+    carcinogen: false,
     releaseType: "all",
     year: 2019,
   },
