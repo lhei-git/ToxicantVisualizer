@@ -106,7 +106,7 @@ async function GraphTopTenFacilities(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
@@ -121,11 +121,11 @@ async function GraphTopTenFacilities(props) {
         return {
           name: f.facility__name,
           total: f.total,
-          av: f.air || 0,
-          bv: f.water || 0,
-          cv: f.land || 0,
-          dv: f.on_site || 0,
-          ev: f.off_site || 0,
+          av: f.air || null,
+          bv: f.water || null,
+          cv: f.land || null,
+          dv: f.on_site || null,
+          ev: f.off_site || null,
         };
       })
       .sort((a, b) => b.total - a.total);
@@ -135,6 +135,7 @@ async function GraphTopTenFacilities(props) {
           <BarChart
             data={data}
             margin={{
+              // left: 100,
               bottom: 200,
             }}
           >
@@ -143,12 +144,14 @@ async function GraphTopTenFacilities(props) {
               dataKey="name"
               type="category"
               interval={0}
+              allowDataOverflow={true}
               tick={<CustomizedXAxisTick />}
             />
             <YAxis
               type="number"
               unit="lbs"
               width={100}
+              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -299,7 +302,7 @@ async function GraphTopTenPBTs(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
       release_type: props.filters.releaseType,
       year: props.filters.year,
     };
@@ -437,8 +440,7 @@ async function GraphTopTenParents(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
-
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
@@ -453,11 +455,11 @@ async function GraphTopTenParents(props) {
         return {
           name: f.facility__parent_co_name,
           total: f.total,
-          av: f.air || 0,
-          bv: f.water || 0,
-          cv: f.land || 0,
-          dv: f.on_site || 0,
-          ev: f.off_site || 0,
+          av: f.air || null,
+          bv: f.water || null,
+          cv: f.land || null,
+          dv: f.on_site || null,
+          ev: f.off_site || null,
         };
       })
       .sort((a, b) => b.total - a.total);
@@ -474,6 +476,7 @@ async function GraphTopTenParents(props) {
             <XAxis
               dataKey="name"
               type="category"
+              allowDataOverflow={true}
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
@@ -481,6 +484,7 @@ async function GraphTopTenParents(props) {
               type="number"
               unit="lbs"
               width={100}
+              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -545,7 +549,7 @@ async function GraphTopTenChemicals(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
@@ -574,12 +578,14 @@ async function GraphTopTenChemicals(props) {
               dataKey="name"
               type="category"
               interval={0}
+              allowDataOverflow={true}
               tick={<CustomizedXAxisTick />}
             />
             <YAxis
               type="number"
               unit="lbs"
               width={100}
+              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -622,12 +628,10 @@ async function TimelineTopFacilities(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
-
+      carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
-      averages: true,
     };
     const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
       params,
@@ -674,6 +678,7 @@ async function TimelineTopFacilities(props) {
               type="number"
               unit="lbs"
               width={100}
+              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -719,7 +724,7 @@ async function TimelineTopParents(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
@@ -769,6 +774,7 @@ async function TimelineTopParents(props) {
               type="number"
               unit="lbs"
               width={100}
+              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -814,7 +820,7 @@ async function TimelineTopChemicals(props) {
       city: props.map.city,
       county: props.map.county,
       state: props.map.state,
-      carcinogen: props.filters.carcinogens || null,
+      carcinogen: props.filters.carcinogen || null,
 
       pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
@@ -863,6 +869,7 @@ async function TimelineTopChemicals(props) {
               type="number"
               unit="lbs"
               width={100}
+              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -972,7 +979,7 @@ function GraphView(props) {
         </div>
         <div className="graphs">
           <div
-            class="top-tens"
+            className="top-tens"
             style={{ display: currentGroup === 0 ? "block" : "none" }}
           >
             <GraphContainer
@@ -1021,9 +1028,7 @@ function GraphView(props) {
               filters={props.filters}
               title={`Total ${getReleaseTypeString(
                 props.filters.releaseType
-              )} releases over time in ${getLocationString(
-                props.map
-              )} - ${
+              )} releases over time in ${getLocationString(props.map)} - ${
                 props.filters.chemical !== "all"
                   ? props.filters.chemical
                   : "all chemicals"
