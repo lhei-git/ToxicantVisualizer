@@ -150,7 +150,7 @@ class ThematicStateMap extends Component {
     const filterType = this.state.filterType;
     await vetapi
       .get("/stats/county/all?year=" + filterYear)
-      .then((response) => {
+      .then((response) => {  alert(this.props.stateName)
         l = response.data.filter(
           (county) => county.facility__state === this.props.stateName
         );
