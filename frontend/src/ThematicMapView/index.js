@@ -19,17 +19,11 @@ class ThematicMapView extends Component {
       contentState: "",
       contentCounty: "",
       stateData: null,
-      stateMax: null,
-      stateMin: null,
       countyData: null,
-      countyMax: null,
-      countyMin: null,
       filterYear: null,
       prevYear: null,
-      filterType: null, //valid options: on_site, air, water, land, off_site, total
+      filterType: null, //valid options: total, air, water, land, on_site, off_site
       prevType: null,
-      countyMap: null,
-      stateMap: null,
     };
 
     this.handleContentState = this.handleContentState.bind(this);
@@ -44,7 +38,7 @@ class ThematicMapView extends Component {
   }
 
   getFilterText(filterType) {
-    //valid options: total, air, water, land, off_site, off_site
+    //valid options: total, air, water, land, on_site, off_site
     switch (filterType) {
       case "on_site":
         return "All On Site Releases";
@@ -161,50 +155,21 @@ class ThematicMapView extends Component {
 
   // retrieves and filters county release data from the database
   async getCountyData() {
-    var l = {};
-    var d = [];
-    var maxValue = 0;
-    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
-    const filterType = this.state.filterType;
-    await vetapi
+    vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
-        l = response.data;
-        d = Object.values(l);
-        response.data.forEach((st) => {
-          if (st[filterType] > maxValue) {
-            maxValue = st[filterType];
-          } else if (st[filterType] < minValue) minValue = st[filterType];
-        });
-        this.setState({
-          countyData: d,
-          countyMin: minValue,
-          countyMax: maxValue,
-        });
-      });
+        this.setState({   countyData: response.data  });
+      }).catch((err) => console.log(err));
   }
 
   // retrieves and filters state release data from the database
   getStateData() {
-    var l = {};
-    var d = [];
-    var maxValue = 0;
-    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
-    const filterType = this.state.filterType;
     vetapi
       .get("/stats/state/all?year=" + filterYear)
       .then((response) => {
-        l = response.data;
-        d = Object.values(l);
-        response.data.forEach((st, i) => {
-          if (st[filterType] > maxValue) maxValue = st[filterType];
-          if (st[filterType] < minValue && st[filterType] !== 0)
-            minValue = st[filterType];
-        });
-
-        this.setState({ stateData: d, stateMin: minValue, stateMax: maxValue });
+        this.setState({ stateData: response.data});
       })
       .catch((err) => console.log(err));
   }

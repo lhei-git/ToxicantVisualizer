@@ -397,7 +397,6 @@ const App = (props) => {
                   </div>
                   {state.map.stateShort !== "US" && (
                     <div>
-                    {alert(state.map.stateShort)}
                       <ThematicStateMap
                         year={state.filters.year}
                         type={state.filters.releaseType}
