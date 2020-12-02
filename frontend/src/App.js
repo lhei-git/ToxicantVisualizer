@@ -14,6 +14,7 @@ import history from "./history";
 import Home from "./Home";
 import MapContainer from "./MapContainer";
 import GraphView from "./GraphView";
+import GraphSummary from "./Graphs/Summary";
 import PubChemFields from "./PubChemFields";
 import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
@@ -30,12 +31,12 @@ const initialState = {
   chemicals: [],
   currentChemical: "",
   activeTab: 0,
-  error: false,
+  errorMessage: "",
   graphsLoaded: false,
   filters: {
     chemical: "all",
-    pbtsAndDioxins: false,
-    carcinogens: false,
+    pbts: false,
+    carcinogen: false,
     releaseType: "all",
     year: 2019,
   },
@@ -43,8 +44,6 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "setError":
-      return { ...state, error: action.payload };
     case "setLocation":
       return { ...state, location: action.payload };
     case "setStateName":
@@ -75,6 +74,8 @@ const reducer = (state, action) => {
       return { ...state, showPubchemInfo: !state.showPubchemInfo };
     case "setActiveTab":
       return { ...state, activeTab: action.payload };
+    case "setErrorMessage":
+      return { ...state, errorMessage: action.payload };
     case "loadGraphs":
       return { ...state, graphsLoaded: true };
     case "refresh":
@@ -94,6 +95,7 @@ const refresh = () => ({ type: "refresh" });
 const setMap = (payload) => ({ type: "setMap", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
+const setErrorMessage = (payload) => ({ type: "setErrorMessage", payload });
 const loadGraphs = () => ({ type: "loadGraphs" });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
@@ -103,8 +105,8 @@ const setCurrentChemical = (payload) => ({
 const getChemicals = async (facilityId, filters) => {
   const params = {
     carcinogen: filters.carcinogens || null,
-    dioxin: filters.pbtsAndDioxins || null,
-    pbt: filters.pbtsAndDioxins || null,
+    dioxin: filters.pbts || null,
+    pbt: filters.pbts || null,
     release_type: filters.releaseType,
     chemical: filters.chemical,
     year: filters.year,
@@ -133,12 +135,16 @@ function ChemicalList(props) {
           }}
           key={c.name + " " + c.total}
         >
-          {c.name} ({formatAmount(c.total)} lbs)
+          <div className="dots">
+            <span className="align-left">{c.name}</span>{" "}
+          </div>
+          <span className="align-right">{formatAmount(c.total)} lbs</span>
+          <div style={{ clear: "both" }}></div>
         </li>
       );
     });
   return (
-    <div>
+    <div className="chemical-list">
       <ol>{listItems}</ol>
     </div>
   );
@@ -156,15 +162,24 @@ const Navbar = (props) => {
         <li className={location.pathname === "/" ? "active" : ""}>
           <Link to="/">Search</Link>
         </li>
-        <li className={location.pathname === "/map" ? "active" : ""}>
-          <Link to="/map">Facility Map</Link>
-        </li>
-        <li className={location.pathname === "/graphs" ? "active" : ""}>
-          <Link to="/graphs">Location Insights</Link>
-        </li>
-        <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
-          <Link to="/thematicmaps">National Insights</Link>
-        </li>
+        {props.visible && (
+          <li className={location.pathname === "/map" ? "active" : ""}>
+            <Link to="/map">Facility Map</Link>
+          </li>
+        )}
+        {props.visible && (
+          <li className={location.pathname === "/graphs" ? "active" : ""}>
+            <Link to="/graphs">Location Insights</Link>
+          </li>
+        )}
+        {props.visible && (
+          <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
+            <Link to="/thematicmaps">National Insights</Link>
+          </li>
+        )}
+        {/* <li className={location.pathname === "/about" ? "active" : ""}>
+          <Link to="/about">About</Link>
+        </li> */}
       </ul>
     </div>
   );
@@ -172,6 +187,28 @@ const Navbar = (props) => {
 
 const App = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  function getColor() {
+    switch (state.filters.releaseType) {
+      case "air":
+        return "grey";
+      case "water":
+        return "green";
+      case "land":
+        return "brown";
+      case "off_site":
+        return "yellow";
+      default:
+        return "red";
+    }
+  }
+
+  function toggleError() {
+    dispatch(setErrorMessage("Server request failed, please try again later."));
+    setTimeout(() => {
+      dispatch(setErrorMessage(""));
+    }, 10000);
+  }
 
   function handleSuccess(map) {
     dispatch(setMap(map));
@@ -181,7 +218,13 @@ const App = (props) => {
   return (
     <Router history={history}>
       <div className="app-container">
-        <Navbar />
+        {state.errorMessage !== "" && (
+          <div className="error" onClick={() => dispatch(setErrorMessage(""))}>
+            {state.errorMessage}
+            <div>x</div>
+          </div>
+        )}
+        <Navbar visible={!!state.map} />
         <Switch>
           <Route exact path="/map">
             <div className="map-view">
@@ -192,14 +235,14 @@ const App = (props) => {
                   {/* <span>{state.numFacilities || 0}</span> Facilities found */}
                 </div>
                 <UserControlPanel
-                  viewport={state.map ? state.map.viewport : null}
+                  map={state.map}
                   filters={state.filters}
                   onFilterChange={(filters) => {
                     dispatch(setFilters(Object.assign({}, filters)));
                   }}
                 ></UserControlPanel>
               </div>
-              <div className="flex-container">
+              <div className="flex-container top">
                 <div className="flex-item pubchem-wrapper">
                   {state.showPubchemInfo ? (
                     <div className="pubchem">
@@ -209,7 +252,13 @@ const App = (props) => {
                           dispatch(showPubchemInfo());
                         }}
                       >
-                        &lt; Back to Chemicals
+                        <span>
+                          <img
+                            src={require("./../src/assets/leftcarat.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        Back to Chemicals
                       </div>
                       {/* PUBCHEM DATA */}
                       <PubChemFields chemName={state.currentChemical} />
@@ -223,8 +272,9 @@ const App = (props) => {
                           </div>
                         </div>
                       ) : (
-                        <div className="header">
-                          Released Toxicants (click for info)
+                        <div className="caption">
+                          Click on toxicant to see detailed chemical
+                          information.
                         </div>
                       )}
                       <ChemicalList
@@ -248,6 +298,7 @@ const App = (props) => {
                       onTilesLoaded={() => dispatch(loadGraphs())}
                       onUpdate={(num) => dispatch(setNumFacilities(num))}
                       onRefresh={() => dispatch(refresh())}
+                      onApiError={toggleError}
                       onMarkerClick={(facilityId) => {
                         getChemicals(
                           facilityId,
@@ -258,8 +309,104 @@ const App = (props) => {
                       }}
                     />
                   )}
+                  <div className="legend">
+                    <div>Total releases (air, water, land and off-site)</div>
+                    <ul style={{ listStyle: "none" }}>
+                      <li>
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_1-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        0 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_2-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        0 - 100 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_3-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        100 - 10,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_4-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        10,000 - 100,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_5-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        100,000 - 1,000,000 lbs
+                      </li>
+                      <li>
+                        {" "}
+                        <span class="marker">
+                          <img
+                            src={require("./../src/assets/" +
+                              getColor() +
+                              "_6-6.png")}
+                            alt=""
+                          ></img>
+                        </span>
+                        &gt;1,000,000 lbs
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
+              {state.map && (
+                <div>
+                  <div>
+                    <GraphSummary
+                      map={state.map}
+                      filters={state.filters}
+                    ></GraphSummary>
+                  </div>
+                  {state.map.stateShort !== "US" && (
+                    <div>
+                      <ThematicStateMap
+                        year={state.filters.year}
+                        type={state.filters.releaseType}
+                        stateName={state.map.stateShort}
+                        stateLongName={state.map.stateLong}
+                      ></ThematicStateMap>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </Route>
           <Route path="/graphs">
@@ -267,8 +414,9 @@ const App = (props) => {
             {state.map && (
               <div className="graph-view">
                 <GraphView
-                  viewport={state.map.viewport}
+                  map={state.map}
                   filters={state.filters}
+                  onApiError={toggleError}
                   onFilterChange={(filters) =>
                     dispatch(setFilters(Object.assign({}, filters)))
                   }
@@ -278,28 +426,47 @@ const App = (props) => {
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            {state.map && (
-              <ThematicStateMap
-                year={state.filters.year}
-                type={state.filters.releaseType}
-                stateName={state.map.stateShort}
-                stateLongName={state.map.stateLong}
-              ></ThematicStateMap>
-            )}
-
             <ThematicMapView
               year={state.filters.year}
               type={state.filters.releaseType}
+              onApiError={toggleError}
             >
               {" "}
             </ThematicMapView>
           </Route>
+          {/* <Route path="/about"></Route> */}
           <Route path="/">
-            <Home isError={state.error} onSuccess={handleSuccess} />
+            <Home onSuccess={handleSuccess} />
           </Route>
         </Switch>
+        <div className="footer">
+          <ul>
+            <li>
+              <a href="https://github.com/ejdejesu/ToxicantVisualizer">
+                Github
+              </a>
+            </li>
+            <li>
+              <a href="https://pubchem.ncbi.nlm.nih.gov/">Pubchem</a>
+            </li>
+            <li>
+              <a href="https://www.epa.gov/toxics-release-inventory-tri-program">
+                TRI Program
+              </a>
+            </li>
+            {/* <li>
+              <Link to="/about">About</Link>
+            </li> */}
+          </ul>
+          <div>
+            <div className="copyright">
+              &#169; VET was developed in 2020 for the Lab for Health and
+              Environmental Information by Evan de Jesus, Adwait Wadekar,
+              Richard Moore, and Calvin Brooks
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="footer"></div>
     </Router>
   );
 };

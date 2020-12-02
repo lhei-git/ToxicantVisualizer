@@ -163,11 +163,8 @@ const thematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                      s.facility__county.split(" ")[0].split(".")[0] ===
-                        geo.properties.name
-                          .toUpperCase()
-                          .split(" ")[0]
-                          .split(".")[0] &&
+                      s.facility__county.slice(0, 3) ===
+                        geo.properties.name.toUpperCase().slice(0, 3) &&
                       s.facility__state === geo.properties.iso_3166_2
                   );
                   if (cur !== undefined) {

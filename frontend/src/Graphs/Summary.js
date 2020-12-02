@@ -9,7 +9,7 @@ function GraphSummary(props) {
   const [body, setBody] = React.useState(null);
 
   let graphProp = props.graph;
-  let viewportProp = props.viewport;
+  let mapProp = props.map;
   let yearProp = props.filters.year;
 
   useEffect(() => {
@@ -17,17 +17,15 @@ function GraphSummary(props) {
     fetchData(mounted);
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, yearProp]); /* eslint-disable-line */
+  }, [graphProp, mapProp, yearProp]); /* eslint-disable-line */
 
   const fetchData = async (mounted) => {
     try {
       const { year } = props.filters;
-      const { northeast, southwest } = props.viewport;
       const params = {
-        ne_lat: northeast.lat,
-        ne_lng: northeast.lng,
-        sw_lat: southwest.lat,
-        sw_lng: southwest.lng,
+        city: props.map.city,
+        county: props.map.county,
+        state: props.map.state,
         year,
       };
       const res = await vetapi.get(`/stats/location/summary`, {
@@ -51,37 +49,37 @@ function GraphSummary(props) {
             <td>{formatAmount(country["num_chemicals"])}</td>
           </tr>
           <tr>
-            <td>Total Disposal Amount</td>
+            <td>Total Disposal Amount (lbs)</td>
             <td>{data["total"]}</td>
             <td>{formatAmount(country["total"])}</td>
           </tr>
           <tr>
-            <td>On-Site Releases</td>
+            <td>On-Site Releases (lbs)</td>
             <td>{data["total_on_site"]}</td>
             <td>{formatAmount(country["total_on_site"])}</td>
           </tr>
           <tr>
-            <td>Off-Site Releases</td>
+            <td>Off-Site Releases (lbs)</td>
             <td>{data["total_off_site"]}</td>
             <td>{formatAmount(country["total_off_site"])}</td>
           </tr>
           <tr>
-            <td>Air Releases</td>
+            <td>Air Releases (lbs)</td>
             <td>{data["total_air"]}</td>
             <td>{formatAmount(country["total_air"])}</td>
           </tr>
           <tr>
-            <td>Water Releases</td>
+            <td>Water Releases (lbs)</td>
             <td>{data["total_water"]}</td>
             <td>{formatAmount(country["total_water"])}</td>
           </tr>
           <tr>
-            <td>Land Releases</td>
+            <td>Land Releases (lbs)</td>
             <td>{data["total_land"]}</td>
             <td>{formatAmount(country["total_land"])}</td>
           </tr>
           <tr>
-            <td>Carcinogenic Releases</td>
+            <td>Carcinogenic Releases (lbs)</td>
             <td>{res.data["total_carcinogen"]}</td>
             <td>{formatAmount(country["total_carcinogen"])}</td>
           </tr>
@@ -98,11 +96,13 @@ function GraphSummary(props) {
   return (
     body !== null && (
       <div className="graph standalone summary">
-        <div className="header">Summary statistics of total releases for current location and U.S.</div>
+        <div className="graph-header">
+          Summary statistics of total releases for current location and U.S.
+        </div>
         <table>
           <thead>
             <tr>
-              <th>Metric</th>
+              <th className="metric">Metric</th>
               <th>Current Location</th>
               <th>United States</th>
             </tr>

@@ -26,8 +26,7 @@ SECRET_KEY = 'yb#re#b*nmjvxnxmno9qk-2owmi&b)77&8xm+=izl4v*w%i8^r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "visualizing-environmental-toxicants-dev.us-east-1.elasticbeanstalk.com",
-                 "api.vet.lhei.org", 'localhost']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -53,7 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'api.middleware.auth.AuthMiddleware'
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

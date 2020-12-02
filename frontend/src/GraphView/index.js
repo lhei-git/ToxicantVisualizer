@@ -1,7 +1,6 @@
 import "./index.css";
 import React, { useEffect, useState } from "react";
 import UserControlPanel from "../UserControlPanel";
-import GraphSummary from "../Graphs/Summary";
 import TimelineTotal from "../Graphs/TimelineTotal";
 const vetapi = require("../api/vetapi");
 const { formatChemical, amountAsLabel, formatAmount } = require("../helpers");
@@ -32,12 +31,15 @@ const timelineColors = [
 ];
 
 const barColors = {
-  red: "#ff483a",
-  beige: "#ffc684",
-  blue: "#15607a",
-  grey: "#e7e7e7",
-  purple: "#9749a5",
+  onSite: "#f65858",
+  offSite: "#e9d700",
+  air: "#8d8d8d",
+  water: "#59954a",
+  land: "#844b11",
 };
+
+const barAspectRatio = 12 / 9;
+const timelineAspectRatio = 16 / 9;
 
 function handleError(err) {
   /* do something here */
@@ -66,12 +68,12 @@ function CustomizedXAxisTick(props) {
 function GraphContainer(props) {
   let [graph, setGraph] = useState(null);
   let graphProp = props.graph;
-  let viewportProp = props.viewport;
+  let mapProp = props.map;
   let filterProp = props.filters;
 
   let innerProps = {
     graph: graphProp,
-    viewport: viewportProp,
+    map: mapProp,
     filters: filterProp,
   };
 
@@ -79,19 +81,19 @@ function GraphContainer(props) {
     let mounted = true;
 
     async function fetchData() {
-      if (!viewportProp) return;
+      if (!mapProp) return;
       const g = await graphProp(innerProps);
       if (mounted) setGraph(g);
     }
     fetchData();
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, filterProp]); /* eslint-disable-line */
+  }, [graphProp, mapProp, filterProp]); /* eslint-disable-line */
 
   return (
     graph !== null && (
       <div className="graph">
-        <div className="header">{props.title}</div>
+        <div className="graph-header">{props.title}</div>
         <div className="rechart">{graph}</div>
       </div>
     )
@@ -100,15 +102,12 @@ function GraphContainer(props) {
 
 async function GraphTopTenFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
+      carcinogen: props.filters.carcinogen || null,
+      pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
       year: props.filters.year,
@@ -122,20 +121,23 @@ async function GraphTopTenFacilities(props) {
         return {
           name: f.facility__name,
           total: f.total,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-          dv: f.off_site,
+          av: f.air || null,
+          bv: f.water || null,
+          cv: f.land || null,
+          dv: f.on_site || null,
+          ev: f.off_site || null,
         };
       })
       .sort((a, b) => b.total - a.total);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -152,20 +154,49 @@ async function GraphTopTenFacilities(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.red} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.blue} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.beige} />
+            <Bar
+              name="air"
+              dataKey={props.filters.releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey={props.filters.releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={props.filters.releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              fill={barColors.land}
+            />
+            <Bar
+              name="on-site"
+              dataKey={
+                props.filters.releaseType === "off_site" ? "total" : "dv"
+              }
+              stackId="a"
+              fill={barColors.onSite}
+            />
             <Bar
               name="off-site"
-              dataKey="dv"
+              dataKey={props.filters.releaseType === "on_site" ? "total" : "ev"}
               stackId="a"
-              fill={barColors.grey}
+              fill={barColors.offSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -181,17 +212,10 @@ async function GraphTopTenFacilities(props) {
 //Chart 14 - Graph of all facilities and total releases in descending order
 async function GraphAllFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
-      release_type: props.filters.releaseType,
-      chemical: props.filters.chemical,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       year: props.filters.year,
       all: 1,
     };
@@ -213,18 +237,21 @@ async function GraphAllFacilities(props) {
     return (
       <div
         width="100%"
-        height="180px"
-        style={{ overflowY: "scroll", maxHeight: "400px" }}
+        height="300px"
+        style={{ overflowY: "auto", maxHeight: "500px" }}
       >
-        <ResponsiveContainer width="100%" height={res.data.length * 40}>
+        <ResponsiveContainer
+          width="100%"
+          height={res.data.length * 50}
+          minHeight="500px"
+        >
           <BarChart
             data={data}
             layout="vertical"
             margin={{
-              top: 30,
-              // right: 50,
-              left: 50,
-              bottom: 200,
+              left: 200,
+              right: 15,
+              bottom: 50,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -242,8 +269,16 @@ async function GraphAllFacilities(props) {
               tickFormatter={(val) => formatAmount(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
+              formatter={(value) => formatAmount(value)}
+              itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
             <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
@@ -260,37 +295,96 @@ async function GraphAllFacilities(props) {
   }
 }
 
+async function GraphTopTenPBTs(props) {
+  try {
+    const params = {
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
+      carcinogen: props.filters.carcinogen || null,
+      release_type: props.filters.releaseType,
+      year: props.filters.year,
+    };
+    const res = await vetapi.get(`/stats/location/top_pbt_chemicals`, {
+      params,
+    });
+    const data = res.data
+      .map((d) => {
+        const f = d;
+        return {
+          name: f.chemical__name,
+          pv: f.total,
+        };
+      })
+      .sort((a, b) => b.pv - a.pv);
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
+          <BarChart
+            data={data}
+            margin={{
+              left: 50,
+              right: 50,
+              bottom: 250,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              tick={<CustomizedXAxisTick />}
+            />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => amountAsLabel(val) + " "}
+            />
+            <Tooltip
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
+              isAnimationActive={false}
+              formatter={(value) => formatAmount(value)}
+              itemSorter={(a) => -a.value}
+            />
+            <Legend align="right" verticalAlign="top" />
+            <Bar
+              name="release amount (lbs)"
+              dataKey="pv"
+              stackId="a"
+              fill={barColors.onSite}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
 //Chart 12 - Table of all facilities and total releases
 async function TableAllFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
-      release_type: props.filters.releaseType,
-      chemical: props.filters.chemical,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
       year: props.filters.year,
       all: 1,
     };
     const res = await vetapi.get(`/stats/location/facility_releases`, {
       params,
     });
-    // const data = res.data
-    //   .sort((a, b) => b.total - a.total)
-    //   .map((d, i) => {
-    //     const f = d;
-    //     return {
-    //       name: f.facility__name,
-    //       av: f.air,
-    //       bv: f.water,
-    //       cv: f.land,
-    //     };
-    //   });
+
     return (
       <div
         width="100%"
@@ -343,15 +437,12 @@ async function TableAllFacilities(props) {
 
 async function GraphTopTenParents(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
+      carcinogen: props.filters.carcinogen || null,
+      pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
       year: props.filters.year,
@@ -365,20 +456,23 @@ async function GraphTopTenParents(props) {
         return {
           name: f.facility__parent_co_name,
           total: f.total,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-          dv: f.off_site,
+          av: f.air || null,
+          bv: f.water || null,
+          cv: f.land || null,
+          dv: f.on_site || null,
+          ev: f.off_site || null,
         };
       })
       .sort((a, b) => b.total - a.total);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -395,20 +489,49 @@ async function GraphTopTenParents(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
             />
             <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill={barColors.red} />
-            <Bar name="water" dataKey="bv" stackId="a" fill={barColors.blue} />
-            <Bar name="land" dataKey="cv" stackId="a" fill={barColors.beige} />
+            <Bar
+              name="air"
+              dataKey={props.filters.releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey={props.filters.releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={props.filters.releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              fill={barColors.land}
+            />
+            <Bar
+              name="on-site"
+              dataKey={
+                props.filters.releaseType === "off_site" ? "total" : "dv"
+              }
+              stackId="a"
+              fill={barColors.onSite}
+            />
             <Bar
               name="off-site"
-              dataKey="dv"
+              dataKey={props.filters.releaseType === "on_site" ? "total" : "ev"}
               stackId="a"
-              fill={barColors.grey}
+              fill={barColors.offSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -423,15 +546,13 @@ async function GraphTopTenParents(props) {
 
 async function GraphTopTenChemicals(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
+      carcinogen: props.filters.carcinogen || null,
+
+      pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
       year: props.filters.year,
     };
@@ -439,18 +560,20 @@ async function GraphTopTenChemicals(props) {
     const data = res.data
       .map((d, i) => {
         return {
-          name: formatChemical(d.chemical__name),
+          name: d.chemical__name,
           pv: d.total,
         };
       })
       .sort((a, b) => b.pv - a.pv);
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 9}>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart
             data={data}
             margin={{
-              bottom: 100,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -467,7 +590,13 @@ async function GraphTopTenChemicals(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -477,7 +606,7 @@ async function GraphTopTenChemicals(props) {
               name="release amount (lbs)"
               dataKey="pv"
               stackId="a"
-              fill={barColors.purple}
+              fill={barColors.onSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -490,26 +619,26 @@ async function GraphTopTenChemicals(props) {
   }
 }
 
+const compare = (a, b) => {
+  return a.year - b.year;
+};
+
 async function TimelineTopFacilities(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
+      carcinogen: props.filters.carcinogen || null,
+      pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
-      averages: true,
     };
     const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
       params,
     });
 
-    const data = res.data.lines
+    let data = res.data.lines
       .reduce((acc, cur) => {
         const existing = acc.find((e) => e.year === cur.year);
         const formatted = cur["facility__name"];
@@ -521,8 +650,9 @@ async function TimelineTopFacilities(props) {
         }
         return acc;
       }, [])
-      .sort((a, b) => a.year - b.year);
-    const correctIndex = data.sort(
+      .sort(compare);
+
+    const correctIndex = [...data].sort(
       (a, b) => Object.keys(b).length - Object.keys(a).length
     )[0];
     const keys = Object.keys(correctIndex);
@@ -541,10 +671,8 @@ async function TimelineTopFacilities(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
-          <LineChart
-            data={data}
-          >
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
             <YAxis
@@ -554,7 +682,13 @@ async function TimelineTopFacilities(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               itemSorter={(a) => -a.value}
               formatter={(value) => formatAmount(value)}
@@ -586,15 +720,13 @@ async function TimelineTopFacilities(props) {
 
 async function TimelineTopParents(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
+      carcinogen: props.filters.carcinogen || null,
+
+      pbt: props.filters.pbts || null,
       chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
     };
@@ -613,9 +745,9 @@ async function TimelineTopParents(props) {
         }
         return acc;
       }, [])
-      .sort((a, b) => a.year - b.year);
+      .sort(compare);
 
-    const correctIndex = data.sort(
+    const correctIndex = [...data].sort(
       (a, b) => Object.keys(b).length - Object.keys(a).length
     )[0];
     const keys = Object.keys(correctIndex);
@@ -634,12 +766,8 @@ async function TimelineTopParents(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
-          <LineChart
-            width={500}
-            height={300}
-            data={data}
-          >
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
             <YAxis
@@ -649,7 +777,13 @@ async function TimelineTopParents(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -681,15 +815,13 @@ async function TimelineTopParents(props) {
 
 async function TimelineTopChemicals(props) {
   try {
-    const { northeast, southwest } = props.viewport;
     const params = {
-      ne_lat: northeast.lat,
-      ne_lng: northeast.lng,
-      sw_lat: southwest.lat,
-      sw_lng: southwest.lng,
-      carcinogen: props.filters.carcinogens || null,
-      dioxin: props.filters.pbtsAndDioxins || null,
-      pbt: props.filters.pbtsAndDioxins || null,
+      city: props.map.city,
+      county: props.map.county,
+      state: props.map.state,
+      carcinogen: props.filters.carcinogen || null,
+
+      pbt: props.filters.pbts || null,
       release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/top_chemicals`, {
@@ -707,9 +839,9 @@ async function TimelineTopChemicals(props) {
         }
         return acc;
       }, [])
-      .sort((a, b) => a.year - b.year);
+      .sort(compare);
 
-    const correctIndex = data.sort(
+    const correctIndex = [...data].sort(
       (a, b) => Object.keys(b).length - Object.keys(a).length
     )[0];
     const keys = Object.keys(correctIndex);
@@ -728,12 +860,8 @@ async function TimelineTopChemicals(props) {
       ));
     return (
       <div>
-        <ResponsiveContainer width="100%" aspect={16 / 7}>
-          <LineChart
-            width={500}
-            height={300}
-            data={data}
-          >
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart width={500} height={300} data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
             <YAxis
@@ -743,7 +871,13 @@ async function TimelineTopChemicals(props) {
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
-              contentStyle={{ color: "#000" }}
+              contentStyle={{
+                color: "#FFF",
+                background: "rgba(0,0,0,0.8)",
+                border: "none",
+              }}
+              itemStyle={{ color: "#FFF" }}
+              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
               isAnimationActive={false}
               formatter={(value) => formatAmount(value)}
               itemSorter={(a) => -a.value}
@@ -773,83 +907,196 @@ async function TimelineTopChemicals(props) {
 }
 
 function GraphView(props) {
+  const [currentGroup, setCurrentGroup] = React.useState(
+    parseInt(sessionStorage.getItem("currentGroup")) || 0
+  );
+
+  function chooseTab(i) {
+    sessionStorage.setItem("currentGroup", i);
+    setCurrentGroup(i);
+  }
+
+  function getLocationString(map) {
+    let str = map.city
+      ? map.city + ", "
+      : map.county
+      ? map.county + " County, "
+      : "";
+    str += map.state;
+    return str;
+  }
+
+  function getReleaseTypeString(releaseType) {
+    return releaseType !== "all" ? releaseType.replace("_", " ") : "";
+  }
+
+  function getProperTitle(title, props) {
+    return `Total ${getReleaseTypeString(
+      props.filters.releaseType
+    )} releases for ${title} in ${getLocationString(props.map)} in ${
+      props.filters.year
+    } - ${
+      props.filters.chemical !== "all"
+        ? props.filters.chemical
+        : "all chemicals"
+    }`;
+  }
+
   return (
     <div className="graph-container">
+      <div className="selector">
+        <ul>
+          <li
+            onClick={() => chooseTab(0)}
+            className={currentGroup === 0 ? "active" : ""}
+          >
+            Top Tens
+          </li>
+          <li
+            onClick={() => chooseTab(1)}
+            className={currentGroup === 1 ? "active" : ""}
+          >
+            Timelines
+          </li>
+          <li
+            onClick={() => chooseTab(2)}
+            className={currentGroup === 2 ? "active" : ""}
+          >
+            Indexes
+          </li>
+        </ul>
+      </div>
       <div className="content">
         {/* <h1>Location Insights</h1> */}
         <div className="filter-container">
           <UserControlPanel
-            chemicals={[]}
-            viewport={props.viewport}
+            map={props.map}
             filters={props.filters}
             onFilterChange={props.onFilterChange}
           ></UserControlPanel>
         </div>
-        <GraphSummary
-          viewport={props.viewport}
-          filters={props.filters}
-        ></GraphSummary>
         <div className="graphs">
-          <TimelineTotal
-            viewport={props.viewport}
-            filters={props.filters}
-          ></TimelineTotal>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_facilities"
-            graph={GraphTopTenFacilities}
-            title="Total releases for the top 10 facilities (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_parents"
-            graph={GraphTopTenParents}
-            title="Total releases for the top 10 parent companies (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_chemicals"
-            graph={GraphTopTenChemicals}
-            title="Total releases for the top 10 chemicals (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="timeline_facilities"
-            graph={TimelineTopFacilities}
-            title="TTotal releases for the top 10 facilities (in lbs) over time"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="timeline_parents"
-            graph={TimelineTopParents}
-            title="Total releases for the top 10 parent companies (in lbs) over time"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="timeline_chemicals"
-            graph={TimelineTopChemicals}
-            title="Total releases for the top 10 chemicals (in lbs) over time"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_parents"
-            graph={GraphAllFacilities}
-            title="Total Releases for all Facilities (in lbs)"
-          ></GraphContainer>
-          <GraphContainer
-            viewport={props.viewport}
-            filters={props.filters}
-            name="top_parents"
-            graph={TableAllFacilities}
-            title="Total Releases for all Facilities (in lbs)"
-          ></GraphContainer>
+          <div
+            className="top-tens"
+            style={{ display: currentGroup === 0 ? "block" : "none" }}
+          >
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="top_facilities"
+              graph={GraphTopTenFacilities}
+              title={getProperTitle("10 top facilities", props)}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="top_parents"
+              graph={GraphTopTenParents}
+              title={getProperTitle("10 top parent companies", props)}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="top_chemicals"
+              graph={GraphTopTenChemicals}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top chemicals in ${getLocationString(
+                props.map
+              )} in ${props.filters.year}`}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="top_pbts"
+              graph={GraphTopTenPBTs}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top PBT chemicals in ${getLocationString(
+                props.map
+              )} in ${props.filters.year}`}
+            ></GraphContainer>
+          </div>
+          <div
+            className="timelines"
+            style={{ display: currentGroup === 1 ? "block" : "none" }}
+          >
+            <TimelineTotal
+              map={props.map}
+              filters={props.filters}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases over time in ${getLocationString(props.map)} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
+            ></TimelineTotal>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="timeline_facilities"
+              graph={TimelineTopFacilities}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top facilities over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="timeline_parents"
+              graph={TimelineTopParents}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top parent companies over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="timeline_chemicals"
+              graph={TimelineTopChemicals}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top chemicals over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
+            ></GraphContainer>
+          </div>
+          <div
+            className="indexes"
+            style={{ display: currentGroup === 2 ? "block" : "none" }}
+          >
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="top_parents"
+              graph={GraphAllFacilities}
+              title="Total Releases for all Facilities (in lbs)"
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              name="top_parents"
+              graph={TableAllFacilities}
+              title="Total Releases for all Facilities (in lbs)"
+            ></GraphContainer>
+          </div>
         </div>
       </div>
     </div>

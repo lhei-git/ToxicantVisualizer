@@ -17,7 +17,7 @@ function TimelineTotal(props) {
   const [body, setBody] = React.useState(null);
 
   let graphProp = props.graph;
-  let viewportProp = props.viewport;
+  let mapProp = props.map;
   let filterProp = props.filters;
 
   useEffect(() => {
@@ -25,20 +25,17 @@ function TimelineTotal(props) {
     fetchData(mounted);
 
     return () => (mounted = false);
-  }, [graphProp, viewportProp, filterProp]); /* eslint-disable-line */
+  }, [graphProp, mapProp, filterProp]); /* eslint-disable-line */
 
   const fetchData = async (mounted) => {
     try {
-      const { northeast, southwest } = props.viewport;
       const params = {
-        ne_lat: northeast.lat,
-        ne_lng: northeast.lng,
-        sw_lat: southwest.lat,
-        sw_lng: southwest.lng,
-        carcinogen: props.filters.carcinogens || null,
-        dioxin: props.filters.pbtsAndDioxins || null,
+        city: props.map.city,
+        county: props.map.county,
+        state: props.map.state,
+        carcinogen: props.filters.carcinogen || null,
         chemical: props.filters.chemical,
-        pbt: props.filters.pbtsAndDioxins || null,
+        pbt: props.filters.pbts || null,
         release_type: props.filters.releaseType,
       };
       const res = await vetapi.get(`/stats/location/timeline/total`, {
@@ -46,12 +43,8 @@ function TimelineTotal(props) {
       });
       const body = (
         <div>
-          <ResponsiveContainer width="100%" aspect={16 / 7}>
-            <LineChart
-              width={500}
-              height={300}
-              data={res.data}
-            >
+          <ResponsiveContainer width="100%" aspect={16 / 9}>
+            <LineChart width={500} height={300} data={res.data}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="year" />
               <YAxis
@@ -61,7 +54,13 @@ function TimelineTotal(props) {
                 tickFormatter={(val) => amountAsLabel(val) + " "}
               />
               <Tooltip
-                contentStyle={{ color: "#000" }}
+                contentStyle={{
+                  color: "#FFF",
+                  background: "rgba(0,0,0,0.8)",
+                  border: "none",
+                }}
+                itemStyle={{ color: "#FFF" }}
+                labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
                 isAnimationActive={false}
                 itemSorter={(a) => -a.value}
                 formatter={(value) => formatAmount(value)}
@@ -69,6 +68,7 @@ function TimelineTotal(props) {
               <Legend />
               <Line
                 type="monotone"
+                name="total (lbs)"
                 dataKey="total"
                 stroke="#9c27b0"
                 strokeWidth={3}
@@ -90,7 +90,7 @@ function TimelineTotal(props) {
   return (
     body !== null && (
       <div className="graph standalone timeline-total">
-        <div className="header">Total Releases</div>
+        <div className="graph-header">{props.title}</div>
         {body}
       </div>
     )
