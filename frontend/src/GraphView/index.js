@@ -135,8 +135,9 @@ async function GraphTopTenFacilities(props) {
           <BarChart
             data={data}
             margin={{
-              // left: 100,
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -144,14 +145,12 @@ async function GraphTopTenFacilities(props) {
               dataKey="name"
               type="category"
               interval={0}
-              allowDataOverflow={true}
               tick={<CustomizedXAxisTick />}
             />
             <YAxis
               type="number"
               unit="lbs"
               width={100}
-              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -324,7 +323,9 @@ async function GraphTopTenPBTs(props) {
           <BarChart
             data={data}
             margin={{
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -469,14 +470,15 @@ async function GraphTopTenParents(props) {
           <BarChart
             data={data}
             margin={{
-              bottom: 200,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
               type="category"
-              allowDataOverflow={true}
               interval={0}
               tick={<CustomizedXAxisTick />}
             />
@@ -484,7 +486,6 @@ async function GraphTopTenParents(props) {
               type="number"
               unit="lbs"
               width={100}
-              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -570,7 +571,9 @@ async function GraphTopTenChemicals(props) {
           <BarChart
             data={data}
             margin={{
-              bottom: 100,
+              left: 50,
+              right: 50,
+              bottom: 250,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -578,14 +581,12 @@ async function GraphTopTenChemicals(props) {
               dataKey="name"
               type="category"
               interval={0}
-              allowDataOverflow={true}
               tick={<CustomizedXAxisTick />}
             />
             <YAxis
               type="number"
               unit="lbs"
               width={100}
-              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -678,7 +679,6 @@ async function TimelineTopFacilities(props) {
               type="number"
               unit="lbs"
               width={100}
-              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -774,7 +774,6 @@ async function TimelineTopParents(props) {
               type="number"
               unit="lbs"
               width={100}
-              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
@@ -869,7 +868,6 @@ async function TimelineTopChemicals(props) {
               type="number"
               unit="lbs"
               width={100}
-              allowDataOverflow={true}
               tickFormatter={(val) => amountAsLabel(val) + " "}
             />
             <Tooltip
