@@ -990,27 +990,60 @@ function GraphView(props) {
             <TimelineTotal
               map={props.map}
               filters={props.filters}
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></TimelineTotal>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_facilities"
               graph={TimelineTopFacilities}
-              title="Total releases for the top 10 facilities (in lbs) over time"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top facilities over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title="Total releases for the top 10 parent companies (in lbs) over time"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top parent companies over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_chemicals"
               graph={TimelineTopChemicals}
-              title="Total releases for the top 10 chemicals (in lbs) over time"
+              title={`Total ${getReleaseTypeString(
+                props.filters.releaseType
+              )} releases for 10 top chemicals over time in ${getLocationString(
+                props.map
+              )} - ${
+                props.filters.chemical !== "all"
+                  ? props.filters.chemical
+                  : "all chemicals"
+              }`}
             ></GraphContainer>
           </div>
           <div
