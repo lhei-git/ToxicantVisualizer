@@ -34,9 +34,8 @@ function TimelineTotal(props) {
         county: props.map.county,
         state: props.map.state,
         carcinogen: props.filters.carcinogens || null,
-        dioxin: props.filters.pbtsAndDioxins || null,
         chemical: props.filters.chemical,
-        pbt: props.filters.pbtsAndDioxins || null,
+        pbt: props.filters.pbts || null,
         release_type: props.filters.releaseType,
       };
       const res = await vetapi.get(`/stats/location/timeline/total`, {
@@ -44,7 +43,7 @@ function TimelineTotal(props) {
       });
       const body = (
         <div>
-          <ResponsiveContainer width="100%" aspect={16 / 7}>
+          <ResponsiveContainer width="100%" aspect={16 / 9}>
             <LineChart width={500} height={300} data={res.data}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="year" />
