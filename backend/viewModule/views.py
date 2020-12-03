@@ -11,6 +11,7 @@ from django.core import serializers as szs
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 import re
+import requests
 
 latest_year = 2019
 
@@ -192,6 +193,15 @@ def get_chemicals(request, facility_id):
         total=Sum('release__total'))
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
+
+
+def get_diseases_for_chemical(request, chemical_name):
+    payload = {'inputType': 'chem', 'inputTerms': chemical_name, 'report': 'diseases', 'format': 'json'}
+    response = requests.get("https://ctdbase.org/tools/batchQuery.go", params=payload)
+    print(type(response))
+    # print(sorted(response, key = lambda i: i['InferenceScore']))
+    return HttpResponse(response, content_type='application/json')
+
 
 ''' '''
 def get_chemicals_in_window(request):
