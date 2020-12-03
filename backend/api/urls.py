@@ -5,7 +5,7 @@ from viewModule.views import get_facilities, get_chemicals, num_facilities, stat
     location_summary, top_facility_releases, timeline_top_facility_releases, all_state_total_releases, \
     all_county_total_releases, timeline_top_pbt_chemicals, top_pbt_chemicals, all_state_total_releases, \
     all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_total_releases, \
-    all_facility_total_releases, get_chemicals_in_window, country_summary, health_check, testgeoFilter
+    all_facility_total_releases, get_chemicals_in_window, country_summary, health_check, testgeoFilter, get_diseases_for_chemical
 
 urlpatterns = [
     path('_health', health_check),
@@ -14,6 +14,8 @@ urlpatterns = [
     path('facilities', get_facilities),
     # return distinct facilities within window -- FIXED
     path('chemicals', get_chemicals_in_window),
+    # return distinct facilities within window -- FIXED
+    path('chemicals/<str:chemical_name>/diseases', get_diseases_for_chemical),
     # return all chemical releases for a specific facility -- FIXED
     path('facilities/<str:facility_id>/chemicals', get_chemicals),
     # return summary within: window

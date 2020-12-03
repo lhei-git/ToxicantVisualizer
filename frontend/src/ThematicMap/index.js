@@ -109,7 +109,7 @@ const thematicMap = (props) => {
                           props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           const total = cur.total;
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br /><span class="geography-attributes">
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${name}</h1></p> <br /><span className="geography-attributes">
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
@@ -179,7 +179,7 @@ const thematicMap = (props) => {
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.facility__county
-                          } COUNTY</p></h1><span class="geography-attributes"><br />
+                          } COUNTY</p></h1><span className="geography-attributes"><br />
                                                 Onsite: ${rounded(
                                                   Math.trunc(cur.on_site)
                                                 )} lbs. <br />
@@ -219,7 +219,7 @@ const thematicMap = (props) => {
                           props.setTooltipContent(null);
                           const { name, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${name.toUpperCase()} COUNTY</p></h1><br />
-                                             <span class="geography-attributes"> No releases reported in ${
+                                             <span className="geography-attributes"> No releases reported in ${
                                                props.filterYear
                                              }</span>
                     `);
@@ -279,7 +279,7 @@ const thematicMap = (props) => {
                           const { NAME, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.facility__county
-                          } COUNTY</p></h1><span class="geography-attributes"><br />
+                          } COUNTY</p></h1><span className="geography-attributes"><br />
                                             Onsite: ${rounded(
                                               Math.trunc(cur.on_site)
                                             )} lbs. <br />
@@ -319,7 +319,7 @@ const thematicMap = (props) => {
                           props.setTooltipContent(null);
                           const { NAME, POP_EST } = geo.properties;
                           props.setTooltipContent(`<h1><p style="text-align:center;">${NAME.toUpperCase()} COUNTY</p></h1><br />
-                                         <span class="geography-attributes"> No releases reported in ${
+                                         <span className="geography-attributes"> No releases reported in ${
                                            props.filterYear
                                          }</span>
                 `);

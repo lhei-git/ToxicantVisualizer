@@ -143,40 +143,42 @@ function HazardStatements(props) {
 function AssociatedDiseases(props) {
   const [header, setHeader] = React.useState(null);
   const [diseaseData, setDiseaseData] = React.useState(null);
-    const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
+  const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
     props.cid || 0
   }#section=Associated-Disorders-and-Diseases`;
 
   // fetches data when component is updated
   React.useEffect(() => {
+    async function getDiseaseData() {
+      try {
+        const params = {
+          inputType: "chem",
+          inputTerms: props.chemName,
+          report: "diseases",
+          format: "json",
+        };
+        const response = await axios.get(
+          "https://ctdbase.org/tools/batchQuery.go",
+          { params }
+        );
+        console.log("response :>> ", response);
+      } catch (err) {
+        handleError(err);
+      } finally {
+        console.log("toxicity loaded");
+        props.onLoad();
+      }
+    }
+
     if (!diseaseData && props.chemName) {
       getDiseaseData();
     }
   }, []);
 
-  async function getDiseaseData() {
-    try {
-    const params = {
-      inputType: "chem",
-      inputTerms: props.chemName,
-      report: "diseases_curated",
-      format: "json"
-    }
-    const response = await axios.get(
-      "http://ctdbase.org/tools/batchQuery.go", { params }
-    );
-    } catch (err) {
-      handleError(err);
-    } finally {
-      console.log("toxicity loaded");
-      props.onLoad();
-    }
-  }
-
   function parseDiseaseData(response) {
     var rows = [];
 
-    alert(JSON.stringify(response))
+    alert(JSON.stringify(response));
 
     //grab the section heading to be displayed
     const TOCHeading =
@@ -272,7 +274,7 @@ function Toxicity(props) {
           {healthData
             .find((d) => d.Name === "Health Effect Code(s)")
             .Value.StringWithMarkup.map((s) => (
-              <li>{s.String}</li>
+              <li key={s.String}>{s.String}</li>
             ))}
         </ul>
       </div>
@@ -284,7 +286,9 @@ function Toxicity(props) {
       <div>
         <ul className="section-content">
           {exposureData.map((s) => (
-            <li>{s.Value.StringWithMarkup[0].String}</li>
+            <li key={s.Value.StringWithMarkup[0].String}>
+              {s.Value.StringWithMarkup[0].String}
+            </li>
           ))}
         </ul>
       </div>
@@ -368,7 +372,10 @@ function Content(props) {
               onLoad={increment}
             ></HazardStatements>
             <Toxicity cid={props.cid} onLoad={increment}></Toxicity>
-            <AssociatedDiseases chemName={props.chemName} onLoad={increment}></AssociatedDiseases>
+            <AssociatedDiseases
+              chemName={props.chemName}
+              onLoad={increment}
+            ></AssociatedDiseases>
             {/* <div className="diseases">
               <div
                 dangerouslySetInnerHTML={{

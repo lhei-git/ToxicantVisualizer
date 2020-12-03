@@ -313,7 +313,7 @@ const App = (props) => {
                     <div>Total releases (air, water, land and off-site)</div>
                     <ul style={{ listStyle: "none" }}>
                       <li>
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -325,7 +325,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -337,7 +337,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -349,7 +349,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -361,7 +361,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -373,7 +373,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
