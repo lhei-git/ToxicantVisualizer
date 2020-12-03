@@ -8,6 +8,7 @@ jobs:
     node_js: 14
     before_install:
     - cd frontend/
+    script: skip
     after_success:
     - npm run build
     - pip install awscli --upgrade --user
