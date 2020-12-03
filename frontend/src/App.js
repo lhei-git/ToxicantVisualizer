@@ -20,7 +20,7 @@ import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
 import ThematicStateMap from "./ThematicStateMap/index.js";
 import React, { useReducer } from "react";
-import { formatChemical, formatAmount } from "./helpers";
+import { formatChemical, formatAmount, getLocationString } from "./helpers";
 import vetapi from "./api/vetapi";
 
 const initialState = {
@@ -230,9 +230,8 @@ const App = (props) => {
             <div className="map-view">
               {/* VET MAP FILTER */}
               <div className="filters">
-                <div className="placeholder"></div>
                 <div className="header">
-                  {/* <span>{state.numFacilities || 0}</span> Facilities found */}
+                  <h1>{getLocationString(state.map)}</h1>
                 </div>
                 <UserControlPanel
                   map={state.map}
@@ -399,8 +398,8 @@ const App = (props) => {
                     <div>
                       <ThematicStateMap
                         year={state.filters.year}
-                        type={state.filters.releaseType}
-                        stateName={state.map.stateShort}
+                        releaseType={state.filters.releaseType}
+                        stateName={state.map.state}
                         stateLongName={state.map.stateLong}
                       ></ThematicStateMap>
                     </div>
