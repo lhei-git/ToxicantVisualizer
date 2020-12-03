@@ -312,7 +312,7 @@ const App = (props) => {
                     <div>Total releases (air, water, land and off-site)</div>
                     <ul style={{ listStyle: "none" }}>
                       <li>
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -324,7 +324,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -336,7 +336,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -348,7 +348,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -360,7 +360,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -372,7 +372,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -398,8 +398,8 @@ const App = (props) => {
                     <div>
                       <ThematicStateMap
                         year={state.filters.year}
-                        type={state.filters.releaseType}
-                        stateName={state.map.stateShort}
+                        releaseType={state.filters.releaseType}
+                        stateName={state.map.state}
                         stateLongName={state.map.stateLong}
                       ></ThematicStateMap>
                     </div>
