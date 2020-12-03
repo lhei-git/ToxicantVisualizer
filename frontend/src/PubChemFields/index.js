@@ -26,27 +26,28 @@ function Pharmacology(props) {
     props.cid || 0
   }#section=Pharmacology`;
 
+  const { onLoad } = props;
   // fetches data when component is updated
   React.useEffect(() => {
-    if (!pubchemData && props.cid) getPubchemData(props.cid);
-  }, []);
-
-  async function getPubchemData(cid) {
-    try {
-      const response = await pubchem.get(
-        "/pug_view/data/compound/" + cid + "/JSON?heading=Pharmacology"
-      );
-      const res =
-        response.data.Record.Section[0].Section[0].Information[0].Value
-          .StringWithMarkup[0].String;
-      setPubchemData(res);
-    } catch (err) {
-      handleError(err);
-    } finally {
-      console.log("pharmacology loaded");
-      props.onLoad();
+    async function getPubchemData(cid) {
+      try {
+        const response = await pubchem.get(
+          "/pug_view/data/compound/" + cid + "/JSON?heading=Pharmacology"
+        );
+        const res =
+          response.data.Record.Section[0].Section[0].Information[0].Value
+            .StringWithMarkup[0].String;
+        setPubchemData(res);
+      } catch (err) {
+        handleError(err);
+      } finally {
+        console.log("pharmacology loaded");
+        onLoad();
+      }
     }
-  }
+
+    if (!pubchemData && props.cid) getPubchemData(props.cid);
+  }, [onLoad, props.cid, pubchemData]);
 
   return pubchemData !== null ? (
     <div className="pharmacology">
@@ -68,29 +69,30 @@ function HazardStatements(props) {
   const [pubchemData, setPubchemData] = React.useState(null);
   const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${props.cid}#section=Safety-and-Hazards`;
 
+  const { onLoad } = props;
   // fetches data when component is updated
   React.useEffect(() => {
+    async function getPubchemData() {
+      try {
+        const response = await pubchem.get(
+          "/pug_view/data/compound/" +
+            props.cid +
+            "/JSON?heading=GHS+Classification"
+        );
+        const data = parseGHSData(response);
+        setPubchemData(data);
+      } catch (err) {
+        handleError(err);
+      } finally {
+        console.log("hazardStatements loaded");
+        onLoad();
+      }
+    }
+
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, []);
-
-  async function getPubchemData() {
-    try {
-      const response = await pubchem.get(
-        "/pug_view/data/compound/" +
-          props.cid +
-          "/JSON?heading=GHS+Classification"
-      );
-      const data = parseGHSData(response);
-      setPubchemData(data);
-    } catch (err) {
-      handleError(err);
-    } finally {
-      console.log("hazardStatements loaded");
-      props.onLoad();
-    }
-  }
+  }, [props.cid, pubchemData, onLoad]);
 
   function parseGHSData(response) {
     const info =
@@ -227,27 +229,29 @@ function Toxicity(props) {
     props.cid || 0
   }#section=Toxicity`;
 
+  const { onLoad } = props;
+
   // fetches data when component is updated
   React.useEffect(() => {
+    async function getPubchemData() {
+      try {
+        const response = await pubchem.get(
+          `/pug_view/data/compound/${props.cid}/JSON?heading=Toxicological+Information`
+        );
+        const data = parseToxicityData(response);
+        setPubchemData(data);
+      } catch (err) {
+        handleError(err);
+      } finally {
+        console.log("toxicity loaded");
+        onLoad();
+      }
+    }
+
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, []);
-
-  async function getPubchemData() {
-    try {
-      const response = await pubchem.get(
-        `/pug_view/data/compound/${props.cid}/JSON?heading=Toxicological+Information`
-      );
-      const data = parseToxicityData(response);
-      setPubchemData(data);
-    } catch (err) {
-      handleError(err);
-    } finally {
-      console.log("toxicity loaded");
-      props.onLoad();
-    }
-  }
+  }, [props.cid, pubchemData, onLoad]);
 
   function parseToxicityData(response) {
     //grab the section heading to be displayed
