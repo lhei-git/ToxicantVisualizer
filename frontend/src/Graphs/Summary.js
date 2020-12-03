@@ -1,7 +1,7 @@
 import React from "react";
 import "./index.css";
 import { useEffect } from "react";
-import { formatAmount } from "../helpers";
+import { formatAmount, getLocationString } from "../helpers";
 const vetapi = require("../api/vetapi");
 const unitedStates = require("./unitedStates");
 
@@ -97,7 +97,8 @@ function GraphSummary(props) {
     body !== null && (
       <div className="graph standalone summary">
         <div className="graph-header">
-          Summary statistics of total releases for current location and U.S.
+          Summary statistics of total releases for{" "}
+          {getLocationString(props.map)} and U.S.
         </div>
         <table>
           <thead>
