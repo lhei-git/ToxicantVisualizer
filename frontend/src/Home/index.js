@@ -34,6 +34,7 @@ function Home(props) {
         city: city ? city.short_name : null,
         county: county ? county.short_name.replace("County", "").trim() : null,
         state: state ? state.short_name : null,
+        stateLong: state ? state.long_name : null,
         center: results.geometry.location,
         viewport: results.geometry.viewport,
       };
