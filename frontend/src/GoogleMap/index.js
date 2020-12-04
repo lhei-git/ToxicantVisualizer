@@ -66,8 +66,10 @@ class MapContainer extends Component {
     const newState = {};
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
-      this.setState({ isLoading: true }, () => {
-        this.fetchPoints(this.props.map, this.props.filters);
+      this.setState({ isLoading: true, markers: {} }, () => {
+        this.fetchPoints(this.props.map, this.props.filters).then((data) =>
+          this.storeFacilities(data)
+        );
       });
       newState.showingInfoWindow = false;
       this.setState(newState);
@@ -123,8 +125,8 @@ class MapContainer extends Component {
         state: map.state,
         county: map.county,
         city: map.city,
-        carcinogen: filters.carcinogens || null,
-        pbt: filters.pbts || null,
+        carcinogen: filters.carcinogen || null,
+        pbt: filters.pbt || null,
         release_type: filters.releaseType,
         chemical: filters.chemical,
         year: filters.year,
@@ -186,6 +188,7 @@ class MapContainer extends Component {
   }
 
   storeFacilities(data) {
+    console.log("storing...");
     this.setState(
       {
         points: data,

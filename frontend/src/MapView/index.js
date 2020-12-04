@@ -22,7 +22,7 @@ const initialState = {
 
   filters: {
     chemical: "all",
-    pbts: false,
+    pbt: false,
     carcinogen: false,
     releaseType: "all",
     year: 2019,
@@ -69,8 +69,8 @@ const setCurrentChemical = (payload) => ({
 const getChemicals = async (facilityId, filters) => {
   const params = {
     carcinogen: filters.carcinogens || null,
-    dioxin: filters.pbts || null,
-    pbt: filters.pbts || null,
+    dioxin: filters.pbt || null,
+    pbt: filters.pbt || null,
     release_type: filters.releaseType,
     chemical: filters.chemical,
     year: filters.year,
