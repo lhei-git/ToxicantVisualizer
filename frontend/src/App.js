@@ -7,6 +7,7 @@ import {
   Link,
   withRouter,
   useLocation,
+  Redirect,
 } from "react-router-dom";
 import "./App.css";
 import "./index.css";
@@ -109,21 +110,21 @@ const App = (props) => {
 
   return (
     <Router history={history}>
+      <Navbar visible={!!state.map} />
+      {state.errorMessage !== "" && (
+        <div className="error" onClick={() => dispatch(setErrorMessage(""))}>
+          {state.errorMessage}
+          <div>x</div>
+        </div>
+      )}
       <div className="app-container">
-        <Navbar visible={!!state.map} />
-        {state.errorMessage !== "" && (
-          <div className="error" onClick={() => dispatch(setErrorMessage(""))}>
-            {state.errorMessage}
-            <div>x</div>
-          </div>
-        )}
         <Switch>
           <Route exact path="/map">
             <MapView></MapView>
           </Route>
           <Route path="/graphs">
             {/* VET GRAPHS */}
-            {state.map && (
+            {state.map ? (
               <div className="graph-view">
                 <GraphView
                   map={state.map}
@@ -134,15 +135,21 @@ const App = (props) => {
                   }
                 ></GraphView>
               </div>
+            ) : (
+              <Redirect to="/" />
             )}
           </Route>
           <Route path="/thematicmaps">
             {/* THEMATIC (CHLOROPLETH) MAPS */}
-            <ThematicMapView
-              year={state.filters.year}
-              type={state.filters.releaseType}
-              onApiError={toggleError}
-            ></ThematicMapView>
+            {state.map ? (
+              <ThematicMapView
+                year={state.filters.year}
+                type={state.filters.releaseType}
+                onApiError={toggleError}
+              ></ThematicMapView>
+            ) : (
+              <Redirect to="/" />
+            )}
           </Route>
           {/* <Route path="/about"></Route> */}
           <Route path="/">
