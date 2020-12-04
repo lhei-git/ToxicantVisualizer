@@ -19,12 +19,9 @@ a {
 
 .app-container .error {
   position: absolute;
-  top: 0;
   left: 0;
   right: 0;
   width: 80%;
-  margin: 20px auto;
-  padding: 20px;
   text-align: center;
   z-index: 2222;
   font-size: 22px;
