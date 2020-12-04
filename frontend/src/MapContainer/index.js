@@ -143,7 +143,7 @@ class MapContainer extends Component {
     this.map = map;
     const mapsApi = window.google.maps;
     setTimeout(() => {
-      mapsApi.event.addListener(map, "center_changed", () => {
+      mapsApi.event.addListener(map, "dragend", () => {
         this.setState({ hasMoved: true });
       });
     }, 1000);
@@ -236,7 +236,6 @@ class MapContainer extends Component {
         <div className="map">
           <Map
             onReady={this.handleMount}
-            onTilesloaded={this.props.onTilesLoaded}
             google={window.google}
             streetViewControl={false}
             styles={silver}
