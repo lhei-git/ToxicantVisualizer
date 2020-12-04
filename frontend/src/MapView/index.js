@@ -1,13 +1,14 @@
 /* eslint-disable import/first */
 require("dotenv").config();
-import "./index.css";
-import MapContainer from "../GoogleMap";
+import GoogleMap from "../GoogleMap";
 import GraphSummary from "../GraphView/Summary";
-import PubChemFields from "../Pubchem";
-import UserControlPanel from "../Filters";
+import PubchemView from "../Pubchem";
+import FilterView from "../Filters";
+import MapLegend from "../MapLegend";
 import ThematicStateMap from "../ThematicStateMap/index.js";
 import { formatChemical, formatAmount, getLocationString } from "../helpers";
 import vetapi from "../api/vetapi";
+import "./index.css";
 import React from "react";
 
 const initialState = {
@@ -116,21 +117,6 @@ function ChemicalList(props) {
 function MapView(props) {
   const [state, dispatch] = React.useReducer(reducer, initialState);
 
-  function getColor() {
-    switch (state.filters.releaseType) {
-      case "air":
-        return "grey";
-      case "water":
-        return "green";
-      case "land":
-        return "brown";
-      case "off_site":
-        return "yellow";
-      default:
-        return "red";
-    }
-  }
-
   return (
     <div className="map-view">
       {/* VET MAP FILTER */}
@@ -138,16 +124,16 @@ function MapView(props) {
         <div className="header">
           {state.map && <h1>{getLocationString(state.map, true)}</h1>}
         </div>
-        <UserControlPanel
+        <FilterView
           map={state.map}
           filters={state.filters}
           onFilterChange={(filters) => {
             dispatch(setFilters(Object.assign({}, filters)));
           }}
-        ></UserControlPanel>
+        ></FilterView>
       </div>
       <div className="flex-container top">
-        <div className="flex-item pubchem-wrapper">
+        {/* <div className="flex-item pubchem-wrapper">
           {state.showPubchemInfo ? (
             <div className="pubchem">
               <div
@@ -164,8 +150,7 @@ function MapView(props) {
                 </span>
                 Back to Chemicals
               </div>
-              {/* PUBCHEM DATA */}
-              <PubChemFields chemName={state.currentChemical} />
+              <PubchemView chemName={state.currentChemical}></PubchemView>
             </div>
           ) : (
             <div className="chemicals">
@@ -189,87 +174,26 @@ function MapView(props) {
               ></ChemicalList>
             </div>
           )}
-        </div>
+        </div> */}
         {/* GOOGLE MAPS RENDER */}
         <div className="flex-item map-wrapper">
           {state.map && (
-            <MapContainer
-              filters={Object.assign({}, state.filters)}
-              map={state.map}
-              apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-              onUpdate={(num) => dispatch(setNumFacilities(num))}
-              onRefresh={() => dispatch(refresh())}
-              onMarkerClick={(facilityId) => {
-                getChemicals(facilityId, state.filters).then((chemicals) =>
-                  dispatch(setChemicals(chemicals))
-                );
-              }}
-            />
+            <div>
+              <GoogleMap
+                filters={Object.assign({}, state.filters)}
+                map={state.map}
+                apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                onUpdate={(num) => dispatch(setNumFacilities(num))}
+                onRefresh={() => dispatch(refresh())}
+                onMarkerClick={(facilityId) => {
+                  getChemicals(facilityId, state.filters).then((chemicals) =>
+                    dispatch(setChemicals(chemicals))
+                  );
+                }}
+              />
+              <MapLegend releaseType={state.filters.releaseType}></MapLegend>
+            </div>
           )}
-          <div className="legend">
-            <div>Total releases (air, water, land and off-site)</div>
-            <ul style={{ listStyle: "none" }}>
-              <li>
-                <span className="marker">
-                  <img
-                    src={require("../../src/assets/" + getColor() + "_1-6.png")}
-                    alt=""
-                  ></img>
-                </span>
-                0 lbs
-              </li>
-              <li>
-                {" "}
-                <span className="marker">
-                  <img
-                    src={require("../../src/assets/" + getColor() + "_2-6.png")}
-                    alt=""
-                  ></img>
-                </span>
-                0 - 100 lbs
-              </li>
-              <li>
-                {" "}
-                <span className="marker">
-                  <img
-                    src={require("../../src/assets/" + getColor() + "_3-6.png")}
-                    alt=""
-                  ></img>
-                </span>
-                100 - 10,000 lbs
-              </li>
-              <li>
-                {" "}
-                <span className="marker">
-                  <img
-                    src={require("../../src/assets/" + getColor() + "_4-6.png")}
-                    alt=""
-                  ></img>
-                </span>
-                10,000 - 100,000 lbs
-              </li>
-              <li>
-                {" "}
-                <span className="marker">
-                  <img
-                    src={require("../../src/assets/" + getColor() + "_5-6.png")}
-                    alt=""
-                  ></img>
-                </span>
-                100,000 - 1,000,000 lbs
-              </li>
-              <li>
-                {" "}
-                <span className="marker">
-                  <img
-                    src={require("../../src/assets/" + getColor() + "_6-6.png")}
-                    alt=""
-                  ></img>
-                </span>
-                &gt;1,000,000 lbs
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
       {state.map && (
