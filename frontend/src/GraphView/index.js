@@ -1,7 +1,7 @@
 import "./index.css";
 import React, { useEffect, useState } from "react";
-import UserControlPanel from "../UserControlPanel";
-import TimelineTotal from "../Graphs/TimelineTotal";
+import UserControlPanel from "../Filters";
+import TimelineTotal from "./TimelineTotal";
 const vetapi = require("../api/vetapi");
 const { formatChemical, amountAsLabel, formatAmount } = require("../helpers");
 const {
