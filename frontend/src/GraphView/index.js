@@ -107,7 +107,7 @@ async function GraphTopTenFacilities(props) {
       county: props.map.county,
       state: props.map.state,
       carcinogen: props.filters.carcinogen || null,
-      pbt: props.filters.pbts || null,
+      pbt: props.filters.pbt || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
       year: props.filters.year,
@@ -442,7 +442,7 @@ async function GraphTopTenParents(props) {
       county: props.map.county,
       state: props.map.state,
       carcinogen: props.filters.carcinogen || null,
-      pbt: props.filters.pbts || null,
+      pbt: props.filters.pbt || null,
       release_type: props.filters.releaseType,
       chemical: props.filters.chemical,
       year: props.filters.year,
@@ -552,7 +552,7 @@ async function GraphTopTenChemicals(props) {
       state: props.map.state,
       carcinogen: props.filters.carcinogen || null,
 
-      pbt: props.filters.pbts || null,
+      pbt: props.filters.pbt || null,
       release_type: props.filters.releaseType,
       year: props.filters.year,
     };
@@ -630,7 +630,7 @@ async function TimelineTopFacilities(props) {
       county: props.map.county,
       state: props.map.state,
       carcinogen: props.filters.carcinogen || null,
-      pbt: props.filters.pbts || null,
+      pbt: props.filters.pbt || null,
       chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
     };
@@ -726,7 +726,7 @@ async function TimelineTopParents(props) {
       state: props.map.state,
       carcinogen: props.filters.carcinogen || null,
 
-      pbt: props.filters.pbts || null,
+      pbt: props.filters.pbt || null,
       chemical: props.filters.chemical,
       release_type: props.filters.releaseType,
     };
@@ -821,7 +821,7 @@ async function TimelineTopChemicals(props) {
       state: props.map.state,
       carcinogen: props.filters.carcinogen || null,
 
-      pbt: props.filters.pbts || null,
+      pbt: props.filters.pbt || null,
       release_type: props.filters.releaseType,
     };
     const res = await vetapi.get(`/stats/location/timeline/top_chemicals`, {

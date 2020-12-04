@@ -35,7 +35,7 @@ function TimelineTotal(props) {
         state: props.map.state,
         carcinogen: props.filters.carcinogen || null,
         chemical: props.filters.chemical,
-        pbt: props.filters.pbts || null,
+        pbt: props.filters.pbt || null,
         release_type: props.filters.releaseType,
       };
       const res = await vetapi.get(`/stats/location/timeline/total`, {
