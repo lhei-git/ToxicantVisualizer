@@ -91,7 +91,7 @@ function MarkerCluster(props) {
         clusterer.clearMarkers();
       };
     }
-  }, [map, google, markers, props.minimumClusterSize, props, releaseType]);
+  }, [map, google, markers, props.minimumClusterSize, releaseType]);
 
   // Do we need to render anything??
   return null;
