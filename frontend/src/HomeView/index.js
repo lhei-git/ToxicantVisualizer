@@ -91,6 +91,7 @@ function Home(props) {
             onError={handleError}
             shouldFetchSuggestions={location.length > 2}
             searchOptions={{
+              types: ["geocode"],
               componentRestrictions: {
                 country: "us",
               },

@@ -250,8 +250,6 @@ class MapContainer extends Component {
                 releaseType={this.props.filters.releaseType}
                 markers={this.state.markers}
                 click={this.onMarkerClick}
-                mouseover={this.onMouseOver}
-                mouseout={this.onMouseOut}
                 minimumClusterSize={15}
               />
             )}
