@@ -103,6 +103,7 @@ const App = (props) => {
 
   function handleSuccess(map) {
     dispatch(setMap(map));
+    sessionStorage.removeItem("facilityData");
     history.push("/map");
   }
 
