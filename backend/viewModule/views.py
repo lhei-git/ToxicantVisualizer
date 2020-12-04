@@ -178,7 +178,7 @@ def get_facilities(request):
     y = int(request.GET.get('year', default=latest_year))
 
     # add sum of total releases for the facility with these filters
-    raw = facility.objects.filter(filters & Q(release__year=y) & filterFacilities(request)).annotate(
+    raw = facility.objects.filter(filters & Q(release__year=y) & filterFacilities(request)).distinct().annotate(
         total=Sum('release__total')).values()
     response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
