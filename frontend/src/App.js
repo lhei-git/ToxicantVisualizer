@@ -29,7 +29,7 @@ const initialState = {
   errorMessage: "",
   filters: {
     chemical: "all",
-    pbts: false,
+    pbt: false,
     carcinogen: false,
     releaseType: "all",
     year: 2019,
