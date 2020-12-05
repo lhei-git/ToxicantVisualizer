@@ -13,6 +13,7 @@ a {
 
 .app-container {
   position: relative;
+  top: 60px;
   color: #3f3844;
   background: #fff;
 }
@@ -42,7 +43,6 @@ a {
 
 .map-view {
   position: relative;
-  margin-top: 60px;
   background: #fff;
   box-sizing: border-box;
   z-index: 99;
