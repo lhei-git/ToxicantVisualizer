@@ -1121,8 +1121,8 @@ function GraphView(props) {
   function getTitleComponent(title, props, hasChemical) {
     return (
       <>
-        Total {getReleaseTypeString(props.filters.releaseType)} releases for{" "}
-        <span>{title}</span> in {getLocationString(props.map)} in{" "}
+        Total {getReleaseTypeString(props.filters.releaseType) + " "}releases
+        for <span>{title}</span> in {getLocationString(props.map)} in{" "}
         {props.filters.year}
         {hasChemical
           ? props.filters.chemical !== "all"

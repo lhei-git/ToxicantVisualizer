@@ -143,9 +143,12 @@ const App = (props) => {
             {/* THEMATIC (CHLOROPLETH) MAPS */}
             {state.map ? (
               <ThematicMapView
-                year={state.filters.year}
-                type={state.filters.releaseType}
+                map={state.map}
+                filters={state.filters}
                 onApiError={toggleError}
+                onFilterChange={(filters) =>
+                  dispatch(setFilters(Object.assign({}, filters)))
+                }
               ></ThematicMapView>
             ) : (
               <Redirect to="/" />
