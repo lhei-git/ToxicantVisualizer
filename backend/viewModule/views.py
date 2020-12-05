@@ -528,7 +528,7 @@ def clean_chemical_name(str):
     pattern = re.compile(r'\([^)]*\)|compounds|\"| and.*', re.IGNORECASE)
     return pattern.sub("", str).strip()
 
-'''
+#Is this function needed?
 def attr(request, attribute=str()):
     attr = str(attribute).upper()
     if attr == 'ID':
@@ -540,6 +540,5 @@ def attr(request, attribute=str()):
     elif attr == 'ZIP':
         return zipview(request)
 
-'''
 
 # - https://docs.djangoproject.com/en/3.1/ref/models/querysets/#field-lookups
