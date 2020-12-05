@@ -1,11 +1,10 @@
-import React, { memo, useState, useEffect } from "react";
+import React, { memo, useState } from "react";
 import {
   ComposableMap,
   ZoomableGroup,
   Geographies,
   Geography,
 } from "react-simple-maps";
-import { scaleQuantile } from "d3-scale";
 import "./index.css";
 
 // used to produce more easily readable numbers
@@ -26,7 +25,7 @@ const ThematicMap = (props) => {
 
   //color scale for counties, has smaller values than states
   function colorScaleCounty(val) {
-    if (val == 0) return "#FCDBC6";
+    if (val === 0) return "#FCDBC6";
     else if (val < 1000) return "#FBCBCA";
     else if (val < 10000) return "#F2A598";
     else if (val < 100000) return "#F65858";
@@ -36,7 +35,7 @@ const ThematicMap = (props) => {
 
   //color scale for states, has larger values than counties
   function colorScaleState(val) {
-    if (val == 0) return "#FCDBC6";
+    if (val === 0) return "#FCDBC6";
     else if (val < 1000000) return "#FBCBCA";
     else if (val < 10000000) return "#F2A598";
     else if (val < 50000000) return "#F65858";
