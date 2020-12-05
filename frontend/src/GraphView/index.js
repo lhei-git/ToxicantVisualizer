@@ -101,6 +101,7 @@ function GraphContainer(props) {
 }
 
 async function GraphTopTenFacilities(props) {
+  const { releaseType } = props.filters;
   try {
     const params = {
       city: props.map.city,
@@ -108,7 +109,7 @@ async function GraphTopTenFacilities(props) {
       state: props.map.state,
       carcinogen: props.filters.carcinogen || null,
       pbt: props.filters.pbt || null,
-      release_type: props.filters.releaseType,
+      release_type: releaseType,
       chemical: props.filters.chemical,
       year: props.filters.year,
     };
@@ -168,34 +169,47 @@ async function GraphTopTenFacilities(props) {
             <Legend align="right" verticalAlign="top" />
             <Bar
               name="air"
-              dataKey={props.filters.releaseType === "air" ? "total" : "av"}
+              dataKey={releaseType === "air" ? "total" : "av"}
               stackId="a"
+              legendType={
+                ["air", "all"].includes(releaseType) ? "square" : "none"
+              }
               fill={barColors.air}
             />
             <Bar
               name="water"
-              dataKey={props.filters.releaseType === "water" ? "total" : "bv"}
+              dataKey={releaseType === "water" ? "total" : "bv"}
               stackId="a"
+              legendType={
+                ["water", "all"].includes(releaseType) ? "square" : "none"
+              }
               fill={barColors.water}
             />
             <Bar
               name="land"
-              dataKey={props.filters.releaseType === "land" ? "total" : "cv"}
+              dataKey={releaseType === "land" ? "total" : "cv"}
               stackId="a"
+              legendType={
+                ["land", "all"].includes(releaseType) ? "square" : "none"
+              }
               fill={barColors.land}
             />
             <Bar
               name="on-site"
-              dataKey={
-                props.filters.releaseType === "off_site" ? "total" : "dv"
-              }
+              dataKey={releaseType === "on_site" ? "total" : "dv"}
               stackId="a"
+              legendType={
+                ["on_site", "all"].includes(releaseType) ? "square" : "none"
+              }
               fill={barColors.onSite}
             />
             <Bar
               name="off-site"
-              dataKey={props.filters.releaseType === "on_site" ? "total" : "ev"}
+              dataKey={releaseType === "off_site" ? "total" : "ev"}
               stackId="a"
+              legendType={
+                ["off_site", "all"].includes(releaseType) ? "square" : "none"
+              }
               fill={barColors.offSite}
             />
           </BarChart>
@@ -1026,7 +1040,7 @@ function GraphView(props) {
               filters={props.filters}
               title={`Total ${getReleaseTypeString(
                 props.filters.releaseType
-              )} releases over time in ${getLocationString(props.map)} - ${
+              )} releases in ${getLocationString(props.map)} - ${
                 props.filters.chemical !== "all"
                   ? props.filters.chemical
                   : "all chemicals"
@@ -1039,7 +1053,7 @@ function GraphView(props) {
               graph={TimelineTopFacilities}
               title={`Total ${getReleaseTypeString(
                 props.filters.releaseType
-              )} releases for 10 top facilities over time in ${getLocationString(
+              )} releases for 10 top facilities in ${getLocationString(
                 props.map
               )} - ${
                 props.filters.chemical !== "all"
@@ -1054,7 +1068,7 @@ function GraphView(props) {
               graph={TimelineTopParents}
               title={`Total ${getReleaseTypeString(
                 props.filters.releaseType
-              )} releases for 10 top parent companies over time in ${getLocationString(
+              )} releases for 10 top parent companies in ${getLocationString(
                 props.map
               )} - ${
                 props.filters.chemical !== "all"
@@ -1069,7 +1083,7 @@ function GraphView(props) {
               graph={TimelineTopChemicals}
               title={`Total ${getReleaseTypeString(
                 props.filters.releaseType
-              )} releases for 10 top chemicals over time in ${getLocationString(
+              )} releases for 10 top chemicals in ${getLocationString(
                 props.map
               )} - ${
                 props.filters.chemical !== "all"

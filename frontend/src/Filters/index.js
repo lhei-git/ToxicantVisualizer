@@ -74,7 +74,7 @@ function UserControlPanel(props) {
   }
 
   function getReleaseTypes() {
-    const types = ["all", "air", "water", "land", "off_site", "on_site"];
+    const types = ["air", "water", "land", "off_site", "on_site"];
 
     return types.map((type) => {
       return <option key={type}>{type}</option>;
