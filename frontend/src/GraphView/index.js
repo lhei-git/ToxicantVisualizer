@@ -1176,28 +1176,28 @@ function GraphView(props) {
               filters={props.filters}
               name="top_facilities"
               graph={GraphTopTenFacilities}
-              title={getTitleComponent("10 top facilities", props, true)}
+              title={getTitleComponent("top 10 facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_parents"
               graph={GraphTopTenParents}
-              title={getTitleComponent("10 top parent companies", props, true)}
+              title={getTitleComponent("top 10 parent companies", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_chemicals"
               graph={GraphTopTenChemicals}
-              title={getTitleComponent("10 top chemicals", props)}
+              title={getTitleComponent("top 10 chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_pbts"
               graph={GraphTopTenPBTs}
-              title={getTitleComponent("10 top PBT chemicals", props)}
+              title={getTitleComponent("top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
           <div
@@ -1217,21 +1217,21 @@ function GraphView(props) {
               filters={props.filters}
               name="timeline_facilities"
               graph={TimelineTopFacilities}
-              title={getTitleComponent("10 top facilities", props)}
+              title={getTitleComponent("top 10 facilities", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title={getTitleComponent("10 top parent companies", props)}
+              title={getTitleComponent("top 10 parent companies", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_chemicals"
               graph={TimelineTopChemicals}
-              title={getTitleComponent("10 top chemicals", props)}
+              title={getTitleComponent("top 10 chemicals", props)}
             ></GraphContainer>
           </div>
           <div
