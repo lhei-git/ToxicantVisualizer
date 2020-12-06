@@ -52,3 +52,13 @@ module.exports.formatAmount = (value) => {
     .toString()
     .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 };
+
+module.exports.getLocationString = (map, long) => {
+  let str = map.city
+    ? map.city + ", "
+    : map.county
+    ? map.county + " County, "
+    : "";
+  str += long ? map.stateLong : map.state;
+  return str;
+};

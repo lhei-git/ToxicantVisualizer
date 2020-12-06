@@ -6,6 +6,7 @@ import "./index.css";
 import data from "../data/stateLocationData.json";
 const React = require("react");
 const Component = React.Component;
+const { shallowEqual } = require("../helpers");
 
 class ThematicStateMap extends Component {
   constructor(props) {
@@ -13,15 +14,11 @@ class ThematicStateMap extends Component {
     this.state = {
       contentCounty: "",
       geoUrl: "",
-      stateName: "MI",
+      stateName: "",
       prevStateName: "",
       countyData: null,
-      countyMax: null,
-      countyMin: null,
       filterYear: null,
-      prevYear: null,
-      filterType: "total", //valid options: total, air, water, land, off_site, off_site  DEFAULT: total
-      prevType: null,
+      releaseType: "total", //valid options: total, air, water, land, off_site, on_site  DEFAULT: total
       scale: null,
       lat: null,
       lon: null,
@@ -37,40 +34,22 @@ class ThematicStateMap extends Component {
     this.getCountyData();
   }
 
-  getFilterText(filterType) {
-    //valid options: total, air, water, land, off_site, off_site
-    switch (filterType) {
-      case "on_site":
-        return "All On Site Releases";
-      case "air":
-        return "All Air Releases";
-      case "water":
-        return "All Water Releases";
-      case "land":
-        return "All Land Releases";
-      case "off_site":
-        return "All Off Site Releases";
-      case "total":
-        return "All Releases";
-      default:
-        return "All On Site Releases";
-    }
+  getFilterText(type) {
+    //valid options: all, air, water, land, on_site, off_site
+    return type !== "all" ? type.replace("_", " ") : "";
   }
 
   // refetches data if the year or release type filter changed
-  componentDidUpdate() {
-    this.state.filterYear = this.props.year;
-    if (this.props.stateName) this.state.stateName = this.props.stateName;
-    this.state.filterType =
-      this.props.type === "all" ? "total" : this.props.type;
+  componentDidUpdate(prevProps, prevState) {
     if (
-      this.state.prevYear !== this.state.filterYear ||
-      this.state.prevType !== this.state.filterType
+      this.props.year !== prevProps.year ||
+      this.props.stateName !== prevProps.stateName ||
+      this.props.type !== prevProps.type
     ) {
+      this.getCountyData();
+
       this.setState(
         {
-          prevYear: this.state.filterYear,
-          prevType: this.state.filterType,
           stateData: null,
           countyData: null,
         },
@@ -79,22 +58,23 @@ class ThematicStateMap extends Component {
         }
       );
     }
-    if (this.state.prevStateName !== this.state.stateName) {
-      this.setState({ prevStateName: this.state.stateName });
-      data.forEach((e) => {
-        if (e.state == this.state.stateName)
-          this.setState({
-            lat: e.latitude,
-            lon: e.longitude,
-            scale: e.scale,
-            geoUrl: e.geoUrl,
-            stateLongName: e.name,
-          });
+
+    //sets scaling and positioning for the map projection
+    if (this.state.prevStateName !== this.props.stateName) {
+      this.setState({ prevStateName: this.props.stateName });
+      const found = data.find((e) => e.state === this.props.stateName);
+
+      this.setState({
+        lat: found.latitude,
+        lon: found.longitude,
+        scale: found.scale,
+        geoUrl: found.geoUrl,
+        stateLongName: found.name,
       });
     }
   }
 
-  // sets tooltip content for the maps
+  // sets tooltip content for the map
   handleContentCountyState(content) {
     this.setState({ content: content });
   }
@@ -103,26 +83,24 @@ class ThematicStateMap extends Component {
     const filterYear =
       this.state.filterYear !== null ? this.state.filterYear : 2019;
     const filterType =
-      this.state.filterType !== null ? this.state.filterType : "total";
+      this.props.releaseType === "all" ? "total" : this.props.releaseType;
 
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
           <div className="graph-header">
-            {this.props.stateLongName} Total Releases By County (
-            {this.getFilterText(this.state.filterType)})
+            Total {this.getFilterText(this.props.releaseType)} releases By
+            County for {this.props.stateLongName} in {this.props.year}
           </div>
           {this.state.countyData ? (
             <>
               <ThematicMap
                 setTooltipContent={this.handleContentCountyState}
                 data={this.state.countyData}
-                maxValue={this.state.countyMax}
-                minValue={this.state.countyMin}
                 filterYear={filterYear}
                 filterType={filterType}
                 geoUrl={this.state.geoUrl}
-                type={"singleState"}
+                mapType={"singleState"}
                 stateName={this.props.stateName}
                 lat={this.state.lat}
                 lon={this.state.lon}
@@ -142,37 +120,20 @@ class ThematicStateMap extends Component {
 
   // retrieves and filters county release data from the database
   async getCountyData() {
-    var l = {};
-    var d = [];
-    var maxValue = 0;
-    var minValue = Number.MAX_SAFE_INTEGER;
     const filterYear = this.state.filterYear;
     const filterType = this.state.filterType;
+    const params = {
+      year: filterYear,
+      state: this.props.stateName,
+    };
     await vetapi
-      .get("/stats/county/all?year=" + filterYear)
+      .get("/stats/county/all", { params })
       .then((response) => {
-        l = response.data.filter(
-          (county) => county.facility__state === this.props.stateName
-        );
-        d = Object.values(l);
-        response.data.map((st, i) => {
-          if (
-            response.data[i][filterType] > maxValue &&
-            response.data[i].facility__state === this.props.stateName
-          )
-            maxValue = response.data[i][filterType];
-          if (
-            response.data[i][filterType] < minValue &&
-            response.data[i].facility__state === this.props.stateName
-          )
-            minValue = response.data[i][filterType];
-        });
         this.setState({
-          countyData: d,
-          countyMin: minValue,
-          countyMax: maxValue,
+          countyData: response.data,
         });
-      });
+      })
+      .catch((err) => console.log(err));
   }
 }
 

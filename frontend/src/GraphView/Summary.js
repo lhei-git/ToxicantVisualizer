@@ -1,7 +1,7 @@
 import React from "react";
 import "./index.css";
 import { useEffect } from "react";
-import { formatAmount } from "../helpers";
+import { formatAmount, getLocationString } from "../helpers";
 const vetapi = require("../api/vetapi");
 const unitedStates = require("./unitedStates");
 
@@ -49,37 +49,37 @@ function GraphSummary(props) {
             <td>{formatAmount(country["num_chemicals"])}</td>
           </tr>
           <tr>
-            <td>Total Disposal Amount (lbs)</td>
+            <td>Total disposal amount (lbs)</td>
             <td>{data["total"]}</td>
             <td>{formatAmount(country["total"])}</td>
           </tr>
           <tr>
-            <td>On-Site Releases (lbs)</td>
+            <td>On-Site releases (lbs)</td>
             <td>{data["total_on_site"]}</td>
             <td>{formatAmount(country["total_on_site"])}</td>
           </tr>
           <tr>
-            <td>Off-Site Releases (lbs)</td>
+            <td>Off-Site releases (lbs)</td>
             <td>{data["total_off_site"]}</td>
             <td>{formatAmount(country["total_off_site"])}</td>
           </tr>
           <tr>
-            <td>Air Releases (lbs)</td>
+            <td>Air releases (lbs)</td>
             <td>{data["total_air"]}</td>
             <td>{formatAmount(country["total_air"])}</td>
           </tr>
           <tr>
-            <td>Water Releases (lbs)</td>
+            <td>Water releases (lbs)</td>
             <td>{data["total_water"]}</td>
             <td>{formatAmount(country["total_water"])}</td>
           </tr>
           <tr>
-            <td>Land Releases (lbs)</td>
+            <td>Land releases (lbs)</td>
             <td>{data["total_land"]}</td>
             <td>{formatAmount(country["total_land"])}</td>
           </tr>
           <tr>
-            <td>Carcinogenic Releases (lbs)</td>
+            <td>Carcinogenic releases (lbs)</td>
             <td>{res.data["total_carcinogen"]}</td>
             <td>{formatAmount(country["total_carcinogen"])}</td>
           </tr>
@@ -97,7 +97,8 @@ function GraphSummary(props) {
     body !== null && (
       <div className="graph standalone summary">
         <div className="graph-header">
-          Summary statistics of total releases for current location and U.S.
+          Summary statistics of total releases for{" "}
+          {getLocationString(props.map, true)} and U.S. in {props.filters.year}
         </div>
         <table>
           <thead>
