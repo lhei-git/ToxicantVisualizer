@@ -16,7 +16,7 @@ function UserControlPanel(props) {
         state: map.state,
         year: props.filters.year,
         release_type: props.filters.releaseType,
-        pbts: props.filters.pbts,
+        pbt: props.filters.pbt,
         carcinogen: props.filters.carcinogen || null,
       };
       try {
@@ -74,7 +74,7 @@ function UserControlPanel(props) {
   }
 
   function getReleaseTypes() {
-    const types = ["all", "air", "water", "land", "off_site", "on_site"];
+    const types = ["air", "water", "land", "off_site", "on_site"];
 
     return types.map((type) => {
       return <option key={type}>{type}</option>;
@@ -123,13 +123,13 @@ function UserControlPanel(props) {
           />
         </div>
         <div className="checkbox-group">
-          <label htmlFor="pbts">PBTs only</label>
+          <label htmlFor="pbt">PBTs only</label>
           <input
             type="checkbox"
-            checked={props.filters.pbts}
+            checked={props.filters.pbt}
             onChange={onFilterChange}
-            id="pbts"
-            name="pbts"
+            id="pbt"
+            name="pbt"
           />
         </div>
       </div>
