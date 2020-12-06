@@ -95,7 +95,7 @@ class ThematicMapView extends Component {
             <div className="graph-header">
               Total{" "}
               {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              releases by state
+              releases by state in {this.props.filters.year}
             </div>
             {this.state.stateData ? (
               <>
@@ -107,7 +107,7 @@ class ThematicMapView extends Component {
                   filterYear={filterYear}
                   filterType={filterType === "all" ? "total" : filterType}
                   geoUrl={stateGeoUrl}
-                  type={"states"}
+                  mapType={"states"}
                 />
                 <ReactTooltip multiline={true} html={true}>
                   {this.state.contentState}
@@ -122,7 +122,7 @@ class ThematicMapView extends Component {
             <div className="graph-header">
               Total{" "}
               {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              releases by county
+              releases by county in {this.props.filters.year}
             </div>
             {this.state.countyData ? (
               <>
@@ -134,7 +134,7 @@ class ThematicMapView extends Component {
                   filterYear={filterYear}
                   filterType={filterType === "all" ? "total" : filterType}
                   geoUrl={countyGeoUrl}
-                  type={"counties"}
+                  mapType={"counties"}
                 />
                 <ReactTooltip multiline={true} html={true}>
                   {this.state.contentCounty}
