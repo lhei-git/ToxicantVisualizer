@@ -32,6 +32,7 @@ class MapContainer extends Component {
     };
 
     this.fetchPoints = this.fetchPoints.bind(this);
+    this.storeFacilities = this.storeFacilities.bind(this);
     this.handleMount = this.handleMount.bind(this);
     this.adjustMap = this.adjustMap.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -65,8 +66,10 @@ class MapContainer extends Component {
     const newState = {};
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
-      this.setState({ isLoading: true }, () => {
-        this.fetchPoints(this.props.map, this.props.filters);
+      this.setState({ isLoading: true, markers: {} }, () => {
+        this.fetchPoints(this.props.map, this.props.filters).then((data) =>
+          this.storeFacilities(data)
+        );
       });
       newState.showingInfoWindow = false;
       this.setState(newState);
@@ -112,47 +115,46 @@ class MapContainer extends Component {
     });
   }
 
-  fetchPoints(map, filters) {
+  async fetchPoints(map, filters) {
     console.log("fetching...");
-    const params = {
-      state: map.state,
-      county: map.county,
-      city: map.city,
-      carcinogen: filters.carcinogens || null,
-      pbt: filters.pbts || null,
-      release_type: filters.releaseType,
-      chemical: filters.chemical,
-      year: filters.year,
-    };
-    vetapi
-      .get(`/facilities`, { params })
-      .then((res) => {
-        const data = res.data;
-        this.setState({
-          points: data,
-          markers: this.createMarkers(data),
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        if (this.props.onApiError) this.props.onApiError();
-      });
+
+    let facilityData = null;
+
+    try {
+      const params = {
+        state: map.state,
+        county: map.county,
+        city: map.city,
+        carcinogen: filters.carcinogen || null,
+        pbt: filters.pbt || null,
+        release_type: filters.releaseType,
+        chemical: filters.chemical,
+        year: filters.year,
+      };
+
+      const res = await vetapi.get(`/facilities`, { params });
+      facilityData = res.data;
+      return facilityData;
+    } catch (err) {
+      console.log(err);
+      if (this.props.onApiError) this.props.onApiError();
+    }
   }
 
   handleMount(mapProps, map) {
     this.map = map;
     const mapsApi = window.google.maps;
     setTimeout(() => {
-      mapsApi.event.addListener(map, "center_changed", () => {
+      mapsApi.event.addListener(map, "dragend", () => {
         this.setState({ hasMoved: true });
       });
     }, 1000);
 
-    // const viewport = this.props.map.viewport;
     this.adjustMap(mapProps, map);
   }
 
   adjustMap(mapProps, map) {
+    console.log("adjusting...");
     const mapsApi = window.google.maps;
     const viewport = this.props.map.viewport;
     if (viewport) {
@@ -165,7 +167,17 @@ class MapContainer extends Component {
               isLoading: true,
             },
             () => {
-              this.fetchPoints(this.props.map, this.props.filters);
+              const facilityData = JSON.parse(
+                sessionStorage.getItem("facilityData")
+              );
+              if (facilityData === null)
+                this.fetchPoints(
+                  this.props.map,
+                  this.props.filters
+                ).then((data) => this.storeFacilities(data));
+              else {
+                this.storeFacilities(facilityData);
+              }
             }
           );
         });
@@ -173,6 +185,19 @@ class MapContainer extends Component {
         console.log(err);
       }
     }
+  }
+
+  storeFacilities(data) {
+    console.log("storing...");
+    this.setState(
+      {
+        points: data,
+        markers: this.createMarkers(data),
+      },
+      () => {
+        sessionStorage.setItem("facilityData", JSON.stringify(data));
+      }
+    );
   }
 
   createLatLngBounds(viewport, api) {
@@ -193,7 +218,7 @@ class MapContainer extends Component {
   }
 
   createMarkers(points) {
-    console.log("creating markers");
+    console.log("creating markers...");
     const facilities = points;
     // create a marker for every point that is passed to the map
     const markers = facilities.map((facility, i) => {
@@ -236,7 +261,6 @@ class MapContainer extends Component {
         <div className="map">
           <Map
             onReady={this.handleMount}
-            onTilesloaded={this.props.onTilesLoaded}
             google={window.google}
             streetViewControl={false}
             styles={silver}
@@ -251,8 +275,6 @@ class MapContainer extends Component {
                 releaseType={this.props.filters.releaseType}
                 markers={this.state.markers}
                 click={this.onMarkerClick}
-                mouseover={this.onMouseOver}
-                mouseout={this.onMouseOut}
                 minimumClusterSize={15}
               />
             )}
