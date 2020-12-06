@@ -242,8 +242,6 @@ def all_state_total_releases(request):
 def all_county_total_releases(request):
     state = request.GET.get('state')
     filters = Q()
-    if state is None:
-        return HttpResponseBadRequest()
     if state is not None:
         filters = Q(facility__state=state.upper())
     y = int(request.GET.get('year', default=latest_year))
