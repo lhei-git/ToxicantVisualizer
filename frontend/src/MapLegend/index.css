@@ -1,0 +1,25 @@
+.map-wrapper .legend {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  z-index: 10000;
+  background: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(32, 33, 36, 0.28);
+}
+
+.map-wrapper .legend .marker {
+  margin-right: 10px;
+}
+
+.map-wrapper .legend .marker img {
+  width: 20px;
+  position: relative;
+  top: 2px;
+}
+
+.map-wrapper .legend ul {
+  margin: 10px 0;
+  padding: 0;
+}
