@@ -133,48 +133,42 @@ function MapView(props) {
         ></FilterView>
       </div>
       <div className="flex-container top">
-        <div className="flex-item pubchem-wrapper">
-          {state.showPubchemInfo ? (
-            <div className="pubchem">
-              <div
-                className="back"
-                onClick={() => {
-                  dispatch(showPubchemInfo());
-                }}
-              >
-                <span>
-                  <img
-                    src={require("../../src/assets/leftcarat.png")}
-                    alt=""
-                  ></img>
-                </span>
-                Back to Chemicals
-              </div>
-              <PubchemView chemName={state.currentChemical}></PubchemView>
-            </div>
-          ) : (
-            <div className="chemicals">
-              {state.chemicals.length === 0 ? (
-                <div className="placeholder">
-                  <div className="text-center">
-                    Click a facility on the map to see its pollutants.{" "}
-                  </div>
+        {state.chemicals.length !== 0 && (
+          <div className="flex-item pubchem-wrapper">
+            {state.showPubchemInfo ? (
+              <div className="pubchem">
+                <div
+                  className="back"
+                  onClick={() => {
+                    dispatch(showPubchemInfo());
+                  }}
+                >
+                  <span>
+                    <img
+                      src={require("../../src/assets/leftcarat.png")}
+                      alt=""
+                    ></img>
+                  </span>
+                  Back to Chemicals
                 </div>
-              ) : (
+                <PubchemView chemName={state.currentChemical}></PubchemView>
+              </div>
+            ) : (
+              <div className="chemicals">
                 <div className="caption">
                   Click on toxicant to see detailed chemical information.
                 </div>
-              )}
-              <ChemicalList
-                onClick={(chemical) => {
-                  dispatch(showPubchemInfo());
-                  dispatch(setCurrentChemical(chemical));
-                }}
-                chemicals={state.chemicals}
-              ></ChemicalList>
-            </div>
-          )}
-        </div>
+                <ChemicalList
+                  onClick={(chemical) => {
+                    dispatch(showPubchemInfo());
+                    dispatch(setCurrentChemical(chemical));
+                  }}
+                  chemicals={state.chemicals}
+                ></ChemicalList>
+              </div>
+            )}
+          </div>
+        )}
         {/* GOOGLE MAPS RENDER */}
         <div className="flex-item map-wrapper">
           {state.map && (
