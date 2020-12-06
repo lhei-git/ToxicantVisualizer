@@ -186,6 +186,9 @@ def get_chemicals(request, facility_id):
 
 ''' '''
 def get_chemicals_in_window(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     raw = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=y)).values('chemical__name').order_by('chemical__name').distinct()
     response = json.dumps([x['chemical__name'] for x in raw], cls=DjangoJSONEncoder)
@@ -193,6 +196,9 @@ def get_chemicals_in_window(request):
 
 ''' Return total stats released by state & year {graph }'''
 def state_total_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     t_dioxin, t_carc, t_onsite, t_air, t_water, t_land, t_offsite, t_facilitycount = 0, 0, 0, 0, 0, 0, 0, 0
     result = {}
@@ -227,6 +233,8 @@ def all_state_total_releases(request):
 def all_county_total_releases(request):
     state = request.GET.get('state')
     filters = Q()
+    if state is None:
+        return HttpResponseBadRequest()
     if state is not None:
         filters = Q(facility__state=state.upper())
     y = int(request.GET.get('year', default=latest_year))
@@ -238,6 +246,9 @@ def all_county_total_releases(request):
 
 ''' Returns all chemicals and respective total release (by type) amounts for queried location {Graph 13} '''
 def all_chemicals_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('chemical__name').annotate(
         Sum('air'), Sum('water'), Sum('land'), Sum('off_site')).order_by('chemical__name')
@@ -247,6 +258,9 @@ def all_chemicals_releases(request):
 
 ''' Returns all chemicals and respective total release (not by type / only total) amounts in queried location {Graph 15} '''
 def all_chemicals_total_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     # TODO - adding an order_by('-total') introduces duplicate chemical names
     qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('chemical__name').annotate(Sum('total')).order_by('chemical__name')
@@ -256,6 +270,9 @@ def all_chemicals_total_releases(request):
 
 ''' Returns all facilities and respective total release (by type) amounts in queried location {Graph 12} '''
 def all_facility_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     qs = release.objects.filter(geoFilter(request) & Q(year=y)).values(
         'facility__name').annotate(
@@ -266,6 +283,9 @@ def all_facility_releases(request):
 
 ''' Returns all facilities and respective total release (not by type / only total) amounts in queried location {Graph 14} '''
 def all_facility_total_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     qs = release.objects.filter(geoFilter(request) & Q(year=y)).values('facility__name').annotate(Sum('total')).order_by('-total').order_by('facility__name')
     #print(qs.query)
@@ -274,6 +294,9 @@ def all_facility_total_releases(request):
 
 ''' Return top 10 companies in total releases by geo window & year'''
 def top_parentco_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     carcinogen = request.GET.get('carcinogen')
     dioxin = request.GET.get('dioxin')
     pbt = request.GET.get('pbt')
@@ -320,6 +343,9 @@ def top_parentco_releases(request):
 
 ''' Return top ten polluting facilities over time by: window'''
 def timeline_top_parentco_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     parents = list(release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=latest_year)).values_list(
         'facility__parent_co_name', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(facility__parent_co_name__in=parents)).values(
@@ -329,6 +355,9 @@ def timeline_top_parentco_releases(request):
 
 """ Returns the total releases (in lbs) in a location for each available year. """
 def timeline_total(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     queryset = release.objects.filter(geoFilter(request) & filterReleases(request)).values(
         'year').annotate(total=Sum('total')).order_by('year')
     response = json.dumps(list(queryset), cls=DjangoJSONEncoder)
@@ -339,6 +368,9 @@ def timeline_total(request):
 
 
 def top_facility_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     carcinogen = request.GET.get('carcinogen')
     dioxin = request.GET.get('dioxin')
     pbt = request.GET.get('pbt')
@@ -388,6 +420,9 @@ def top_facility_releases(request):
 
 ''' Return top ten polluting facilities over time by: window'''
 def timeline_top_facility_releases(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     get_averages = bool(request.GET.get('averages'))
     release_list = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(
         year=2018)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
@@ -402,6 +437,9 @@ def timeline_top_facility_releases(request):
 
 ''' Return timeline data for PBT chemicals'''
 def timeline_top_pbt_chemicals(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     chemicals = list(release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=latest_year) & Q(chemical__classification='PBT')).values_list(
         'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
@@ -410,11 +448,17 @@ def timeline_top_pbt_chemicals(request):
 
 ''' Returns number of facilities based on state -- UNUSED'''
 def num_facilities(request):
-    data = facility.objects.filter(state=request.GET.get('state')).values('name').distinct().count()
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
+    data = facility.objects.filter(state=state).values('name').distinct().count()
     return HttpResponse(data, content_type='application/json')
 
 ''' Return summary points within window'''
 def country_summary(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     raw = release.objects.filter(Q(year=y)).aggregate(total=Sum(
         'total'), num_facilities=Count('facility__id', distinct=True), num_chemicals=Count('chemical__id', distinct=True),
@@ -426,6 +470,9 @@ def country_summary(request):
 
 ''' Returns summary based on geo spec. '''
 def location_summary(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     raw = release.objects.filter(geoFilter(request) & Q(year=y)).aggregate(total=Sum(
         'total'), num_facilities=Count('facility__id', distinct=True), num_chemicals=Count('chemical__id', distinct=True),
@@ -438,6 +485,10 @@ def location_summary(request):
 ''' Returns amount released by each chemical within geo spec. '''
 def top_chemicals(request):
     carcinogen = request.GET.get('carcinogen')
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
+        
     y = int(request.GET.get('year', default=latest_year))
     release_type = request.GET.get('release_type', default='all').upper()
     filters = Q()
@@ -469,6 +520,9 @@ def top_chemicals(request):
 
 """ Returns the total release amount over time for the top 10 chemicals released in latest_year. """
 def top_pbt_chemicals(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     release_type = request.GET.get('release_type', default='all').upper()
     filters = Q(chemical__classification='PBT')
@@ -495,6 +549,9 @@ def top_pbt_chemicals(request):
 
 
 def timeline_top_chemicals(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
     chemicals = list(release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=latest_year)).values_list(
         'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
@@ -506,7 +563,7 @@ def clean_chemical_name(str):
     pattern = re.compile(r'\([^)]*\)|compounds|\"| and.*', re.IGNORECASE)
     return pattern.sub("", str).strip()
 
-
+#Is this function needed?
 def attr(request, attribute=str()):
     attr = str(attribute).upper()
     if attr == 'ID':
@@ -517,7 +574,6 @@ def attr(request, attribute=str()):
         return cityview(request)
     elif attr == 'ZIP':
         return zipview(request)
-
 
 
 # - https://docs.djangoproject.com/en/3.1/ref/models/querysets/#field-lookups
