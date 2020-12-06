@@ -197,7 +197,7 @@ function MapView(props) {
         </div>
       </div>
       {state.map && (
-        <div>
+        <div className="summary-container">
           <div>
             <GraphSummary
               map={state.map}
