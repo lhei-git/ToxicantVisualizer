@@ -23,24 +23,98 @@ const ThematicMap = (props) => {
 
   if (!props.data) return null;
 
-  //color scale for counties, has smaller values than states
-  function colorScaleCounty(val) {
-    if (val === 0) return "#FCDBC6";
-    else if (val < 1000) return "#FBCBCA";
-    else if (val < 10000) return "#F2A598";
-    else if (val < 100000) return "#F65858";
-    else if (val < 1000000) return "#E00E0E";
-    else return "#A60A0A";
+  //determines if foreground text should be black or white depending on the darkness of the background color
+  function textColorScale(color) {
+    var r = parseInt(color.toString().substr(1, 2), 16);
+    var g = parseInt(color.toString().substr(3, 2), 16);
+    var b = parseInt(color.toString().substr(5, 2), 16);
+
+    return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? "black" : "white";
   }
 
-  //color scale for states, has larger values than counties
-  function colorScaleState(val) {
-    if (val === 0) return "#FCDBC6";
-    else if (val < 1000000) return "#FBCBCA";
-    else if (val < 10000000) return "#F2A598";
-    else if (val < 50000000) return "#F65858";
-    else if (val < 100000000) return "#E00E0E";
-    else return "#A60A0A";
+  //fetch color scale for visual elements based on release filter and map type (state vs. county)
+  function colorScale(val, releaseType, mapType) {
+    //color scales for each release type (on-site and total have the same color scale)
+    const scaleAll = [
+      "#FCDBC6",
+      "#FBCBCA",
+      "#F2A598",
+      "#F65858",
+      "#E00E0E",
+      "#A60A0A",
+    ];
+    const scaleAir = [
+      "#DEDEDE",
+      "#DDDDDD",
+      "#AEAEAE",
+      "#8D8D8D",
+      "#6D6D6D",
+      "#353535",
+    ];
+    const scaleWater = [
+      "#C5E0B4",
+      "#97C14B",
+      "#80B145",
+      "#59954A",
+      "#447741",
+      "#316033",
+    ];
+    const scaleLand = [
+      "#F8CBAD",
+      "#C48647",
+      "#A3672B",
+      "#844B11",
+      "#733A00",
+      "#502F0C",
+    ];
+    const scaleOffsite = [
+      "#FFFFCA",
+      "#FFF9AE",
+      "#F8ED62",
+      "#E9D700",
+      "#DAB600",
+      "#A98600",
+    ];
+
+    //numerical values to adjust the bucket size, values in each bucket are LESS THAN the numerical value
+    const stateBuckets = [1000000, 10000000, 25000000, 50000000, 100000000];
+    const countyBuckets = [1000, 10000, 100000, 1000000, 5000000];
+
+    var valIndex = 0;
+
+    //states and counties use a different scale to keep results presentable
+    switch (mapType) {
+      case "states":
+        if (val < stateBuckets[0]) valIndex = 0;
+        else if (val < stateBuckets[1]) valIndex = 1;
+        else if (val < stateBuckets[2]) valIndex = 2;
+        else if (val < stateBuckets[3]) valIndex = 3;
+        else if (val < stateBuckets[4]) valIndex = 4;
+        else valIndex = 5;
+        break;
+      default:
+        if (val < countyBuckets[0]) valIndex = 0;
+        else if (val < countyBuckets[1]) valIndex = 1;
+        else if (val < countyBuckets[2]) valIndex = 2;
+        else if (val < countyBuckets[3]) valIndex = 3;
+        else if (val < countyBuckets[4]) valIndex = 4;
+        else valIndex = 5;
+        break;
+    }
+
+    //return the color for the visual element
+    switch (releaseType) {
+      case "air":
+        return [scaleAir[valIndex]];
+      case "water":
+        return [scaleWater[valIndex]];
+      case "land":
+        return [scaleLand[valIndex]];
+      case "off_site":
+        return [scaleOffsite[valIndex]];
+      default:
+        return [scaleAll[valIndex]];
+    }
   }
 
   //zoom and pan functions for the county based thematic map
@@ -59,10 +133,8 @@ const ThematicMap = (props) => {
     setPosition({ coordinates: [-96, 38], zoom: 1 });
   }
 
-  const filterType = props.filterType !== null ? props.filterType : "total";
-
   //////  used to render the state based map  //////
-  if (props.type === "states")
+  if (props.mapType === "states")
     return (
       <>
         <div className="thematic-map-container">
@@ -78,7 +150,11 @@ const ThematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScaleState(cur ? cur[filterType] : 0)}
+                        fill={colorScale(
+                          cur ? cur[props.filterType] : 0,
+                          props.filterType,
+                          props.mapType
+                        )}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
@@ -88,28 +164,28 @@ const ThematicMap = (props) => {
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
-                                                Facilities: ${rounded(
-                                                  Math.trunc(cur.num_facilities)
-                                                )} </br>
+                                                Land: ${rounded(
+                                                  Math.trunc(cur.land)
+                                                )} lbs. <br />
                                                 Air: ${rounded(
                                                   Math.trunc(cur.air)
                                                 )} lbs. <br />
                                                 Water: ${rounded(
                                                   Math.trunc(cur.water)
                                                 )} lbs. <br />
-                                                Land: ${rounded(
-                                                  Math.trunc(cur.land)
+                                                Onsite: ${rounded(
+                                                  Math.trunc(cur.on_site)
                                                 )} lbs. <br />
                                                 Offsite: ${rounded(
                                                   Math.trunc(cur.off_site)
                                                 )} lbs. <br />
-                                                Onsite: ${rounded(
-                                                  Math.trunc(cur.on_site)
-                                                )} lbs. <span />
+                                                Facilities: ${rounded(
+                                                  Math.trunc(cur.num_facilities)
+                                                )} <span />
                                                 `);
                         }}
                         onMouseLeave={() => {
-                          props.setTooltipContent("");
+                          props.setTooltipContent(null);
                         }}
                       />
                     );
@@ -118,15 +194,17 @@ const ThematicMap = (props) => {
               }
             </Geographies>
           </ComposableMap>
-          <LegendState
-            colorScale={colorScaleState}
-            filterType={filterType}
-          ></LegendState>
+          <Legend
+            colorScale={colorScale}
+            textColor={textColorScale}
+            filterType={props.filterType}
+            mapType={props.mapType}
+          ></Legend>
         </div>
       </>
     );
   //////  used to render the county based map  //////
-  else if (props.type === "counties")
+  else if (props.mapType === "counties")
     return (
       <>
         <div className="thematic-map-container">
@@ -141,45 +219,49 @@ const ThematicMap = (props) => {
                   geographies.map((geo) => {
                     var cur = props.data.find(
                       (s) =>
-                        s.facility__county.slice(0, 3) ===
-                          geo.properties.name.toUpperCase().slice(0, 3) &&
-                        s.facility__state === geo.properties.iso_3166_2
+                        s.facility__state === geo.properties.iso_3166_2 &&
+                        s.facility__county.slice(
+                          0,
+                          geo.properties.name.length
+                        ) === geo.properties.name.toUpperCase()
                     );
                     if (cur !== undefined) {
                       return (
                         <Geography
                           key={geo.rsmKey}
                           geography={geo}
-                          fill={colorScaleCounty(cur ? cur[filterType] : 0)}
+                          fill={colorScale(
+                            cur ? cur[props.filterType] : 0,
+                            props.filterType,
+                            props.mapType
+                          )}
                           stroke={"#000"}
                           onMouseEnter={() => {
                             props.setTooltipContent(null);
                             props.setTooltipContent(`<h1><p style="text-align:center;">${
                               cur.facility__county
                             } COUNTY</p></h1><span class="geography-attributes"><br />
-                                                    Onsite: ${rounded(
-                                                      Math.trunc(cur.on_site)
-                                                    )} lbs. <br />
-                                                    Air: ${rounded(
-                                                      Math.trunc(cur.air)
-                                                    )} lbs. <br />
-                                                    Water: ${rounded(
-                                                      Math.trunc(cur.water)
-                                                    )} lbs. <br />
-                                                    Land: ${rounded(
-                                                      Math.trunc(cur.land)
-                                                    )} lbs. <br />
-                                                    Offsite: ${rounded(
-                                                      Math.trunc(cur.off_site)
-                                                    )} lbs. <br />
-                                                    Total: ${rounded(
-                                                      Math.trunc(cur.total)
-                                                    )} lbs. <br />
-                                                    Facilities: ${rounded(
-                                                      Math.trunc(
-                                                        cur.num_facilities
-                                                      )
-                                                    )} </span>
+                                                Total: ${rounded(
+                                                  Math.trunc(cur.total)
+                                                )} lbs. <br />
+                                                Land: ${rounded(
+                                                  Math.trunc(cur.land)
+                                                )} lbs. <br />
+                                                Air: ${rounded(
+                                                  Math.trunc(cur.air)
+                                                )} lbs. <br />
+                                                Water: ${rounded(
+                                                  Math.trunc(cur.water)
+                                                )} lbs. <br />
+                                                Onsite: ${rounded(
+                                                  Math.trunc(cur.on_site)
+                                                )} lbs. <br />
+                                                Offsite: ${rounded(
+                                                  Math.trunc(cur.off_site)
+                                                )} lbs. <br />
+                                                Facilities: ${rounded(
+                                                  Math.trunc(cur.num_facilities)
+                                                )} <span />
                         `);
                           }}
                           onMouseLeave={() => {
@@ -192,7 +274,7 @@ const ThematicMap = (props) => {
                         <Geography
                           key={geo.rsmKey}
                           geography={geo}
-                          fill={colorScaleCounty(0)}
+                          fill={colorScale(0, props.filterType, props.mapType)}
                           stroke={"#000"}
                           onMouseEnter={() => {
                             props.setTooltipContent(null);
@@ -261,8 +343,10 @@ const ThematicMap = (props) => {
             </button>
           </div>
           <Legend
-            colorScale={colorScaleCounty}
-            filterType={filterType}
+            colorScale={colorScale}
+            textColor={textColorScale}
+            filterType={props.filterType}
+            mapType={props.mapType}
           ></Legend>
         </div>
       </>
@@ -286,43 +370,47 @@ const ThematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                      s.facility__county.split(" ")[0].split(".")[0] ===
-                      geo.properties.NAME.toUpperCase()
-                        .split(" ")[0]
-                        .split(".")[0]
+                      s.facility__county.slice(
+                        0,
+                        geo.properties.NAME.length
+                      ) === geo.properties.NAME.toUpperCase()
                   );
                   if (cur !== undefined) {
                     return (
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScaleCounty(cur ? cur[filterType] : 0)}
+                        fill={colorScale(
+                          cur ? cur[props.filterType] : 0,
+                          props.filterType,
+                          props.mapType
+                        )}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.facility__county
                           } COUNTY</p></h1><span class="geography-attributes"><br />
-                                            Onsite: ${rounded(
-                                              Math.trunc(cur.on_site)
-                                            )} lbs. <br />
-                                            Air: ${rounded(
-                                              Math.trunc(cur.air)
-                                            )} lbs. <br />
-                                            Water: ${rounded(
-                                              Math.trunc(cur.water)
-                                            )} lbs. <br />
-                                            Land: ${rounded(
-                                              Math.trunc(cur.land)
-                                            )} lbs. <br />
-                                            Offsite: ${rounded(
-                                              Math.trunc(cur.off_site)
-                                            )} lbs. <br />
-                                            Total: ${rounded(
-                                              Math.trunc(cur.total)
-                                            )} lbs. <br />
-                                            Facilities: ${rounded(
-                                              Math.trunc(cur.num_facilities)
-                                            )} </span>
+                                                Total: ${rounded(
+                                                  Math.trunc(cur.total)
+                                                )} lbs. <br />
+                                                Land: ${rounded(
+                                                  Math.trunc(cur.land)
+                                                )} lbs. <br />
+                                                Air: ${rounded(
+                                                  Math.trunc(cur.air)
+                                                )} lbs. <br />
+                                                Water: ${rounded(
+                                                  Math.trunc(cur.water)
+                                                )} lbs. <br />
+                                                Onsite: ${rounded(
+                                                  Math.trunc(cur.on_site)
+                                                )} lbs. <br />
+                                                Offsite: ${rounded(
+                                                  Math.trunc(cur.off_site)
+                                                )} lbs. <br />
+                                                Facilities: ${rounded(
+                                                  Math.trunc(cur.num_facilities)
+                                                )} <span />
                 `);
                         }}
                         onMouseLeave={() => {
@@ -335,7 +423,7 @@ const ThematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScaleCounty(0)}
+                        fill={colorScale(0, props.filterType, props.mapType)}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
@@ -356,8 +444,9 @@ const ThematicMap = (props) => {
             </Geographies>
           </ComposableMap>
           <Legend
-            colorScale={colorScaleCounty}
-            filterType={filterType}
+            colorScale={colorScale}
+            textColor={textColorScale}
+            filterType={props.filterType}
           ></Legend>
         </div>
       </>
@@ -365,219 +454,53 @@ const ThematicMap = (props) => {
   }
 };
 
-// creates svg gradient legend based on min and max values and color scale
 function Legend(props) {
-  return (
-    <svg height="25" width="100%" margin="5px">
-      <rect
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(0)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="16.6%"
-        height="100"
-        width="16.6%"
-        fill="#FBCBCA"
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="33.2%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(9999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="49.8%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(99999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="66.4%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(999999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="83%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(9999999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <text
-        x="1%"
-        y="50%"
-        fill="black"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        0 lbs.
-      </text>
-      <text
-        x="17.7%"
-        y="50%"
-        fill="black"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(1000))} lbs.
-      </text>
-      <text
-        x="34.3%"
-        y="50%"
-        fill="black"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(10000))} lbs.
-      </text>
-      <text
-        x="50.9%"
-        y="50%"
-        fill="white"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(100000))} lbs.
-      </text>
-      <text
-        x="67.5%"
-        y="50%"
-        fill="white"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(1000000))} lbs.
-      </text>
-      <text
-        x="84.1%"
-        y="50%"
-        fill="white"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {">"} {rounded(Math.trunc(1000000))} lbs.
-      </text>
-    </svg>
-  );
-}
+  //numerical values to adjust the bucket size, values in each bucket are GREATER THAN the numerical value
+  //padded with a leading zero to create 6 buckets to iterate through to create visual elements
+  const stateBuckets = [0, 1000000, 10000000, 25000000, 50000000, 100000000];
+  const countyBuckets = [0, 1000, 10000, 100000, 1000000, 5000000];
 
-function LegendState(props) {
   return (
     <svg height="25" width="100%" margin="5px">
-      <rect
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(0)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="16.6%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(999999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="33.2%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(9999999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="49.8%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(19999999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="66.4%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(99999999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <rect
-        x="83%"
-        height="100"
-        width="16.6%"
-        fill={props.colorScale(9999999999)}
-        strokeWidth="1"
-        stroke="black"
-      />
-      <text
-        x="1%"
-        y="50%"
-        fill="black"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        0 lbs.
-      </text>
-      <text
-        x="17.7%"
-        y="50%"
-        fill="black"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(1000000))} lbs.
-      </text>
-      <text
-        x="34.3%"
-        y="50%"
-        fill="black"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(10000000))} lbs.
-      </text>
-      <text
-        x="50.9%"
-        y="50%"
-        fill="white"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(50000000))} lbs.
-      </text>
-      <text
-        x="67.5%"
-        y="50%"
-        fill="white"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {"<"} {rounded(Math.trunc(100000000))} lbs.
-      </text>
-      <text
-        x="84.1%"
-        y="50%"
-        fill="white"
-        dominantBaseline="middle"
-        textAnchor="start"
-      >
-        {">"} {rounded(Math.trunc(100000000))} lbs.
-      </text>
+      {stateBuckets.map((val, i) => {
+        var currentColor = props.colorScale(
+          props.mapType === "states"
+            ? stateBuckets[i] + 1
+            : countyBuckets[i] + 1,
+          props.filterType,
+          props.mapType
+        );
+
+        return (
+          <>
+            <rect
+              height="100"
+              width="16.6%"
+              x={16.6 * i + "%"}
+              fill={currentColor}
+              strokeWidth="1"
+              stroke="black"
+            />
+            <text
+              x={16.6 * i + 1 + "%"}
+              y="50%"
+              fill={props.textColor(currentColor)}
+              dominantBaseline="middle"
+              textAnchor="start"
+            >
+              {i === 0 ? "≥" : ">"}{" "}
+              {rounded(
+                Math.trunc(
+                  props.mapType === "states"
+                    ? stateBuckets[i]
+                    : countyBuckets[i]
+                )
+              )}{" "}
+              lbs.
+            </text>
+          </>
+        );
+      })}
     </svg>
   );
 }
