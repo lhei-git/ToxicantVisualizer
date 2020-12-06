@@ -65,7 +65,7 @@ def filterFacilities(request):
     # filter by carcinogens, PBTs, or dioxins only
     if carcinogen is not None and str(carcinogen).lower() == 'true':
         filters.add(Q(chemical__carcinogen='YES'), filters.connector)
-    elif pbt is not None and str(pbt).lower() == 'true':
+    if pbt is not None and str(pbt).lower() == 'true':
         filters.add(Q(chemical__classification='PBT'), filters.connector)
 
     return filters
@@ -99,7 +99,7 @@ def filterChemicals(request):
     # filter by carcinogens, PBTs, or dioxins only
     if carcinogen is not None and str(carcinogen).lower() == 'true':
         filters.add(Q(carcinogen='YES'), filters.connector)
-    elif pbt is not None and str(pbt).lower() == 'true':
+    if pbt is not None and str(pbt).lower() == 'true':
         filters.add(Q(classification='PBT'), filters.connector)
 
     return filters
@@ -133,7 +133,7 @@ def filterReleases(request):
     # filter by carcinogens, PBTs, or dioxins only
     if carcinogen is not None and str(carcinogen).lower() == 'true':
         filters.add(Q(chemical__carcinogen='YES'), filters.connector)
-    elif pbt is not None and str(pbt).lower() == 'true':
+    if pbt is not None and str(pbt).lower() == 'true':
         filters.add(Q(chemical__classification='PBT'), filters.connector)
     return filters
 
