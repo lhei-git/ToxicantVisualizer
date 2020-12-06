@@ -20,15 +20,6 @@
   background-repeat: no-repeat;
   background-size: cover;
 }
-.home-container .background .cite {
-  position: absolute;
-  bottom: 5px;
-  right: 10px;
-  font-size: 14px;
-  font-style: italic;
-  color: #fff;
-  opacity: 0.7;
-}
 
 .home-container .overlay {
   z-index: 3;
