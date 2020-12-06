@@ -45,8 +45,8 @@ function Pharmacology(props) {
       }
     }
 
-    if (!pubchemData && props.cid) getPubchemData(props.cid);
-  }, [onLoad, props.cid, pubchemData]);
+    if (props.cid) getPubchemData(props.cid);
+  }, []);
 
   return pubchemData !== null ? (
     <div className="pharmacology">
@@ -91,7 +91,7 @@ function HazardStatements(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, [props.cid, pubchemData, onLoad]);
+  }, []);
 
   function parseGHSData(response) {
     const info =
@@ -168,7 +168,7 @@ function Toxicity(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, [props.cid, pubchemData, onLoad]);
+  }, []);
 
   function parseToxicityData(response) {
     //grab the section heading to be displayed
