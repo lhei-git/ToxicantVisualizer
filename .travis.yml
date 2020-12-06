@@ -8,6 +8,7 @@ jobs:
     node_js: 14
     before_install:
     - cd frontend/
+    script: skip
     after_success:
     - npm run build
     - pip install awscli --upgrade --user
@@ -26,7 +27,7 @@ jobs:
       secret_access_key: $PIPELINE_AWS_SECRET
       region: us-east-1
       app: visualizing-environmental-toxicants
-      env: visualizing-environmental-toxicants-dev
+      env:  VisualizingEnvironmentalToxicants-env
       bucket_name: elasticbeanstalk-us-east-1-211778834029
       cleanup: false
 env:
