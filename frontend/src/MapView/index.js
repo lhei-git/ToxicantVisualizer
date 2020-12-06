@@ -133,7 +133,7 @@ function MapView(props) {
         ></FilterView>
       </div>
       <div className="flex-container top">
-        {/* <div className="flex-item pubchem-wrapper">
+        <div className="flex-item pubchem-wrapper">
           {state.showPubchemInfo ? (
             <div className="pubchem">
               <div
@@ -174,7 +174,7 @@ function MapView(props) {
               ></ChemicalList>
             </div>
           )}
-        </div> */}
+        </div>
         {/* GOOGLE MAPS RENDER */}
         <div className="flex-item map-wrapper">
           {state.map && (
