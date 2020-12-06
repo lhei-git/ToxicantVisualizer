@@ -95,7 +95,7 @@ class ThematicMapView extends Component {
             <div className="graph-header">
               Total{" "}
               {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              Releases By State
+              releases by state
             </div>
             {this.state.stateData ? (
               <>
@@ -122,7 +122,7 @@ class ThematicMapView extends Component {
             <div className="graph-header">
               Total{" "}
               {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              Releases By County
+              releases by county
             </div>
             {this.state.countyData ? (
               <>
