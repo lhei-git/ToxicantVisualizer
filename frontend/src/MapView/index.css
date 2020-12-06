@@ -1,0 +1,255 @@
+:root {
+  --primary: #9c27b0;
+  --primary-light: #d05ce3;
+  --primary-dark: #6a0080;
+  --black: #3f3844;
+  --grey: #f8f8f8;
+}
+
+a {
+  text-decoration: none;
+  color: var(--black);
+}
+
+.app-container {
+  position: relative;
+  color: #3f3844;
+  background: #fff;
+}
+
+.app-container .error {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 80%;
+  text-align: center;
+  z-index: 2222;
+  font-size: 22px;
+  background: rgb(255, 145, 145);
+  color: black;
+  border: 2px solid red;
+}
+
+.app-container .error div:first-child {
+  float: right;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.go-home {
+  margin-left: 50px;
+}
+
+.map-view {
+  position: relative;
+  margin-top: 80px;
+  background: #fff;
+  box-sizing: border-box;
+  z-index: 99;
+}
+
+.map-view .top {
+  height: 75vh;
+}
+
+.map-view .flex-container {
+  display: flex;
+}
+
+.map-view .flex-item {
+  position: relative;
+  height: 100%;
+}
+
+.map-view .summary {
+  min-width: 1000px;
+  max-width: 50vw;
+  margin: 0 auto;
+}
+
+.map-view .summary-container {
+  margin-top: 80px;
+}
+
+.pubchem-wrapper {
+  position: relative;
+  background: #fff;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-style: dotted;
+  border-color: rgba(32, 33, 36, 0.28);
+  border-width: 1px 0;
+}
+
+.filters {
+  flex: 1;
+  display: flex;
+  min-height: 30px;
+}
+
+.filters .header {
+  flex: 1;
+  text-align: center;
+}
+
+.filters .control-container {
+  flex: 2;
+}
+
+.filters .control-container .content select:nth-child(1) {
+  margin-left: 0;
+}
+
+.filters .location {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.filters .location h1 {
+  margin: 0;
+}
+
+.pubchem-wrapper .chemicals {
+  flex: 3;
+  overflow-y: auto;
+  box-sizing: border-box;
+  /* background: var(--grey); */
+}
+
+.pubchem-wrapper .chemicals .header {
+  margin: 15px 0;
+  padding: 0 10px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.pubchem-wrapper .chemicals .caption {
+  font-size: 20px;
+  margin: 10px;
+  opacity: 0.7;
+}
+
+.map-wrapper {
+  border: 1px solid rgba(32, 33, 36, 0.28);
+  flex: 2;
+  /* box-sizing: border-box; */
+}
+
+.pubchem {
+  flex: 3;
+  overflow-y: auto;
+}
+
+.pubchem .back {
+  text-align: right;
+  font-size: 20px;
+  margin: 10px;
+  opacity: 0.7;
+}
+
+.pubchem .back span img {
+  width: 25px;
+  position: relative;
+  top: 5px;
+}
+
+.chemicals .placeholder {
+  position: relative;
+  text-align: center;
+  height: 100%;
+  font-size: 30px;
+  vertical-align: middle;
+}
+
+.chemicals .placeholder .text-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pubchem-wrapper .chemical-list {
+  font-size: 22px;
+}
+
+/* .pubchem-wrapper .chemical-list .dots {
+    background: url('https://i.stack.imgur.com/otJN0.png') repeat-x bottom;
+    display: inline-block;
+    width: 80%;
+  } */
+
+.pubchem-wrapper .chemical-list ol li {
+  padding: 3px 0;
+  padding-left: 8px;
+}
+
+.pubchem-wrapper .chemical-list ol li:hover {
+  color: #0096aa;
+}
+
+.pubchem-wrapper .chemical-list li {
+  margin: 0 20px;
+}
+
+.pubchem-wrapper .chemical-list span {
+  margin: 0;
+  background-color: #fff;
+}
+
+.pubchem-wrapper .chemical-list .align-left {
+  float: left;
+}
+.pubchem-wrapper .chemical-list .align-right {
+  float: right;
+}
+.footer {
+  position: absolute;
+  text-align: center;
+  left: 0;
+  right: 0;
+  font-size: 14px;
+  width: 100%;
+  border-top: 1px solid rgba(32, 33, 36, 0.28);
+  border-bottom: 1px solid rgba(32, 33, 36, 0.28);
+  background: #f8f8f8;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer > div {
+  width: 100%;
+  font-style: italic;
+}
+
+.footer .copyright {
+  padding: 0 20px;
+  margin: 10px 0;
+}
+
+.footer ul {
+  padding: 0;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  width: 100%;
+  margin: 0;
+}
+
+.footer li {
+  display: inline-block;
+  padding: 0 18px;
+  font-weight: 600;
+}
+
+@media all and (max-width: 1080px) {
+  .map-view {
+    flex-direction: column;
+  }
+
+  .pubchem-wrapper {
+    flex-direction: row;
+  }
+}
