@@ -2,6 +2,7 @@
   width: 100%;
   display: flex;
   justify-content: flex-start;
+  background: #fafbfc;
 
   --primary: #9c27b0;
   --primary-light: #d05ce3;
@@ -35,4 +36,5 @@
 .control-container .checkbox-group {
   display: inline-block;
   margin: 15px;
+  cursor: pointer;
 }

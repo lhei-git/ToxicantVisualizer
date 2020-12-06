@@ -10,11 +10,9 @@ function Home(props) {
 
   /* Used to handle Elastic Beanstalk cold start */
   React.useEffect(() => {
-    try {
-      vetapi.get("_health");
-    } catch (err) {
+    vetapi.get("_health").catch((err) => {
       console.log(err);
-    }
+    });
   }, []);
 
   async function geocodeLocation(location) {
@@ -36,6 +34,7 @@ function Home(props) {
         city: city ? city.short_name : null,
         county: county ? county.short_name.replace("County", "").trim() : null,
         state: state ? state.short_name : null,
+        stateLong: state ? state.long_name : null,
         center: results.geometry.location,
         viewport: results.geometry.viewport,
       };
@@ -69,19 +68,16 @@ function Home(props) {
   return (
     <div className="home-container">
       <div className="background">
+        <div className="cite">Photo by https://unsplash.com/@punkidu</div>
         <div className="overlay"></div>
       </div>
       <div className="content-group">
         <div className="header">Visualizer of Environmental Toxicants</div>
         <div className="caption">
-          This VET tool was developed to obtain information from the Toxic
-          Releases Inventory data of the U.S. EPA, and associated chemical
-          information from the PubChem database, to map, organize and visualize
-          information about releases of chemicals into water, air and land by
-          manufacturing facilities across the U.S. This tool is for exploratory
-          purposes only, focused on potential health issues with toxic releases.
-          Any decision related to information herein should be made with other
-          relevant information and analyses.
+          Select a location to see U.S. facilities emitting toxic chemicals into
+          the air, land and water; statistics and trends on releases of
+          toxicants into the environment; as well as detailed information on
+          potential health hazards from these toxic chemicals.
         </div>
         <div className="search-bar">
           <PlacesAutocomplete
@@ -91,6 +87,7 @@ function Home(props) {
             onError={handleError}
             shouldFetchSuggestions={location.length > 2}
             searchOptions={{
+              types: ["geocode"],
               componentRestrictions: {
                 country: "us",
               },
@@ -102,8 +99,7 @@ function Home(props) {
                   <div className="search-input-container">
                     <input
                       {...getInputProps({
-                        placeholder:
-                          "Enter a zip code; a 'city, state' combination; or a state",
+                        placeholder: "Type location name and select to search",
                         className: "search-input",
                       })}
                     />
