@@ -113,7 +113,7 @@ class ThematicMapView extends Component {
                 filterYear={filterYear}
                 filterType={filterType}
                 geoUrl={stateGeoUrl}
-                type={"states"}
+                mapType={"states"}
               />
               <ReactTooltip multiline={true} html={true}>
                 {this.state.contentState}
@@ -139,7 +139,7 @@ class ThematicMapView extends Component {
                 filterYear={filterYear}
                 filterType={filterType}
                 geoUrl={countyGeoUrl}
-                type={"counties"}
+                mapType={"counties"}
               />
               <ReactTooltip multiline={true} html={true}>
                 {this.state.contentCounty}

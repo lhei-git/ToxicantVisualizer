@@ -119,7 +119,7 @@ class ThematicStateMap extends Component {
                 filterYear={filterYear}
                 filterType={filterType}
                 geoUrl={this.state.geoUrl}
-                type={"singleState"}
+                mapType={"singleState"}
                 stateName={this.props.stateName}
                 lat={this.state.lat}
                 lon={this.state.lon}
