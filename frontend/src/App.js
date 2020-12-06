@@ -20,7 +20,7 @@ import UserControlPanel from "./UserControlPanel";
 import ThematicMapView from "./ThematicMapView/index.js";
 import ThematicStateMap from "./ThematicStateMap/index.js";
 import React, { useReducer } from "react";
-import { formatChemical, formatAmount } from "./helpers";
+import { formatChemical, formatAmount, getLocationString } from "./helpers";
 import vetapi from "./api/vetapi";
 
 const initialState = {
@@ -32,7 +32,6 @@ const initialState = {
   currentChemical: "",
   activeTab: 0,
   errorMessage: "",
-  graphsLoaded: false,
   filters: {
     chemical: "all",
     pbts: false,
@@ -76,8 +75,6 @@ const reducer = (state, action) => {
       return { ...state, activeTab: action.payload };
     case "setErrorMessage":
       return { ...state, errorMessage: action.payload };
-    case "loadGraphs":
-      return { ...state, graphsLoaded: true };
     case "refresh":
       return {
         ...state,
@@ -96,7 +93,6 @@ const setMap = (payload) => ({ type: "setMap", payload });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
 const setErrorMessage = (payload) => ({ type: "setErrorMessage", payload });
-const loadGraphs = () => ({ type: "loadGraphs" });
 const setCurrentChemical = (payload) => ({
   type: "setCurrentChemical",
   payload,
@@ -230,9 +226,8 @@ const App = (props) => {
             <div className="map-view">
               {/* VET MAP FILTER */}
               <div className="filters">
-                <div className="placeholder"></div>
                 <div className="header">
-                  {/* <span>{state.numFacilities || 0}</span> Facilities found */}
+                  {state.map && <h1>{getLocationString(state.map)}</h1>}
                 </div>
                 <UserControlPanel
                   map={state.map}
@@ -293,9 +288,7 @@ const App = (props) => {
                     <MapContainer
                       filters={Object.assign({}, state.filters)}
                       map={state.map}
-                      onLoad={() => dispatch(loadGraphs())}
                       apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-                      onTilesLoaded={() => dispatch(loadGraphs())}
                       onUpdate={(num) => dispatch(setNumFacilities(num))}
                       onRefresh={() => dispatch(refresh())}
                       onApiError={toggleError}
@@ -313,7 +306,7 @@ const App = (props) => {
                     <div>Total releases (air, water, land and off-site)</div>
                     <ul style={{ listStyle: "none" }}>
                       <li>
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -325,7 +318,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -337,7 +330,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -349,7 +342,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -361,7 +354,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -373,7 +366,7 @@ const App = (props) => {
                       </li>
                       <li>
                         {" "}
-                        <span class="marker">
+                        <span className="marker">
                           <img
                             src={require("./../src/assets/" +
                               getColor() +
@@ -399,8 +392,8 @@ const App = (props) => {
                     <div>
                       <ThematicStateMap
                         year={state.filters.year}
-                        type={state.filters.releaseType}
-                        stateName={state.map.stateShort}
+                        releaseType={state.filters.releaseType}
+                        stateName={state.map.state}
                         stateLongName={state.map.stateLong}
                       ></ThematicStateMap>
                     </div>
