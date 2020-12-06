@@ -243,13 +243,18 @@ def all_county_total_releases(request):
     state = request.GET.get('state')
     filters = Q()
     if state is None:
-        return HttpResponseBadRequest()
+        y = int(request.GET.get('year', default=latest_year))
+        raw = release.objects.filter(filters & Q(year=y)).values('facility__county', 'facility__state').annotate(
+            total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
+            'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(
+            on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__county')
+        response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     if state is not None:
         filters = Q(facility__state=state.upper())
-    y = int(request.GET.get('year', default=latest_year))
-    raw = release.objects.filter(filters & Q(year=y)).values('facility__county', 'facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
-        'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__county')
-    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
+        y = int(request.GET.get('year', default=latest_year))
+        raw = release.objects.filter(filters & Q(year=y)).values('facility__county', 'facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
+            'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__county')
+        response = json.dumps(list(raw), cls=DjangoJSONEncoder)
     return HttpResponse(response, content_type='application/json')
 
 
