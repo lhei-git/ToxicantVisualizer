@@ -83,10 +83,12 @@ const getChemicals = async (facilityId, filters) => {
   return chemicals;
 };
 
+/* Component for a facility's list of chemicals, shows when facility is clicked */
 function ChemicalList(props) {
   const { chemicals } = props;
   if (chemicals.length === 0) return <div></div>;
 
+  /* Format each chemical into a split row using name and release amount */
   const listItems = chemicals
     .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total)
@@ -119,11 +121,11 @@ function MapView(props) {
 
   return (
     <div className="map-view">
-      {/* VET MAP FILTER */}
       <div className="filters">
         <div className="header">
           {state.map && <h1>{getLocationString(state.map, true)}</h1>}
         </div>
+        {/* Filter component */}
         <FilterView
           map={state.map}
           filters={state.filters}
@@ -133,8 +135,10 @@ function MapView(props) {
         ></FilterView>
       </div>
       <div className="flex-container top">
+        {/* Only show pubchem sidebar if facility has been clicked */}
         {state.chemicals.length !== 0 && (
           <div className="flex-item pubchem-wrapper">
+            {/* Only show pubchem data if a chemical has been clicked */}
             {state.showPubchemInfo ? (
               <div className="pubchem">
                 <div
@@ -154,6 +158,7 @@ function MapView(props) {
                 <PubchemView chemName={state.currentChemical}></PubchemView>
               </div>
             ) : (
+              /* Actually show chemical list */
               <div className="chemicals">
                 <div className="caption">
                   Click on toxicant to see detailed chemical information.
@@ -169,7 +174,7 @@ function MapView(props) {
             )}
           </div>
         )}
-        {/* GOOGLE MAPS RENDER */}
+        {/* Google Map (requires api keys and google as a property of the window)*/}
         <div className="flex-item map-wrapper">
           {state.map && (
             <div>
@@ -185,11 +190,13 @@ function MapView(props) {
                   );
                 }}
               />
+              {/* Legend updates with colors of selected release type */}
               <MapLegend releaseType={state.filters.releaseType}></MapLegend>
             </div>
           )}
         </div>
       </div>
+      {/* Summary table and state thematic map. Only show if a search has been completed */}
       {state.map && (
         <div className="summary-container">
           <div>
