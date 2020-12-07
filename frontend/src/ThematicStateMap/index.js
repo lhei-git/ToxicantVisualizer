@@ -42,9 +42,9 @@ class ThematicStateMap extends Component {
   // refetches data if the year or release type filter changed
   componentDidUpdate(prevProps, prevState) {
     if (
-      this.props.filterYear !== prevProps.filterYear ||
+      this.props.year !== prevProps.year ||
       this.props.stateName !== prevProps.stateName ||
-      this.props.releaseType !== prevProps.releaseType
+      this.props.type !== prevProps.type
     ) {
       this.getCountyData();
 
@@ -89,8 +89,8 @@ class ThematicStateMap extends Component {
       <div className="thematic-view-container">
         <div className="flex-item">
           <div className="graph-header">
-            Total {this.getFilterText(this.props.releaseType)} Releases By
-            County for {this.props.stateLongName}
+            Total {this.getFilterText(this.props.releaseType)} releases By
+            County for {this.props.stateLongName} in {this.props.year}
           </div>
           {this.state.countyData ? (
             <>

@@ -1,11 +1,10 @@
-import React, { memo, useState, useEffect } from "react";
+import React, { memo, useState } from "react";
 import {
   ComposableMap,
   ZoomableGroup,
   Geographies,
   Geography,
 } from "react-simple-maps";
-import { scaleQuantile } from "d3-scale";
 import "./index.css";
 
 // used to produce more easily readable numbers
@@ -25,63 +24,96 @@ const ThematicMap = (props) => {
   if (!props.data) return null;
 
   //determines if foreground text should be black or white depending on the darkness of the background color
-  function textColorScale(color){
-        var r = parseInt(color.toString().substr(1, 2), 16)
-        var g = parseInt(color.toString().substr(3, 2), 16)
-        var b = parseInt(color.toString().substr(5, 2), 16)
+  function textColorScale(color) {
+    var r = parseInt(color.toString().substr(1, 2), 16);
+    var g = parseInt(color.toString().substr(3, 2), 16);
+    var b = parseInt(color.toString().substr(5, 2), 16);
 
-        return (((r * 0.299) + (g * 0.587) + (b * 0.114)) > 186) ?
-            "black" : "white";
+    return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? "black" : "white";
   }
 
   //fetch color scale for visual elements based on release filter and map type (state vs. county)
-  function colorScale(val, releaseType, mapType)
-  {
+  function colorScale(val, releaseType, mapType) {
     //color scales for each release type (on-site and total have the same color scale)
-    const scaleAll = ["#FCDBC6", "#FBCBCA", "#F2A598", "#F65858", "#E00E0E", "#A60A0A"]
-    const scaleAir = ["#DEDEDE", "#DDDDDD", "#AEAEAE", "#8D8D8D", "#6D6D6D", "#353535"]
-    const scaleWater = ["#C5E0B4", "#97C14B", "#80B145", "#59954A", "#447741", "#316033"]
-    const scaleLand = ["#F8CBAD", "#C48647", "#A3672B", "#844B11", "#733A00", "#502F0C"]
-    const scaleOffsite = ["#FFFFCA", "#FFF9AE", "#F8ED62", "#E9D700", "#DAB600", "#A98600"]
+    const scaleAll = [
+      "#FCDBC6",
+      "#FBCBCA",
+      "#F2A598",
+      "#F65858",
+      "#E00E0E",
+      "#A60A0A",
+    ];
+    const scaleAir = [
+      "#DEDEDE",
+      "#DDDDDD",
+      "#AEAEAE",
+      "#8D8D8D",
+      "#6D6D6D",
+      "#353535",
+    ];
+    const scaleWater = [
+      "#C5E0B4",
+      "#97C14B",
+      "#80B145",
+      "#59954A",
+      "#447741",
+      "#316033",
+    ];
+    const scaleLand = [
+      "#F8CBAD",
+      "#C48647",
+      "#A3672B",
+      "#844B11",
+      "#733A00",
+      "#502F0C",
+    ];
+    const scaleOffsite = [
+      "#FFFFCA",
+      "#FFF9AE",
+      "#F8ED62",
+      "#E9D700",
+      "#DAB600",
+      "#A98600",
+    ];
 
     //numerical values to adjust the bucket size, values in each bucket are LESS THAN the numerical value
-    const stateBuckets = [1000000, 10000000, 25000000, 50000000, 100000000]
-    const countyBuckets = [1000, 10000, 100000, 1000000, 5000000]
+    const stateBuckets = [1000000, 10000000, 25000000, 50000000, 100000000];
+    const countyBuckets = [1000, 10000, 100000, 1000000, 5000000];
 
     var valIndex = 0;
 
     //states and counties use a different scale to keep results presentable
-    switch (mapType){
-        case "states":
-            if (val < stateBuckets[0]) valIndex = 0;
-            else if (val < stateBuckets[1]) valIndex = 1;
-            else if (val < stateBuckets[2]) valIndex = 2;
-            else if (val < stateBuckets[3]) valIndex = 3;
-            else if (val < stateBuckets[4]) valIndex = 4;
-            else valIndex = 5;
-            break;
-        default:
-            if (val < countyBuckets[0]) valIndex = 0;
-            else if (val < countyBuckets[1]) valIndex = 1;
-            else if (val < countyBuckets[2]) valIndex = 2;
-            else if (val < countyBuckets[3]) valIndex = 3;
-            else if (val < countyBuckets[4]) valIndex = 4;
-            else valIndex = 5;
-            break;
-        }
+    switch (mapType) {
+      case "states":
+        if (val < stateBuckets[0]) valIndex = 0;
+        else if (val < stateBuckets[1]) valIndex = 1;
+        else if (val < stateBuckets[2]) valIndex = 2;
+        else if (val < stateBuckets[3]) valIndex = 3;
+        else if (val < stateBuckets[4]) valIndex = 4;
+        else valIndex = 5;
+        break;
+      default:
+        if (val < countyBuckets[0]) valIndex = 0;
+        else if (val < countyBuckets[1]) valIndex = 1;
+        else if (val < countyBuckets[2]) valIndex = 2;
+        else if (val < countyBuckets[3]) valIndex = 3;
+        else if (val < countyBuckets[4]) valIndex = 4;
+        else valIndex = 5;
+        break;
+    }
 
     //return the color for the visual element
-    switch (releaseType){
-        case "air":
-            return([scaleAir[valIndex]]);
-        case "water":
-            return([scaleWater[valIndex]]);
-        case "land":
-            return([scaleLand[valIndex]]);
-        case "off_site":
-            return([scaleOffsite[valIndex]]);
-        default:
-            return([scaleAll[valIndex]]);
+    switch (releaseType) {
+      case "air":
+        return [scaleAir[valIndex]];
+      case "water":
+        return [scaleWater[valIndex]];
+      case "land":
+        return [scaleLand[valIndex]];
+      case "off_site":
+        return [scaleOffsite[valIndex]];
+      default:
+        return [scaleAll[valIndex]];
     }
   }
 
@@ -118,7 +150,11 @@ const ThematicMap = (props) => {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur[props.filterType] : 0, props.filterType, props.mapType)}
+                        fill={colorScale(
+                          cur ? cur[props.filterType] : 0,
+                          props.filterType,
+                          props.mapType
+                        )}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
@@ -184,15 +220,21 @@ const ThematicMap = (props) => {
                     var cur = props.data.find(
                       (s) =>
                         s.facility__state === geo.properties.iso_3166_2 &&
-                        s.facility__county.slice(0, geo.properties.name.length ) ===
-                          geo.properties.name.toUpperCase()
+                        s.facility__county.slice(
+                          0,
+                          geo.properties.name.length
+                        ) === geo.properties.name.toUpperCase()
                     );
                     if (cur !== undefined) {
                       return (
                         <Geography
                           key={geo.rsmKey}
                           geography={geo}
-                          fill={colorScale(cur ? cur[props.filterType] : 0, props.filterType, props.mapType)}
+                          fill={colorScale(
+                            cur ? cur[props.filterType] : 0,
+                            props.filterType,
+                            props.mapType
+                          )}
                           stroke={"#000"}
                           onMouseEnter={() => {
                             props.setTooltipContent(null);
@@ -328,15 +370,21 @@ const ThematicMap = (props) => {
                 geographies.map((geo) => {
                   var cur = props.data.find(
                     (s) =>
-                        s.facility__county.slice(0, geo.properties.NAME.length ) ===
-                          geo.properties.NAME.toUpperCase()
+                      s.facility__county.slice(
+                        0,
+                        geo.properties.NAME.length
+                      ) === geo.properties.NAME.toUpperCase()
                   );
                   if (cur !== undefined) {
                     return (
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={colorScale(cur ? cur[props.filterType] : 0, props.filterType, props.mapType)}
+                        fill={colorScale(
+                          cur ? cur[props.filterType] : 0,
+                          props.filterType,
+                          props.mapType
+                        )}
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
@@ -406,46 +454,55 @@ const ThematicMap = (props) => {
   }
 };
 
-function Legend (props){
-    //numerical values to adjust the bucket size, values in each bucket are GREATER THAN the numerical value
-    //padded with a leading zero to create 6 buckets to iterate through to create visual elements
-    const stateBuckets = [0, 1000000, 10000000, 25000000, 50000000, 100000000];
-    const countyBuckets = [0, 1000, 10000, 100000, 1000000, 5000000];
+function Legend(props) {
+  //numerical values to adjust the bucket size, values in each bucket are GREATER THAN the numerical value
+  //padded with a leading zero to create 6 buckets to iterate through to create visual elements
+  const stateBuckets = [0, 1000000, 10000000, 25000000, 50000000, 100000000];
+  const countyBuckets = [0, 1000, 10000, 100000, 1000000, 5000000];
 
-    return(
-        <svg height="25" width="100%" margin="5px">
-            { stateBuckets.map((val, i) => {
-
-                var currentColor = props.colorScale(props.mapType === "states" ? stateBuckets[i] + 1 : countyBuckets[i] + 1, props.filterType, props.mapType);
-
-                return(
-                  <>
-                      <rect
-                        height="100"
-                        width="16.6%"
-                        x = {(16.6 * i) + "%"}
-                        fill={currentColor}
-                        strokeWidth="1"
-                        stroke="black"
-                      />
-                      <text
-                        x={(16.6 * i) + 1 + "%"}
-                        y="50%"
-                        fill={ props.textColor(currentColor)}
-                        dominantBaseline="middle"
-                        textAnchor="start"
-                      >
-                        {i === 0 ? "≥" : ">"} {rounded(Math.trunc(
-                            props.mapType === "states" ? stateBuckets[i]  : countyBuckets[i]
-                        ))} lbs.
-                  </text>
-                  </>
-                )
-
-            })}
-        </svg>
+  return (
+    <svg height="25" width="100%" margin="5px">
+      {stateBuckets.map((val, i) => {
+        var currentColor = props.colorScale(
+          props.mapType === "states"
+            ? stateBuckets[i] + 1
+            : countyBuckets[i] + 1,
+          props.filterType,
+          props.mapType
         );
 
-};
+        return (
+          <>
+            <rect
+              height="100"
+              width="16.6%"
+              x={16.6 * i + "%"}
+              fill={currentColor}
+              strokeWidth="1"
+              stroke="black"
+            />
+            <text
+              x={16.6 * i + 1 + "%"}
+              y="50%"
+              fill={props.textColor(currentColor)}
+              dominantBaseline="middle"
+              textAnchor="start"
+            >
+              {i === 0 ? "≥" : ">"}{" "}
+              {rounded(
+                Math.trunc(
+                  props.mapType === "states"
+                    ? stateBuckets[i]
+                    : countyBuckets[i]
+                )
+              )}{" "}
+              lbs.
+            </text>
+          </>
+        );
+      })}
+    </svg>
+  );
+}
 
 export default memo(ThematicMap);
