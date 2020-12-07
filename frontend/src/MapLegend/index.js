@@ -1,6 +1,7 @@
 import React from "react";
 import "./index.css";
 
+/* Map legend changes colors of icons depending on release type shown */
 function MapLegend(props) {
   function getColor(type) {
     switch (type) {
