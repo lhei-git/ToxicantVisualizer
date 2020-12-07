@@ -6,11 +6,6 @@
   --grey: #f8f8f8;
 }
 
-a {
-  text-decoration: none;
-  color: var(--black);
-}
-
 .app-container {
   position: relative;
   color: #3f3844;
