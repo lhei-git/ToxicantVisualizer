@@ -1,7 +1,6 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
 import LoadingSpinner from "../LoadingSpinner";
-import UserControlPanel from "../Filters";
 import vetapi from "../api/vetapi";
 import "./index.css";
 const React = require("react");
@@ -29,6 +28,8 @@ class ThematicMapView extends Component {
 
     this.handleContentState = this.handleContentState.bind(this);
     this.handleContentCounty = this.handleContentCounty.bind(this);
+    this.state.filterYear = props.year;
+    this.state.filterType = props.type;
   }
 
   componentDidMount() {
@@ -36,18 +37,38 @@ class ThematicMapView extends Component {
     this.getCountyData();
   }
 
-  getFilterText(type) {
-    return (type === "total" ? "" : type) + " ";
+  getFilterText(filterType) {
+    //valid options: total, air, water, land, on_site, off_site
+    switch (filterType) {
+      case "on_site":
+        return "All On Site Releases";
+      case "air":
+        return "All Air Releases";
+      case "water":
+        return "All Water Releases";
+      case "land":
+        return "All Land Releases";
+      case "off_site":
+        return "All Off Site Releases";
+      case "total":
+      default:
+        return "All Releases";
+    }
   }
 
   //refetch data if the year or release type filter changed
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
+    this.state.filterYear = this.props.year;
+    this.state.filterType =
+      this.props.type === "all" ? "total" : this.props.type;
     if (
-      prevProps.filters.year !== this.props.filters.year ||
-      prevProps.filters.releaseType !== this.props.filters.releaseType
+      this.state.prevYear !== this.state.filterYear ||
+      this.state.prevType !== this.state.filterType
     ) {
       this.setState(
         {
+          prevYear: this.state.filterYear,
+          prevType: this.state.filterType,
           stateData: null,
           countyData: null,
         },
@@ -69,81 +90,64 @@ class ThematicMapView extends Component {
     this.setState({ contentCounty: content });
   }
 
-  getReleaseTypeString(releaseType) {
-    return releaseType !== "all" ? releaseType.replace("_", " ") : "";
-  }
-
   render() {
     const filterYear =
-      this.props.filters.year !== null ? this.props.filters.year : 2019;
+      this.state.filterYear !== null ? this.state.filterYear : 2019;
     const filterType =
-      this.props.filters.releaseType !== null
-        ? this.props.filters.releaseType
-        : "all";
+      this.state.filterType !== null ? this.state.filterType : "total";
 
     return (
-      <div class="thematic-view-wrapper">
-        <div className="filter-container">
-          <UserControlPanel
-            map={this.props.map}
-            filters={this.props.filters}
-            onFilterChange={this.props.onFilterChange}
-          ></UserControlPanel>
+      <div className="thematic-view-container">
+        <div className="flex-item">
+          <div className="graph-header">
+            Total Releases By State ({this.getFilterText(this.state.filterType)}
+            )
+          </div>
+          {this.state.stateData ? (
+            <>
+              <ThematicMap
+                setTooltipContent={this.handleContentState}
+                data={this.state.stateData}
+                maxValue={this.state.stateMax}
+                minValue={this.state.stateMin}
+                filterYear={filterYear}
+                filterType={filterType}
+                geoUrl={stateGeoUrl}
+                mapType={"states"}
+              />
+              <ReactTooltip multiline={true} html={true}>
+                {this.state.contentState}
+              </ReactTooltip>
+            </>
+          ) : (
+            <LoadSpinner />
+          )}
         </div>
-        <div className="thematic-view-container">
-          <div className="flex-item">
-            <div className="graph-header">
-              Total{" "}
-              {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              releases by state in {this.props.filters.year}
-            </div>
-            {this.state.stateData ? (
-              <>
-                <ThematicMap
-                  setTooltipContent={this.handleContentState}
-                  data={this.state.stateData}
-                  maxValue={this.state.stateMax}
-                  minValue={this.state.stateMin}
-                  filterYear={filterYear}
-                  filterType={filterType === "all" ? "total" : filterType}
-                  geoUrl={stateGeoUrl}
-                  mapType={"states"}
-                />
-                <ReactTooltip multiline={true} html={true}>
-                  {this.state.contentState}
-                </ReactTooltip>
-              </>
-            ) : (
-              <LoadSpinner />
-            )}
-          </div>
 
-          <div className="flex-item">
-            <div className="graph-header">
-              Total{" "}
-              {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              releases by county in {this.props.filters.year}
-            </div>
-            {this.state.countyData ? (
-              <>
-                <ThematicMap
-                  setTooltipContent={this.handleContentCounty}
-                  data={this.state.countyData}
-                  maxValue={this.state.countyMax}
-                  minValue={this.state.countyMin}
-                  filterYear={filterYear}
-                  filterType={filterType === "all" ? "total" : filterType}
-                  geoUrl={countyGeoUrl}
-                  mapType={"counties"}
-                />
-                <ReactTooltip multiline={true} html={true}>
-                  {this.state.contentCounty}
-                </ReactTooltip>
-              </>
-            ) : (
-              <LoadSpinner />
-            )}
+        <div className="flex-item">
+          <div className="graph-header">
+            Total Releases By County (
+            {this.getFilterText(this.state.filterType)})
           </div>
+          {this.state.countyData ? (
+            <>
+              <ThematicMap
+                setTooltipContent={this.handleContentCounty}
+                data={this.state.countyData}
+                maxValue={this.state.countyMax}
+                minValue={this.state.countyMin}
+                filterYear={filterYear}
+                filterType={filterType}
+                geoUrl={countyGeoUrl}
+                mapType={"counties"}
+              />
+              <ReactTooltip multiline={true} html={true}>
+                {this.state.contentCounty}
+              </ReactTooltip>
+            </>
+          ) : (
+            <LoadSpinner />
+          )}
         </div>
       </div>
     );
@@ -151,8 +155,7 @@ class ThematicMapView extends Component {
 
   // retrieves and filters county release data from the database
   async getCountyData() {
-    console.trace("fetching data");
-    const filterYear = this.props.filters.year;
+    const filterYear = this.state.filterYear;
     vetapi
       .get("/stats/county/all?year=" + filterYear)
       .then((response) => {
@@ -163,7 +166,7 @@ class ThematicMapView extends Component {
 
   // retrieves and filters state release data from the database
   getStateData() {
-    const filterYear = this.props.filters.year;
+    const filterYear = this.state.filterYear;
     vetapi
       .get("/stats/state/all?year=" + filterYear)
       .then((response) => {
