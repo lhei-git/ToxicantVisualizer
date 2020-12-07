@@ -8,6 +8,7 @@ const { formatChemical } = require("../helpers");
 function UserControlPanel(props) {
   const [chemicals, setChemicals] = React.useState([]);
 
+  /* Update chemical list with chemicals found in the selected window under the current search parameters */
   React.useEffect(() => {
     async function fetchChemicalList(map) {
       const params = {
@@ -31,15 +32,17 @@ function UserControlPanel(props) {
     if (props.map) fetchChemicalList(props.map);
   }, [props.filters, props.map]);
 
+  /* Update app-level filters when component-level filters change. Propogates change to other filters */
   function onFilterChange(event) {
     const target = event.target;
-    const filters = props.filters;
+    const filters = Object.assign({}, props.filters);
     const value = target.type === "checkbox" ? target.checked : target.value;
     if (target.name === "year") filters[target.name] = parseInt(value);
     else filters[target.name] = value;
     props.onFilterChange(filters);
   }
 
+  /* Create select dropdown of available years */
   function getYears() {
     const startYear = 2005;
     const endYear = 2019;
@@ -54,6 +57,7 @@ function UserControlPanel(props) {
     return years;
   }
 
+  /* Create select dropdown of chemicals released */
   function getChemicals() {
     let options = [];
     options.push(
@@ -73,11 +77,16 @@ function UserControlPanel(props) {
     return options;
   }
 
+  /* Create select dropdown of release types */
   function getReleaseTypes() {
     const types = ["air", "water", "land", "off_site", "on_site"];
 
     return types.map((type) => {
-      return <option key={type}>{type}</option>;
+      return (
+        <option key={type} value={type}>
+          {type.replace("_", "-")}
+        </option>
+      );
     });
   }
 
