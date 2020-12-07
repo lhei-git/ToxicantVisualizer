@@ -40,6 +40,7 @@ class MapContainer extends Component {
     this.onRefresh = this.onRefresh.bind(this);
   }
 
+  /* User hits re-center - Sidebar is cleared of any pubchem data and map restores to original searched center */
   onRefresh() {
     const newState = {};
     const oldPoints = this.state.points;
@@ -62,6 +63,7 @@ class MapContainer extends Component {
     });
   }
 
+  /* Props to the map component have changed */
   componentDidUpdate(prevProps) {
     const newState = {};
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
@@ -86,6 +88,7 @@ class MapContainer extends Component {
     }
   }
 
+  /* Handle facility select. This gets passed down to marker clusterer */
   onMarkerClick(props) {
     const showing = this.state.showingInfoWindow;
     if (!showing || !shallowEqual(this.state.activeMarker, props.entry)) {
@@ -97,6 +100,7 @@ class MapContainer extends Component {
         },
         () => {
           this.map.setCenter(props.marker.position);
+          /* best looking zoom level */
           this.map.setZoom(14);
           this.props.onMarkerClick(props.entry.meta.id);
         }
@@ -115,9 +119,8 @@ class MapContainer extends Component {
     });
   }
 
+  /* Retrieve list of facilities from VET api */
   async fetchPoints(map, filters) {
-    console.log("fetching...");
-
     let facilityData = null;
 
     try {
@@ -141,6 +144,7 @@ class MapContainer extends Component {
     }
   }
 
+  /* map startup */
   handleMount(mapProps, map) {
     this.map = map;
     const mapsApi = window.google.maps;
@@ -153,8 +157,8 @@ class MapContainer extends Component {
     this.adjustMap(mapProps, map);
   }
 
+  /* move map window when location has changed. Once map is finished moving, facilities are populated  */
   adjustMap(mapProps, map) {
-    console.log("adjusting...");
     const mapsApi = window.google.maps;
     const viewport = this.props.map.viewport;
     if (viewport) {
@@ -188,7 +192,6 @@ class MapContainer extends Component {
   }
 
   storeFacilities(data) {
-    console.log("storing...");
     this.setState(
       {
         points: data,
@@ -206,6 +209,7 @@ class MapContainer extends Component {
     return new api.LatLngBounds(s, n);
   }
 
+  /* arbitrary legend, could use changing to not be hardcoded */
   getColor(total) {
     let color = 1;
     if (total < 100) color = 1;
@@ -217,10 +221,9 @@ class MapContainer extends Component {
     return color;
   }
 
+  // create a map marker for every point that is passed to the map
   createMarkers(points) {
-    console.log("creating markers...");
     const facilities = points;
-    // create a marker for every point that is passed to the map
     const markers = facilities.map((facility, i) => {
       return {
         meta: facility,
@@ -259,6 +262,7 @@ class MapContainer extends Component {
           </div>
         )}
         <div className="map">
+          {/* Google Map component from google-maps-react */}
           <Map
             onReady={this.handleMount}
             google={window.google}
