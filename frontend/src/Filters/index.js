@@ -33,7 +33,7 @@ function UserControlPanel(props) {
 
   function onFilterChange(event) {
     const target = event.target;
-    const filters = props.filters;
+    const filters = Object.assign({}, props.filters);
     const value = target.type === "checkbox" ? target.checked : target.value;
     if (target.name === "year") filters[target.name] = parseInt(value);
     else filters[target.name] = value;
@@ -77,7 +77,11 @@ function UserControlPanel(props) {
     const types = ["air", "water", "land", "off_site", "on_site"];
 
     return types.map((type) => {
-      return <option key={type}>{type}</option>;
+      return (
+        <option key={type} value={type}>
+          {type.replace("_", "-")}
+        </option>
+      );
     });
   }
 

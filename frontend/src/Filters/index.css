@@ -29,7 +29,8 @@
 }
 
 .control-container .content select {
-  min-width: 140px;
+  padding-left: 3px;
+  padding-right: 20px;
   font-size: 18px;
 }
 

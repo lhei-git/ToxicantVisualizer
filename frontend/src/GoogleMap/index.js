@@ -116,8 +116,6 @@ class MapContainer extends Component {
   }
 
   async fetchPoints(map, filters) {
-    console.log("fetching...");
-
     let facilityData = null;
 
     try {
@@ -154,7 +152,6 @@ class MapContainer extends Component {
   }
 
   adjustMap(mapProps, map) {
-    console.log("adjusting...");
     const mapsApi = window.google.maps;
     const viewport = this.props.map.viewport;
     if (viewport) {
@@ -188,7 +185,6 @@ class MapContainer extends Component {
   }
 
   storeFacilities(data) {
-    console.log("storing...");
     this.setState(
       {
         points: data,
@@ -218,7 +214,6 @@ class MapContainer extends Component {
   }
 
   createMarkers(points) {
-    console.log("creating markers...");
     const facilities = points;
     // create a marker for every point that is passed to the map
     const markers = facilities.map((facility, i) => {

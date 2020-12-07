@@ -39,7 +39,8 @@ const initialState = {
 const reducer = (state, action) => {
   switch (action.type) {
     case "setFilters":
-      return { ...state, filters: action.payload };
+      const newFilters = Object.assign({}, action.payload);
+      return { ...state, filters: newFilters };
     case "setMap":
       sessionStorage.setItem("map", JSON.stringify(action.payload));
       return {
@@ -130,9 +131,7 @@ const App = (props) => {
                   map={state.map}
                   filters={state.filters}
                   onApiError={toggleError}
-                  onFilterChange={(filters) =>
-                    dispatch(setFilters(Object.assign({}, filters)))
-                  }
+                  onFilterChange={(filters) => dispatch(setFilters(filters))}
                 ></GraphView>
               </div>
             ) : (
@@ -146,9 +145,7 @@ const App = (props) => {
                 map={state.map}
                 filters={state.filters}
                 onApiError={toggleError}
-                onFilterChange={(filters) =>
-                  dispatch(setFilters(Object.assign({}, filters)))
-                }
+                onFilterChange={(filters) => dispatch(setFilters(filters))}
               ></ThematicMapView>
             ) : (
               <Redirect to="/" />
