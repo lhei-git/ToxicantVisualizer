@@ -17,6 +17,7 @@ module.exports.formatChemical = (entry) => {
   return trimmed;
 };
 
+// compares two objects for shallow equality
 module.exports.shallowEqual = (obj1, obj2) => {
   const keys1 = Object.keys(obj1);
   const keys2 = Object.keys(obj2);
@@ -34,6 +35,7 @@ module.exports.shallowEqual = (obj1, obj2) => {
   return true;
 };
 
+// Turns long-form decimal number into formatted string for map labels
 module.exports.amountAsLabel = (value) => {
   var suffixes = ["", "K", "M", "B", "T"];
   var suffixNum = Math.floor(("" + value).length / 4);
@@ -46,6 +48,7 @@ module.exports.amountAsLabel = (value) => {
   return shortValue + suffixes[suffixNum];
 };
 
+// Turns decimal number into formatted string by adding commas
 module.exports.formatAmount = (value) => {
   if (value == null) return 0;
   return (+value.toFixed(2))
@@ -53,6 +56,7 @@ module.exports.formatAmount = (value) => {
     .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 };
 
+// Turns map components into readable string
 module.exports.getLocationString = (map, long) => {
   let str = map.city
     ? map.city + ", "
