@@ -100,6 +100,31 @@ function GraphContainer(props) {
   );
 }
 
+function processData(data, nameAttribute) {
+  const formatted = data
+    .map((d) => {
+      const f = d;
+      return {
+        name: f[nameAttribute],
+        total: f.total,
+        av: f.air || null,
+        bv: f.water || null,
+        cv: f.land || null,
+        dv: f.on_site || null,
+        ev: f.off_site || null,
+      };
+    })
+    .sort((a, b) => b.total - a.total);
+  if (formatted.length < 5) {
+    for (let i = formatted.length; i < 5; i++) {
+      formatted.push({
+        name: null,
+      });
+    }
+  }
+  return formatted;
+}
+
 async function GraphTopTenFacilities(props) {
   const { releaseType } = props.filters;
   try {
@@ -116,20 +141,7 @@ async function GraphTopTenFacilities(props) {
     const res = await vetapi.get(`/stats/location/facility_releases`, {
       params,
     });
-    const data = res.data
-      .map((d) => {
-        const f = d;
-        return {
-          name: f.facility__name,
-          total: f.total,
-          av: f.air || null,
-          bv: f.water || null,
-          cv: f.land || null,
-          dv: f.on_site || null,
-          ev: f.off_site || null,
-        };
-      })
-      .sort((a, b) => b.total - a.total);
+    const data = processData(res.data, "facility__name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -323,19 +335,7 @@ async function GraphTopTenPBTs(props) {
     const res = await vetapi.get(`/stats/location/top_pbt_chemicals`, {
       params,
     });
-    const data = res.data
-      .map((d) => {
-        return {
-          name: d.chemical__name,
-          total: d.total,
-          av: d.air || null,
-          bv: d.water || null,
-          cv: d.land || null,
-          dv: d.on_site || null,
-          ev: d.off_site || null,
-        };
-      })
-      .sort((a, b) => b.total - a.total);
+    const data = processData(res.data, "chemical__name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -509,21 +509,7 @@ async function GraphTopTenParents(props) {
     const res = await vetapi.get(`/stats/location/parent_releases`, {
       params,
     });
-    const data = res.data
-      .map((d) => {
-        const f = d;
-        return {
-          name: f.facility__parent_co_name,
-          total: f.total,
-          av: f.air || null,
-          bv: f.water || null,
-          cv: f.land || null,
-          dv: f.on_site || null,
-          ev: f.off_site || null,
-        };
-      })
-      .sort((a, b) => b.total - a.total);
-    console.table(data);
+    const data = processData(res.data, "facility__parent_co_name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -629,20 +615,9 @@ async function GraphTopTenChemicals(props) {
       release_type: props.filters.releaseType,
       year: props.filters.year,
     };
+
     const res = await vetapi.get(`/stats/location/top_chemicals`, { params });
-    const data = res.data
-      .map((d) => {
-        return {
-          name: d.chemical__name,
-          total: d.total,
-          av: d.air || null,
-          bv: d.water || null,
-          cv: d.land || null,
-          dv: d.on_site || null,
-          ev: d.off_site || null,
-        };
-      })
-      .sort((a, b) => b.total - a.total);
+    const data = processData(res.data, "chemical__name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>

@@ -82,7 +82,7 @@ class ThematicMapView extends Component {
         : "all";
 
     return (
-      <div class="thematic-view-wrapper">
+      <div className="thematic-view-wrapper">
         <div className="filter-container">
           <UserControlPanel
             map={this.props.map}
@@ -151,7 +151,6 @@ class ThematicMapView extends Component {
 
   // retrieves and filters county release data from the database
   async getCountyData() {
-    console.trace("fetching data");
     const filterYear = this.props.filters.year;
     vetapi
       .get("/stats/county/all?year=" + filterYear)
