@@ -16,9 +16,6 @@ const evtNames = [
 function MarkerCluster(props) {
   const { map, google, markers, releaseType } = props;
 
-  // This hook works like ComponentWillMount
-  // The  hook isn't really needed, this whole thing worked without it,
-  // I added the hook so that I could implement a cleanup function
   useEffect(() => {
     const handleEvent = ({ event, marker, entry }) => {
       if (props[event]) {
