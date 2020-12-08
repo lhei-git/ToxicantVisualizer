@@ -77,7 +77,6 @@ function Home(props) {
   return (
     <div className="home-container">
       <div className="background">
-        <div className="cite">Photo by https://unsplash.com/@punkidu</div>
         <div className="overlay"></div>
       </div>
       <div className="content-group">

@@ -8,7 +8,7 @@
   padding: 0;
   top: 0;
   color: #fff;
-  background: var(--primary-dark);
+  background: #7d3a8b;
 }
 
 .navigation.transparent {
@@ -26,6 +26,7 @@
 }
 
 .navigation a {
+  text-decoration: none;
   color: rgba(255, 255, 255, 0.85);
 }
 

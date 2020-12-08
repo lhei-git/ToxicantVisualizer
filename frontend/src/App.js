@@ -15,6 +15,7 @@ import history from "./history";
 import Home from "./HomeView";
 import GraphView from "./GraphView";
 import ThematicMapView from "./ThematicMapView/index.js";
+import AboutPage from "./About/index";
 import React, { useReducer } from "react";
 import MapView from "./MapView";
 
@@ -70,29 +71,31 @@ const Navbar = (props) => {
     <div
       className={`navigation ${location.pathname === "/" ? "transparent" : ""}`}
     >
-      <div className="logo">VET.</div>
+      <div className="logo">
+        <Link to="/">VET.</Link>
+      </div>
       <ul>
         <li className={location.pathname === "/" ? "active" : ""}>
           <Link to="/">Search</Link>
         </li>
         {props.visible && (
-          <li className={location.pathname === "/map" ? "active" : ""}>
-            <Link to="/map">Facility Map</Link>
-          </li>
+          <>
+            <li className={location.pathname === "/map" ? "active" : ""}>
+              <Link to="/map">Facility Map</Link>
+            </li>
+            <li className={location.pathname === "/graphs" ? "active" : ""}>
+              <Link to="/graphs">Location Insights</Link>
+            </li>
+            <li
+              className={location.pathname === "/thematicmaps" ? "active" : ""}
+            >
+              <Link to="/thematicmaps">National Insights</Link>
+            </li>
+            <li className={location.pathname === "/about" ? "active" : ""}>
+              <Link to="/about">About</Link>
+            </li>
+          </>
         )}
-        {props.visible && (
-          <li className={location.pathname === "/graphs" ? "active" : ""}>
-            <Link to="/graphs">Location Insights</Link>
-          </li>
-        )}
-        {props.visible && (
-          <li className={location.pathname === "/thematicmaps" ? "active" : ""}>
-            <Link to="/thematicmaps">National Insights</Link>
-          </li>
-        )}
-        {/* <li className={location.pathname === "/about" ? "active" : ""}>
-          <Link to="/about">About</Link>
-        </li> */}
       </ul>
     </div>
   );
@@ -161,42 +164,46 @@ const App = (props) => {
               <Redirect to="/" />
             )}
           </Route>
+          <Route path="/about" component={AboutPage}></Route>
           {/* <Route path="/about"></Route> */}
           <Route path="/">
             {/* home page */}
             <Home onSuccess={handleSuccess} />
           </Route>
         </Switch>
-        <div className="footer">
-          <ul>
-            <li>
-              <a href="https://github.com/ejdejesu/ToxicantVisualizer">
-                Github
-              </a>
-            </li>
-            <li>
-              <a href="https://pubchem.ncbi.nlm.nih.gov/">Pubchem</a>
-            </li>
-            <li>
-              <a href="https://www.epa.gov/toxics-release-inventory-tri-program">
-                TRI Program
-              </a>
-            </li>
-            {/* <li>
-              <Link to="/about">About</Link>
-            </li> */}
-          </ul>
-          <div>
-            <div className="copyright">
-              &#169; VET was developed in 2020 for the Lab for Health and
-              Environmental Information by Evan de Jesus, Adwait Wadekar,
-              Richard Moore, and Calvin Brooks
-            </div>
-          </div>
-        </div>
       </div>
     </Router>
   );
 };
+
+function Footer() {
+  return (
+    <div className="footer">
+      <ul>
+        <li>
+          <a href="https://github.com/ejdejesu/ToxicantVisualizer">Github</a>
+        </li>
+        <li>
+          <a href="https://pubchem.ncbi.nlm.nih.gov/">Pubchem</a>
+        </li>
+        <li>
+          <a href="https://www.epa.gov/toxics-release-inventory-tri-program">
+            TRI Program
+          </a>
+        </li>
+        {/* <li>
+          <Link to="/about">About</Link>
+        </li> */}
+      </ul>
+      <div>
+        <div className="copyright">
+          &#169; VET was developed in 2020 for the Lab for Health and
+          Environmental Information by Evan de Jesus, Adwait Wadekar, Richard
+          Moore, and Calvin Brooks
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default withRouter(App);
