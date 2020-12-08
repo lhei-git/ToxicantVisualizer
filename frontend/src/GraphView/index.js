@@ -53,13 +53,13 @@ const compare = (a, b) => {
 };
 
 /* convert properties of graph to query params for the VET api */
-const createParams = (props, hideChemical, hideYear) => ({
+const createParams = (props, hideChemical, hideYear, forcePBT) => ({
   params: {
     city: props.map.city,
     county: props.map.county,
     state: props.map.state,
     carcinogen: props.filters.carcinogen,
-    pbt: props.filters.pbt,
+    pbt: forcePBT ? true : props.filters.pbt,
     release_type: props.filters.releaseType,
     chemical: hideChemical ? null : props.filters.chemical,
     year: hideYear ? null : props.filters.year,
@@ -156,7 +156,7 @@ const processTopTenData = (data, nameAttribute) => {
     .sort((a, b) => b.total - a.total);
 
   /* Fill nearly empty bar chart with placeholders to avoid fatness */
-  for (let i = formatted.length; i < 5; i++) {
+  for (let i = formatted.length; i < 6; i++) {
     formatted.push({
       name: null,
     });
@@ -381,8 +381,8 @@ async function GraphTopTenPBTs(props) {
   const { releaseType } = props.filters;
   try {
     const res = await vetapi.get(
-      `/stats/location/top_pbt_chemicals`,
-      createParams(props, true)
+      `/stats/location/top_chemicals`,
+      createParams(props, true, false, true)
     );
     const data = processTopTenData(res.data, "chemical__name");
     return (
@@ -1030,11 +1030,11 @@ async function TimelineTopChemicals(props) {
   }
 }
 
-async function TimelineTopPBTChemicals(props) {
+async function timelineTopPBTs(props) {
   try {
     const res = await vetapi.get(
-      `/stats/location/timeline/top_pbt_chemicals`,
-      createParams(props, true, true)
+      `/stats/location/timeline/top_chemicals`,
+      createParams(props, true, true, true)
     );
     const data = res.data
       .reduce((acc, cur) => {
@@ -1268,7 +1268,7 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               name="timeline_chemicals"
-              graph={TimelineTopPBTChemicals}
+              graph={timelineTopPBTs}
               title={Title("top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
