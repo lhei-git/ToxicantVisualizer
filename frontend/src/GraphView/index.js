@@ -139,21 +139,32 @@ const GraphContainer = (props) => {
   This handles forming the data into a format Recharts.js can understand
 
 */
-const processTopTenData = (data, nameAttribute) => {
-  const formatted = data
+
+const compareIndividualTypes = (a, b) => {
+  const aSum = a.av + a.bv + a.cv + a.dv;
+  const bSum = b.av + b.bv + b.cv + b.dv;
+  console.group();
+  console.log(aSum, bSum, aSum - bSum);
+  console.groupEnd();
+  return bSum - aSum;
+};
+
+const processTopTenData = (data, nameAttribute, isStacked) => {
+  let formatted = data
     .map((d) => {
       const f = d;
       return {
         name: f[nameAttribute],
         total: f.total,
-        av: f.air || null,
-        bv: f.water || null,
-        cv: f.land || null,
-        dv: f.on_site || null,
-        ev: f.off_site || null,
+        av: f.air || 0,
+        bv: f.water || 0,
+        cv: f.land || 0,
+        dv: f.off_site || 0,
       };
     })
     .sort((a, b) => b.total - a.total);
+
+  if (isStacked) formatted.sort(compareIndividualTypes);
 
   /* Fill nearly empty bar chart with placeholders to avoid fatness */
   for (let i = formatted.length; i < 6; i++) {
@@ -196,7 +207,11 @@ async function GraphTopTenFacilities(props) {
       `/stats/location/facility_releases`,
       createParams(props)
     );
-    const data = processTopTenData(res.data, "facility__name");
+    const data = processTopTenData(
+      res.data,
+      "facility__name",
+      releaseType === "all"
+    );
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -262,17 +277,8 @@ async function GraphTopTenFacilities(props) {
               fill={barColors.land}
             />
             <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["on_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.onSite}
-            />
-            <Bar
               name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "ev"}
+              dataKey={releaseType === "off_site" ? "total" : "dv"}
               stackId="a"
               legendType={
                 ["off_site", "all"].includes(releaseType) ? "square" : "none"
@@ -549,7 +555,7 @@ async function GraphTopTenParents(props) {
       `/stats/location/parent_releases`,
       createParams(props)
     );
-    const data = processTopTenData(res.data, "facility__parent_co_name");
+    const data = processTopTenData(res.data, "facility__parent_co_name", true);
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
