@@ -1,7 +1,6 @@
 import "./index.css";
 import React, { useEffect, useState } from "react";
 import UserControlPanel from "../Filters";
-// import TimelineTotal from "./TimelineTotal";
 const vetapi = require("../api/vetapi");
 const { formatChemical, amountAsLabel, formatAmount } = require("../helpers");
 const {
@@ -17,6 +16,7 @@ const {
   ResponsiveContainer,
 } = require("recharts");
 
+/* A bunch of random colors I found on some color generator */
 const timelineColors = [
   "#a6cee3",
   "#1f78b4",
@@ -30,6 +30,7 @@ const timelineColors = [
   "#6a3d9a",
 ];
 
+/* The colors of the release types given to us by our client */
 const barColors = {
   onSite: "#f65858",
   offSite: "#e9d700",
@@ -38,6 +39,7 @@ const barColors = {
   land: "#844b11",
 };
 
+/* Bar graph divs need to be taller than timeline graphs due to outrageous */
 const barAspectRatio = 11 / 9;
 const timelineAspectRatio = 17 / 9;
 
@@ -45,7 +47,27 @@ function handleError(err) {
   /* do something here */
 }
 
-function CustomizedXAxisTick(props) {
+/* compare function used for sorting timeline graphs */
+const compare = (a, b) => {
+  return a.year - b.year;
+};
+
+/* convert properties of graph to query params for the VET api */
+const createParams = (props, hideChemical, hideYear) => ({
+  params: {
+    city: props.map.city,
+    county: props.map.county,
+    state: props.map.state,
+    carcinogen: props.filters.carcinogen,
+    pbt: props.filters.pbt,
+    release_type: props.filters.releaseType,
+    chemical: hideChemical ? null : props.filters.chemical,
+    year: hideYear ? null : props.filters.year,
+  },
+});
+
+/* Add css styling to base X-Axis React Component */
+const CustomizedXAxisTick = (props) => {
   const { x, y, payload } = props;
   return (
     <g transform={`translate(${x},${y})`}>
@@ -63,10 +85,13 @@ function CustomizedXAxisTick(props) {
       </text>
     </g>
   );
-}
+};
 
-function GraphContainer(props) {
+/* Wrapper component around graphs. This is done to remove some of the boilerplate with handling the async fetch to the vet api.  */
+const GraphContainer = (props) => {
   let [graph, setGraph] = useState(null);
+
+  /* This is done to avoid confusion with the props object across the rest of the function */
   let graphProp = props.graph;
   let mapProp = props.map;
   let filterProp = props.filters;
@@ -91,6 +116,7 @@ function GraphContainer(props) {
   }, [graphProp, mapProp, filterProp]); /* eslint-disable-line */
 
   return (
+    /* Graph must have received data successfully to render */
     graph !== null && (
       <div className="graph">
         <div className="graph-header">{props.title}</div>
@@ -98,9 +124,22 @@ function GraphContainer(props) {
       </div>
     )
   );
-}
+};
 
-function processData(data, nameAttribute) {
+/* The bar graphs appear in the following form: 
+  {
+    (facility|chemical|parent_co)__name: <>
+    air: <>
+    water: <>
+    land: <>
+    on_site: <>
+    off_site: <>
+  }
+
+  This handles forming the data into a format Recharts.js can understand
+
+*/
+const processTopTenData = (data, nameAttribute) => {
   const formatted = data
     .map((d) => {
       const f = d;
@@ -115,33 +154,49 @@ function processData(data, nameAttribute) {
       };
     })
     .sort((a, b) => b.total - a.total);
-  if (formatted.length < 5) {
-    for (let i = formatted.length; i < 5; i++) {
-      formatted.push({
-        name: null,
-      });
-    }
+
+  /* Fill nearly empty bar chart with placeholders to avoid fatness */
+  for (let i = formatted.length; i < 5; i++) {
+    formatted.push({
+      name: null,
+    });
   }
   return formatted;
-}
+};
 
+/* oh boy */
+const processTimelineData = (data, nameAttribute) => {
+  return data.lines
+    .reduce((acc, cur) => {
+      const existing = acc.find((e) => e.year === cur.year);
+      const formatted = cur[nameAttribute];
+      if (existing) {
+        existing[formatted] = cur.total;
+      } else {
+        const newLine = { year: cur.year, [formatted]: cur.total };
+        acc.push(newLine);
+      }
+      return acc;
+    }, [])
+    .sort(compare);
+};
+
+const timelineKeys = (data) => {
+  const correctIndex = [...data].sort(
+    (a, b) => Object.keys(b).length - Object.keys(a).length
+  )[0];
+  return Object.keys(correctIndex);
+};
+
+/* Top ten releasing facilities bar graph */
 async function GraphTopTenFacilities(props) {
   const { releaseType } = props.filters;
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      pbt: props.filters.pbt || null,
-      release_type: releaseType,
-      chemical: props.filters.chemical,
-      year: props.filters.year,
-    };
-    const res = await vetapi.get(`/stats/location/facility_releases`, {
-      params,
-    });
-    const data = processData(res.data, "facility__name");
+    const res = await vetapi.get(
+      `/stats/location/facility_releases`,
+      createParams(props)
+    );
+    const data = processTopTenData(res.data, "facility__name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -321,21 +376,15 @@ async function GraphAllFacilities(props) {
   }
 }
 
+/* Top ten PBT chemicals bar graphs */
 async function GraphTopTenPBTs(props) {
   const { releaseType } = props.filters;
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      release_type: props.filters.releaseType,
-      year: props.filters.year,
-    };
-    const res = await vetapi.get(`/stats/location/top_pbt_chemicals`, {
-      params,
-    });
-    const data = processData(res.data, "chemical__name");
+    const res = await vetapi.get(
+      `/stats/location/top_pbt_chemicals`,
+      createParams(props, true)
+    );
+    const data = processTopTenData(res.data, "chemical__name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -496,20 +545,11 @@ async function TableAllFacilities(props) {
 async function GraphTopTenParents(props) {
   const { releaseType } = props.filters;
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      pbt: props.filters.pbt || null,
-      release_type: props.filters.releaseType,
-      chemical: props.filters.chemical,
-      year: props.filters.year,
-    };
-    const res = await vetapi.get(`/stats/location/parent_releases`, {
-      params,
-    });
-    const data = processData(res.data, "facility__parent_co_name");
+    const res = await vetapi.get(
+      `/stats/location/parent_releases`,
+      createParams(props)
+    );
+    const data = processTopTenData(res.data, "facility__parent_co_name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -603,21 +643,15 @@ async function GraphTopTenParents(props) {
   }
 }
 
+/* Top ten chemicals bar graph */
 async function GraphTopTenChemicals(props) {
   const { releaseType } = props.filters;
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      pbt: props.filters.pbt || null,
-      release_type: props.filters.releaseType,
-      year: props.filters.year,
-    };
-
-    const res = await vetapi.get(`/stats/location/top_chemicals`, { params });
-    const data = processData(res.data, "chemical__name");
+    const res = await vetapi.get(
+      `/stats/location/top_chemicals`,
+      createParams(props)
+    );
+    const data = processTopTenData(res.data, "chemical__name");
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -710,25 +744,12 @@ async function GraphTopTenChemicals(props) {
     return null;
   }
 }
-
-const compare = (a, b) => {
-  return a.year - b.year;
-};
-
 async function TimelineTotal(props) {
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      chemical: props.filters.chemical,
-      pbt: props.filters.pbt || null,
-      release_type: props.filters.releaseType,
-    };
-    const res = await vetapi.get(`/stats/location/timeline/total`, {
-      params,
-    });
+    const res = await vetapi.get(
+      `/stats/location/timeline/total`,
+      createParams(props, false, true)
+    );
     const body = (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
@@ -773,39 +794,16 @@ async function TimelineTotal(props) {
   }
 }
 
+/* Top ten facilities over time line chart */
 async function TimelineTopFacilities(props) {
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      pbt: props.filters.pbt || null,
-      chemical: props.filters.chemical,
-      release_type: props.filters.releaseType,
-    };
-    const res = await vetapi.get(`/stats/location/timeline/facility_releases`, {
-      params,
-    });
+    const res = await vetapi.get(
+      `/stats/location/timeline/facility_releases`,
+      createParams(props, false, true)
+    );
 
-    let data = res.data.lines
-      .reduce((acc, cur) => {
-        const existing = acc.find((e) => e.year === cur.year);
-        const formatted = cur["facility__name"];
-        if (existing) {
-          existing[formatted] = cur.total;
-        } else {
-          const newLine = { year: cur.year, [formatted]: cur.total };
-          acc.push(newLine);
-        }
-        return acc;
-      }, [])
-      .sort(compare);
-
-    const correctIndex = [...data].sort(
-      (a, b) => Object.keys(b).length - Object.keys(a).length
-    )[0];
-    const keys = Object.keys(correctIndex);
+    let data = processTimelineData(res.data, "facility__name");
+    const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
       .map((k, i) => (
@@ -870,37 +868,13 @@ async function TimelineTopFacilities(props) {
 
 async function TimelineTopParents(props) {
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
+    const res = await vetapi.get(
+      `/stats/location/timeline/parent_releases`,
+      createParams(props, false, true)
+    );
 
-      pbt: props.filters.pbt || null,
-      chemical: props.filters.chemical,
-      release_type: props.filters.releaseType,
-    };
-    const res = await vetapi.get(`/stats/location/timeline/parent_releases`, {
-      params,
-    });
-    const data = res.data
-      .reduce((acc, cur) => {
-        const existing = acc.find((e) => e.year === cur.year);
-        const formatted = cur["facility__parent_co_name"];
-        if (existing) {
-          existing[formatted] = cur.total;
-        } else {
-          const newLine = { year: cur.year, [formatted]: cur.total };
-          acc.push(newLine);
-        }
-        return acc;
-      }, [])
-      .sort(compare);
-
-    const correctIndex = [...data].sort(
-      (a, b) => Object.keys(b).length - Object.keys(a).length
-    )[0];
-    const keys = Object.keys(correctIndex);
+    let data = processTimelineData(res.data, "facility__parent_co_name");
+    const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
       .map((k, i) => (
@@ -965,16 +939,10 @@ async function TimelineTopParents(props) {
 
 async function TimelineTopChemicals(props) {
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      release_type: props.filters.releaseType,
-    };
-    const res = await vetapi.get(`/stats/location/timeline/top_chemicals`, {
-      params,
-    });
+    const res = await vetapi.get(
+      `/stats/location/timeline/top_chemicals`,
+      createParams(props, true, true)
+    );
     const data = res.data
       .reduce((acc, cur) => {
         const existing = acc.find((e) => e.year === cur.year);
@@ -989,10 +957,7 @@ async function TimelineTopChemicals(props) {
       }, [])
       .sort(compare);
 
-    const correctIndex = [...data].sort(
-      (a, b) => Object.keys(b).length - Object.keys(a).length
-    )[0];
-    const keys = Object.keys(correctIndex);
+    const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
       .map((k, i) => (
@@ -1056,16 +1021,10 @@ async function TimelineTopChemicals(props) {
 
 async function TimelineTopPBTChemicals(props) {
   try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      carcinogen: props.filters.carcinogen || null,
-      release_type: props.filters.releaseType,
-    };
-    const res = await vetapi.get(`/stats/location/timeline/top_pbt_chemicals`, {
-      params,
-    });
+    const res = await vetapi.get(
+      `/stats/location/timeline/top_pbt_chemicals`,
+      createParams(props, true, true)
+    );
     const data = res.data
       .reduce((acc, cur) => {
         const existing = acc.find((e) => e.year === cur.year);
@@ -1080,10 +1039,7 @@ async function TimelineTopPBTChemicals(props) {
       }, [])
       .sort(compare);
 
-    const correctIndex = [...data].sort(
-      (a, b) => Object.keys(b).length - Object.keys(a).length
-    )[0];
-    const keys = Object.keys(correctIndex);
+    const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
       .map((k, i) => (
@@ -1145,14 +1101,17 @@ async function TimelineTopPBTChemicals(props) {
   }
 }
 
+/* Wrapping component for graphs */
 function GraphView(props) {
-  const [currentGroup, setCurrentGroup] = React.useState(
-    parseInt(sessionStorage.getItem("currentGroup")) || 0
+  const [currentTab, setCurrentTab] = React.useState(
+    /* Stores which tab user was last on. Might be worth taking out */
+    parseInt(sessionStorage.getItem("currentTab")) || 0
   );
 
+  /* Setter for current tab */
   function chooseTab(i) {
-    sessionStorage.setItem("currentGroup", i);
-    setCurrentGroup(i);
+    sessionStorage.setItem("currentTab", i);
+    setCurrentTab(i);
   }
 
   function getLocationString(map) {
@@ -1165,11 +1124,13 @@ function GraphView(props) {
     return str;
   }
 
+  /* format release type for title */
   function getReleaseTypeString(releaseType) {
     return releaseType !== "all" ? releaseType.replace("_", " ") : "";
   }
 
-  function getTitleComponent(title, props, hasChemical) {
+  /* Create formatted Title Component title given filter information */
+  function Title(title, props, hasChemical) {
     return (
       <>
         Total {getReleaseTypeString(props.filters.releaseType) + " "}releases
@@ -1190,19 +1151,19 @@ function GraphView(props) {
         <ul>
           <li
             onClick={() => chooseTab(0)}
-            className={currentGroup === 0 ? "active" : ""}
+            className={currentTab === 0 ? "active" : ""}
           >
             Top Tens
           </li>
           <li
             onClick={() => chooseTab(1)}
-            className={currentGroup === 1 ? "active" : ""}
+            className={currentTab === 1 ? "active" : ""}
           >
             Timelines
           </li>
           <li
             onClick={() => chooseTab(2)}
-            className={currentGroup === 2 ? "active" : ""}
+            className={currentTab === 2 ? "active" : ""}
           >
             Indexes
           </li>
@@ -1220,40 +1181,40 @@ function GraphView(props) {
         <div className="graphs">
           <div
             className="top-tens"
-            style={{ display: currentGroup === 0 ? "block" : "none" }}
+            style={{ display: currentTab === 0 ? "block" : "none" }}
           >
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_facilities"
               graph={GraphTopTenFacilities}
-              title={getTitleComponent("top 10 facilities", props, true)}
+              title={Title("top 10 facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_parents"
               graph={GraphTopTenParents}
-              title={getTitleComponent("top 10 parent companies", props, true)}
+              title={Title("top 10 parent companies", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_chemicals"
               graph={GraphTopTenChemicals}
-              title={getTitleComponent("top 10 chemicals", props)}
+              title={Title("top 10 chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="top_pbts"
               graph={GraphTopTenPBTs}
-              title={getTitleComponent("top 10 PBT chemicals", props)}
+              title={Title("top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
           <div
             className="timelines"
-            style={{ display: currentGroup === 1 ? "block" : "none" }}
+            style={{ display: currentTab === 1 ? "block" : "none" }}
           >
             <GraphContainer
               map={props.map}
@@ -1271,39 +1232,38 @@ function GraphView(props) {
                 </>
               }
             ></GraphContainer>
-
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_facilities"
               graph={TimelineTopFacilities}
-              title={getTitleComponent("top 10 facilities", props)}
+              title={Title("top 10 facilities", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title={getTitleComponent("top 10 parent companies", props)}
+              title={Title("top 10 parent companies", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_chemicals"
               graph={TimelineTopChemicals}
-              title={getTitleComponent("top 10 chemicals", props)}
+              title={Title("top 10 chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_chemicals"
               graph={TimelineTopPBTChemicals}
-              title={getTitleComponent("top 10 PBT chemicals", props)}
+              title={Title("top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
           <div
             className="indexes"
-            style={{ display: currentGroup === 2 ? "block" : "none" }}
+            style={{ display: currentTab === 2 ? "block" : "none" }}
           >
             <GraphContainer
               map={props.map}
