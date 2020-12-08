@@ -399,7 +399,7 @@ def top_parentco_releases(request):
             total=Sum('off_site')).order_by('-total')
     else:
         queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
-            land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
+            land=Sum('land')).annotate(off_site=Sum('off_site')).order_by('-total')
     return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
 
 
@@ -478,7 +478,7 @@ def top_facility_releases(request):
                 total=Sum('off_site')).order_by('-total')
         else:
             queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
-                land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
+                land=Sum('land')).annotate(off_site=Sum('off_site')).order_by('-total')
 
     return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
 
@@ -574,7 +574,7 @@ def top_chemicals(request):
             total=Sum('off_site')).order_by('-total')
     else:
         queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
-            land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
+            land=Sum('land')).annotate(off_site=Sum('off_site')).order_by('-total')
     return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
 
 
