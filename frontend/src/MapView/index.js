@@ -16,10 +16,9 @@ const initialState = {
   map: JSON.parse(sessionStorage.getItem("map")),
   numFacilities: 0,
   showPubchemInfo: false,
+  showChemicalList: false,
   chemicals: [],
   currentChemical: "",
-  activeTab: 0,
-
   filters: {
     chemical: "all",
     pbt: false,
