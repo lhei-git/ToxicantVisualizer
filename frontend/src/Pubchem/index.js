@@ -352,10 +352,8 @@ class PubChemFields extends Component {
       await this.getPugRestData(this.props.chemName);
   }
 
-  /* UPDATE HOOK NOT NEEDED as this component is recreated on each chemical click. 
-  TODO: prevent component recreation */
-
   render() {
+    /* render content only when pubchem has found a candidate compound for the clicked chemical */
     return this.state.cid || this.state.isLoading ? (
       <Content
         description={this.state.description}
