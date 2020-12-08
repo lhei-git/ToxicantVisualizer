@@ -208,8 +208,7 @@ function MapView(props) {
           {state.map.stateShort !== "US" && (
             <div>
               <ThematicStateMap
-                year={state.filters.year}
-                releaseType={state.filters.releaseType}
+                filters={state.filters}
                 stateName={state.map.state}
                 stateLongName={state.map.stateLong}
               ></ThematicStateMap>

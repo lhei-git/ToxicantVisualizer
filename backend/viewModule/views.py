@@ -28,7 +28,7 @@ def geoFilter(request):
 
     if state is not None:
         filters.add(Q(facility__state=state.upper()), filters.connector)
-    
+
     if county is not None:
         filters.add(Q(facility__county=county.upper()), filters.connector)
 
@@ -168,7 +168,7 @@ def get_facilities(request):
 
     if state is not None:
         filters.add(Q(state=state.upper()), filters.connector)
-    
+
     if county is not None:
         filters.add(Q(county=county.upper()), filters.connector)
 
@@ -233,24 +233,70 @@ def state_total_releases(request):
 ''' '''
 def all_state_total_releases(request):
     y = int(request.GET.get('year', default=latest_year))
-    raw = release.objects.filter(year=y).values('facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
-        'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__state')
-    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
-    return HttpResponse(response, content_type='application/json')
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
+
+    filters = Q()
+
+    # filter by chemicals
+    if chemical is not None and chemical != "all":
+        filters.add(Q(chemical__name__icontains=chemical), filters.connector)
+    # filter by carcinogens, PBTs, or dioxins only
+
+    if carcinogen is not None:
+        filters.add(Q(chemical__carcinogen='YES'), filters.connector)
+    elif dioxin is not None:
+        filters.add(Q(chemical__classification='Dioxin'), filters.connector)
+    elif pbt is not None:
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
+
+
+
+    queryset  = release.objects.filter(filters &
+                                      geoFilter(request) & Q(year=y)).values('facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
+                                        'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__state')
+
+
+    return JsonResponse(list(queryset), content_type='application/json', safe=False)
+
 
 ''' Returns releases by county and state'''
 def all_county_total_releases(request):
-    state = request.GET.get('state')
-    filters = Q()
-    if state is None:
-        return HttpResponseBadRequest()
-    if state is not None:
-        filters = Q(facility__state=state.upper())
     y = int(request.GET.get('year', default=latest_year))
-    raw = release.objects.filter(filters & Q(year=y)).values('facility__county', 'facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
-        'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__county')
-    response = json.dumps(list(raw), cls=DjangoJSONEncoder)
-    return HttpResponse(response, content_type='application/json')
+    state = request.GET.get('state')
+    carcinogen = request.GET.get('carcinogen')
+    dioxin = request.GET.get('dioxin')
+    pbt = request.GET.get('pbt')
+    chemical = request.GET.get('chemical')
+
+    filters = Q()
+
+    # filter by chemicals
+    if chemical is not None and chemical != "all":
+        filters.add(Q(chemical__name__icontains=chemical), filters.connector)
+    # filter by carcinogens, PBTs, or dioxins only
+
+    if carcinogen is not None:
+        filters.add(Q(chemical__carcinogen='YES'), filters.connector)
+    elif dioxin is not None:
+        filters.add(Q(chemical__classification='Dioxin'), filters.connector)
+    elif pbt is not None:
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
+
+    #filter by state (used for single state on map page)
+    if state is not None:
+        filters.add(Q(facility__state=state.upper()), filters.connector)
+
+    queryset = release.objects.filter(filters &
+                                      geoFilter(request) & Q(year=y)).values('facility__county',
+                                                                             'facility__state').annotate(
+        total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
+        'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(
+        on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__county')
+
+    return JsonResponse(list(queryset), content_type='application/json', safe=False)
 
 
 ''' Returns all chemicals and respective total release (by type) amounts for queried location {Graph 13} '''
