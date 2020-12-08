@@ -440,17 +440,6 @@ def timeline_top_facility_releases(request):
             'name').annotate(avg=Avg('release__total')).order_by('-avg')
     return HttpResponse(json.dumps({'averages': list(averages) if get_averages else None, 'lines': list(lines)}, cls=DjangoJSONEncoder), content_type='application/json')
 
-''' Return timeline data for PBT chemicals'''
-def timeline_top_pbt_chemicals(request):
-    state = request.GET.get('state')
-    if state is None:
-        return HttpResponseBadRequest()
-    chemicals = list(release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=latest_year) & Q(chemical__classification='PBT')).values_list(
-        'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
-    response = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
-        'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
-    return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
-
 ''' Returns number of facilities based on state -- UNUSED'''
 def num_facilities(request):
     state = request.GET.get('state')
@@ -490,6 +479,7 @@ def location_summary(request):
 ''' Returns amount released by each chemical within geo spec. '''
 def top_chemicals(request):
     carcinogen = request.GET.get('carcinogen')
+    pbt = request.GET.get('pbt')
     state = request.GET.get('state')
     if state is None:
         return HttpResponseBadRequest()
@@ -497,6 +487,9 @@ def top_chemicals(request):
     y = int(request.GET.get('year', default=latest_year))
     release_type = request.GET.get('release_type', default='all').upper()
     filters = Q()
+
+    if pbt is not None and str(pbt).lower() == 'true': 
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
     
     # filter by carcinogens, PBTs, or dioxins only
     if carcinogen is not None:
@@ -522,42 +515,27 @@ def top_chemicals(request):
             land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
     return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
 
-
-""" Returns the total release amount over time for the top 10 chemicals released in latest_year. """
-def top_pbt_chemicals(request):
-    state = request.GET.get('state')
-    if state is None:
-        return HttpResponseBadRequest()
-    y = int(request.GET.get('year', default=latest_year))
-    release_type = request.GET.get('release_type', default='all').upper()
-    filters = Q(chemical__classification='PBT')
-
-    queryset = release.objects.filter(filters & geoFilter(request) & Q(year=y)).values(
-        'chemical__name')
-
-    if release_type == 'AIR':
-        queryset = queryset.annotate(total=Sum('air')).order_by('-total')
-    elif release_type == 'WATER':
-        queryset = queryset.annotate(total=Sum('water')).order_by('-total')
-    elif release_type == 'LAND':
-        queryset = queryset.annotate(total=Sum('land')).order_by('-total')
-    elif release_type == 'ON_SITE':
-        queryset = queryset.annotate(
-            total=Sum('on_site')).order_by('-total')
-    elif release_type == 'OFF_SITE':
-        queryset = queryset.annotate(
-            total=Sum('off_site')).order_by('-total')
-    else:
-        queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
-            land=Sum('land')).annotate(on_site=Sum('on_site')).annotate(off_site=Sum('off_site')).order_by('-total')
-    return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
-
-
 def timeline_top_chemicals(request):
     state = request.GET.get('state')
+    pbt = request.GET.get('pbt')
+    filters = Q()
+    if pbt is not None and str(pbt).lower() == 'true': 
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
+
     if state is None:
         return HttpResponseBadRequest()
-    chemicals = list(release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=latest_year)).values_list(
+    chemicals = list(release.objects.filter(filters & geoFilter(request) & filterReleases(request) & Q(year=latest_year)).values_list(
+        'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
+    response = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
+        'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
+    return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
+
+''' Return timeline data for PBT chemicals'''
+def timeline_top_pbt_chemicals(request):
+    state = request.GET.get('state')
+    if state is None:
+        return HttpResponseBadRequest()
+    chemicals = list(release.objects.filter(geoFilter(request) & filterReleases(request) & Q(year=latest_year) & Q(chemical__classification='PBT')).values_list(
         'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geoFilter(request) & filterReleases(request) & Q(chemical__id__in=chemicals)).values(
         'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
