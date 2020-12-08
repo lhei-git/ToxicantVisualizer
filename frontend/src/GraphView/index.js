@@ -744,16 +744,28 @@ async function GraphTopTenChemicals(props) {
     return null;
   }
 }
+
 async function TimelineTotal(props) {
   try {
     const res = await vetapi.get(
       `/stats/location/timeline/total`,
       createParams(props, false, true)
     );
+    const data = res.data;
+    /* Fill total timeline with zeros, only needed if filtering by chemical and there is missing release data for one or more years */
+    for (let i = 2005; i <= 2019; i++) {
+      if (!data.find((d) => d.year === i)) {
+        data.push({
+          year: i,
+          total: 0,
+        });
+      }
+    }
+    data.sort((a, b) => a.year - b.year);
     const body = (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
-          <LineChart data={res.data} margin={{ right: 150 }}>
+          <LineChart data={data} margin={{ right: 150 }}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
             <YAxis
@@ -801,7 +813,6 @@ async function TimelineTopFacilities(props) {
       `/stats/location/timeline/facility_releases`,
       createParams(props, false, true)
     );
-
     let data = processTimelineData(res.data, "facility__name");
     const keys = timelineKeys(data);
     const lines = keys
