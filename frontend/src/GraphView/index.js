@@ -217,7 +217,7 @@ const processBarGraphData = (data, nameAttribute, isStacked) => {
 
 /* oh boy */
 const processTimelineData = (data, nameAttribute) => {
-  return data.lines
+  const output = data
     .reduce((acc, cur) => {
       const existing = acc.find((e) => e.year === cur.year);
       const formatted = cur[nameAttribute];
@@ -230,6 +230,7 @@ const processTimelineData = (data, nameAttribute) => {
       return acc;
     }, [])
     .sort(compare);
+  return output;
 };
 
 const timelineKeys = (data) => {
@@ -337,7 +338,6 @@ async function GraphAllFacilities(props) {
       "facility__name",
       releaseType === "all"
     );
-    console.table(data);
     return (
       <div
         width="100%"
@@ -894,14 +894,14 @@ async function TimelineTotal(props) {
     );
     const data = res.data;
     /* Fill total timeline with zeros, only needed if filtering by chemical and there is missing release data for one or more years */
-    for (let i = 2005; i <= 2019; i++) {
-      if (!data.find((d) => d.year === i)) {
-        data.push({
-          year: i,
-          total: 0,
-        });
-      }
-    }
+    // for (let i = 2005; i <= 2019; i++) {
+    //   if (!data.find((d) => d.year === i)) {
+    //     data.push({
+    //       year: i,
+    //       total: 0,
+    //     });
+    //   }
+    // }
     data.sort((a, b) => a.year - b.year);
     const body = (
       <div>
@@ -945,6 +945,7 @@ async function TimelineTopFacilities(props) {
       createParams(props, { year: null })
     );
     let data = processTimelineData(res.data, "facility__name");
+    console.table(data);
     const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
@@ -1340,14 +1341,14 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={TimelineTopFacilities}
-              title={Title("top 10 facilities", props)}
+              title={Title("top 10 facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title={Title("top 10 parent companies", props)}
+              title={Title("top 10 parent companies", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
