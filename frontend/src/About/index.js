@@ -23,6 +23,8 @@ function About(props) {
           , to map, organize and visualize information about releases of toxic
           chemicals into the air, land and water across the United States.
         </div>
+        <br />
+
         <div>
           This tool was created to expand knowledge about environmental
           pollutants and enable the public, scientists and policymakers to learn
@@ -30,6 +32,8 @@ function About(props) {
           water, and how these releases may be affecting communities across the
           U.S.
         </div>
+        <br />
+
         <div>
           Toxicity is a complex issue, and the hazards of a chemical are
           dependent on amount and concentration of the chemical, among other
@@ -42,6 +46,7 @@ function About(props) {
           </a>{" "}
           and the PubChem website.
         </div>
+        <br />
         <div>
           VET was developed for the Lab for Health and Environmental Information
           (LHEI) at Wayne State University by Evan de Jesus, Adwait Wadekar,
@@ -50,6 +55,8 @@ function About(props) {
           DePaula, Director of LHEI and Assistant Professor at the School of
           Information Sciences at Wayne State University.
         </div>
+        <br />
+
         <div className="credits">
           <span>
             Home page photo by{" "}

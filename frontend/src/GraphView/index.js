@@ -16,6 +16,22 @@ const {
   ResponsiveContainer,
 } = require("recharts");
 
+class CustomTooltip extends Tooltip {
+  static defaultProps = {
+    ...Tooltip.defaultProps,
+    contentStyle: {
+      color: "#FFF",
+      background: "rgba(0,0,0,0.8)",
+      border: "none",
+    },
+    itemStyle: { color: "#FFF" },
+    labelStyle: { fontSize: "24px", fontWeight: "bold" },
+    isAnimationActive: false,
+    formatter: (value) => formatAmount(value),
+    itemSorter: (a) => -a.value,
+  };
+}
+
 /* A bunch of random colors I found on some color generator */
 const timelineColors = [
   "#a6cee3",
@@ -43,6 +59,14 @@ const barColors = {
 const barAspectRatio = 11 / 9;
 const timelineAspectRatio = 17 / 9;
 
+const maxLabelLength = 20;
+
+const barChartMargins = {
+  left: 20,
+  right: 0,
+  bottom: 150,
+};
+
 function handleError(err) {
   /* do something here */
 }
@@ -53,39 +77,59 @@ const compare = (a, b) => {
 };
 
 /* convert properties of graph to query params for the VET api */
-const createParams = (props, hideChemical, hideYear, forcePBT) => ({
-  params: {
+const createParams = (props, customParams) => {
+  const params = {
     city: props.map.city,
     county: props.map.county,
     state: props.map.state,
     carcinogen: props.filters.carcinogen,
-    pbt: forcePBT ? true : props.filters.pbt,
+    pbt: props.filters.pbt,
     release_type: props.filters.releaseType,
-    chemical: hideChemical ? null : props.filters.chemical,
-    year: hideYear ? null : props.filters.year,
-  },
-});
-
+    chemical: props.filters.chemical,
+    year: props.filters.year,
+  };
+  Object.assign(params, customParams);
+  return { params };
+};
 /* Add css styling to base X-Axis React Component */
-const CustomizedXAxisTick = (props) => {
+const CustomXAxisTick = (props) => {
   const { x, y, payload } = props;
+  let { value } = payload;
+  if (value.length > maxLabelLength + 5) {
+    value = value.slice(0, maxLabelLength + 5) + "...";
+  }
   return (
     <g transform={`translate(${x},${y})`}>
-      <text
-        fontSize="12"
-        transform="rotate(-35)"
-        x={0}
-        y={0}
-        dx={-10}
-        // fill="#FFF"
-      >
+      <text fontSize="12" transform="rotate(-35)" x={0} y={0} dx={-10}>
         <tspan textAnchor="end" x="0" dy="0">
-          {payload.value}
+          {value}
         </tspan>
       </text>
     </g>
   );
 };
+
+/* Add css styling to base X-Axis React Component */
+const CustomYAxisTick = (props) => {
+  const { x, y, payload } = props;
+  let { value } = payload;
+  if (value.length > maxLabelLength) {
+    value = value.slice(0, maxLabelLength) + "...";
+  }
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text fontSize="12" x={0} y={0} dx={10}>
+        <tspan textAnchor="start" x="0" dy="0">
+          {value}
+        </tspan>
+      </text>
+    </g>
+  );
+};
+
+const customYAxisTickFormatter = (val) => amountAsLabel(val) + " ";
+const customLegendFormatter = (value) =>
+  value.length > 35 ? value.slice(0, 35) + "..." : value;
 
 /* Wrapper component around graphs. This is done to remove some of the boilerplate with handling the async fetch to the vet api.  */
 const GraphContainer = (props) => {
@@ -143,33 +187,29 @@ const GraphContainer = (props) => {
 const compareIndividualTypes = (a, b) => {
   const aSum = a.av + a.bv + a.cv + a.dv;
   const bSum = b.av + b.bv + b.cv + b.dv;
-  console.group();
-  console.log(aSum, bSum, aSum - bSum);
-  console.groupEnd();
   return bSum - aSum;
 };
 
-const processTopTenData = (data, nameAttribute, isStacked) => {
-  let formatted = data
-    .map((d) => {
-      const f = d;
-      return {
-        name: f[nameAttribute],
-        total: f.total,
-        av: f.air || 0,
-        bv: f.water || 0,
-        cv: f.land || 0,
-        dv: f.off_site || 0,
-      };
-    })
-    .sort((a, b) => b.total - a.total);
+const processBarGraphData = (data, nameAttribute, isStacked) => {
+  let formatted = data.map((d) => {
+    const f = d;
+    return {
+      name: f[nameAttribute],
+      total: isStacked ? null : f.total,
+      av: f.air || 0,
+      bv: f.water || 0,
+      cv: f.land || 0,
+      dv: f.off_site || 0,
+    };
+  });
 
   if (isStacked) formatted.sort(compareIndividualTypes);
+  else formatted.sort((a, b) => b.total - a.total);
 
   /* Fill nearly empty bar chart with placeholders to avoid fatness */
   for (let i = formatted.length; i < 6; i++) {
     formatted.push({
-      name: null,
+      name: "",
     });
   }
   return formatted;
@@ -207,7 +247,7 @@ async function GraphTopTenFacilities(props) {
       `/stats/location/facility_releases`,
       createParams(props)
     );
-    const data = processTopTenData(
+    const data = processBarGraphData(
       res.data,
       "facility__name",
       releaseType === "all"
@@ -215,40 +255,412 @@ async function GraphTopTenFacilities(props) {
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart
-            data={data}
-            margin={{
-              left: 50,
-              right: 50,
-              bottom: 250,
-            }}
-          >
+          <BarChart data={data} margin={barChartMargins}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
               type="category"
               interval={0}
-              tick={<CustomizedXAxisTick />}
+              tick={<CustomXAxisTick />}
             />
             <YAxis
               type="number"
               unit="lbs"
               width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
+              tickFormatter={customYAxisTickFormatter}
             />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
+            <CustomTooltip></CustomTooltip>
+            <Legend iconType="circle" align="right" verticalAlign="top" />
+            <Bar
+              name="air"
+              dataKey={releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              legendType={
+                ["air", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.air}
             />
-            <Legend align="right" verticalAlign="top" />
+            <Bar
+              name="water"
+              dataKey={releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              legendType={
+                ["water", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              legendType={
+                ["land", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.land}
+            />{" "}
+            <Bar
+              name="off-site"
+              dataKey={releaseType === "off_site" ? "total" : "dv"}
+              stackId="a"
+              legendType={
+                ["off_site", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.offSite}
+            />
+            <Bar
+              name="on-site"
+              dataKey={releaseType === "on_site" ? "total" : "ev"}
+              stackId="a"
+              legendType={releaseType === "on_site" ? "square" : "none"}
+              fill={barColors.onSite}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+//Chart 14 - Graph of all facilities and total releases in descending order
+async function GraphAllFacilities(props) {
+  const { releaseType } = props.filters;
+  try {
+    const params = createParams(props, { all: true });
+
+    const res = await vetapi.get(`/stats/location/facility_releases`, params);
+    const data = processBarGraphData(
+      res.data,
+      "facility__name",
+      releaseType === "all"
+    );
+    console.table(data);
+    return (
+      <div
+        width="100%"
+        height="300px"
+        style={{ overflowY: "auto", maxHeight: "500px" }}
+      >
+        <ResponsiveContainer
+          width="100%"
+          height={Math.max(res.data.length * 50, 500)}
+        >
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{
+              // left: 150,
+              right: 150,
+              bottom: 50,
+              // top: 40,
+            }}
+          >
+            <CartesianGrid />
+            <Legend iconType="circle" align="right" verticalAlign="top" />
+            <XAxis
+              // hide="true"
+              orientation="top"
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => formatAmount(val) + " "}
+            />
+            <YAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              orientation="right"
+              tick={<CustomYAxisTick />}
+            />
+            <CustomTooltip></CustomTooltip>
+            <Bar
+              name="air"
+              dataKey="av"
+              stackId="a"
+              legendType={
+                ["air", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey="bv"
+              stackId="a"
+              legendType={
+                ["water", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey="cv"
+              stackId="a"
+              legendType={
+                ["land", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.land}
+            />
+            <Bar
+              name="off-site"
+              dataKey="dv"
+              stackId="a"
+              legendType={
+                ["off_site", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.offSite}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+//Chart 14 - Graph of all facilities and total releases in descending order
+async function GraphAllChemicals(props) {
+  const { releaseType } = props.filters;
+  try {
+    const params = createParams(props, { all: true });
+
+    const res = await vetapi.get(`/stats/location/top_chemicals`, params);
+    const data = processBarGraphData(
+      res.data,
+      "chemical__name",
+      releaseType === "all"
+    );
+    return (
+      <div
+        width="100%"
+        height="300px"
+        style={{ overflowY: "auto", maxHeight: "500px" }}
+      >
+        <ResponsiveContainer
+          width="100%"
+          height={Math.max(res.data.length * 50, 500)}
+        >
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{
+              // left: 150,
+              right: 150,
+              bottom: 50,
+              // top: 40,
+            }}
+          >
+            <CartesianGrid />
+            <Legend iconType="circle" align="right" verticalAlign="top" />
+            <XAxis
+              // hide="true"
+              orientation="top"
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={(val) => formatAmount(val) + " "}
+            />
+            <YAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              orientation="right"
+              tick={<CustomYAxisTick />}
+            />
+            <CustomTooltip></CustomTooltip>
+            <Bar
+              name="air"
+              dataKey="av"
+              stackId="a"
+              legendType={
+                ["air", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey="bv"
+              stackId="a"
+              legendType={
+                ["water", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey="cv"
+              stackId="a"
+              legendType={
+                ["land", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.land}
+            />
+            <Bar
+              name="off-site"
+              dataKey="dv"
+              stackId="a"
+              legendType={
+                ["off_site", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.offSite}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+//Chart 12 - Table of all facilities and total releases
+async function TableAllFacilities(props) {
+  try {
+    const params = createParams(props, { all: true, release_type: null });
+    const res = await vetapi.get(`/stats/location/facility_releases`, params);
+    return (
+      <div
+        width="100%"
+        height="50vh"
+        style={{ overflowY: "auto", maxHeight: "50vh" }}
+      >
+        <table className="dynamic-table">
+          <thead>
+            <tr>
+              <th className="sticky-header">Facility Name</th>
+              <th className="sticky-header">Land</th>
+              <th className="sticky-header">Air</th>
+              <th className="sticky-header">Water</th>
+              <th className="sticky-header">Off-Site</th>
+            </tr>
+          </thead>
+          <tbody>
+            {res.data.map(function (d, i) {
+              if (i % 2 !== 0) {
+                return (
+                  <tr key={d + "-" + i}>
+                    <td className="odd-overflow-column">{d.facility__name}</td>
+                    <td className="odd-row">{d.land}</td>
+                    <td className="odd-row">{d.air}</td>
+                    <td className="odd-row">{d.water}</td>
+                    <td className="odd-row">{d.off_site}</td>
+                  </tr>
+                );
+              } else
+                return (
+                  <tr key={d + "-" + i}>
+                    <td className="even-overflow-column">{d.facility__name}</td>
+                    <td className="even-row">{d.land}</td>
+                    <td className="even-row">{d.air}</td>
+                    <td className="even-row">{d.water}</td>
+                    <td className="even-row">{d.off_site}</td>
+                  </tr>
+                );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+async function TableAllChemicals(props) {
+  try {
+    const params = createParams(props, { all: true, release_type: null });
+    const res = await vetapi.get(`/stats/location/top_chemicals`, params);
+    return (
+      <div
+        width="100%"
+        height="50vh"
+        style={{ overflowY: "auto", maxHeight: "50vh" }}
+      >
+        <table className="dynamic-table">
+          <thead>
+            <tr>
+              <th className="sticky-header">Chemical Name</th>
+              <th className="sticky-header">Land</th>
+              <th className="sticky-header">Air</th>
+              <th className="sticky-header">Water</th>
+              <th className="sticky-header">Off-Site</th>
+            </tr>
+          </thead>
+          <tbody>
+            {res.data.map(function (d, i) {
+              if (i % 2 !== 0) {
+                return (
+                  <tr key={d + "-" + i}>
+                    <td className="odd-overflow-column">{d.chemical__name}</td>
+                    <td className="odd-row">{d.land}</td>
+                    <td className="odd-row">{d.air}</td>
+                    <td className="odd-row">{d.water}</td>
+                    <td className="odd-row">{d.off_site}</td>
+                  </tr>
+                );
+              } else
+                return (
+                  <tr key={d + "-" + i}>
+                    <td className="even-overflow-column">{d.chemical__name}</td>
+                    <td className="even-row">{d.land}</td>
+                    <td className="even-row">{d.air}</td>
+                    <td className="even-row">{d.water}</td>
+                    <td className="even-row">{d.off_site}</td>
+                  </tr>
+                );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+async function GraphTopTenParents(props) {
+  const { releaseType } = props.filters;
+  try {
+    const res = await vetapi.get(
+      `/stats/location/parent_releases`,
+      createParams(props)
+    );
+    const data = processBarGraphData(
+      res.data,
+      "facility__parent_co_name",
+      releaseType === "all"
+    );
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
+          <BarChart data={data} margin={barChartMargins}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              tick={<CustomXAxisTick />}
+            />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={customYAxisTickFormatter}
+            />
+            <CustomTooltip></CustomTooltip>
+
+            <Legend iconType="circle" align="right" verticalAlign="top" />
             <Bar
               name="air"
               dataKey={releaseType === "air" ? "total" : "av"}
@@ -285,358 +697,12 @@ async function GraphTopTenFacilities(props) {
               }
               fill={barColors.offSite}
             />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-//Chart 14 - Graph of all facilities and total releases in descending order
-async function GraphAllFacilities(props) {
-  try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      year: props.filters.year,
-      all: 1,
-    };
-
-    const res = await vetapi.get(`/stats/location/facility_releases`, {
-      params,
-    });
-    const data = res.data
-      .sort((a, b) => b.total - a.total)
-      .map((d, i) => {
-        const f = d;
-        return {
-          name: f.facility__name,
-          av: f.air,
-          bv: f.water,
-          cv: f.land,
-        };
-      });
-    return (
-      <div
-        width="100%"
-        height="300px"
-        style={{ overflowY: "auto", maxHeight: "500px" }}
-      >
-        <ResponsiveContainer
-          width="100%"
-          height={res.data.length * 50}
-          minHeight="500px"
-        >
-          <BarChart
-            data={data}
-            layout="vertical"
-            margin={{
-              left: 200,
-              right: 15,
-              bottom: 50,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <YAxis
-              dataKey="name"
-              type="category"
-              interval={0}
-              tick={<CustomizedXAxisTick />}
-              margin={{ top: 60 }}
-            />
-            <XAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={(val) => formatAmount(val) + " "}
-            />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
-            />
-            <Legend align="right" verticalAlign="top" />
-            <Bar name="air" dataKey="av" stackId="a" fill="#8884d8" />
-            <Bar name="water" dataKey="bv" stackId="a" fill="#82ca9d" />
-            <Bar name="land" dataKey="cv" stackId="a" fill="#ffc658" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-/* Top ten PBT chemicals bar graphs */
-async function GraphTopTenPBTs(props) {
-  const { releaseType } = props.filters;
-  try {
-    const res = await vetapi.get(
-      `/stats/location/top_chemicals`,
-      createParams(props, true, false, true)
-    );
-    const data = processTopTenData(res.data, "chemical__name");
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart
-            data={data}
-            margin={{
-              left: 50,
-              right: 50,
-              bottom: 250,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="name"
-              type="category"
-              interval={0}
-              tick={<CustomizedXAxisTick />}
-            />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
-            />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
-            />
-            <Legend align="right" verticalAlign="top" />
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />
             <Bar
               name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "dv"}
+              dataKey={releaseType === "on_site" ? "total" : "ev"}
               stackId="a"
-              legendType={
-                ["on_site", "all"].includes(releaseType) ? "square" : "none"
-              }
+              legendType={releaseType === "on_site" ? "square" : "none"}
               fill={barColors.onSite}
-            />
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-//Chart 12 - Table of all facilities and total releases
-async function TableAllFacilities(props) {
-  try {
-    const params = {
-      city: props.map.city,
-      county: props.map.county,
-      state: props.map.state,
-      year: props.filters.year,
-      all: 1,
-    };
-    const res = await vetapi.get(`/stats/location/facility_releases`, {
-      params,
-    });
-
-    return (
-      <div
-        width="100%"
-        height="50vh"
-        style={{ overflowY: "scroll", maxHeight: "50vh" }}
-      >
-        <table className="dynamic-table">
-          <thead>
-            <tr>
-              <th className="sticky-header">Facility Name</th>
-              <th className="sticky-header">Land</th>
-              <th className="sticky-header">Air</th>
-              <th className="sticky-header">Water</th>
-              <th className="sticky-header">Off-Site</th>
-            </tr>
-          </thead>
-          <tbody>
-            {res.data.map(function (d, i) {
-              if (i % 2 !== 0) {
-                return (
-                  <tr key={d + "-" + i}>
-                    <td className="odd-overflow-column">{d.facility__name}</td>
-                    <td className="odd-row">{d.land}</td>
-                    <td className="odd-row">{d.air}</td>
-                    <td className="odd-row">{d.water}</td>
-                    <td className="odd-row">{d.vet_total_releases_offsite}</td>
-                  </tr>
-                );
-              } else
-                return (
-                  <tr key={d + "-" + i}>
-                    <td className="even-overflow-column">{d.facility__name}</td>
-                    <td className="even-row">{d.land}</td>
-                    <td className="even-row">{d.air}</td>
-                    <td className="even-row">{d.water}</td>
-                    <td className="even-row">{d.vet_total_releases_offsite}</td>
-                  </tr>
-                );
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-async function GraphTopTenParents(props) {
-  const { releaseType } = props.filters;
-  try {
-    const res = await vetapi.get(
-      `/stats/location/parent_releases`,
-      createParams(props)
-    );
-    const data = processTopTenData(res.data, "facility__parent_co_name", true);
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart
-            data={data}
-            margin={{
-              left: 50,
-              right: 50,
-              bottom: 250,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="name"
-              type="category"
-              interval={0}
-              tick={<CustomizedXAxisTick />}
-            />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
-            />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
-            />
-            <Legend align="right" verticalAlign="top" />
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />
-            <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["on_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.onSite}
-            />
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -657,44 +723,31 @@ async function GraphTopTenChemicals(props) {
       `/stats/location/top_chemicals`,
       createParams(props)
     );
-    const data = processTopTenData(res.data, "chemical__name");
+    const data = processBarGraphData(
+      res.data,
+      "chemical__name",
+      releaseType === "all"
+    );
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart
-            data={data}
-            margin={{
-              left: 50,
-              right: 50,
-              bottom: 250,
-            }}
-          >
+          <BarChart data={data} margin={barChartMargins}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="name"
               type="category"
               interval={0}
-              tick={<CustomizedXAxisTick />}
+              tick={<CustomXAxisTick />}
             />
             <YAxis
               type="number"
               unit="lbs"
               width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
+              tickFormatter={customYAxisTickFormatter}
             />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
-            />
-            <Legend align="right" verticalAlign="top" />
+            <CustomTooltip></CustomTooltip>
+
+            <Legend iconType="circle" align="right" verticalAlign="top" />
             <Bar
               name="air"
               dataKey={releaseType === "air" ? "total" : "av"}
@@ -723,22 +776,104 @@ async function GraphTopTenChemicals(props) {
               fill={barColors.land}
             />
             <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["on_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.onSite}
-            />
-            <Bar
               name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "ev"}
+              dataKey={releaseType === "off_site" ? "total" : "dv"}
               stackId="a"
               legendType={
                 ["off_site", "all"].includes(releaseType) ? "square" : "none"
               }
               fill={barColors.offSite}
+            />
+            <Bar
+              name="on-site"
+              dataKey={releaseType === "on_site" ? "total" : "ev"}
+              stackId="a"
+              legendType={releaseType === "on_site" ? "square" : "none"}
+              fill={barColors.onSite}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+/* Top ten PBT chemicals bar graphs */
+async function GraphTopTenPBTs(props) {
+  const { releaseType } = props.filters;
+
+  try {
+    const res = await vetapi.get(
+      `/stats/location/top_chemicals`,
+      createParams(props, { chemical: null, pbt: true })
+    );
+    const data = processBarGraphData(res.data, "chemical__name", true);
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
+          <BarChart data={data} margin={barChartMargins}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              type="category"
+              interval={0}
+              tick={<CustomXAxisTick />}
+            />
+            <YAxis
+              type="number"
+              unit="lbs"
+              width={100}
+              tickFormatter={customYAxisTickFormatter}
+            />
+            <CustomTooltip></CustomTooltip>
+
+            <Legend iconType="circle" align="right" verticalAlign="top" />
+            <Bar
+              name="air"
+              dataKey={releaseType === "air" ? "total" : "av"}
+              stackId="a"
+              legendType={
+                ["air", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.air}
+            />
+            <Bar
+              name="water"
+              dataKey={releaseType === "water" ? "total" : "bv"}
+              stackId="a"
+              legendType={
+                ["water", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.water}
+            />
+            <Bar
+              name="land"
+              dataKey={releaseType === "land" ? "total" : "cv"}
+              stackId="a"
+              legendType={
+                ["land", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.land}
+            />
+            <Bar
+              name="off-site"
+              dataKey={releaseType === "off_site" ? "total" : "dv"}
+              stackId="a"
+              legendType={
+                ["off_site", "all"].includes(releaseType) ? "square" : "none"
+              }
+              fill={barColors.offSite}
+            />
+            <Bar
+              name="on-site"
+              dataKey={releaseType === "on_site" ? "total" : "ev"}
+              stackId="a"
+              legendType={releaseType === "on_site" ? "square" : "none"}
+              fill={barColors.onSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -755,7 +890,7 @@ async function TimelineTotal(props) {
   try {
     const res = await vetapi.get(
       `/stats/location/timeline/total`,
-      createParams(props, false, true)
+      createParams(props, { year: null })
     );
     const data = res.data;
     /* Fill total timeline with zeros, only needed if filtering by chemical and there is missing release data for one or more years */
@@ -778,20 +913,10 @@ async function TimelineTotal(props) {
               type="number"
               unit="lbs"
               width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
+              tickFormatter={customYAxisTickFormatter}
             />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              itemSorter={(a) => -a.value}
-              formatter={(value) => formatAmount(value)}
-            />
+            <CustomTooltip></CustomTooltip>
+
             <Line
               type="monotone"
               name="total (lbs)"
@@ -817,7 +942,7 @@ async function TimelineTopFacilities(props) {
   try {
     const res = await vetapi.get(
       `/stats/location/timeline/facility_releases`,
-      createParams(props, false, true)
+      createParams(props, { year: null })
     );
     let data = processTimelineData(res.data, "facility__name");
     const keys = timelineKeys(data);
@@ -844,20 +969,10 @@ async function TimelineTopFacilities(props) {
               type="number"
               unit="lbs"
               width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
+              tickFormatter={customYAxisTickFormatter}
             />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              itemSorter={(a) => -a.value}
-              formatter={(value) => formatAmount(value)}
-            />
+            <CustomTooltip></CustomTooltip>
+
             <Legend
               width={120}
               height={140}
@@ -870,6 +985,7 @@ async function TimelineTopFacilities(props) {
                 right: 0,
                 lineHeight: "24px",
               }}
+              formatter={customLegendFormatter}
             />
             {lines}
           </LineChart>
@@ -887,7 +1003,7 @@ async function TimelineTopParents(props) {
   try {
     const res = await vetapi.get(
       `/stats/location/timeline/parent_releases`,
-      createParams(props, false, true)
+      createParams(props, { year: null })
     );
 
     let data = processTimelineData(res.data, "facility__parent_co_name");
@@ -915,20 +1031,10 @@ async function TimelineTopParents(props) {
               type="number"
               unit="lbs"
               width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
+              tickFormatter={customYAxisTickFormatter}
             />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
-            />
+            <CustomTooltip></CustomTooltip>
+
             <Legend
               width={120}
               height={140}
@@ -941,6 +1047,7 @@ async function TimelineTopParents(props) {
                 right: 0,
                 lineHeight: "24px",
               }}
+              formatter={customLegendFormatter}
             />
             {lines}
           </LineChart>
@@ -958,7 +1065,7 @@ async function TimelineTopChemicals(props) {
   try {
     const res = await vetapi.get(
       `/stats/location/timeline/top_chemicals`,
-      createParams(props, true, true)
+      createParams(props, { chemical: null, year: null })
     );
     const data = res.data
       .reduce((acc, cur) => {
@@ -998,20 +1105,10 @@ async function TimelineTopChemicals(props) {
               type="number"
               unit="lbs"
               width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
+              tickFormatter={customYAxisTickFormatter}
             />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
-            />
+            <CustomTooltip></CustomTooltip>
+
             <Legend
               width={120}
               height={140}
@@ -1024,6 +1121,7 @@ async function TimelineTopChemicals(props) {
                 right: 0,
                 lineHeight: "24px",
               }}
+              formatter={customLegendFormatter}
             />
             {lines}
           </LineChart>
@@ -1036,11 +1134,11 @@ async function TimelineTopChemicals(props) {
   }
 }
 
-async function timelineTopPBTs(props) {
+async function TimelineTopPBTs(props) {
   try {
     const res = await vetapi.get(
       `/stats/location/timeline/top_chemicals`,
-      createParams(props, true, true, true)
+      createParams(props, { chemical: null, year: null, pbt: true })
     );
     const data = res.data
       .reduce((acc, cur) => {
@@ -1080,20 +1178,10 @@ async function timelineTopPBTs(props) {
               type="number"
               unit="lbs"
               width={100}
-              tickFormatter={(val) => amountAsLabel(val) + " "}
+              tickFormatter={customYAxisTickFormatter}
             />
-            <Tooltip
-              contentStyle={{
-                color: "#FFF",
-                background: "rgba(0,0,0,0.8)",
-                border: "none",
-              }}
-              itemStyle={{ color: "#FFF" }}
-              labelStyle={{ fontSize: "24px", fontWeight: "bold" }}
-              isAnimationActive={false}
-              formatter={(value) => formatAmount(value)}
-              itemSorter={(a) => -a.value}
-            />
+            <CustomTooltip></CustomTooltip>
+
             <Legend
               width={120}
               height={140}
@@ -1106,6 +1194,7 @@ async function timelineTopPBTs(props) {
                 right: 0,
                 lineHeight: "24px",
               }}
+              formatter={customLegendFormatter}
             />
             {lines}
           </LineChart>
@@ -1147,11 +1236,14 @@ function GraphView(props) {
   }
 
   /* Create formatted Title Component title given filter information */
-  function Title(title, props, hasChemical) {
+  function Title(title, props, hasChemical, hideReleaseType) {
     return (
       <>
-        Total {getReleaseTypeString(props.filters.releaseType) + " "}releases
-        for <span>{title}</span> in {getLocationString(props.map)} in{" "}
+        Total{" "}
+        {hideReleaseType
+          ? ""
+          : getReleaseTypeString(props.filters.releaseType) + " "}
+        releases for <span>{title}</span> in {getLocationString(props.map)} in{" "}
         {props.filters.year}
         {hasChemical
           ? props.filters.chemical !== "all"
@@ -1203,28 +1295,24 @@ function GraphView(props) {
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="top_facilities"
               graph={GraphTopTenFacilities}
               title={Title("top 10 facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="top_parents"
               graph={GraphTopTenParents}
               title={Title("top 10 parent companies", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="top_chemicals"
               graph={GraphTopTenChemicals}
               title={Title("top 10 chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="top_pbts"
               graph={GraphTopTenPBTs}
               title={Title("top 10 PBT chemicals", props)}
             ></GraphContainer>
@@ -1236,7 +1324,6 @@ function GraphView(props) {
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="timeline_total"
               graph={TimelineTotal}
               title={
                 <>
@@ -1252,7 +1339,6 @@ function GraphView(props) {
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="timeline_facilities"
               graph={TimelineTopFacilities}
               title={Title("top 10 facilities", props)}
             ></GraphContainer>
@@ -1266,15 +1352,13 @@ function GraphView(props) {
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="timeline_chemicals"
               graph={TimelineTopChemicals}
               title={Title("top 10 chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="timeline_chemicals"
-              graph={timelineTopPBTs}
+              graph={TimelineTopPBTs}
               title={Title("top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
@@ -1285,16 +1369,26 @@ function GraphView(props) {
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="top_parents"
               graph={GraphAllFacilities}
-              title="Total releases for all Facilities"
+              title={Title("all facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              name="top_parents"
+              graph={GraphAllChemicals}
+              title={Title("all chemicals", props)}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
               graph={TableAllFacilities}
-              title="Total releases for all Facilities"
+              title={Title("all facilities by release type", props, true, true)}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              graph={TableAllChemicals}
+              title={Title("all chemicals by release type", props, false, true)}
             ></GraphContainer>
           </div>
         </div>
