@@ -20,7 +20,7 @@ function MapLegend(props) {
 
   return (
     <div className="legend">
-      <div>Total releases (air, water, land and off-site)</div>
+      <div>Total release amount (lbs)</div>
       <ul style={{ listStyle: "none" }}>
         <li>
           <span className="marker">
