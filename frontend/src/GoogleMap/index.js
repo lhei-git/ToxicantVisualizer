@@ -24,6 +24,7 @@ class MapContainer extends Component {
       activeMarker: null,
       markers: [],
       points: [],
+      latLngbounds: null,
       showingInfoWindow: false,
       isLoading: true,
       map: null,
@@ -40,20 +41,13 @@ class MapContainer extends Component {
     this.onRefresh = this.onRefresh.bind(this);
   }
 
+  /* User hits re-center - Sidebar is cleared of any pubchem data and map restores to original searched center */
   onRefresh() {
     const newState = {};
     const oldPoints = this.state.points;
     newState.markers = this.createMarkers(oldPoints);
-
-    const mapsApi = window.google.maps;
-    const viewport = this.props.map.viewport;
-    if (viewport) {
-      try {
-        const b = this.createLatLngBounds(viewport, mapsApi);
-        this.map.fitBounds(b);
-      } catch (err) {
-        console.log(err);
-      }
+    if (this.map && this.state.latLngbounds) {
+      this.resetMapView(this.map, this.state.latLngbounds);
     }
     newState.showingInfoWindow = false;
     newState.hasMoved = false;
@@ -62,10 +56,15 @@ class MapContainer extends Component {
     });
   }
 
+  /* Props to the map component have changed */
   componentDidUpdate(prevProps) {
     const newState = {};
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
+      // recenter map when filters change
+      this.resetMapView(this.map, this.state.latLngbounds);
+
+      // when filters change, new data must be fetched from the VET API
       this.setState({ isLoading: true, markers: {} }, () => {
         this.fetchPoints(this.props.map, this.props.filters).then((data) =>
           this.storeFacilities(data)
@@ -74,18 +73,9 @@ class MapContainer extends Component {
       newState.showingInfoWindow = false;
       this.setState(newState);
     }
-
-    const mapsApi = window.google.maps;
-    if (!shallowEqual(prevProps.map.viewport, this.props.map.viewport)) {
-      try {
-        const b = this.createLatLngBounds(this.props.map.viewport, mapsApi);
-        this.map.fitBounds(b);
-      } catch (err) {
-        console.log(err);
-      }
-    }
   }
 
+  /* Handle facility select. This gets passed down to marker clusterer */
   onMarkerClick(props) {
     const showing = this.state.showingInfoWindow;
     if (!showing || !shallowEqual(this.state.activeMarker, props.entry)) {
@@ -97,6 +87,7 @@ class MapContainer extends Component {
         },
         () => {
           this.map.setCenter(props.marker.position);
+          /* best looking zoom level */
           this.map.setZoom(14);
           this.props.onMarkerClick(props.entry.meta.id);
         }
@@ -115,9 +106,8 @@ class MapContainer extends Component {
     });
   }
 
+  /* Retrieve list of facilities from VET api */
   async fetchPoints(map, filters) {
-    console.log("fetching...");
-
     let facilityData = null;
 
     try {
@@ -141,6 +131,7 @@ class MapContainer extends Component {
     }
   }
 
+  /* map startup */
   handleMount(mapProps, map) {
     this.map = map;
     const mapsApi = window.google.maps;
@@ -153,31 +144,43 @@ class MapContainer extends Component {
     this.adjustMap(mapProps, map);
   }
 
+  resetMapView(map, bounds) {
+    map.fitBounds(bounds);
+
+    /* optionally increase zoom on areas */
+    // const zoom = map.getZoom();
+    // if (zoom) {
+    //   map.setZoom(zoom + 1);
+    // }
+  }
+
+  /* move map window when location has changed. Once map is finished moving, facilities are populated  */
   adjustMap(mapProps, map) {
-    console.log("adjusting...");
     const mapsApi = window.google.maps;
     const viewport = this.props.map.viewport;
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
-        map.fitBounds(b);
+        this.setState({ latLngbounds: b }, () => {
+          this.resetMapView(map, b);
+        });
         mapsApi.event.addListenerOnce(map, "idle", () => {
           this.setState(
             {
               isLoading: true,
             },
             () => {
-              const facilityData = JSON.parse(
-                sessionStorage.getItem("facilityData")
-              );
-              if (facilityData === null)
-                this.fetchPoints(
-                  this.props.map,
-                  this.props.filters
-                ).then((data) => this.storeFacilities(data));
-              else {
-                this.storeFacilities(facilityData);
-              }
+              // const facilityData = JSON.parse(
+              //   sessionStorage.getItem("facilityData")
+              // );
+              // if (facilityData === null)
+              this.fetchPoints(
+                this.props.map,
+                this.props.filters
+              ).then((data) => this.storeFacilities(data));
+              // else {
+              //   this.storeFacilities(facilityData);
+              // }
             }
           );
         });
@@ -188,7 +191,6 @@ class MapContainer extends Component {
   }
 
   storeFacilities(data) {
-    console.log("storing...");
     this.setState(
       {
         points: data,
@@ -206,6 +208,7 @@ class MapContainer extends Component {
     return new api.LatLngBounds(s, n);
   }
 
+  /* arbitrary legend, could use changing to not be hardcoded */
   getColor(total) {
     let color = 1;
     if (total < 100) color = 1;
@@ -217,10 +220,9 @@ class MapContainer extends Component {
     return color;
   }
 
+  // create a map marker for every point that is passed to the map
   createMarkers(points) {
-    console.log("creating markers...");
     const facilities = points;
-    // create a marker for every point that is passed to the map
     const markers = facilities.map((facility, i) => {
       return {
         meta: facility,
@@ -259,6 +261,7 @@ class MapContainer extends Component {
           </div>
         )}
         <div className="map">
+          {/* Google Map component from google-maps-react */}
           <Map
             onReady={this.handleMount}
             google={window.google}

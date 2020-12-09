@@ -16,10 +16,9 @@ const initialState = {
   map: JSON.parse(sessionStorage.getItem("map")),
   numFacilities: 0,
   showPubchemInfo: false,
+  showChemicalList: false,
   chemicals: [],
   currentChemical: "",
-  activeTab: 0,
-
   filters: {
     chemical: "all",
     pbt: false,
@@ -68,8 +67,7 @@ const setCurrentChemical = (payload) => ({
 
 const getChemicals = async (facilityId, filters) => {
   const params = {
-    carcinogen: filters.carcinogens || null,
-    dioxin: filters.pbt || null,
+    carcinogen: filters.carcinogen || null,
     pbt: filters.pbt || null,
     release_type: filters.releaseType,
     chemical: filters.chemical,
@@ -83,10 +81,12 @@ const getChemicals = async (facilityId, filters) => {
   return chemicals;
 };
 
+/* Component for a facility's list of chemicals, shows when facility is clicked */
 function ChemicalList(props) {
   const { chemicals } = props;
   if (chemicals.length === 0) return <div></div>;
 
+  /* Format each chemical into a split row using name and release amount */
   const listItems = chemicals
     .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total)
@@ -119,11 +119,8 @@ function MapView(props) {
 
   return (
     <div className="map-view">
-      {/* VET MAP FILTER */}
       <div className="filters">
-        <div className="header">
-          {state.map && <h1>{getLocationString(state.map, true)}</h1>}
-        </div>
+        {/* Filter component */}
         <FilterView
           map={state.map}
           filters={state.filters}
@@ -133,49 +130,46 @@ function MapView(props) {
         ></FilterView>
       </div>
       <div className="flex-container top">
-        <div className="flex-item pubchem-wrapper">
-          {state.showPubchemInfo ? (
-            <div className="pubchem">
-              <div
-                className="back"
-                onClick={() => {
-                  dispatch(showPubchemInfo());
-                }}
-              >
-                <span>
-                  <img
-                    src={require("../../src/assets/leftcarat.png")}
-                    alt=""
-                  ></img>
-                </span>
-                Back to Chemicals
-              </div>
-              <PubchemView chemName={state.currentChemical}></PubchemView>
-            </div>
-          ) : (
-            <div className="chemicals">
-              {state.chemicals.length === 0 ? (
-                <div className="placeholder">
-                  <div className="text-center">
-                    Click a facility on the map to see its pollutants.{" "}
-                  </div>
+        {/* Only show pubchem sidebar if facility has been clicked */}
+        {state.chemicals.length !== 0 && (
+          <div className="flex-item pubchem-wrapper">
+            {/* Only show pubchem data if a chemical has been clicked */}
+            {state.showPubchemInfo ? (
+              <div className="pubchem">
+                <div
+                  className="back"
+                  onClick={() => {
+                    dispatch(showPubchemInfo());
+                  }}
+                >
+                  <span>
+                    <img
+                      src={require("../../src/assets/leftcarat.png")}
+                      alt=""
+                    ></img>
+                  </span>
+                  Back to Chemicals
                 </div>
-              ) : (
+                <PubchemView chemName={state.currentChemical}></PubchemView>
+              </div>
+            ) : (
+              /* Actually show chemical list */
+              <div className="chemicals">
                 <div className="caption">
                   Click on toxicant to see detailed chemical information.
                 </div>
-              )}
-              <ChemicalList
-                onClick={(chemical) => {
-                  dispatch(showPubchemInfo());
-                  dispatch(setCurrentChemical(chemical));
-                }}
-                chemicals={state.chemicals}
-              ></ChemicalList>
-            </div>
-          )}
-        </div>
-        {/* GOOGLE MAPS RENDER */}
+                <ChemicalList
+                  onClick={(chemical) => {
+                    dispatch(showPubchemInfo());
+                    dispatch(setCurrentChemical(chemical));
+                  }}
+                  chemicals={state.chemicals}
+                ></ChemicalList>
+              </div>
+            )}
+          </div>
+        )}
+        {/* Google Map (requires api keys and google as a property of the window)*/}
         <div className="flex-item map-wrapper">
           {state.map && (
             <div>
@@ -191,11 +185,13 @@ function MapView(props) {
                   );
                 }}
               />
+              {/* Legend updates with colors of selected release type */}
               <MapLegend releaseType={state.filters.releaseType}></MapLegend>
             </div>
           )}
         </div>
       </div>
+      {/* Summary table and state thematic map. Only show if a search has been completed */}
       {state.map && (
         <div className="summary-container">
           <div>
@@ -207,8 +203,7 @@ function MapView(props) {
           {state.map.stateShort !== "US" && (
             <div>
               <ThematicStateMap
-                year={state.filters.year}
-                releaseType={state.filters.releaseType}
+                filters={state.filters}
                 stateName={state.map.state}
                 stateLongName={state.map.stateLong}
               ></ThematicStateMap>

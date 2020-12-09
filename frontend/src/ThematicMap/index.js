@@ -158,9 +158,7 @@ const ThematicMap = (props) => {
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${
-                            geo.properties.name
-                          }</h1></p> <br /><span class="geography-attributes">
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name.toUpperCase()}</h1></p> <br /><span class="geography-attributes">
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
@@ -183,6 +181,26 @@ const ThematicMap = (props) => {
                                                   Math.trunc(cur.num_facilities)
                                                 )} <span />
                                                 `);
+                        }}
+                        onMouseLeave={() => {
+                          props.setTooltipContent(null);
+                        }}
+                      />
+                    );
+                  } else {
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill={colorScale(0, props.filterType, props.mapType)}
+                        stroke={"#000"}
+                        onMouseEnter={() => {
+                          props.setTooltipContent(null);
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name.toUpperCase()}</p></h1><br />
+                                         <span class="geography-attributes"> No releases reported in ${
+                                           props.filterYear
+                                         }</span>
+                `);
                         }}
                         onMouseLeave={() => {
                           props.setTooltipContent(null);
@@ -240,7 +258,9 @@ const ThematicMap = (props) => {
                             props.setTooltipContent(null);
                             props.setTooltipContent(`<h1><p style="text-align:center;">${
                               cur.facility__county
-                            } COUNTY</p></h1><span class="geography-attributes"><br />
+                            } ${
+                              cur.facility__state === "LA" ? "" : "COUNTY"
+                            }</p></h1><span class="geography-attributes"><br />
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
@@ -278,7 +298,11 @@ const ThematicMap = (props) => {
                           stroke={"#000"}
                           onMouseEnter={() => {
                             props.setTooltipContent(null);
-                            props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name.toUpperCase()} COUNTY</p></h1><br />
+                            props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.name.toUpperCase()} ${
+                              geo.properties.iso_3166_2 === "LA"
+                                ? "PARISH"
+                                : "COUNTY"
+                            }</p></h1><br />
                                                  <span class="geography-attributes"> No releases reported in ${
                                                    props.filterYear
                                                  }</span>
@@ -389,7 +413,9 @@ const ThematicMap = (props) => {
                         onMouseEnter={() => {
                           props.setTooltipContent(`<h1><p style="text-align:center;">${
                             cur.facility__county
-                          } COUNTY</p></h1><span class="geography-attributes"><br />
+                          } ${
+                            cur.facility__state === "LA" ? "" : "COUNTY"
+                          }</p></h1><span class="geography-attributes"><br />
                                                 Total: ${rounded(
                                                   Math.trunc(cur.total)
                                                 )} lbs. <br />
@@ -427,7 +453,9 @@ const ThematicMap = (props) => {
                         stroke={"#000"}
                         onMouseEnter={() => {
                           props.setTooltipContent(null);
-                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.NAME.toUpperCase()} COUNTY</p></h1><br />
+                          props.setTooltipContent(`<h1><p style="text-align:center;">${geo.properties.NAME.toUpperCase()} ${
+                            props.stateName === "LA" ? "PARISH" : "COUNTY"
+                          }</p></h1><br />
                                          <span class="geography-attributes"> No releases reported in ${
                                            props.filterYear
                                          }</span>
