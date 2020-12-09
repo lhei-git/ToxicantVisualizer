@@ -218,6 +218,18 @@ const processBarGraphData = (data, nameAttribute, isStacked) => {
 
 /* oh boy */
 const processTimelineData = (data, nameAttribute) => {
+  const names = new Set(data.map((d) => d[nameAttribute]));
+  for (let year = 2005; year <= 2019; year++) {
+    for (var name of names) {
+      if (!data.find((d) => d.year === year && d[nameAttribute] === name)) {
+        data.push({
+          year,
+          [nameAttribute]: name,
+          total: 0,
+        });
+      }
+    }
+  }
   const output = data
     .reduce((acc, cur) => {
       const existing = acc.find((e) => e.year === cur.year);
@@ -339,7 +351,6 @@ async function GraphAllFacilities(props) {
       "facility__name",
       releaseType === "all"
     );
-    console.table(data);
     return (
       <div
         width="100%"
@@ -910,16 +921,15 @@ async function TimelineTotal(props) {
     );
     const data = res.data;
     /* Fill total timeline with zeros, only needed if filtering by chemical and there is missing release data for one or more years */
-    // for (let i = 2005; i <= 2019; i++) {
-    //   if (!data.find((d) => d.year === i)) {
-    //     data.push({
-    //       year: i,
-    //       total: 0,
-    //     });
-    //   }
-    // }
+    for (let i = 2005; i <= 2019; i++) {
+      if (!data.find((d) => d.year === i)) {
+        data.push({
+          year: i,
+          total: 0,
+        });
+      }
+    }
     data.sort((a, b) => a.year - b.year);
-    console.table(data);
     const body = (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
@@ -962,6 +972,7 @@ async function TimelineTopFacilities(props) {
       createParams(props, { year: null })
     );
     let data = processTimelineData(res.data, "facility__name");
+    console.table(data);
     const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
@@ -1084,7 +1095,22 @@ async function TimelineTopChemicals(props) {
       `/stats/location/timeline/top_chemicals`,
       createParams(props, { chemical: null, year: null })
     );
-    const data = res.data
+    let data = res.data;
+    const names = new Set(res.data.map((d) => d["chemical__name"]));
+    for (let year = 2005; year <= 2019; year++) {
+      for (var name of names) {
+        if (
+          !data.find((d) => d.year === year && d["chemical__name"] === name)
+        ) {
+          data.push({
+            year,
+            chemical__name: name,
+            total: 0,
+          });
+        }
+      }
+    }
+    data = data
       .reduce((acc, cur) => {
         const existing = acc.find((e) => e.year === cur.year);
         const formatted = formatChemical(cur["chemical__name"]).toUpperCase();
@@ -1157,7 +1183,22 @@ async function TimelineTopPBTs(props) {
       `/stats/location/timeline/top_chemicals`,
       createParams(props, { chemical: null, year: null, pbt: true })
     );
-    const data = res.data
+    let data = res.data;
+    const names = new Set(res.data.map((d) => d["chemical__name"]));
+    for (let year = 2005; year <= 2019; year++) {
+      for (var name of names) {
+        if (
+          !data.find((d) => d.year === year && d["chemical__name"] === name)
+        ) {
+          data.push({
+            year,
+            chemical__name: name,
+            total: 0,
+          });
+        }
+      }
+    }
+    data = data
       .reduce((acc, cur) => {
         const existing = acc.find((e) => e.year === cur.year);
         const formatted = formatChemical(cur["chemical__name"]).toUpperCase();
