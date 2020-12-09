@@ -171,6 +171,7 @@ const App = (props) => {
             <Home onSuccess={handleSuccess} />
           </Route>
         </Switch>
+        <Footer></Footer>
       </div>
     </Router>
   );
@@ -179,28 +180,10 @@ const App = (props) => {
 function Footer() {
   return (
     <div className="footer">
-      <ul>
-        <li>
-          <a href="https://github.com/ejdejesu/ToxicantVisualizer">Github</a>
-        </li>
-        <li>
-          <a href="https://pubchem.ncbi.nlm.nih.gov/">Pubchem</a>
-        </li>
-        <li>
-          <a href="https://www.epa.gov/toxics-release-inventory-tri-program">
-            TRI Program
-          </a>
-        </li>
-        {/* <li>
-          <Link to="/about">About</Link>
-        </li> */}
-      </ul>
-      <div>
-        <div className="copyright">
-          &#169; VET was developed in 2020 for the Lab for Health and
-          Environmental Information by Evan de Jesus, Adwait Wadekar, Richard
-          Moore, and Calvin Brooks
-        </div>
+      <div className="copyright">
+        &#169; VET was developed in 2020 for the Lab for Health and
+        Environmental Information by Evan de Jesus, Adwait Wadekar, Richard
+        Moore, and Calvin Brooks
       </div>
     </div>
   );
