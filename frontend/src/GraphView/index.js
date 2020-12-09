@@ -191,21 +191,20 @@ const compareIndividualTypes = (a, b) => {
 };
 
 const processBarGraphData = (data, nameAttribute, isStacked) => {
-  let formatted = data
-    .map((d) => {
-      const f = d;
-      return {
-        name: f[nameAttribute],
-        total: isStacked ? null : f.total,
-        av: f.air || 0,
-        bv: f.water || 0,
-        cv: f.land || 0,
-        dv: f.off_site || 0,
-      };
-    })
-    .sort((a, b) => b.total - a.total);
+  let formatted = data.map((d) => {
+    const f = d;
+    return {
+      name: f[nameAttribute],
+      total: isStacked ? null : f.total,
+      av: f.air || 0,
+      bv: f.water || 0,
+      cv: f.land || 0,
+      dv: f.off_site || 0,
+    };
+  });
 
   if (isStacked) formatted.sort(compareIndividualTypes);
+  else formatted.sort((a, b) => b.total - a.total);
 
   /* Fill nearly empty bar chart with placeholders to avoid fatness */
   for (let i = formatted.length; i < 6; i++) {
@@ -333,7 +332,12 @@ async function GraphAllFacilities(props) {
     const params = createParams(props, { all: true });
 
     const res = await vetapi.get(`/stats/location/facility_releases`, params);
-    const data = processBarGraphData(res.data, "facility__name", true);
+    const data = processBarGraphData(
+      res.data,
+      "facility__name",
+      releaseType === "all"
+    );
+    console.table(data);
     return (
       <div
         width="100%"
@@ -426,7 +430,11 @@ async function GraphAllChemicals(props) {
     const params = createParams(props, { all: true });
 
     const res = await vetapi.get(`/stats/location/top_chemicals`, params);
-    const data = processBarGraphData(res.data, "chemical__name", true);
+    const data = processBarGraphData(
+      res.data,
+      "chemical__name",
+      releaseType === "all"
+    );
     return (
       <div
         width="100%"
@@ -797,12 +805,13 @@ async function GraphTopTenChemicals(props) {
 /* Top ten PBT chemicals bar graphs */
 async function GraphTopTenPBTs(props) {
   const { releaseType } = props.filters;
+
   try {
     const res = await vetapi.get(
       `/stats/location/top_chemicals`,
       createParams(props, { chemical: null, pbt: true })
     );
-    const data = processBarGraphData(res.data, "chemical__name");
+    const data = processBarGraphData(res.data, "chemical__name", true);
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -1125,7 +1134,7 @@ async function TimelineTopChemicals(props) {
   }
 }
 
-async function timelineTopPBTs(props) {
+async function TimelineTopPBTs(props) {
   try {
     const res = await vetapi.get(
       `/stats/location/timeline/top_chemicals`,
@@ -1227,11 +1236,14 @@ function GraphView(props) {
   }
 
   /* Create formatted Title Component title given filter information */
-  function Title(title, props, hasChemical) {
+  function Title(title, props, hasChemical, hideReleaseType) {
     return (
       <>
-        Total {getReleaseTypeString(props.filters.releaseType) + " "}releases
-        for <span>{title}</span> in {getLocationString(props.map)} in{" "}
+        Total{" "}
+        {hideReleaseType
+          ? ""
+          : getReleaseTypeString(props.filters.releaseType) + " "}
+        releases for <span>{title}</span> in {getLocationString(props.map)} in{" "}
         {props.filters.year}
         {hasChemical
           ? props.filters.chemical !== "all"
@@ -1346,7 +1358,7 @@ function GraphView(props) {
             <GraphContainer
               map={props.map}
               filters={props.filters}
-              graph={timelineTopPBTs}
+              graph={TimelineTopPBTs}
               title={Title("top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
@@ -1358,7 +1370,7 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={GraphAllFacilities}
-              title={Title("all facilities", props)}
+              title={Title("all facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
@@ -1370,13 +1382,13 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={TableAllFacilities}
-              title={Title("all facilities by release type", props)}
+              title={Title("all facilities by release type", props, true, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TableAllChemicals}
-              title={Title("all chemicals by release type", props)}
+              title={Title("all chemicals by release type", props, false, true)}
             ></GraphContainer>
           </div>
         </div>
