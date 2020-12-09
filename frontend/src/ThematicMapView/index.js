@@ -1,9 +1,10 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
 import LoadingSpinner from "../LoadingSpinner";
-import UserControlPanel from "../Filters";
+import Filters from "../Filters";
 import vetapi from "../api/vetapi";
 import "./index.css";
+import Title from "../Title/index.js";
 const React = require("react");
 const Component = React.Component;
 
@@ -102,19 +103,16 @@ class ThematicMapView extends Component {
     return (
       <div className="thematic-view-wrapper">
         <div className="filter-container">
-          <UserControlPanel
+          <Filters
             map={this.props.map}
             filters={this.props.filters}
             onFilterChange={this.props.onFilterChange}
-          ></UserControlPanel>
+          ></Filters>
         </div>
         <div className="thematic-view-container">
           <div className="flex-item">
             <div className="graph-header">
-              Total{" "}
-              {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              Releases {this.getParentheticalString(this.props.filters)} By
-              State in {this.props.filters.year}
+              {Title("by state", this.props, true)}
             </div>
             {this.state.stateData ? (
               <>
@@ -137,10 +135,7 @@ class ThematicMapView extends Component {
 
           <div className="flex-item">
             <div className="graph-header">
-              Total{" "}
-              {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              Releases {this.getParentheticalString(this.props.filters)} By
-              County in {this.props.filters.year}
+              {Title("by county", this.props, true)}
             </div>
             {this.state.countyData ? (
               <>

@@ -38,7 +38,7 @@
   width: 70%;
   padding: 40px;
   left: 50%;
-  background: #FFF;
+  background: rgba(255, 255, 255, 0.9);
   transform: translateX(-50%);
   border-radius: 4px;
 }

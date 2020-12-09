@@ -1,9 +1,20 @@
+:root {
+  --black: #3f3844;
+}
+
 .graph-header {
-  font-size: 30px;
-  font-weight: bold;
   text-align: left;
   width: 100%;
-  margin: 20px 0;
+  margin-bottom: 30px;
+}
+
+.graph-header h1,
+.graph-header h2 {
+  margin: 0;
+}
+
+.graph-header h2 {
+  opacity: 0.7;
 }
 
 .graph-header span {
@@ -56,11 +67,6 @@
   margin: 0 auto;
 }
 
-.graph-container h1 {
-  text-align: center;
-  font-size: 40px;
-}
-
 .graph-container .graphs {
   width: 100%;
 }
@@ -88,17 +94,6 @@
 
 .graph-container .top-ten {
   position: relative;
-}
-
-.graph-container .filter-container,
-.thematic-view-wrapper .filter-container {
-  z-index: 100;
-  position: fixed;
-  top: 80px;
-  width: 100%;
-  left: 0;
-  background: #fff;
-  border-bottom: 1px solid rgba(32, 33, 36, 0.28);
 }
 
 .graph-container .filter-container .control-container {
@@ -145,10 +140,6 @@
   width: 40%;
   min-width: 200px;
   background-color: #fff;
-}
-
-.summary {
-  --black: #3f3844;
 }
 
 .summary th,

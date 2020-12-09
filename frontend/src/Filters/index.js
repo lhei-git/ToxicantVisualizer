@@ -2,10 +2,10 @@ import "./index.css";
 import "../index.css";
 import vetapi from "../api/vetapi";
 const React = require("react");
-const { formatChemical } = require("../helpers");
+const { formatChemical, getLocationString } = require("../helpers");
 
 //search button and text box
-function UserControlPanel(props) {
+function Filters(props) {
   const [chemicals, setChemicals] = React.useState([]);
 
   /* Update chemical list with chemicals found in the selected window under the current search parameters */
@@ -97,59 +97,64 @@ function UserControlPanel(props) {
   }
 
   return (
-    <div className="control-container">
-      <div className="content">
-        {/* Search Bar Content*/}
-        <select
-          name="year"
-          value={props.filters.year}
-          onChange={onFilterChange}
-          id=""
-        >
-          {getYears()}
-        </select>
-        <select
-          name="releaseType"
-          value={props.filters.releaseType}
-          onChange={onFilterChange}
-          id=""
-        >
-          <option defaultValue={true} key="all" value="all">
-            All release types
-          </option>
-          {getReleaseTypes()}
-        </select>
-        <select
-          name="chemical"
-          value={props.filters.chemical}
-          onChange={onFilterChange}
-          id=""
-        >
-          {getChemicals()}
-        </select>
-        <div className="checkbox-group">
-          <label htmlFor="carcinogen">Carcinogens only</label>
-          <input
-            type="checkbox"
-            checked={props.filters.carcinogen}
+    <div style={{ display: "flex" }}>
+      <div className="control-header">
+        {props.map && <h1>{getLocationString(props.map, true)}</h1>}
+      </div>
+      <div className="control-container">
+        <div className="content">
+          {/* Search Bar Content*/}
+          <select
+            name="year"
+            value={props.filters.year}
             onChange={onFilterChange}
-            name="carcinogen"
-            id="carcinogen"
-          />
-        </div>
-        <div className="checkbox-group">
-          <label htmlFor="pbt">PBTs only</label>
-          <input
-            type="checkbox"
-            checked={props.filters.pbt}
+            id=""
+          >
+            {getYears()}
+          </select>
+          <select
+            name="releaseType"
+            value={props.filters.releaseType}
             onChange={onFilterChange}
-            id="pbt"
-            name="pbt"
-          />
+            id=""
+          >
+            <option defaultValue={true} key="all" value="all">
+              All release types
+            </option>
+            {getReleaseTypes()}
+          </select>
+          <select
+            name="chemical"
+            value={props.filters.chemical}
+            onChange={onFilterChange}
+            id=""
+          >
+            {getChemicals()}
+          </select>
+          <div className="checkbox-group">
+            <label htmlFor="carcinogen">Carcinogens only</label>
+            <input
+              type="checkbox"
+              checked={props.filters.carcinogen}
+              onChange={onFilterChange}
+              name="carcinogen"
+              id="carcinogen"
+            />
+          </div>
+          <div className="checkbox-group">
+            <label htmlFor="pbt">PBTs only</label>
+            <input
+              type="checkbox"
+              checked={props.filters.pbt}
+              onChange={onFilterChange}
+              id="pbt"
+              name="pbt"
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-export default UserControlPanel;
+export default Filters;
