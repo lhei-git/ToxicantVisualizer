@@ -56,9 +56,11 @@ function Home(props) {
   }
 
   /* start geocoding process when location is selected or user hits enter (topmost location used) */
-  function handleSelect(location) {
-    geocodeLocation(location)
-      .then((map) => props.onSuccess(map))
+  function handleSelect(location, placeId, suggestion) {
+    geocodeLocation(suggestion ? suggestion.description : location)
+      .then((map) => {
+        props.onSuccess(map);
+      })
       .catch((error) => console.error("Error", error));
   }
 
@@ -94,6 +96,7 @@ function Home(props) {
             onSelect={handleSelect}
             onError={handleError}
             shouldFetchSuggestions={location.length > 2}
+            highlightFirstSuggestion={true}
             searchOptions={{
               types: ["geocode"],
               componentRestrictions: {
