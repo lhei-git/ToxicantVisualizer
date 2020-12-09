@@ -4,8 +4,8 @@ from viewModule.views import get_facilities, get_chemicals, state_total_releases
     timeline_total, top_parentco_releases, timeline_top_parentco_releases, top_chemicals, timeline_top_chemicals, \
     location_summary, top_facility_releases, timeline_top_facility_releases, \
     timeline_top_pbt_chemicals, all_state_total_releases, \
-    all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_total_releases, \
-    all_facility_total_releases, get_chemicals_in_window, country_summary, health_check
+    all_county_total_releases, \
+    get_chemicals_in_window, country_summary, health_check
 
 
 ''' This list acts as a controller for the API endpoints while path() marks an element for inclusion'''
@@ -45,13 +45,5 @@ urlpatterns = [
     # return release all states, individually
     path('stats/state/all', all_state_total_releases),
     # return release all counties, individually
-    path('stats/county/all', all_county_total_releases),
-    # return all facilities and respective total releases (by type) in queried state {Graph 12}
-    path('stats/facilities/total_release_types', all_facility_releases),
-    # return all chemicals and respective total releases (by type) in queried state {Graph 13}
-    path('stats/chemicals/total_release_types', all_chemicals_releases),
-    # return all facilities and respective total release amounts in queried state {Graph 14}
-    path('stats/facilities/total_releases', all_facility_total_releases),
-    # return all chemicals and respective total release amounts in queried state {Graph 15}
-    path('stats/chemicals/total_releases', all_chemicals_total_releases),
+    path('stats/county/all', all_county_total_releases)
 ]
