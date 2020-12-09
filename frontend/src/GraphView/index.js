@@ -1307,32 +1307,44 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={TimelineTotal}
-              title={Title("", props, true, false)}
+              title={Title("", props, true, false, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopFacilities}
-              title={Title("for top 10 facilities", props, true)}
+              title={Title("for top 10 facilities", props, true, false, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title={Title("for top 10 parent companies", props, true)}
+              title={Title(
+                "for top 10 parent companies",
+                props,
+                true,
+                false,
+                true
+              )}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopChemicals}
-              title={Title("for top 10 chemicals", props)}
+              title={Title("for top 10 chemicals", props, false, false, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopPBTs}
-              title={Title("for top 10 PBT chemicals", props)}
+              title={Title(
+                "for top 10 PBT chemicals",
+                props,
+                false,
+                false,
+                true
+              )}
             ></GraphContainer>
           </div>
           <div
