@@ -120,9 +120,6 @@ function MapView(props) {
   return (
     <div className="map-view">
       <div className="filters">
-        <div className="header">
-          {state.map && <h1>{getLocationString(state.map, true)}</h1>}
-        </div>
         {/* Filter component */}
         <FilterView
           map={state.map}
