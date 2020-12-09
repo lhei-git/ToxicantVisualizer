@@ -16,7 +16,7 @@ function getReleaseTypeString(releaseType) {
 }
 
 /* Create formatted Title Component title given filter information */
-function Title(title, props, hasChemical, hideReleaseType) {
+function Title(title, props, hasChemical, hideReleaseType, hideYear) {
   const locationString = props.map ? ` in ${getLocationString(props.map)}` : "";
   return (
     <>
@@ -26,7 +26,8 @@ function Title(title, props, hasChemical, hideReleaseType) {
           ? ""
           : getReleaseTypeString(props.filters.releaseType) + " "}
         releases <span>{title}</span>
-        {locationString} in {props.filters.year}
+        {locationString}
+        {hideYear ? "" : ` in ${props.filters.year}`}
       </h1>
       <h2>{getSubHeader(props.filters, hasChemical)}</h2>
     </>
