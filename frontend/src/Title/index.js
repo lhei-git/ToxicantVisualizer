@@ -35,7 +35,9 @@ function Title(title, props, hasChemical, hideReleaseType, hideYear) {
 }
 
 const getSubHeader = (filters, hasChemical) => {
-  if (filters.chemical !== "all") {
+  if (!hasChemical) {
+    return "";
+  } else if (filters.chemical !== "all") {
     return filters.chemical;
   } else if (filters.carcinogen && filters.pbt) {
     return "carcinogens and PBTs";
