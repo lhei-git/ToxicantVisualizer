@@ -4,6 +4,7 @@ import LoadingSpinner from "../LoadingSpinner";
 import vetapi from "../api/vetapi";
 import "./index.css";
 import data from "../data/stateLocationData.json";
+import Title from "../Title/index.js";
 const React = require("react");
 const Component = React.Component;
 const { shallowEqual } = require("../helpers");
@@ -12,40 +13,57 @@ class ThematicStateMap extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      latestYear: 2019,
       contentCounty: "",
       geoUrl: "",
       stateName: "",
       prevStateName: "",
       countyData: null,
-      filterYear: null,
-      releaseType: "total", //valid options: total, air, water, land, off_site, on_site  DEFAULT: total
+      filters: null,
       scale: null,
       lat: null,
       lon: null,
     };
 
     this.handleContentCountyState = this.handleContentCountyState.bind(this);
-
-    if (props.year) this.state.filterYear = props.year;
-    if (props.type) this.state.filterType = props.type;
   }
 
+  //retrieves county data when component loads
   componentDidMount() {
     this.getCountyData();
   }
 
-  getFilterText(type) {
-    //valid options: all, air, water, land, on_site, off_site
-    return type !== "all" ? type.replace("_", " ") : "";
+  //convert releaseType filter to display text
+  getReleaseTypeString(releaseType) {
+    return (
+      (releaseType !== "all" ? releaseType.replace("_", " ") : "")
+        .charAt(0)
+        .toUpperCase() +
+      (releaseType !== "all" ? releaseType.replace("_", " ") : "").slice(1)
+    );
+  }
+
+  //convert applied filters into parenthetical text
+  getParentheticalString(filters) {
+    var strings = [];
+
+    if (filters.chemical != "all") strings.push(filters.chemical);
+    if (filters.pbt === true) strings.push("PBTs");
+    if (filters.carcinogen === true) strings.push("Carcinogens");
+
+    if (strings.length === 0) return "";
+    if (strings.length === 1) return " (" + strings[0] + " Only)";
+    if (strings.length === 2)
+      return " (" + strings[0] + " & " + strings[1] + " Only)";
+    if (strings.length === 3)
+      return (
+        " (" + strings[0] + ", " + strings[1] + " & " + strings[2] + " Only)"
+      );
   }
 
   // refetches data if the year or release type filter changed
   componentDidUpdate(prevProps, prevState) {
-    if (
-      this.props.year !== prevProps.year ||
-      this.props.stateName !== prevProps.stateName ||
-      this.props.type !== prevProps.type
-    ) {
+    if (prevProps.filters !== this.props.filters) {
       this.getCountyData();
 
       this.setState(
@@ -81,23 +99,24 @@ class ThematicStateMap extends Component {
 
   render() {
     const filterYear =
-      this.state.filterYear !== null ? this.state.filterYear : 2019;
+      this.props.filters.year !== null
+        ? this.props.filters.year
+        : this.state.latestYear;
     const filterType =
-      this.props.releaseType === "all" ? "total" : this.props.releaseType;
+      this.props.filters.releaseType === "all"
+        ? "total"
+        : this.props.filters.releaseType;
 
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
-          <div className="graph-header">
-            Total {this.getFilterText(this.props.releaseType)} releases By
-            County for {this.props.stateLongName} in {this.props.year}
-          </div>
+          <div className="graph-header">{Title("by county", this.props)}</div>
           {this.state.countyData ? (
             <>
               <ThematicMap
                 setTooltipContent={this.handleContentCountyState}
                 data={this.state.countyData}
-                filterYear={filterYear}
+                filterYear={this.props.filters.year}
                 filterType={filterType}
                 geoUrl={this.state.geoUrl}
                 mapType={"singleState"}
@@ -120,18 +139,25 @@ class ThematicStateMap extends Component {
 
   // retrieves and filters county release data from the database
   async getCountyData() {
-    const filterYear = this.state.filterYear;
-    const filterType = this.state.filterType;
-    const params = {
-      year: filterYear,
-      state: this.props.stateName,
-    };
-    await vetapi
-      .get("/stats/county/all", { params })
+    //possible filters
+    const filterYear = this.props.filters.year;
+    const pbt = this.props.filters.pbt;
+    const carcinogen = this.props.filters.carcinogen;
+    const chemical = this.props.filters.chemical;
+    const stateName = this.props.stateName;
+
+    //apply filters and run GET request
+    vetapi
+      .get(
+        "/stats/county/all?year=" +
+          filterYear +
+          ("&state=" + stateName) +
+          (pbt === true ? "&pbt" : "") +
+          (carcinogen === true ? "&carcinogen" : "") +
+          (chemical != "all " ? "&chemical=" + chemical : "")
+      )
       .then((response) => {
-        this.setState({
-          countyData: response.data,
-        });
+        this.setState({ countyData: response.data });
       })
       .catch((err) => console.log(err));
   }

@@ -1,9 +1,10 @@
 import ReactTooltip from "react-tooltip";
 import ThematicMap from "../ThematicMap/index.js";
 import LoadingSpinner from "../LoadingSpinner";
-import UserControlPanel from "../Filters";
+import Filters from "../Filters";
 import vetapi from "../api/vetapi";
 import "./index.css";
+import Title from "../Title/index.js";
 const React = require("react");
 const Component = React.Component;
 
@@ -17,35 +18,27 @@ class ThematicMapView extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      latestYear: 2019,
       contentState: "",
       contentCounty: "",
       stateData: null,
       countyData: null,
-      filterYear: null,
-      prevYear: null,
-      filterType: null, //valid options: total, air, water, land, on_site, off_site
-      prevType: null,
+      filters: null,
     };
 
     this.handleContentState = this.handleContentState.bind(this);
     this.handleContentCounty = this.handleContentCounty.bind(this);
   }
 
+  //loads state and county data when component loads
   componentDidMount() {
     this.getStateData();
     this.getCountyData();
   }
 
-  getFilterText(type) {
-    return (type === "total" ? "" : type) + " ";
-  }
-
   //refetch data if the year or release type filter changed
   componentDidUpdate(prevProps) {
-    if (
-      prevProps.filters.year !== this.props.filters.year ||
-      prevProps.filters.releaseType !== this.props.filters.releaseType
-    ) {
+    if (prevProps.filters !== this.props.filters) {
       this.setState(
         {
           stateData: null,
@@ -69,41 +62,63 @@ class ThematicMapView extends Component {
     this.setState({ contentCounty: content });
   }
 
+  //convert releaseType filter to display text
   getReleaseTypeString(releaseType) {
-    return releaseType !== "all" ? releaseType.replace("_", " ") : "";
+    return (
+      (releaseType !== "all" ? releaseType.replace("_", " ") : "")
+        .charAt(0)
+        .toUpperCase() +
+      (releaseType !== "all" ? releaseType.replace("_", " ") : "").slice(1)
+    );
+  }
+
+  //convert applied filters into parenthetical text
+  getParentheticalString(filters) {
+    var strings = [];
+
+    if (filters.chemical !== "all") strings.push(filters.chemical);
+    if (filters.pbt === true) strings.push("PBTs");
+    if (filters.carcinogen === true) strings.push("Carcinogens");
+
+    if (strings.length === 0) return "";
+    if (strings.length === 1) return " (" + strings[0] + " Only)";
+    if (strings.length === 2)
+      return " (" + strings[0] + " & " + strings[1] + " Only)";
+    if (strings.length === 3)
+      return (
+        " (" + strings[0] + ", " + strings[1] + " & " + strings[2] + " Only)"
+      );
   }
 
   render() {
     const filterYear =
-      this.props.filters.year !== null ? this.props.filters.year : 2019;
+      this.props.filters.year !== null
+        ? this.props.filters.year
+        : this.state.latestYear;
     const filterType =
       this.props.filters.releaseType !== null
         ? this.props.filters.releaseType
         : "all";
 
     return (
-      <div class="thematic-view-wrapper">
+      <div className="thematic-view-wrapper">
         <div className="filter-container">
-          <UserControlPanel
+          <Filters
             map={this.props.map}
             filters={this.props.filters}
             onFilterChange={this.props.onFilterChange}
-          ></UserControlPanel>
+          ></Filters>
         </div>
         <div className="thematic-view-container">
           <div className="flex-item">
             <div className="graph-header">
-              Total{" "}
-              {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              releases by state in {this.props.filters.year}
+              {Title("by state", this.props, true)}
             </div>
             {this.state.stateData ? (
               <>
                 <ThematicMap
                   setTooltipContent={this.handleContentState}
                   data={this.state.stateData}
-                  maxValue={this.state.stateMax}
-                  minValue={this.state.stateMin}
                   filterYear={filterYear}
                   filterType={filterType === "all" ? "total" : filterType}
                   geoUrl={stateGeoUrl}
@@ -120,17 +135,13 @@ class ThematicMapView extends Component {
 
           <div className="flex-item">
             <div className="graph-header">
-              Total{" "}
-              {this.getReleaseTypeString(this.props.filters.releaseType) + " "}
-              releases by county in {this.props.filters.year}
+              {Title("by county", this.props, true)}
             </div>
             {this.state.countyData ? (
               <>
                 <ThematicMap
                   setTooltipContent={this.handleContentCounty}
                   data={this.state.countyData}
-                  maxValue={this.state.countyMax}
-                  minValue={this.state.countyMin}
                   filterYear={filterYear}
                   filterType={filterType === "all" ? "total" : filterType}
                   geoUrl={countyGeoUrl}
@@ -151,10 +162,22 @@ class ThematicMapView extends Component {
 
   // retrieves and filters county release data from the database
   async getCountyData() {
-    console.trace("fetching data");
+    //possible filters
     const filterYear = this.props.filters.year;
+    const pbt = this.props.filters.pbt;
+    const carcinogen = this.props.filters.carcinogen;
+    const chemical = this.props.filters.chemical;
+
+    const params = {
+      year: filterYear,
+      pbt,
+      carcinogen,
+      chemical,
+    };
+
+    //apply filters and run GET request
     vetapi
-      .get("/stats/county/all?year=" + filterYear)
+      .get("/stats/county/all", { params })
       .then((response) => {
         this.setState({ countyData: response.data });
       })
@@ -163,9 +186,22 @@ class ThematicMapView extends Component {
 
   // retrieves and filters state release data from the database
   getStateData() {
+    //possible filters
     const filterYear = this.props.filters.year;
+    const pbt = this.props.filters.pbt;
+    const carcinogen = this.props.filters.carcinogen;
+    const chemical = this.props.filters.chemical;
+
+    const params = {
+      year: filterYear,
+      pbt,
+      carcinogen,
+      chemical,
+    };
+    //apply filters and run GET request
     vetapi
-      .get("/stats/state/all?year=" + filterYear)
+      .get("/stats/state/all", { params })
+
       .then((response) => {
         this.setState({ stateData: response.data });
       })

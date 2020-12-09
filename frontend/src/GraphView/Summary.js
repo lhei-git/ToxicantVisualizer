@@ -97,8 +97,11 @@ function GraphSummary(props) {
     body !== null && (
       <div className="graph standalone summary">
         <div className="graph-header">
-          Summary statistics of total releases for{" "}
-          {getLocationString(props.map, true)} and U.S. in {props.filters.year}
+          <h1>
+            Summary statistics of total releases for{" "}
+            {getLocationString(props.map, true)} and U.S. in{" "}
+            {props.filters.year}
+          </h1>
         </div>
         <table>
           <thead>
