@@ -37,7 +37,7 @@
 
 .map-view {
   position: relative;
-  margin-top: 80px;
+  margin-top: 160px;
   background: #fff;
   box-sizing: border-box;
   z-index: 99;
@@ -78,22 +78,14 @@
 }
 
 .filters {
-  flex: 1;
-  display: flex;
   min-height: 30px;
-}
-
-.filters .header {
-  flex: 1;
-  text-align: center;
-}
-
-.filters .control-container {
-  flex: 2;
-}
-
-.filters .control-container .content select:nth-child(1) {
-  margin-left: 0;
+  z-index: 100;
+  position: fixed;
+  top: 80px;
+  width: 100%;
+  left: 0;
+  background: #fafbfc;
+  /* border-bottom: 1px solid rgba(32, 33, 36, 0.28); */
 }
 
 .filters .location {
