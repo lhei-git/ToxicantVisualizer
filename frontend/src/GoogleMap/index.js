@@ -24,6 +24,7 @@ class MapContainer extends Component {
       activeMarker: null,
       markers: [],
       points: [],
+      latLngbounds: null,
       showingInfoWindow: false,
       isLoading: true,
       map: null,
@@ -45,16 +46,8 @@ class MapContainer extends Component {
     const newState = {};
     const oldPoints = this.state.points;
     newState.markers = this.createMarkers(oldPoints);
-
-    const mapsApi = window.google.maps;
-    const viewport = this.props.map.viewport;
-    if (viewport) {
-      try {
-        const b = this.createLatLngBounds(viewport, mapsApi);
-        this.map.fitBounds(b);
-      } catch (err) {
-        console.log(err);
-      }
+    if (this.map && this.state.latLngbounds) {
+      this.resetMapView(this.map, this.state.latLngbounds);
     }
     newState.showingInfoWindow = false;
     newState.hasMoved = false;
@@ -68,6 +61,10 @@ class MapContainer extends Component {
     const newState = {};
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
+      // recenter map when filters change
+      this.resetMapView(this.map, this.state.latLngbounds);
+
+      // when filters change, new data must be fetched from the VET API
       this.setState({ isLoading: true, markers: {} }, () => {
         this.fetchPoints(this.props.map, this.props.filters).then((data) =>
           this.storeFacilities(data)
@@ -75,16 +72,6 @@ class MapContainer extends Component {
       });
       newState.showingInfoWindow = false;
       this.setState(newState);
-    }
-
-    const mapsApi = window.google.maps;
-    if (!shallowEqual(prevProps.map.viewport, this.props.map.viewport)) {
-      try {
-        const b = this.createLatLngBounds(this.props.map.viewport, mapsApi);
-        this.map.fitBounds(b);
-      } catch (err) {
-        console.log(err);
-      }
     }
   }
 
@@ -157,6 +144,14 @@ class MapContainer extends Component {
     this.adjustMap(mapProps, map);
   }
 
+  resetMapView(map, bounds) {
+    map.fitBounds(bounds);
+    const zoom = map.getZoom();
+    if (zoom) {
+      map.setZoom(zoom + 1);
+    }
+  }
+
   /* move map window when location has changed. Once map is finished moving, facilities are populated  */
   adjustMap(mapProps, map) {
     const mapsApi = window.google.maps;
@@ -164,24 +159,26 @@ class MapContainer extends Component {
     if (viewport) {
       try {
         const b = this.createLatLngBounds(viewport, mapsApi);
-        map.fitBounds(b);
+        this.setState({ latLngbounds: b }, () => {
+          this.resetMapView(map, b);
+        });
         mapsApi.event.addListenerOnce(map, "idle", () => {
           this.setState(
             {
               isLoading: true,
             },
             () => {
-              const facilityData = JSON.parse(
-                sessionStorage.getItem("facilityData")
-              );
-              if (facilityData === null)
-                this.fetchPoints(
-                  this.props.map,
-                  this.props.filters
-                ).then((data) => this.storeFacilities(data));
-              else {
-                this.storeFacilities(facilityData);
-              }
+              // const facilityData = JSON.parse(
+              //   sessionStorage.getItem("facilityData")
+              // );
+              // if (facilityData === null)
+              this.fetchPoints(
+                this.props.map,
+                this.props.filters
+              ).then((data) => this.storeFacilities(data));
+              // else {
+              //   this.storeFacilities(facilityData);
+              // }
             }
           );
         });
