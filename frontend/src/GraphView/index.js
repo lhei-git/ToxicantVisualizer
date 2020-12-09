@@ -838,7 +838,12 @@ async function GraphTopTenPBTs(props) {
       `/stats/location/top_chemicals`,
       createParams(props, { chemical: null, pbt: true })
     );
-    const data = processBarGraphData(res.data, "chemical__name", true);
+    const data = processBarGraphData(
+      res.data,
+      "chemical__name",
+      releaseType === "all"
+    );
+    console.log("data :>> ", data);
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -972,7 +977,6 @@ async function TimelineTopFacilities(props) {
       createParams(props, { year: null })
     );
     let data = processTimelineData(res.data, "facility__name");
-    console.table(data);
     const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
