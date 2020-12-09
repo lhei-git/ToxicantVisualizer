@@ -919,6 +919,7 @@ async function TimelineTotal(props) {
     //   }
     // }
     data.sort((a, b) => a.year - b.year);
+    console.table(data);
     const body = (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>

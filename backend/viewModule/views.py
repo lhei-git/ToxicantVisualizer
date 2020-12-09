@@ -408,7 +408,7 @@ def timeline_top_parentco_releases(request):
         return HttpResponseBadRequest()
 
     # values_list() returns QuerySet containing tuples, with param flat= true it returns single values instead of tuples
-    parents = list(release.objects.filter(geo_filter(request) & filter_releases(request) & Q(year=latest_year)).values_list(
+    parents = list(release.objects.filter(geo_filter(request) & filter_releases(request)).values_list(
         'facility__parent_co_name', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(facility__parent_co_name__in=parents)).values(
         'year', 'facility__parent_co_name').order_by('facility__parent_co_name', 'year').annotate(total=Sum('total'))
@@ -427,6 +427,7 @@ def timeline_total(request):
 
     queryset = release.objects.filter(geo_filter(request) & filter_releases(request)).values(
         'year').annotate(total=Sum('total')).order_by('year')
+    print(queryset.query)
     response = json.dumps(list(queryset), cls=DjangoJSONEncoder)
 
     return HttpResponse(response, content_type='application/json')
@@ -492,8 +493,8 @@ def timeline_top_facility_releases(request):
     if state is None:
         return HttpResponseBadRequest()
 
-    release_list = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(
-        year=latest_year)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
+    release_list = release.objects.filter(geo_filter(request) & filter_releases(request)).values(
+        'facility__id').annotate(total=Sum('total')).order_by('-total')
     top_facilities = [x['facility__id'] for x in release_list][:10]
     lines = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(facility__id__in=top_facilities)).values(
         'year', 'facility__name').order_by('facility__name', 'year').annotate(total=Sum('total'))
@@ -598,7 +599,7 @@ def timeline_top_chemicals(request):
 
     if state is None:
         return HttpResponseBadRequest()
-    chemicals = list(release.objects.filter(geo_filter(request) & filter_releases(request) & Q(year=latest_year)).values_list(
+    chemicals = list(release.objects.filter(geo_filter(request) & filter_releases(request)).values_list(
         'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(chemical__id__in=chemicals)).values(
         'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
@@ -615,7 +616,7 @@ def timeline_top_pbt_chemicals(request):
     if state is None:
         return HttpResponseBadRequest()
 
-    chemicals = list(release.objects.filter(geo_filter(request) & filter_releases(request) & Q(year=latest_year) & Q(chemical__classification='PBT')).values_list(
+    chemicals = list(release.objects.filter(geo_filter(request) & filter_releases(request) & Q(chemical__classification='PBT')).values_list(
         'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(chemical__id__in=chemicals)).values(
         'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
