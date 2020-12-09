@@ -3,7 +3,7 @@ import "./index.css";
 import LoadingSpinner from "../LoadingSpinner";
 const { formatChemical } = require("../helpers");
 const pubchem = require("../api/pubchem/index");
-const axios = require("axios");
+const vetapi = require("../api/vetapi");
 const React = require("react");
 const Component = React.Component;
 
@@ -142,9 +142,9 @@ function HazardStatements(props) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* Associated Disorders and Diseases */
-function AssociatedDiseases(props) {
-  const [header, setHeader] = React.useState(null);
+function Diseases(props) {
   const [diseaseData, setDiseaseData] = React.useState(null);
+  const [expanded, setExpanded] = React.useState(false);
   const link = `https://pubchem.ncbi.nlm.nih.gov/compound/${
     props.cid || 0
   }#section=Associated-Disorders-and-Diseases`;
@@ -153,21 +153,14 @@ function AssociatedDiseases(props) {
   React.useEffect(() => {
     async function getDiseaseData() {
       try {
-        const params = {
-          inputType: "chem",
-          inputTerms: props.chemName,
-          report: "diseases",
-          format: "json",
-        };
-        const response = await axios.get(
-          "https://ctdbase.org/tools/batchQuery.go",
-          { params }
+        const { data } = await vetapi.get(
+          `/chemicals/${props.chemName}/diseases`
         );
-        console.log("response :>> ", response);
+        setDiseaseData(data);
       } catch (err) {
         handleError(err);
       } finally {
-        console.log("toxicity loaded");
+        console.log("diseases loaded");
         props.onLoad();
       }
     }
@@ -177,43 +170,27 @@ function AssociatedDiseases(props) {
     }
   }, []);
 
-  function parseDiseaseData(response) {
-    var rows = [];
-
-    alert(JSON.stringify(response));
-
-    //grab the section heading to be displayed
-    const TOCHeading =
-      response.data.Record.Section[0].Section[0].Section[1].TOCHeading;
-    setHeader(TOCHeading);
-
-    const info =
-      response.data.Record.Section[0].Section[0].Section[1].Information;
-
-    rows = info
-      .map((t) => t.Value.StringWithMarkup[0].String)
-      .filter((t) => t.toUpperCase() !== "NOT LISTED");
-
-    return { rows };
-  }
-
   return (
     diseaseData !== null &&
-    header !== null &&
-    diseaseData.toxicity.length !== 0 && (
-      <div className="toxicity">
-        <a href={link}>
-          <h2>
-            {header}
-            <Link href={link} />
-          </h2>
-        </a>
-
-        <ul>
-          {diseaseData.toxicity.map((v, i) => {
-            return <li key={"toxicity-" + i}>{v}</li>;
-          })}
-        </ul>
+    diseaseData.length !== 0 && (
+      <div className="diseases" style={{ cursor: "pointer" }}>
+        <div
+          className={"triangle" + (expanded ? " active" : "")}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          <img
+            src={require("./../../src/assets/black-triangle.png")}
+            alt=""
+          ></img>
+          <h3 style={{ display: "inline-block", margin: "5px 0" }}>Diseases</h3>
+        </div>
+        {expanded && (
+          <ul>
+            {diseaseData.map((v, i) => {
+              return <li key={"disease-" + i}>{v}</li>;
+            })}
+          </ul>
+        )}
       </div>
     )
   );
@@ -376,10 +353,11 @@ function Content(props) {
               onLoad={increment}
             ></HazardStatements>
             <Toxicity cid={props.cid} onLoad={increment}></Toxicity>
-            <AssociatedDiseases
+            <Diseases
+              cid={props.cid}
               chemName={props.chemName}
               onLoad={increment}
-            ></AssociatedDiseases>
+            ></Diseases>
             {/* <div className="diseases">
               <div
                 dangerouslySetInnerHTML={{

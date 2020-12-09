@@ -201,10 +201,10 @@ def get_chemicals(request, facility_id):
 
 def get_diseases_for_chemical(request, chemical_name):
     payload = {'inputType': 'chem', 'inputTerms': chemical_name, 'report': 'diseases', 'format': 'json'}
-    response = requests.get("https://ctdbase.org/tools/batchQuery.go", params=payload)
-    print(type(response))
-    # print(sorted(response, key = lambda i: i['InferenceScore']))
-    return HttpResponse(response, content_type='application/json')
+    diseases = json.loads(requests.get("https://ctdbase.org/tools/batchQuery.go", params=payload).text)
+    response = [x['DiseaseName'] for x in diseases]
+    # response = [x['DiseaseName'] for x in diseases
+    return HttpResponse(json.dumps(list(set(response))), content_type='application/json')
 
 
 ''' '''
@@ -281,24 +281,24 @@ def all_state_total_releases(request):
         filters.add(Q(chemical__classification='PBT'), filters.connector)
 
     queryset = release.objects.filter(filters &
-                                      geo_filter(request) & Q(year=y)).values('facility__state').annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
-                                          'water')).annotate(land=Sum('land')).annotate(off_site=Sum('off_site')).annotate(on_site=Sum('on_site')).annotate(num_facilities=Count('facility__id')).order_by('facility__state')
+                                      geo_filter(request) & Q(year=y)).values('facility__state').annotate(total = Sum('total')).annotate(air = Sum('air')).annotate(water = Sum(
+                                          'water')).annotate(land = Sum('land')).annotate(off_site = Sum('off_site')).annotate(on_site = Sum('on_site')).annotate(num_facilities = Count('facility__id')).order_by('facility__state')
 
-    return JsonResponse(list(queryset), content_type='application/json', safe=False)
+    return JsonResponse(list(queryset), content_type = 'application/json', safe = False)
 
 
 ''' Returns releases for the counties of a state in a year.'''
 
 
 def all_county_total_releases(request):
-    y = int(request.GET.get('year', default=latest_year))
-    state = request.GET.get('state')
-    carcinogen = request.GET.get('carcinogen')
+    y=int(request.GET.get('year', default=latest_year))
+    state=request.GET.get('state')
+    carcinogen=request.GET.get('carcinogen')
 
-    pbt = request.GET.get('pbt')
-    chemical = request.GET.get('chemical')
+    pbt=request.GET.get('pbt')
+    chemical=request.GET.get('chemical')
 
-    filters = Q()
+    filters=Q()
 
     # filter by chemicals
     if chemical is not None and chemical != "all":
@@ -314,7 +314,7 @@ def all_county_total_releases(request):
     if state is not None:
         filters.add(Q(facility__state=state.upper()), filters.connector)
 
-    queryset = release.objects.filter(filters &
+    queryset=release.objects.filter(filters &
                                       geo_filter(request) & Q(year=y)).values('facility__county',
                                                                               'facility__state').annotate(
         total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum(
