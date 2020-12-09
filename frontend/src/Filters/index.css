@@ -1,4 +1,11 @@
+.control-header {
+  flex: 1;
+  text-align: center;
+  display: inline-block;
+}
+
 .control-container {
+  flex: 2;
   width: 100%;
   display: flex;
   justify-content: flex-start;
