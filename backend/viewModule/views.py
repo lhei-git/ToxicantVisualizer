@@ -334,24 +334,8 @@ def all_facility_releases(request):
     if state is None:
         return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
-    qs = release.objects.filter(geo_filter(request) & Q(year=y)).values(
-        'facility__name').annotate(
-        Sum('air'), Sum('water'), Sum('land'), Sum('off_site')).order_by('facility__name')
-    # print(qs.query)
-    return JsonResponse(list(qs), content_type='application/json', safe=False)
-
-
-''' Returns all facilities and respective total release (not by type / only total) amounts in queried location {Graph 14} '''
-
-
-def all_facility_total_releases(request):
-    state = request.GET.get('state')
-    if state is None:
-        return HttpResponseBadRequest()
-    y = int(request.GET.get('year', default=latest_year))
-    qs = release.objects.filter(geo_filter(request) & Q(year=y)).values(
-        'facility__name').annotate(Sum('total')).order_by('-total').order_by('facility__name')
-    # print(qs.query)
+    qs = release.objects.filter(geo_filter(request) & Q(year=y) & Q(total__gt=0)).values('facility__name').annotate(
+        total=Sum('total'), air=Sum('air'), water=Sum('water'), land=Sum('land'), off_site=Sum('off_site')).order_by('facility__name')
     return JsonResponse(list(qs), content_type='application/json', safe=False)
 
 
@@ -386,21 +370,22 @@ def top_parentco_releases(request):
                                       geo_filter(request) & Q(year=y)).values('facility__parent_co_name')
 
     if release_type == 'AIR':
-        queryset = queryset.annotate(total=Sum('air')).order_by('-total')
+        queryset = queryset.annotate(total=Sum('air'))
     elif release_type == 'WATER':
-        queryset = queryset.annotate(total=Sum('water')).order_by('-total')
+        queryset = queryset.annotate(total=Sum('water'))
     elif release_type == 'LAND':
-        queryset = queryset.annotate(total=Sum('land')).order_by('-total')
+        queryset = queryset.annotate(total=Sum('land'))
     elif release_type == 'ON_SITE':
         queryset = queryset.annotate(
-            total=Sum('on_site')).order_by('-total')
+            total=Sum('on_site'))
     elif release_type == 'OFF_SITE':
         queryset = queryset.annotate(
-            total=Sum('off_site')).order_by('-total')
+            total=Sum('off_site'))
     else:
         queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
-            land=Sum('land')).annotate(off_site=Sum('off_site')).order_by('-total')
-    return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
+            land=Sum('land')).annotate(off_site=Sum('off_site'))
+    response = list(queryset.filter(total__gt=0).order_by('-total')[:10])
+    return JsonResponse(response, content_type='application/json', safe=False)
 
 
 ''' Return top ten polluting facilities over time by: window'''
@@ -438,49 +423,49 @@ def top_facility_releases(request):
     if state is None:
         return HttpResponseBadRequest()
     carcinogen = request.GET.get('carcinogen')
-
     pbt = request.GET.get('pbt')
     chemical = request.GET.get('chemical')
-    all = int(request.GET.get('all', default=0))
+    all = request.GET.get('all')
     y = int(request.GET.get('year', default=latest_year))
     release_type = request.GET.get('release_type', default='all').upper()
-    if all == 1:
-        queryset = release.objects.filter(geo_filter(request) & Q(year=y)).values('facility__name').annotate(total=Sum('on_site')).annotate(land=Sum('land')).annotate(
-            air=Sum('air')).annotate(water=Sum('water')).annotate(vet_total_releases_offsite=Sum('off_site')).order_by('-total')
+    filters = Q()
+
+    # filter by chemicals
+    if chemical is not None and chemical != "all":
+        filters.add(Q(chemical__name__icontains=chemical),
+                    filters.connector)
+
+    # filter by carcinogens and PBTs
+    if carcinogen is not None and str(carcinogen).lower() == 'true':
+        filters.add(Q(chemical__carcinogen='YES'), filters.connector)
+    if pbt is not None and str(pbt).lower() == 'true':
+        filters.add(Q(chemical__classification='PBT'), filters.connector)
+
+    queryset = release.objects.filter(filters &
+                                      geo_filter(request) & Q(year=y)).values('facility__name')
+
+    if release_type == 'AIR':
+        queryset = queryset.annotate(total=Sum('air'))
+    elif release_type == 'WATER':
+        queryset = queryset.annotate(total=Sum('water'))
+    elif release_type == 'LAND':
+        queryset = queryset.annotate(total=Sum('land'))
+    elif release_type == 'ON_SITE':
+        queryset = queryset.annotate(
+            total=Sum('on_site'))
+    elif release_type == 'OFF_SITE':
+        queryset = queryset.annotate(
+            total=Sum('off_site'))
     else:
-        filters = Q()
+        queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
+            land=Sum('land')).annotate(off_site=Sum('off_site'))
 
-        # filter by chemicals
-        if chemical is not None and chemical != "all":
-            filters.add(Q(chemical__name__icontains=chemical),
-                        filters.connector)
-
-        # filter by carcinogens and PBTs
-        if carcinogen is not None and str(carcinogen).lower() == 'true':
-            filters.add(Q(chemical__carcinogen='YES'), filters.connector)
-        if pbt is not None and str(pbt).lower() == 'true':
-            filters.add(Q(chemical__classification='PBT'), filters.connector)
-
-        queryset = release.objects.filter(filters &
-                                          geo_filter(request) & Q(year=y)).values('facility__name')
-
-        if release_type == 'AIR':
-            queryset = queryset.annotate(total=Sum('air')).order_by('-total')
-        elif release_type == 'WATER':
-            queryset = queryset.annotate(total=Sum('water')).order_by('-total')
-        elif release_type == 'LAND':
-            queryset = queryset.annotate(total=Sum('land')).order_by('-total')
-        elif release_type == 'ON_SITE':
-            queryset = queryset.annotate(
-                total=Sum('on_site')).order_by('-total')
-        elif release_type == 'OFF_SITE':
-            queryset = queryset.annotate(
-                total=Sum('off_site')).order_by('-total')
-        else:
-            queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
-                land=Sum('land')).annotate(off_site=Sum('off_site')).order_by('-total')
-
-    return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
+    response = []
+    if all is not None and str(all).lower() == 'true':
+        response = list(queryset.filter(total__gt=0).order_by('facility__name'))
+    else:
+        response = list(queryset.filter(total__gt=0).order_by('-total')[:10])
+    return JsonResponse(response, content_type='application/json', safe=False)
 
 
 ''' Return top ten polluting facilities over time by: window'''
@@ -544,50 +529,53 @@ def top_chemicals(request):
     carcinogen = request.GET.get('carcinogen')
     pbt = request.GET.get('pbt')
     state = request.GET.get('state')
+    all = request.GET.get('all')
     if state is None:
         return HttpResponseBadRequest()
     y = int(request.GET.get('year', default=latest_year))
     release_type = request.GET.get('release_type', default='all').upper()
-    filters = Q()
+    filters = Q(total__gt=0)
 
     if pbt is not None and str(pbt).lower() == 'true':
         filters.add(Q(chemical__classification='PBT'), filters.connector)
 
     # filter by carcinogens, PBTs, or dioxins only
-    if carcinogen is not None:
+    if carcinogen is not None and str(carcinogen).lower() == 'true':
         filters.add(Q(chemical__carcinogen='YES'), filters.connector)
 
     queryset = release.objects.filter(filters & geo_filter(request) & Q(year=y)).values(
         'chemical__name')
 
     if release_type == 'AIR':
-        queryset = queryset.annotate(total=Sum('air')).order_by('-total')
+        queryset = queryset.annotate(total=Sum('air'))
     elif release_type == 'WATER':
-        queryset = queryset.annotate(total=Sum('water')).order_by('-total')
+        queryset = queryset.annotate(total=Sum('water'))
     elif release_type == 'LAND':
-        queryset = queryset.annotate(total=Sum('land')).order_by('-total')
+        queryset = queryset.annotate(total=Sum('land'))
     elif release_type == 'ON_SITE':
         queryset = queryset.annotate(
-            total=Sum('on_site')).order_by('-total')
+            total=Sum('on_site'))
     elif release_type == 'OFF_SITE':
         queryset = queryset.annotate(
-            total=Sum('off_site')).order_by('-total')
+            total=Sum('off_site'))
     else:
         queryset = queryset.annotate(total=Sum('total')).annotate(air=Sum('air')).annotate(water=Sum('water')).annotate(
-            land=Sum('land')).annotate(off_site=Sum('off_site')).order_by('-total')
-    return JsonResponse(list(queryset[:10]), content_type='application/json', safe=False)
+            land=Sum('land')).annotate(off_site=Sum('off_site'))
+
+    response = []
+    if all is not None and str(all).lower() == 'true':
+        response = list(queryset.filter(total__gt=0).order_by('chemical__name'))
+    else:
+        response = list(queryset.filter(total__gt=0).order_by('-total')[:10])
+    return JsonResponse(response, content_type='application/json', safe=False)
 
 
 def timeline_top_chemicals(request):
     state = request.GET.get('state')
-    pbt = request.GET.get('pbt')
-    filters = Q()
-    if pbt is not None and str(pbt).lower() == 'true':
-        filters.add(Q(chemical__classification='PBT'), filters.connector)
 
     if state is None:
         return HttpResponseBadRequest()
-    chemicals = list(release.objects.filter(filters & geo_filter(request) & filter_releases(request) & Q(year=latest_year)).values_list(
+    chemicals = list(release.objects.filter(geo_filter(request) & filter_releases(request) & Q(year=latest_year)).values_list(
         'chemical__id', flat=True).annotate(total=Sum('total')).order_by('-total'))[:10]
     response = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(chemical__id__in=chemicals)).values(
         'year', 'chemical__name').order_by('chemical__name', 'year').annotate(total=Sum('total'))
