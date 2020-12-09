@@ -1,6 +1,7 @@
 import "./index.css";
 import React, { useEffect, useState } from "react";
-import UserControlPanel from "../Filters";
+import Filters from "../Filters";
+import Title from "../Title";
 const vetapi = require("../api/vetapi");
 const { formatChemical, amountAsLabel, formatAmount } = require("../helpers");
 const {
@@ -338,6 +339,7 @@ async function GraphAllFacilities(props) {
       "facility__name",
       releaseType === "all"
     );
+    console.table(data);
     return (
       <div
         width="100%"
@@ -378,7 +380,7 @@ async function GraphAllFacilities(props) {
             <CustomTooltip></CustomTooltip>
             <Bar
               name="air"
-              dataKey="av"
+              dataKey={releaseType === "air" ? "total" : "av"}
               stackId="a"
               legendType={
                 ["air", "all"].includes(releaseType) ? "square" : "none"
@@ -387,7 +389,7 @@ async function GraphAllFacilities(props) {
             />
             <Bar
               name="water"
-              dataKey="bv"
+              dataKey={releaseType === "water" ? "total" : "bv"}
               stackId="a"
               legendType={
                 ["water", "all"].includes(releaseType) ? "square" : "none"
@@ -396,7 +398,7 @@ async function GraphAllFacilities(props) {
             />
             <Bar
               name="land"
-              dataKey="cv"
+              dataKey={releaseType === "land" ? "total" : "cv"}
               stackId="a"
               legendType={
                 ["land", "all"].includes(releaseType) ? "square" : "none"
@@ -405,12 +407,19 @@ async function GraphAllFacilities(props) {
             />
             <Bar
               name="off-site"
-              dataKey="dv"
+              dataKey={releaseType === "off_site" ? "total" : "dv"}
               stackId="a"
               legendType={
                 ["off_site", "all"].includes(releaseType) ? "square" : "none"
               }
               fill={barColors.offSite}
+            />
+            <Bar
+              name="on-site"
+              dataKey={releaseType === "on_site" ? "total" : "ev"}
+              stackId="a"
+              legendType={releaseType === "on_site" ? "square" : "none"}
+              fill={barColors.onSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -475,7 +484,7 @@ async function GraphAllChemicals(props) {
             <CustomTooltip></CustomTooltip>
             <Bar
               name="air"
-              dataKey="av"
+              dataKey={releaseType === "air" ? "total" : "av"}
               stackId="a"
               legendType={
                 ["air", "all"].includes(releaseType) ? "square" : "none"
@@ -484,7 +493,7 @@ async function GraphAllChemicals(props) {
             />
             <Bar
               name="water"
-              dataKey="bv"
+              dataKey={releaseType === "water" ? "total" : "bv"}
               stackId="a"
               legendType={
                 ["water", "all"].includes(releaseType) ? "square" : "none"
@@ -493,7 +502,7 @@ async function GraphAllChemicals(props) {
             />
             <Bar
               name="land"
-              dataKey="cv"
+              dataKey={releaseType === "land" ? "total" : "cv"}
               stackId="a"
               legendType={
                 ["land", "all"].includes(releaseType) ? "square" : "none"
@@ -502,12 +511,19 @@ async function GraphAllChemicals(props) {
             />
             <Bar
               name="off-site"
-              dataKey="dv"
+              dataKey={releaseType === "off_site" ? "total" : "dv"}
               stackId="a"
               legendType={
                 ["off_site", "all"].includes(releaseType) ? "square" : "none"
               }
               fill={barColors.offSite}
+            />
+            <Bar
+              name="on-site"
+              dataKey={releaseType === "on_site" ? "total" : "ev"}
+              stackId="a"
+              legendType={releaseType === "on_site" ? "square" : "none"}
+              fill={barColors.onSite}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -945,7 +961,6 @@ async function TimelineTopFacilities(props) {
       createParams(props, { year: null })
     );
     let data = processTimelineData(res.data, "facility__name");
-    console.table(data);
     const keys = timelineKeys(data);
     const lines = keys
       .filter((k) => k !== "year")
@@ -1221,40 +1236,6 @@ function GraphView(props) {
     setCurrentTab(i);
   }
 
-  function getLocationString(map) {
-    let str = map.city
-      ? map.city + ", "
-      : map.county
-      ? map.county + " County, "
-      : "";
-    str += map.state;
-    return str;
-  }
-
-  /* format release type for title */
-  function getReleaseTypeString(releaseType) {
-    return releaseType !== "all" ? releaseType.replace("_", " ") : "";
-  }
-
-  /* Create formatted Title Component title given filter information */
-  function Title(title, props, hasChemical, hideReleaseType) {
-    return (
-      <>
-        Total{" "}
-        {hideReleaseType
-          ? ""
-          : getReleaseTypeString(props.filters.releaseType) + " "}
-        releases for <span>{title}</span> in {getLocationString(props.map)} in{" "}
-        {props.filters.year}
-        {hasChemical
-          ? props.filters.chemical !== "all"
-            ? " - " + props.filters.chemical
-            : " - All chemicals"
-          : null}
-      </>
-    );
-  }
-
   return (
     <div className="graph-container">
       <div className="selector">
@@ -1275,18 +1256,18 @@ function GraphView(props) {
             onClick={() => chooseTab(2)}
             className={currentTab === 2 ? "active" : ""}
           >
-            Indexes
+            Appendix
           </li>
         </ul>
       </div>
       <div className="content">
         {/* <h1>Location Insights</h1> */}
         <div className="filter-container">
-          <UserControlPanel
+          <Filters
             map={props.map}
             filters={props.filters}
             onFilterChange={props.onFilterChange}
-          ></UserControlPanel>
+          ></Filters>
         </div>
         <div className="graphs">
           <div
@@ -1297,25 +1278,25 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenFacilities}
-              title={Title("top 10 facilities", props, true)}
+              title={Title("for top 10 facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenParents}
-              title={Title("top 10 parent companies", props, true)}
+              title={Title("for top 10 parent companies", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenChemicals}
-              title={Title("top 10 chemicals", props)}
+              title={Title("for top 10 chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenPBTs}
-              title={Title("top 10 PBT chemicals", props)}
+              title={Title("for top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
           <div
@@ -1326,41 +1307,32 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={TimelineTotal}
-              title={
-                <>
-                  Total {getReleaseTypeString(props.filters.releaseType) + " "}
-                  releases in {getLocationString(props.map)} in{" "}
-                  {props.filters.year}
-                  {props.filters.chemical !== "all"
-                    ? " - " + props.filters.chemical
-                    : " - All chemicals"}
-                </>
-              }
+              title={Title("", props, true, false)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopFacilities}
-              title={Title("top 10 facilities", props, true)}
+              title={Title("for top 10 facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title={Title("top 10 parent companies", props, true)}
+              title={Title("for top 10 parent companies", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopChemicals}
-              title={Title("top 10 chemicals", props)}
+              title={Title("for top 10 chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopPBTs}
-              title={Title("top 10 PBT chemicals", props)}
+              title={Title("for top 10 PBT chemicals", props)}
             ></GraphContainer>
           </div>
           <div
@@ -1371,25 +1343,35 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={GraphAllFacilities}
-              title={Title("all facilities", props, true)}
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={GraphAllChemicals}
-              title={Title("all chemicals", props)}
+              title={Title("for all facilities", props, true)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TableAllFacilities}
-              title={Title("all facilities by release type", props, true, true)}
+              title={Title(
+                "for all facilities by release type",
+                props,
+                true,
+                true
+              )}
+            ></GraphContainer>
+            <GraphContainer
+              map={props.map}
+              filters={props.filters}
+              graph={GraphAllChemicals}
+              title={Title("for all chemicals", props)}
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TableAllChemicals}
-              title={Title("all chemicals by release type", props, false, true)}
+              title={Title(
+                "for all chemicals by release type",
+                props,
+                false,
+                true
+              )}
             ></GraphContainer>
           </div>
         </div>
