@@ -75,7 +75,7 @@ class ThematicMapView extends Component {
   getParentheticalString(filters) {
     var strings = [];
 
-    if (filters.chemical != "all") strings.push(filters.chemical);
+    if (filters.chemical !== "all") strings.push(filters.chemical);
     if (filters.pbt === true) strings.push("PBTs");
     if (filters.carcinogen === true) strings.push("Carcinogens");
 
@@ -173,15 +173,16 @@ class ThematicMapView extends Component {
     const carcinogen = this.props.filters.carcinogen;
     const chemical = this.props.filters.chemical;
 
+    const params = {
+      year: filterYear,
+      pbt,
+      carcinogen,
+      chemical,
+    };
+
     //apply filters and run GET request
     vetapi
-      .get(
-        "/stats/county/all?year=" +
-          filterYear +
-          (pbt === true ? "&pbt" : "") +
-          (carcinogen === true ? "&carcinogen" : "") +
-          (chemical != "all " ? "&chemical=" + chemical : "")
-      )
+      .get("/stats/county/all", { params })
       .then((response) => {
         this.setState({ countyData: response.data });
       })
@@ -196,15 +197,16 @@ class ThematicMapView extends Component {
     const carcinogen = this.props.filters.carcinogen;
     const chemical = this.props.filters.chemical;
 
+    const params = {
+      year: filterYear,
+      pbt,
+      carcinogen,
+      chemical,
+    };
     //apply filters and run GET request
     vetapi
-      .get(
-        "/stats/state/all?year=" +
-          filterYear +
-          (pbt === true ? "&pbt" : "") +
-          (carcinogen === true ? "&carcinogen" : "") +
-          (chemical != "all " ? "&chemical=" + chemical : "")
-      )
+      .get("/stats/state/all", { params })
+
       .then((response) => {
         this.setState({ stateData: response.data });
       })

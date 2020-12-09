@@ -32,13 +32,19 @@ function UserControlPanel(props) {
     if (props.map) fetchChemicalList(props.map);
   }, [props.filters, props.map]);
 
-  /* Update app-level filters when component-level filters change. Propogates change to other filters */
+  /* Update app-level filters when component-level filters change. Propagates change to other filters */
   function onFilterChange(event) {
     const target = event.target;
     const filters = Object.assign({}, props.filters);
     const value = target.type === "checkbox" ? target.checked : target.value;
     if (target.name === "year") filters[target.name] = parseInt(value);
     else filters[target.name] = value;
+    if (["carcinogen", "pbt"].includes(target.name) && target.checked) {
+      filters["chemical"] = "all";
+    } else if (target.name === "chemical") {
+      filters["carcinogen"] = false;
+      filters["pbt"] = false;
+    }
     props.onFilterChange(filters);
   }
 
