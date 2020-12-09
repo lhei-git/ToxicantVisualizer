@@ -83,3 +83,15 @@ ul.section-content li {
   font-style: italic;
   margin: 10px;
 }
+
+.triangle img {
+  width: 10px;
+  margin-right: 10px;
+  position: relative;
+  top: -2px;
+  transform: rotate(-90deg);
+}
+
+.triangle.active img {
+  transform: none;
+}
