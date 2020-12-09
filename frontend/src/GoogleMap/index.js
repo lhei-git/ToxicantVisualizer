@@ -146,10 +146,12 @@ class MapContainer extends Component {
 
   resetMapView(map, bounds) {
     map.fitBounds(bounds);
-    const zoom = map.getZoom();
-    if (zoom) {
-      map.setZoom(zoom + 1);
-    }
+
+    /* optionally increase zoom on areas */
+    // const zoom = map.getZoom();
+    // if (zoom) {
+    //   map.setZoom(zoom + 1);
+    // }
   }
 
   /* move map window when location has changed. Once map is finished moving, facilities are populated  */
