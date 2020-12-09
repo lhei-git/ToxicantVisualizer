@@ -5,7 +5,7 @@ from viewModule.views import get_facilities, get_chemicals, state_total_releases
     location_summary, top_facility_releases, timeline_top_facility_releases, \
     timeline_top_pbt_chemicals, all_state_total_releases, \
     all_county_total_releases, all_chemicals_releases, all_facility_releases, all_chemicals_total_releases, \
-    all_facility_total_releases, get_chemicals_in_window, country_summary, health_check
+    get_chemicals_in_window, country_summary, health_check
 
 urlpatterns = [
     path('_health', health_check),
@@ -46,8 +46,6 @@ urlpatterns = [
     path('stats/facilities/total_release_types', all_facility_releases),
     # return all chemicals and respective total releases (by type) in queried location {Graph 13}
     path('stats/chemicals/total_release_types', all_chemicals_releases),
-    # return all facilities and respective total release amounts in queried location {Graph 14}
-    path('stats/facilities/total_releases', all_facility_total_releases),
     # return all chemicals and respective total release amounts in queried location {Graph 15}
     path('stats/chemicals/total_releases', all_chemicals_total_releases),
 ]

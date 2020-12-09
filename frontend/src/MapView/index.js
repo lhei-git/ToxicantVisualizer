@@ -67,8 +67,7 @@ const setCurrentChemical = (payload) => ({
 
 const getChemicals = async (facilityId, filters) => {
   const params = {
-    carcinogen: filters.carcinogens || null,
-    dioxin: filters.pbt || null,
+    carcinogen: filters.carcinogen || null,
     pbt: filters.pbt || null,
     release_type: filters.releaseType,
     chemical: filters.chemical,
