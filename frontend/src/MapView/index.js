@@ -6,7 +6,7 @@ import PubchemView from "../Pubchem";
 import FilterView from "../Filters";
 import MapLegend from "../MapLegend";
 import ThematicStateMap from "../ThematicStateMap/index.js";
-import { formatChemical, formatAmount, getLocationString } from "../helpers";
+import { formatChemical, formatAmount } from "../helpers";
 import vetapi from "../api/vetapi";
 import "./index.css";
 import React from "react";
@@ -200,7 +200,7 @@ function MapView(props) {
               filters={state.filters}
             ></GraphSummary>
           </div>
-          {state.map.stateShort !== "US" && (
+          {!["US", "DC"].includes(state.map.state) && (
             <div>
               <ThematicStateMap
                 filters={state.filters}
