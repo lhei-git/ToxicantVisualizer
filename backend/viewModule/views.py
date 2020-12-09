@@ -488,22 +488,17 @@ def top_facility_releases(request):
 
 def timeline_top_facility_releases(request):
     state = request.GET.get('state')
-    get_averages = bool(request.GET.get('averages'))
 
     if state is None:
         return HttpResponseBadRequest()
 
     release_list = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(
-        year=2018)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
+        year=latest_year)).values('facility__id').annotate(total=Sum('total')).order_by('-total')
     top_facilities = [x['facility__id'] for x in release_list][:10]
     lines = release.objects.filter(geo_filter(request) & filter_releases(request) & Q(facility__id__in=top_facilities)).values(
         'year', 'facility__name').order_by('facility__name', 'year').annotate(total=Sum('total'))
 
-    if(get_averages):
-        averages = facility.objects.filter(Q(id__in=top_facilities)).values(
-            'name').annotate(avg=Avg('release__total')).order_by('-avg')
-
-    return HttpResponse(json.dumps({'averages': list(averages) if get_averages else None, 'lines': list(lines)}, cls=DjangoJSONEncoder), content_type='application/json')
+    return HttpResponse(json.dumps(list(lines), cls=DjangoJSONEncoder), content_type='application/json')
 
 
 ''' Returns summary points for each state and year.'''

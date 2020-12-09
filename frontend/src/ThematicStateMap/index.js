@@ -4,6 +4,7 @@ import LoadingSpinner from "../LoadingSpinner";
 import vetapi from "../api/vetapi";
 import "./index.css";
 import data from "../data/stateLocationData.json";
+import Title from "../Title/index.js";
 const React = require("react");
 const Component = React.Component;
 const { shallowEqual } = require("../helpers");
@@ -109,12 +110,7 @@ class ThematicStateMap extends Component {
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
-          <div className="graph-header">
-            Total {this.getReleaseTypeString(this.props.filters.releaseType)}{" "}
-            Releases By County for {this.props.stateLongName}{" "}
-            {this.getParentheticalString(this.props.filters)} in{" "}
-            {this.props.filters.year}
-          </div>
+          <div className="graph-header">{Title("by county", this.props)}</div>
           {this.state.countyData ? (
             <>
               <ThematicMap
