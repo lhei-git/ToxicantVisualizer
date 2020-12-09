@@ -35,18 +35,15 @@ function Title(title, props, hasChemical, hideReleaseType, hideYear) {
 }
 
 const getSubHeader = (filters, hasChemical) => {
-  if (!hasChemical) {
-    return "";
-  } else if (filters.chemical !== "all") {
-    return filters.chemical;
-  } else if (filters.carcinogen && filters.pbt) {
+  if (filters.carcinogen && filters.pbt) {
     return "carcinogens and PBTs";
   } else if (filters.carcinogen) {
     return "carcinogens only";
   } else if (filters.pbt) {
     return "PBTs only";
   } else if (hasChemical) {
-    return "all chemicals";
+    if (filters.chemical !== "all") return filters.chemical;
+    else return "all chemicals";
   } else {
     return "";
   }
