@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Tri, Facility, Chemical, Release
-admin.site.register(Tri)
+from .models import Facility, Chemical, Release
 admin.site.register(Facility)
 admin.site.register(Chemical)
 admin.site.register(Release)
