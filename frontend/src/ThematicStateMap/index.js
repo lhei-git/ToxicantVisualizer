@@ -110,7 +110,13 @@ class ThematicStateMap extends Component {
     return (
       <div className="thematic-view-container">
         <div className="flex-item">
-          <div className="graph-header">{Title("by county", this.props)}</div>
+          <div className="graph-header">
+            <Title
+              text="by county"
+              filters={this.props.filters}
+              map={this.props.map}
+            ></Title>
+          </div>
           {this.state.countyData ? (
             <>
               <ThematicMap
@@ -146,16 +152,17 @@ class ThematicStateMap extends Component {
     const chemical = this.props.filters.chemical;
     const stateName = this.props.stateName;
 
+    const params = {
+      year: filterYear,
+      pbt,
+      carcinogen,
+      chemical,
+      state: stateName,
+    };
+
     //apply filters and run GET request
     vetapi
-      .get(
-        "/stats/county/all?year=" +
-          filterYear +
-          ("&state=" + stateName) +
-          (pbt === true ? "&pbt" : "") +
-          (carcinogen === true ? "&carcinogen" : "") +
-          (chemical != "all " ? "&chemical=" + chemical : "")
-      )
+      .get("/stats/county/all", { params })
       .then((response) => {
         this.setState({ countyData: response.data });
       })
