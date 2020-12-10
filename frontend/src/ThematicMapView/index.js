@@ -112,7 +112,11 @@ class ThematicMapView extends Component {
         <div className="thematic-view-container">
           <div className="flex-item">
             <div className="graph-header">
-              {Title("by state", this.props, true)}
+              <Title
+                text="by state"
+                map={this.props.map}
+                filters={this.props.filters}
+              ></Title>
             </div>
             {this.state.stateData ? (
               <>
@@ -135,7 +139,11 @@ class ThematicMapView extends Component {
 
           <div className="flex-item">
             <div className="graph-header">
-              {Title("by county", this.props, true)}
+              <Title
+                text="by county"
+                map={this.props.map}
+                filters={this.props.filters}
+              ></Title>
             </div>
             {this.state.countyData ? (
               <>
