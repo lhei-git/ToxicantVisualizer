@@ -41,25 +41,7 @@ class ThematicStateMap extends Component {
       (releaseType !== "all" ? releaseType.replace("_", " ") : "").slice(1)
     );
   }
-
-  //convert applied filters into parenthetical text
-  getParentheticalString(filters) {
-    var strings = [];
-
-    if (filters.chemical != "all") strings.push(filters.chemical);
-    if (filters.pbt === true) strings.push("PBTs");
-    if (filters.carcinogen === true) strings.push("Carcinogens");
-
-    if (strings.length === 0) return "";
-    if (strings.length === 1) return " (" + strings[0] + " Only)";
-    if (strings.length === 2)
-      return " (" + strings[0] + " & " + strings[1] + " Only)";
-    if (strings.length === 3)
-      return (
-        " (" + strings[0] + ", " + strings[1] + " & " + strings[2] + " Only)"
-      );
-  }
-
+  
   // refetches data if the year or release type filter changed
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.filters !== this.props.filters) {
