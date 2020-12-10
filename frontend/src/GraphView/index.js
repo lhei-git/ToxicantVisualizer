@@ -1324,25 +1324,51 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenFacilities}
-              title={Title("for top 10 facilities", props, true)}
+              title={
+                <Title
+                  text="for top 10 facilities"
+                  map={props.map}
+                  filters={props.filters}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenParents}
-              title={Title("for top 10 parent companies", props, true)}
+              title={
+                <Title
+                  text="for top 10 parent companies"
+                  map={props.map}
+                  filters={props.filters}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenChemicals}
-              title={Title("for top 10 chemicals", props)}
+              title={
+                <Title
+                  text="for top 10 chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenPBTs}
-              title={Title("for top 10 PBT chemicals", props)}
+              title={
+                <Title
+                  text="for top 10 PBT chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
           </div>
           <div
@@ -1353,44 +1379,69 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={TimelineTotal}
-              title={Title("", props, true, false, true)}
+              title={
+                <Title
+                  text=""
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopFacilities}
-              title={Title("for top 10 facilities", props, true, false, true)}
+              title={
+                <Title
+                  text="for top 10 facilities"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title={Title(
-                "for top 10 parent companies",
-                props,
-                true,
-                false,
-                true
-              )}
+              title={
+                <Title
+                  text="for top 10 parent companies"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopChemicals}
-              title={Title("for top 10 chemicals", props, false, false, true)}
+              title={
+                <Title
+                  text="for top 10 chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopPBTs}
-              title={Title(
-                "for top 10 PBT chemicals",
-                props,
-                false,
-                false,
-                true
-              )}
+              title={
+                <Title
+                  text="for top 10 PBT chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
           </div>
           <div
@@ -1401,35 +1452,53 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={GraphAllFacilities}
-              title={Title("for all facilities", props, true)}
+              title={
+                <Title
+                  text="for all facilities"
+                  map={props.map}
+                  filters={props.filters}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TableAllFacilities}
-              title={Title(
-                "for all facilities by release type",
-                props,
-                true,
-                true
-              )}
+              title={
+                <Title
+                  text="for all facilities by release type"
+                  map={props.map}
+                  filters={props.filters}
+                  showReleaseType={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphAllChemicals}
-              title={Title("for all chemicals", props)}
+              title={
+                <Title
+                  text="for all chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TableAllChemicals}
-              title={Title(
-                "for all chemicals by release type",
-                props,
-                false,
-                true
-              )}
+              title={
+                <Title
+                  text="for all chemicals by release type"
+                  map={props.map}
+                  filters={props.filters}
+                  showReleaseType={false}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
           </div>
         </div>

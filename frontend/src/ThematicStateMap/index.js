@@ -7,7 +7,6 @@ import data from "../data/stateLocationData.json";
 import Title from "../Title/index.js";
 const React = require("react");
 const Component = React.Component;
-const { shallowEqual } = require("../helpers");
 
 class ThematicStateMap extends Component {
   constructor(props) {
@@ -47,7 +46,7 @@ class ThematicStateMap extends Component {
   getParentheticalString(filters) {
     var strings = [];
 
-    if (filters.chemical != "all") strings.push(filters.chemical);
+    if (filters.chemical !== "all") strings.push(filters.chemical);
     if (filters.pbt === true) strings.push("PBTs");
     if (filters.carcinogen === true) strings.push("Carcinogens");
 
@@ -122,7 +121,7 @@ class ThematicStateMap extends Component {
               <ThematicMap
                 setTooltipContent={this.handleContentCountyState}
                 data={this.state.countyData}
-                filterYear={this.props.filters.year}
+                filterYear={filterYear}
                 filterType={filterType}
                 geoUrl={this.state.geoUrl}
                 mapType={"singleState"}
