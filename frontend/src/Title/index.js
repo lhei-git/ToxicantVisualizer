@@ -60,7 +60,7 @@ Title.propTypes = {
     state: PropTypes.string,
   }),
   filters: PropTypes.shape({
-    year: PropTypes.string,
+    year: PropTypes.number,
     releaseType: PropTypes.string,
     pbt: PropTypes.bool,
     carcinogen: PropTypes.bool,

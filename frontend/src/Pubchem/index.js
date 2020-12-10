@@ -46,7 +46,7 @@ function Pharmacology(props) {
     }
 
     if (props.cid) getPubchemData(props.cid);
-  }, []);
+  }, [onLoad, props.cid]);
 
   return pubchemData !== null ? (
     <div className="pharmacology">
@@ -91,7 +91,7 @@ function HazardStatements(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, []);
+  }, [onLoad, props.cid, pubchemData]);
 
   function parseGHSData(response) {
     const info =
@@ -168,7 +168,7 @@ function Toxicity(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, []);
+  }, [onLoad, props.cid, pubchemData]);
 
   function parseToxicityData(response) {
     //grab the section heading to be displayed

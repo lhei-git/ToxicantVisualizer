@@ -2,6 +2,7 @@ import "./index.css";
 import "../index.css";
 import vetapi from "../api/vetapi";
 const React = require("react");
+const { years } = require("../contants");
 const { formatChemical, getLocationString } = require("../helpers");
 
 //search button and text box
@@ -50,17 +51,15 @@ function Filters(props) {
 
   /* Create select dropdown of available years */
   function getYears() {
-    const startYear = 2005;
-    const endYear = 2019;
-    let years = [];
-    for (let i = endYear; i >= startYear; i--) {
-      years.push(
-        <option defaultValue={i === endYear} key={i} value={i}>
+    let yearOptions = [];
+    for (let i = years.end; i >= years.start; i--) {
+      yearOptions.push(
+        <option defaultValue={i === years.end} key={i} value={i}>
           {i}
         </option>
       );
     }
-    return years;
+    return yearOptions;
   }
 
   /* Create select dropdown of chemicals released */
