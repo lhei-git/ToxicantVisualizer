@@ -23,6 +23,6 @@ it("renders", () => {
     render(<MapLegend releaseType="air"></MapLegend>, container);
   });
   expect(container.textContent).toBe(
-    "Total releases (air, water, land and off-site)0 lbs 0 - 100 lbs 100 - 10,000 lbs 10,000 - 100,000 lbs 100,000 - 1,000,000 lbs >1,000,000 lbs"
+    "Total release amount (lbs)0 lbs 0 - 100 lbs 100 - 10,000 lbs 10,000 - 100,000 lbs 100,000 - 1,000,000 lbs >1,000,000 lbs"
   );
 });
