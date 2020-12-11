@@ -2,9 +2,12 @@ import "./index.css";
 import React, { useEffect, useState } from "react";
 import Filters from "../Filters";
 import Title from "../Title";
+import MapView from "../MapView";
+import PropTypes from "prop-types";
 const vetapi = require("../api/vetapi");
 const { amountAsLabel, formatAmount } = require("../helpers");
 const { years } = require("../contants");
+
 const {
   BarChart,
   CartesianGrid,
@@ -1143,5 +1146,42 @@ function GraphView(props) {
     </div>
   );
 }
+MapView.propTypes = {
+  filters: PropTypes.shape({
+    chemical: PropTypes.string.isRequired,
+    pbt: PropTypes.bool.isRequired,
+    carcinogen: PropTypes.bool.isRequired,
+    releaseType: PropTypes.oneOf([
+      "all",
+      "air",
+      "water",
+      "land",
+      "on_site",
+      "off_site",
+    ]).isRequired,
+    year: PropTypes.number.isRequired,
+  }),
+  map: PropTypes.shape({
+    city: PropTypes.string,
+    county: PropTypes.string,
+    state: PropTypes.string,
+    stateLong: PropTypes.string,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+    viewport: PropTypes.shape({
+      northeast: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+      southwest: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+    }),
+  }),
+  onFilterChange: PropTypes.func.isRequired,
+};
 
 export default GraphView;
