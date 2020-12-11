@@ -31,13 +31,17 @@ sqlparse==0.4.1
 
 In the directory containing the file (with installed dependencies in a virtualenv), you can run:
 
-### `python manange.py runserver` to start the development server with default settings
+### `python manange.py runserver` 
+to start the development server with default settings
 
-### `python manange.py inspectdb > filename.py` creates models (in a file) by introspecting an existing database
+### `python manange.py inspectdb > filename.py` 
+creates models (in a file) by introspecting an existing database
 
-### `python manange.py makemigrations` new set of migrations will be written out based on changes to models
+### `python manange.py makemigrations` 
+new set of migrations will be written out based on changes to models
 
-### `python manange.py migrate` applies the migrations made with the previous command
+### `python manange.py migrate` 
+applies the migrations made with the previous command
 
 NOTE: [Different databases](https://docs.djangoproject.com/en/3.1/topics/migrations/#backend-support) have different capabilities, check link to find more.
    
