@@ -342,9 +342,7 @@ const GraphContainer = ({ graph, map, filters, title }) => {
     /* Graph must have received data successfully to render */
     graph !== null && (
       <div className="graph">
-        <div className="graph-header">
-          <Title text={title} map={map} filters={filters}></Title>
-        </div>
+        <div className="graph-header">{title}</div>
         <div className="rechart">{data}</div>
       </div>
     )
@@ -983,25 +981,51 @@ function GraphView({ map, filters, onFilterChange }) {
                 map={map}
                 filters={filters}
                 graph={GraphTopTenFacilities}
-                title="for top 10 facilities"
+                title={
+                  <Title
+                    text={"for top 10 facilities"}
+                    map={map}
+                    filters={filters}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={GraphTopTenParents}
-                title="for top 10 parent companies"
+                title={
+                  <Title
+                    text={"for top 10 parent companies"}
+                    map={map}
+                    filters={filters}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={GraphTopTenChemicals}
-                title="for top 10 chemicals"
+                title={
+                  <Title
+                    text={"for top 10 chemicals"}
+                    map={map}
+                    filters={filters}
+                    showChemicalName={false}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={GraphTopTenPBTs}
-                title="for top 10 PBT chemicals"
+                title={
+                  <Title
+                    text={"for top 10 PBT chemicals"}
+                    map={map}
+                    filters={filters}
+                    showChemicalName={false}
+                  ></Title>
+                }
               ></GraphContainer>
             </div>
           )}
@@ -1014,32 +1038,69 @@ function GraphView({ map, filters, onFilterChange }) {
                 map={map}
                 filters={filters}
                 graph={TimelineTotal}
-                title=""
+                title={
+                  <Title
+                    text={""}
+                    map={map}
+                    filters={filters}
+                    showYear={false}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={TimelineTopFacilities}
-                title="for top 10 facilities"
+                title={
+                  <Title
+                    text={"for top 10 facilities"}
+                    map={map}
+                    filters={filters}
+                    showYear={false}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 name="timeline_parents"
                 graph={TimelineTopParents}
-                title="for top 10 parent companies"
+                title={
+                  <Title
+                    text={"for top 10 parent companies"}
+                    map={map}
+                    filters={filters}
+                    showYear={false}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={TimelineTopChemicals}
-                title="for top 10 chemicals"
+                title={
+                  <Title
+                    text={"for top 10 chemicals"}
+                    map={map}
+                    filters={filters}
+                    showYear={false}
+                    showChemicalName={false}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={TimelineTopPBTs}
-                title="for top 10 PBT chemicals"
+                title={
+                  <Title
+                    text={"for top 10 PBT chemicals"}
+                    map={map}
+                    filters={filters}
+                    showYear={false}
+                    showChemicalName={false}
+                  ></Title>
+                }
               ></GraphContainer>
             </div>
           )}
@@ -1052,25 +1113,53 @@ function GraphView({ map, filters, onFilterChange }) {
                 map={map}
                 filters={filters}
                 graph={GraphAllFacilities}
-                title="for all facilities"
+                title={
+                  <Title
+                    text={"for all facilities"}
+                    map={map}
+                    filters={filters}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={TableAllFacilities}
-                title="for all facilities by release type"
+                title={
+                  <Title
+                    text={"for all facilities by release type"}
+                    map={map}
+                    filters={filters}
+                    showReleaseType={false}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={GraphAllChemicals}
-                title="for all chemicals"
+                title={
+                  <Title
+                    text={"for all chemicals"}
+                    map={map}
+                    filters={filters}
+                    showChemicalName={false}
+                  ></Title>
+                }
               ></GraphContainer>
               <GraphContainer
                 map={map}
                 filters={filters}
                 graph={TableAllChemicals}
-                title="for all chemicals by release type"
+                title={
+                  <Title
+                    text={"for all chemicals by release type"}
+                    map={map}
+                    filters={filters}
+                    showReleaseType={false}
+                    showChemicalName={false}
+                  ></Title>
+                }
               ></GraphContainer>
             </div>
           )}
