@@ -6,7 +6,7 @@
 /* eslint-disable import/first */
 require("dotenv").config();
 import {
-  BrowserRouter as Router,
+  Router,
   Switch,
   Route,
   Link,
