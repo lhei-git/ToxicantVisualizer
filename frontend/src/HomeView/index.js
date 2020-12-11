@@ -1,5 +1,6 @@
 import "./index.css";
 import PlacesAutocomplete from "react-places-autocomplete";
+import PropTypes from "prop-types";
 const geocoder = require("../api/geocoder");
 const React = require("react");
 const vetapi = require("../api/vetapi");
@@ -160,5 +161,8 @@ function Home(props) {
     </div>
   );
 }
+Home.propTypes = {
+  onSuccess: PropTypes.func.isRequired,
+};
 
 export default Home;

@@ -28,7 +28,6 @@ class MapContainer extends Component {
       showingInfoWindow: false,
       isLoading: true,
       map: null,
-      chemicalList: [],
       hasMoved: false,
     };
 
@@ -44,8 +43,9 @@ class MapContainer extends Component {
   /* User hits re-center - Sidebar is cleared of any pubchem data and map restores to original searched center */
   onRefresh() {
     const newState = {};
-    const oldPoints = this.state.points;
-    newState.markers = this.createMarkers(oldPoints);
+    // const oldPoints = this.state.points;
+    // console.trace('oldPoints');
+    // newState.markers = this.createMarkers(oldPoints);
     if (this.map && this.state.latLngbounds) {
       this.resetMapView(this.map, this.state.latLngbounds);
     }
@@ -234,14 +234,9 @@ class MapContainer extends Component {
         },
       };
     });
-    this.setState(
-      {
-        isLoading: false,
-      },
-      () => {
-        this.props.onUpdate(markers.length);
-      }
-    );
+    this.setState({
+      isLoading: false,
+    });
     return markers;
   }
 
@@ -316,9 +311,5 @@ class MapContainer extends Component {
     );
   }
 }
-
-// export default GoogleApiWrapper((props) => ({
-//   apiKey: props.apiKey,
-// }))(MapContainer);
 
 export default MapContainer;
