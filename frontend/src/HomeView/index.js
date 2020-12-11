@@ -133,7 +133,6 @@ function Home(props) {
 
                         return (
                           <div
-                            key={"suggestion-" + i}
                             {...getSuggestionItemProps(suggestion, {
                               className,
                             })}
