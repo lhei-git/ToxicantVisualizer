@@ -1,3 +1,5 @@
+# Author: Evan de Jesus
+
 FROM node:14.6
 
 COPY package*.json /reactApp/

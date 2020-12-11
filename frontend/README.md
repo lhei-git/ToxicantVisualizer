@@ -1,13 +1,16 @@
 # VET Frontend
 
-## Development
+## Development (without docker)
 
 1. Create a .env variable with the following:
 ```sh
 REACT_APP_GOOGLE_API_KEY=<your key>
 REACT_APP_API_URL=http://localhost:8000
+REACT_APP_GEOCODE_URL=https://maps.googleapis.com/maps/api/geocode
+REACT_APP_API_KEY=Zm9vYmFy
 ```
 additional variables need to be prefixed with `REACT_APP_` to be usable in the app.
+NOTE: The `REACT_APP_API_KEY` is only used in production and api key authentication is disabled for development. This variable is only needed when setting up the remote environment.
 
 2. Install dependencies
 

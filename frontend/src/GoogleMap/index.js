@@ -56,9 +56,10 @@ class GoogleMap extends Component {
 
   /* Props to the map component have changed */
   componentDidUpdate(prevProps) {
-    const newState = {};
     const refiltered = !shallowEqual(prevProps.filters, this.props.filters);
     if (refiltered) {
+      const newState = {};
+
       // recenter map when filters change
       this.resetMapView(this.map, this.state.latLngbounds);
 
