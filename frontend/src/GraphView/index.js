@@ -2,8 +2,12 @@ import "./index.css";
 import React, { useEffect, useState } from "react";
 import Filters from "../Filters";
 import Title from "../Title";
+import MapView from "../MapView";
+import PropTypes from "prop-types";
 const vetapi = require("../api/vetapi");
-const { formatChemical, amountAsLabel, formatAmount } = require("../helpers");
+const { amountAsLabel, formatAmount } = require("../helpers");
+const { years } = require("../contants");
+
 const {
   BarChart,
   CartesianGrid,
@@ -16,22 +20,6 @@ const {
   Line,
   ResponsiveContainer,
 } = require("recharts");
-
-class CustomTooltip extends Tooltip {
-  static defaultProps = {
-    ...Tooltip.defaultProps,
-    contentStyle: {
-      color: "#FFF",
-      background: "rgba(0,0,0,0.8)",
-      border: "none",
-    },
-    itemStyle: { color: "#FFF" },
-    labelStyle: { fontSize: "24px", fontWeight: "bold" },
-    isAnimationActive: false,
-    formatter: (value) => formatAmount(value),
-    itemSorter: (a) => -a.value,
-  };
-}
 
 /* A bunch of random colors I found on some color generator */
 const timelineColors = [
@@ -69,6 +57,7 @@ const barChartMargins = {
 };
 
 function handleError(err) {
+  console.error(err);
   /* do something here */
 }
 
@@ -92,6 +81,55 @@ const createParams = (props, customParams) => {
   Object.assign(params, customParams);
   return { params };
 };
+
+const customYAxisTickFormatter = (val) => amountAsLabel(val) + " ";
+const customLegendFormatter = (value) =>
+  value.length > 35 ? value.slice(0, 35) + "..." : value;
+
+class CustomTooltip extends Tooltip {
+  static defaultProps = {
+    ...Tooltip.defaultProps,
+    contentStyle: {
+      color: "#FFF",
+      background: "rgba(0,0,0,0.8)",
+      border: "none",
+    },
+    itemStyle: { color: "#FFF" },
+    labelStyle: { fontSize: "24px", fontWeight: "bold" },
+    isAnimationActive: false,
+    formatter: (value) => formatAmount(value),
+    itemSorter: (a) => -a.value,
+  };
+}
+
+class CustomLine extends Line {
+  static defaultProps = {
+    ...Line.defaultProps,
+    type: "monotone",
+    strokeWidth: 3,
+    dot: false,
+    activeDot: { r: 8 },
+  };
+}
+
+class CustomTimelineLegend extends Legend {
+  static defaultProps = {
+    ...Legend.defaultProps,
+    width: 120,
+    height: 140,
+    layout: "vertical",
+    verticalAlign: "middle",
+    align: "right",
+    wrapperStyle: {
+      whiteSpace: "nowrap",
+      top: 0,
+      right: 0,
+      lineHeight: "24px",
+    },
+    formatter: customLegendFormatter,
+  };
+}
+
 /* Add css styling to base X-Axis React Component */
 const CustomXAxisTick = (props) => {
   const { x, y, payload } = props;
@@ -128,9 +166,100 @@ const CustomYAxisTick = (props) => {
   );
 };
 
-const customYAxisTickFormatter = (val) => amountAsLabel(val) + " ";
-const customLegendFormatter = (value) =>
-  value.length > 35 ? value.slice(0, 35) + "..." : value;
+class CustomXAxis extends XAxis {
+  static defaultProps = {
+    ...XAxis.defaultProps,
+    dataKey: "name",
+    type: "category",
+    interval: 0,
+    tick: CustomXAxisTick,
+  };
+}
+
+class CustomYAxis extends YAxis {
+  static defaultProps = {
+    ...YAxis.defaultProps,
+    type: "number",
+    unit: "lbs",
+    width: 100,
+    tickFormatter: customYAxisTickFormatter,
+  };
+}
+
+const generateLines = (data) => {
+  const timelineKeys = (data) => {
+    const correctIndex = [...data].sort(
+      (a, b) => Object.keys(b).length - Object.keys(a).length
+    )[0];
+    return Object.keys(correctIndex);
+  };
+
+  if (data.length === 0) {
+    return <></>;
+  }
+
+  const keys = timelineKeys(data);
+  const lines = keys
+    .filter((k) => k !== "year")
+    .map((k, i) => (
+      <CustomLine key={k} dataKey={k} stroke={timelineColors[i]}></CustomLine>
+    ));
+  return lines;
+};
+
+const generateBars = (currentReleaseType) => {
+  const bars = [
+    <Bar
+      name="air"
+      key="air"
+      dataKey={currentReleaseType === "air" ? "total" : "av"}
+      stackId="a"
+      legendType={
+        ["air", "all"].includes(currentReleaseType) ? "circle" : "none"
+      }
+      fill={barColors.air}
+    />,
+    <Bar
+      name="water"
+      key="water"
+      dataKey={currentReleaseType === "water" ? "total" : "bv"}
+      stackId="a"
+      legendType={
+        ["water", "all"].includes(currentReleaseType) ? "circle" : "none"
+      }
+      fill={barColors.water}
+    />,
+    <Bar
+      name="land"
+      key="land"
+      dataKey={currentReleaseType === "land" ? "total" : "cv"}
+      stackId="a"
+      legendType={
+        ["land", "all"].includes(currentReleaseType) ? "circle" : "none"
+      }
+      fill={barColors.land}
+    />,
+    <Bar
+      name="off-site"
+      key="off-site"
+      dataKey={currentReleaseType === "off_site" ? "total" : "dv"}
+      stackId="a"
+      legendType={
+        ["off_site", "all"].includes(currentReleaseType) ? "circle" : "none"
+      }
+      fill={barColors.offSite}
+    />,
+    <Bar
+      name="on-site"
+      key="on-site"
+      dataKey={currentReleaseType === "on_site" ? "total" : "ev"}
+      stackId="a"
+      legendType={currentReleaseType === "on_site" ? "circle" : "none"}
+      fill={barColors.onSite}
+    />,
+  ];
+  return bars;
+};
 
 /* Wrapper component around graphs. This is done to remove some of the boilerplate with handling the async fetch to the vet api.  */
 const GraphContainer = (props) => {
@@ -185,13 +314,13 @@ const GraphContainer = (props) => {
 
 */
 
-const compareIndividualTypes = (a, b) => {
-  const aSum = a.av + a.bv + a.cv + a.dv;
-  const bSum = b.av + b.bv + b.cv + b.dv;
-  return bSum - aSum;
-};
-
 const processBarGraphData = (data, nameAttribute, isStacked) => {
+  const compareIndividualTypes = (a, b) => {
+    const aSum = a.av + a.bv + a.cv + a.dv;
+    const bSum = b.av + b.bv + b.cv + b.dv;
+    return bSum - aSum;
+  };
+
   let formatted = data.map((d) => {
     const f = d;
     return {
@@ -216,20 +345,26 @@ const processBarGraphData = (data, nameAttribute, isStacked) => {
   return formatted;
 };
 
-/* oh boy */
-const processTimelineData = (data, nameAttribute) => {
+const fillTimeline = (data, nameAttribute) => {
+  const newData = data;
   const names = new Set(data.map((d) => d[nameAttribute]));
-  for (let year = 2005; year <= 2019; year++) {
-    for (var name of names) {
-      if (!data.find((d) => d.year === year && d[nameAttribute] === name)) {
-        data.push({
+  for (let year = years.start; year <= years.end; year++) {
+    names.forEach((name) => {
+      if (!newData.find((d) => d.year === year && d[nameAttribute] === name)) {
+        newData.push({
           year,
           [nameAttribute]: name,
           total: 0,
         });
       }
-    }
+    });
   }
+  return newData;
+};
+
+/* oh boy */
+const processTimelineData = (data, nameAttribute) => {
+  data = fillTimeline(data, nameAttribute);
   const output = data
     .reduce((acc, cur) => {
       const existing = acc.find((e) => e.year === cur.year);
@@ -244,13 +379,6 @@ const processTimelineData = (data, nameAttribute) => {
     }, [])
     .sort(compare);
   return output;
-};
-
-const timelineKeys = (data) => {
-  const correctIndex = [...data].sort(
-    (a, b) => Object.keys(b).length - Object.keys(a).length
-  )[0];
-  return Object.keys(correctIndex);
 };
 
 /* Top ten releasing facilities bar graph */
@@ -271,63 +399,11 @@ async function GraphTopTenFacilities(props) {
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
           <BarChart data={data} margin={barChartMargins}>
             <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="name"
-              type="category"
-              interval={0}
-              tick={<CustomXAxisTick />}
-            />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
+            <CustomXAxis></CustomXAxis>
+            <CustomYAxis></CustomYAxis>
             <CustomTooltip></CustomTooltip>
             <Legend iconType="circle" align="right" verticalAlign="top" />
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />{" "}
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
-            />
-            <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={releaseType === "on_site" ? "square" : "none"}
-              fill={barColors.onSite}
-            />
+            {generateBars(releaseType)}
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -389,49 +465,7 @@ async function GraphAllFacilities(props) {
               tick={<CustomYAxisTick />}
             />
             <CustomTooltip></CustomTooltip>
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
-            />
-            <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={releaseType === "on_site" ? "square" : "none"}
-              fill={barColors.onSite}
-            />
+            {generateBars(releaseType)}
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -493,49 +527,7 @@ async function GraphAllChemicals(props) {
               tick={<CustomYAxisTick />}
             />
             <CustomTooltip></CustomTooltip>
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
-            />
-            <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={releaseType === "on_site" ? "square" : "none"}
-              fill={barColors.onSite}
-            />
+            {generateBars(releaseType)}
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -547,52 +539,61 @@ async function GraphAllChemicals(props) {
   }
 }
 
+const generateTable = (data, nameAttribute) => {
+  return (
+    <table className="dynamic-table">
+      <thead>
+        <tr>
+          <th className="sticky-header">Facility Name</th>
+          <th className="sticky-header">Land</th>
+          <th className="sticky-header">Air</th>
+          <th className="sticky-header">Water</th>
+          <th className="sticky-header">Off-Site</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map(function (d, i) {
+          if (i % 2 !== 0) {
+            return (
+              <tr key={d + "-" + i}>
+                <td className="odd-overflow-column">{d[nameAttribute]}</td>
+                <td className="odd-row">{d.land}</td>
+                <td className="odd-row">{d.air}</td>
+                <td className="odd-row">{d.water}</td>
+                <td className="odd-row">{d.off_site}</td>
+              </tr>
+            );
+          } else
+            return (
+              <tr key={d + "-" + i}>
+                <td className="even-overflow-column">{d[nameAttribute]}</td>
+                <td className="even-row">{d.land}</td>
+                <td className="even-row">{d.air}</td>
+                <td className="even-row">{d.water}</td>
+                <td className="even-row">{d.off_site}</td>
+              </tr>
+            );
+        })}
+      </tbody>
+    </table>
+  );
+};
+
 //Chart 12 - Table of all facilities and total releases
 async function TableAllFacilities(props) {
   try {
     const params = createParams(props, { all: true, release_type: null });
-    const res = await vetapi.get(`/stats/location/facility_releases`, params);
+    const { data } = await vetapi.get(
+      `/stats/location/facility_releases`,
+      params
+    );
     return (
       <div
         width="100%"
         height="50vh"
         style={{ overflowY: "auto", maxHeight: "50vh" }}
       >
-        <table className="dynamic-table">
-          <thead>
-            <tr>
-              <th className="sticky-header">Facility Name</th>
-              <th className="sticky-header">Land</th>
-              <th className="sticky-header">Air</th>
-              <th className="sticky-header">Water</th>
-              <th className="sticky-header">Off-Site</th>
-            </tr>
-          </thead>
-          <tbody>
-            {res.data.map(function (d, i) {
-              if (i % 2 !== 0) {
-                return (
-                  <tr key={d + "-" + i}>
-                    <td className="odd-overflow-column">{d.facility__name}</td>
-                    <td className="odd-row">{d.land}</td>
-                    <td className="odd-row">{d.air}</td>
-                    <td className="odd-row">{d.water}</td>
-                    <td className="odd-row">{d.off_site}</td>
-                  </tr>
-                );
-              } else
-                return (
-                  <tr key={d + "-" + i}>
-                    <td className="even-overflow-column">{d.facility__name}</td>
-                    <td className="even-row">{d.land}</td>
-                    <td className="even-row">{d.air}</td>
-                    <td className="even-row">{d.water}</td>
-                    <td className="even-row">{d.off_site}</td>
-                  </tr>
-                );
-            })}
-          </tbody>
-        </table>
+        {generateTable(data, "facility__name")}
       </div>
     );
   } catch (err) {
@@ -605,48 +606,14 @@ async function TableAllFacilities(props) {
 async function TableAllChemicals(props) {
   try {
     const params = createParams(props, { all: true, release_type: null });
-    const res = await vetapi.get(`/stats/location/top_chemicals`, params);
+    const { data } = await vetapi.get(`/stats/location/top_chemicals`, params);
     return (
       <div
         width="100%"
         height="50vh"
         style={{ overflowY: "auto", maxHeight: "50vh" }}
       >
-        <table className="dynamic-table">
-          <thead>
-            <tr>
-              <th className="sticky-header">Chemical Name</th>
-              <th className="sticky-header">Land</th>
-              <th className="sticky-header">Air</th>
-              <th className="sticky-header">Water</th>
-              <th className="sticky-header">Off-Site</th>
-            </tr>
-          </thead>
-          <tbody>
-            {res.data.map(function (d, i) {
-              if (i % 2 !== 0) {
-                return (
-                  <tr key={d + "-" + i}>
-                    <td className="odd-overflow-column">{d.chemical__name}</td>
-                    <td className="odd-row">{d.land}</td>
-                    <td className="odd-row">{d.air}</td>
-                    <td className="odd-row">{d.water}</td>
-                    <td className="odd-row">{d.off_site}</td>
-                  </tr>
-                );
-              } else
-                return (
-                  <tr key={d + "-" + i}>
-                    <td className="even-overflow-column">{d.chemical__name}</td>
-                    <td className="even-row">{d.land}</td>
-                    <td className="even-row">{d.air}</td>
-                    <td className="even-row">{d.water}</td>
-                    <td className="even-row">{d.off_site}</td>
-                  </tr>
-                );
-            })}
-          </tbody>
-        </table>
+        {generateTable(data, "chemical__name")}
       </div>
     );
   } catch (err) {
@@ -679,58 +646,12 @@ async function GraphTopTenParents(props) {
               interval={0}
               tick={<CustomXAxisTick />}
             />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
+            <CustomYAxis></CustomYAxis>
+
             <CustomTooltip></CustomTooltip>
 
             <Legend iconType="circle" align="right" verticalAlign="top" />
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
-            />
-            <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={releaseType === "on_site" ? "square" : "none"}
-              fill={barColors.onSite}
-            />
+            {generateBars(releaseType)}
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -766,58 +687,10 @@ async function GraphTopTenChemicals(props) {
               interval={0}
               tick={<CustomXAxisTick />}
             />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
+            <CustomYAxis></CustomYAxis>
             <CustomTooltip></CustomTooltip>
-
             <Legend iconType="circle" align="right" verticalAlign="top" />
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
-            />
-            <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={releaseType === "on_site" ? "square" : "none"}
-              fill={barColors.onSite}
-            />
+            {generateBars(releaseType)}
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -843,7 +716,6 @@ async function GraphTopTenPBTs(props) {
       "chemical__name",
       releaseType === "all"
     );
-    console.log("data :>> ", data);
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
@@ -855,58 +727,12 @@ async function GraphTopTenPBTs(props) {
               interval={0}
               tick={<CustomXAxisTick />}
             />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
+            <CustomYAxis></CustomYAxis>
+
             <CustomTooltip></CustomTooltip>
 
             <Legend iconType="circle" align="right" verticalAlign="top" />
-            <Bar
-              name="air"
-              dataKey={releaseType === "air" ? "total" : "av"}
-              stackId="a"
-              legendType={
-                ["air", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.air}
-            />
-            <Bar
-              name="water"
-              dataKey={releaseType === "water" ? "total" : "bv"}
-              stackId="a"
-              legendType={
-                ["water", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.water}
-            />
-            <Bar
-              name="land"
-              dataKey={releaseType === "land" ? "total" : "cv"}
-              stackId="a"
-              legendType={
-                ["land", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.land}
-            />
-            <Bar
-              name="off-site"
-              dataKey={releaseType === "off_site" ? "total" : "dv"}
-              stackId="a"
-              legendType={
-                ["off_site", "all"].includes(releaseType) ? "square" : "none"
-              }
-              fill={barColors.offSite}
-            />
-            <Bar
-              name="on-site"
-              dataKey={releaseType === "on_site" ? "total" : "ev"}
-              stackId="a"
-              legendType={releaseType === "on_site" ? "square" : "none"}
-              fill={barColors.onSite}
-            />
+            {generateBars(releaseType)}
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -926,7 +752,7 @@ async function TimelineTotal(props) {
     );
     const data = res.data;
     /* Fill total timeline with zeros, only needed if filtering by chemical and there is missing release data for one or more years */
-    for (let i = 2005; i <= 2019; i++) {
+    for (let i = years.start; i <= years.end; i++) {
       if (!data.find((d) => d.year === i)) {
         data.push({
           year: i,
@@ -941,23 +767,14 @@ async function TimelineTotal(props) {
           <LineChart data={data} margin={{ right: 150 }}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
-            <CustomTooltip></CustomTooltip>
+            <CustomYAxis></CustomYAxis>
 
-            <Line
-              type="monotone"
+            <CustomTooltip></CustomTooltip>
+            <CustomLine
               name="total (lbs)"
               dataKey="total"
               stroke="#9c27b0"
-              strokeWidth={3}
-              dot={false}
-              activeDot={{ r: 8 }}
-            ></Line>
+            ></CustomLine>
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -977,48 +794,16 @@ async function TimelineTopFacilities(props) {
       createParams(props, { year: null })
     );
     let data = processTimelineData(res.data, "facility__name");
-    const keys = timelineKeys(data);
-    const lines = keys
-      .filter((k) => k !== "year")
-      .map((k, i) => (
-        <Line
-          type="monotone"
-          key={k}
-          dataKey={k}
-          stroke={timelineColors[i] || "#8884d8"}
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 8 }}
-        ></Line>
-      ));
+    const lines = generateLines(data);
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
+            <CustomYAxis></CustomYAxis>
             <CustomTooltip></CustomTooltip>
-
-            <Legend
-              width={120}
-              height={140}
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              wrapperStyle={{
-                whiteSpace: "nowrap",
-                top: 0,
-                right: 0,
-                lineHeight: "24px",
-              }}
-              formatter={customLegendFormatter}
-            />
+            <CustomTimelineLegend></CustomTimelineLegend>
             {lines}
           </LineChart>
         </ResponsiveContainer>
@@ -1039,48 +824,19 @@ async function TimelineTopParents(props) {
     );
 
     let data = processTimelineData(res.data, "facility__parent_co_name");
-    const keys = timelineKeys(data);
-    const lines = keys
-      .filter((k) => k !== "year")
-      .map((k, i) => (
-        <Line
-          type="monotone"
-          key={k}
-          dataKey={k}
-          stroke={timelineColors[i] || "#8884d8"}
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 8 }}
-        ></Line>
-      ));
+    const lines = generateLines(data);
+
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
-            <CustomTooltip></CustomTooltip>
+            <CustomYAxis></CustomYAxis>
 
-            <Legend
-              width={120}
-              height={140}
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              wrapperStyle={{
-                whiteSpace: "nowrap",
-                top: 0,
-                right: 0,
-                lineHeight: "24px",
-              }}
-              formatter={customLegendFormatter}
-            />
+            <CustomTooltip></CustomTooltip>
+            <CustomTimelineLegend></CustomTimelineLegend>
+
             {lines}
           </LineChart>
         </ResponsiveContainer>
@@ -1099,77 +855,20 @@ async function TimelineTopChemicals(props) {
       `/stats/location/timeline/top_chemicals`,
       createParams(props, { chemical: null, year: null })
     );
-    let data = res.data;
-    const names = new Set(res.data.map((d) => d["chemical__name"]));
-    for (let year = 2005; year <= 2019; year++) {
-      for (var name of names) {
-        if (
-          !data.find((d) => d.year === year && d["chemical__name"] === name)
-        ) {
-          data.push({
-            year,
-            chemical__name: name,
-            total: 0,
-          });
-        }
-      }
-    }
-    data = data
-      .reduce((acc, cur) => {
-        const existing = acc.find((e) => e.year === cur.year);
-        const formatted = formatChemical(cur["chemical__name"]).toUpperCase();
-        if (existing) {
-          existing[formatted] = cur.total;
-        } else {
-          const newLine = { year: cur.year, [formatted]: cur.total };
-          acc.push(newLine);
-        }
-        return acc;
-      }, [])
-      .sort(compare);
+    let data = processTimelineData(res.data, "chemical__name");
+    const lines = generateLines(data);
 
-    const keys = timelineKeys(data);
-    const lines = keys
-      .filter((k) => k !== "year")
-      .map((k, i) => (
-        <Line
-          type="monotone"
-          key={k}
-          dataKey={k}
-          stroke={timelineColors[i] || "#d9d9d9"}
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 8 }}
-        ></Line>
-      ));
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
-            <CustomTooltip></CustomTooltip>
+            <CustomYAxis></CustomYAxis>
 
-            <Legend
-              width={120}
-              height={140}
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              wrapperStyle={{
-                whiteSpace: "nowrap",
-                top: 0,
-                right: 0,
-                lineHeight: "24px",
-              }}
-              formatter={customLegendFormatter}
-            />
+            <CustomTooltip></CustomTooltip>
+            <CustomTimelineLegend></CustomTimelineLegend>
+
             {lines}
           </LineChart>
         </ResponsiveContainer>
@@ -1187,77 +886,18 @@ async function TimelineTopPBTs(props) {
       `/stats/location/timeline/top_chemicals`,
       createParams(props, { chemical: null, year: null, pbt: true })
     );
-    let data = res.data;
-    const names = new Set(res.data.map((d) => d["chemical__name"]));
-    for (let year = 2005; year <= 2019; year++) {
-      for (var name of names) {
-        if (
-          !data.find((d) => d.year === year && d["chemical__name"] === name)
-        ) {
-          data.push({
-            year,
-            chemical__name: name,
-            total: 0,
-          });
-        }
-      }
-    }
-    data = data
-      .reduce((acc, cur) => {
-        const existing = acc.find((e) => e.year === cur.year);
-        const formatted = formatChemical(cur["chemical__name"]).toUpperCase();
-        if (existing) {
-          existing[formatted] = cur.total;
-        } else {
-          const newLine = { year: cur.year, [formatted]: cur.total };
-          acc.push(newLine);
-        }
-        return acc;
-      }, [])
-      .sort(compare);
+    let data = processTimelineData(res.data, "chemical__name");
+    const lines = generateLines(data);
 
-    const keys = timelineKeys(data);
-    const lines = keys
-      .filter((k) => k !== "year")
-      .map((k, i) => (
-        <Line
-          type="monotone"
-          key={k}
-          dataKey={k}
-          stroke={timelineColors[i] || "#d9d9d9"}
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 8 }}
-        ></Line>
-      ));
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
           <LineChart data={data}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis
-              type="number"
-              unit="lbs"
-              width={100}
-              tickFormatter={customYAxisTickFormatter}
-            />
+            <CustomYAxis></CustomYAxis>
             <CustomTooltip></CustomTooltip>
-
-            <Legend
-              width={120}
-              height={140}
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              wrapperStyle={{
-                whiteSpace: "nowrap",
-                top: 0,
-                right: 0,
-                lineHeight: "24px",
-              }}
-              formatter={customLegendFormatter}
-            />
+            <CustomTimelineLegend></CustomTimelineLegend>
             {lines}
           </LineChart>
         </ResponsiveContainer>
@@ -1324,25 +964,51 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenFacilities}
-              title={Title("for top 10 facilities", props, true)}
+              title={
+                <Title
+                  text="for top 10 facilities"
+                  map={props.map}
+                  filters={props.filters}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenParents}
-              title={Title("for top 10 parent companies", props, true)}
+              title={
+                <Title
+                  text="for top 10 parent companies"
+                  map={props.map}
+                  filters={props.filters}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenChemicals}
-              title={Title("for top 10 chemicals", props)}
+              title={
+                <Title
+                  text="for top 10 chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphTopTenPBTs}
-              title={Title("for top 10 PBT chemicals", props)}
+              title={
+                <Title
+                  text="for top 10 PBT chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
           </div>
           <div
@@ -1353,44 +1019,69 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={TimelineTotal}
-              title={Title("", props, true, false, true)}
+              title={
+                <Title
+                  text=""
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopFacilities}
-              title={Title("for top 10 facilities", props, true, false, true)}
+              title={
+                <Title
+                  text="for top 10 facilities"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               name="timeline_parents"
               graph={TimelineTopParents}
-              title={Title(
-                "for top 10 parent companies",
-                props,
-                true,
-                false,
-                true
-              )}
+              title={
+                <Title
+                  text="for top 10 parent companies"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopChemicals}
-              title={Title("for top 10 chemicals", props, false, false, true)}
+              title={
+                <Title
+                  text="for top 10 chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TimelineTopPBTs}
-              title={Title(
-                "for top 10 PBT chemicals",
-                props,
-                false,
-                false,
-                true
-              )}
+              title={
+                <Title
+                  text="for top 10 PBT chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showYear={false}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
           </div>
           <div
@@ -1401,35 +1092,53 @@ function GraphView(props) {
               map={props.map}
               filters={props.filters}
               graph={GraphAllFacilities}
-              title={Title("for all facilities", props, true)}
+              title={
+                <Title
+                  text="for all facilities"
+                  map={props.map}
+                  filters={props.filters}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TableAllFacilities}
-              title={Title(
-                "for all facilities by release type",
-                props,
-                true,
-                true
-              )}
+              title={
+                <Title
+                  text="for all facilities by release type"
+                  map={props.map}
+                  filters={props.filters}
+                  showReleaseType={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={GraphAllChemicals}
-              title={Title("for all chemicals", props)}
+              title={
+                <Title
+                  text="for all chemicals"
+                  map={props.map}
+                  filters={props.filters}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
             <GraphContainer
               map={props.map}
               filters={props.filters}
               graph={TableAllChemicals}
-              title={Title(
-                "for all chemicals by release type",
-                props,
-                false,
-                true
-              )}
+              title={
+                <Title
+                  text="for all chemicals by release type"
+                  map={props.map}
+                  filters={props.filters}
+                  showReleaseType={false}
+                  showChemicalName={false}
+                ></Title>
+              }
             ></GraphContainer>
           </div>
         </div>
@@ -1437,5 +1146,42 @@ function GraphView(props) {
     </div>
   );
 }
+MapView.propTypes = {
+  filters: PropTypes.shape({
+    chemical: PropTypes.string.isRequired,
+    pbt: PropTypes.bool.isRequired,
+    carcinogen: PropTypes.bool.isRequired,
+    releaseType: PropTypes.oneOf([
+      "all",
+      "air",
+      "water",
+      "land",
+      "on_site",
+      "off_site",
+    ]).isRequired,
+    year: PropTypes.number.isRequired,
+  }),
+  map: PropTypes.shape({
+    city: PropTypes.string,
+    county: PropTypes.string,
+    state: PropTypes.string,
+    stateLong: PropTypes.string,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+    viewport: PropTypes.shape({
+      northeast: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+      southwest: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+    }),
+  }),
+  onFilterChange: PropTypes.func.isRequired,
+};
 
 export default GraphView;
