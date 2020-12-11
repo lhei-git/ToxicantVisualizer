@@ -623,4 +623,7 @@ def timeline_top_pbt_chemicals(request):
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
 
 
-# - https://docs.djangoproject.com/en/3.1/ref/models/querysets/#field-lookups
+''' Root page for backend'''
+
+def homepoint(request):
+    return HttpResponse('API HOME')
