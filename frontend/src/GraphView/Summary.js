@@ -2,30 +2,30 @@ import React from "react";
 import "./index.css";
 import { useEffect } from "react";
 import { formatAmount, getLocationString } from "../helpers";
+import PropTypes from "prop-types";
 const vetapi = require("../api/vetapi");
-const unitedStates = require("./unitedStates");
+const unitedStates = require("../data/unitedStates");
 
-function GraphSummary(props) {
+/* Summary graph showing basic information about current location and entire United States */
+function GraphSummary({ map, filters }) {
   const [body, setBody] = React.useState(null);
+  let year = filters.year;
 
-  let graphProp = props.graph;
-  let mapProp = props.map;
-  let yearProp = props.filters.year;
-
+  /* Fetch new data when location,  */
   useEffect(() => {
     let mounted = true;
     fetchData(mounted);
 
     return () => (mounted = false);
-  }, [graphProp, mapProp, yearProp]); /* eslint-disable-line */
+  }, [map, year]); /* eslint-disable-line */
 
   const fetchData = async (mounted) => {
     try {
-      const { year } = props.filters;
+      const { year } = filters;
       const params = {
-        city: props.map.city,
-        county: props.map.county,
-        state: props.map.state,
+        city: map.city,
+        county: map.county,
+        state: map.state,
         year,
       };
       const res = await vetapi.get(`/stats/location/summary`, {
@@ -99,8 +99,7 @@ function GraphSummary(props) {
         <div className="graph-header">
           <h1>
             Summary statistics of total releases for{" "}
-            {getLocationString(props.map, true)} and U.S. in{" "}
-            {props.filters.year}
+            {getLocationString(map, true)} and U.S. in {filters.year}
           </h1>
         </div>
         <table>
@@ -117,5 +116,40 @@ function GraphSummary(props) {
     )
   );
 }
-
+GraphSummary.propTypes = {
+  filters: PropTypes.shape({
+    chemical: PropTypes.string.isRequired,
+    pbt: PropTypes.bool.isRequired,
+    carcinogen: PropTypes.bool.isRequired,
+    releaseType: PropTypes.oneOf([
+      "all",
+      "air",
+      "water",
+      "land",
+      "on_site",
+      "off_site",
+    ]).isRequired,
+    year: PropTypes.number.isRequired,
+  }),
+  map: PropTypes.shape({
+    city: PropTypes.string,
+    county: PropTypes.string,
+    state: PropTypes.string,
+    stateLong: PropTypes.string,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+    viewport: PropTypes.shape({
+      northeast: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+      southwest: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+    }),
+  }),
+};
 export default GraphSummary;

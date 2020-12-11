@@ -482,26 +482,27 @@ const ThematicMap = (props) => {
   }
 };
 
+//numerical values to adjust the bucket size, values in each bucket are GREATER THAN the numerical value
+//padded with a leading zero to create 6 buckets to iterate through to create visual elements
+const stateBuckets = [0, 1000000, 10000000, 25000000, 50000000, 100000000];
+const countyBuckets = [0, 1000, 10000, 100000, 1000000, 5000000];
+
 function Legend(props) {
-  //numerical values to adjust the bucket size, values in each bucket are GREATER THAN the numerical value
-  //padded with a leading zero to create 6 buckets to iterate through to create visual elements
-  const stateBuckets = [0, 1000000, 10000000, 25000000, 50000000, 100000000];
-  const countyBuckets = [0, 1000, 10000, 100000, 1000000, 5000000];
+  const buckets = props.mapType === "states" ? stateBuckets : countyBuckets;
 
   return (
     <svg height="25" width="100%" margin="5px">
-      {stateBuckets.map((val, i) => {
+      {buckets.map((val, i) => {
         var currentColor = props.colorScale(
-          props.mapType === "states"
-            ? stateBuckets[i] + 1
-            : countyBuckets[i] + 1,
+          val + 1,
           props.filterType,
           props.mapType
         );
 
         return (
-          <>
+          <React.Fragment key={i}>
             <rect
+              key={i}
               height="100"
               width="16.6%"
               x={16.6 * i + "%"}
@@ -510,23 +511,16 @@ function Legend(props) {
               stroke="black"
             />
             <text
+              key={(i + 1) * 2}
               x={16.6 * i + 1 + "%"}
               y="50%"
               fill={props.textColor(currentColor)}
               dominantBaseline="middle"
               textAnchor="start"
             >
-              {i === 0 ? "≥" : ">"}{" "}
-              {rounded(
-                Math.trunc(
-                  props.mapType === "states"
-                    ? stateBuckets[i]
-                    : countyBuckets[i]
-                )
-              )}{" "}
-              lbs.
+              {i === 0 ? "≥" : ">"} {rounded(Math.trunc(val))} lbs.
             </text>
-          </>
+          </React.Fragment>
         );
       })}
     </svg>

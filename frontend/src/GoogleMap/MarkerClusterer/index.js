@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect } from "react";
 import PropTypes from "prop-types";
 
@@ -87,7 +89,7 @@ function MarkerCluster(props) {
         clusterer.clearMarkers();
       };
     }
-  }, []);
+  }, []); /* Called only on initial render when passed an empty dependency array */
 
   // Do we need to render anything??
   return null;

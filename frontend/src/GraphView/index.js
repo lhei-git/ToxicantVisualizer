@@ -45,16 +45,11 @@ const barColors = {
 };
 
 /* Bar graph divs need to be taller than timeline graphs due to outrageous */
-const barAspectRatio = 11 / 9;
+const barAspectRatio = 12 / 9;
 const timelineAspectRatio = 17 / 9;
 
+// Cut off labels and add parentheses
 const maxLabelLength = 20;
-
-const barChartMargins = {
-  left: 20,
-  right: 0,
-  bottom: 150,
-};
 
 function handleError(err) {
   console.error(err);
@@ -67,16 +62,16 @@ const compare = (a, b) => {
 };
 
 /* convert properties of graph to query params for the VET api */
-const createParams = (props, customParams) => {
+const createParams = ({ map, filters }, customParams) => {
   const params = {
-    city: props.map.city,
-    county: props.map.county,
-    state: props.map.state,
-    carcinogen: props.filters.carcinogen,
-    pbt: props.filters.pbt,
-    release_type: props.filters.releaseType,
-    chemical: props.filters.chemical,
-    year: props.filters.year,
+    city: map.city,
+    county: map.county,
+    state: map.state,
+    carcinogen: filters.carcinogen,
+    pbt: filters.pbt,
+    release_type: filters.releaseType,
+    chemical: filters.chemical,
+    year: filters.year,
   };
   Object.assign(params, customParams);
   return { params };
@@ -86,6 +81,18 @@ const customYAxisTickFormatter = (val) => amountAsLabel(val) + " ";
 const customLegendFormatter = (value) =>
   value.length > 35 ? value.slice(0, 35) + "..." : value;
 
+/* Custom bar chart */
+class CustomBarChart extends BarChart {
+  static defaultProps = {
+    ...BarChart.defaultProps,
+    margin: {
+      left: 20,
+      bottom: 150,
+    },
+  };
+}
+
+/* Custom tooltip */
 class CustomTooltip extends Tooltip {
   static defaultProps = {
     ...Tooltip.defaultProps,
@@ -102,6 +109,7 @@ class CustomTooltip extends Tooltip {
   };
 }
 
+/* custom line */
 class CustomLine extends Line {
   static defaultProps = {
     ...Line.defaultProps,
@@ -112,6 +120,7 @@ class CustomLine extends Line {
   };
 }
 
+/* Custom legend for timeline graphs */
 class CustomTimelineLegend extends Legend {
   static defaultProps = {
     ...Legend.defaultProps,
@@ -166,6 +175,7 @@ const CustomYAxisTick = (props) => {
   );
 };
 
+/* Custom X axis for top ten graphs */
 class CustomXAxis extends XAxis {
   static defaultProps = {
     ...XAxis.defaultProps,
@@ -176,6 +186,7 @@ class CustomXAxis extends XAxis {
   };
 }
 
+/* Custom X axis */
 class CustomYAxis extends YAxis {
   static defaultProps = {
     ...YAxis.defaultProps,
@@ -186,6 +197,7 @@ class CustomYAxis extends YAxis {
   };
 }
 
+/* take parsed timeline data and create a list of Recharts components */
 const generateLines = (data) => {
   const timelineKeys = (data) => {
     const correctIndex = [...data].sort(
@@ -207,6 +219,10 @@ const generateLines = (data) => {
   return lines;
 };
 
+/* 
+take parsed top ten data and create a list of Recharts components.
+when release type is not selected, bar graph is stacked (see stackId)
+*/
 const generateBars = (currentReleaseType) => {
   const bars = [
     <Bar
@@ -261,58 +277,116 @@ const generateBars = (currentReleaseType) => {
   return bars;
 };
 
+/* Take parsed table data and generate html table */
+const generateTable = (data, nameAttribute) => {
+  return (
+    <table className="dynamic-table">
+      <thead>
+        <tr>
+          <th className="sticky-header">Facility Name</th>
+          <th className="sticky-header">Land</th>
+          <th className="sticky-header">Air</th>
+          <th className="sticky-header">Water</th>
+          <th className="sticky-header">Off-Site</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map(function (d, i) {
+          if (i % 2 !== 0) {
+            return (
+              <tr key={d + "-" + i}>
+                <td className="odd-overflow-column">{d[nameAttribute]}</td>
+                <td className="odd-row">{d.land}</td>
+                <td className="odd-row">{d.air}</td>
+                <td className="odd-row">{d.water}</td>
+                <td className="odd-row">{d.off_site}</td>
+              </tr>
+            );
+          } else
+            return (
+              <tr key={d + "-" + i}>
+                <td className="even-overflow-column">{d[nameAttribute]}</td>
+                <td className="even-row">{d.land}</td>
+                <td className="even-row">{d.air}</td>
+                <td className="even-row">{d.water}</td>
+                <td className="even-row">{d.off_site}</td>
+              </tr>
+            );
+        })}
+      </tbody>
+    </table>
+  );
+};
+
 /* Wrapper component around graphs. This is done to remove some of the boilerplate with handling the async fetch to the vet api.  */
-const GraphContainer = (props) => {
-  let [graph, setGraph] = useState(null);
 
-  /* This is done to avoid confusion with the props object across the rest of the function */
-  let graphProp = props.graph;
-  let mapProp = props.map;
-  let filterProp = props.filters;
+/* TODO: use sessionStorage to store graph data for when filters do not change across tabs */
+const GraphContainer = ({ graph, map, filters, title }) => {
+  let [data, setData] = useState(null);
 
-  let innerProps = {
-    graph: graphProp,
-    map: mapProp,
-    filters: filterProp,
-  };
-
+  /* Use graph's internal data fetching when filters change */
   useEffect(() => {
     let mounted = true;
 
     async function fetchData() {
-      if (!mapProp) return;
-      const g = await graphProp(innerProps);
-      if (mounted) setGraph(g);
+      if (!map) return;
+      const g = await graph({ map, filters });
+      if (mounted) setData(g);
     }
     fetchData();
 
     return () => (mounted = false);
-  }, [graphProp, mapProp, filterProp]); /* eslint-disable-line */
+  }, [graph, map, filters]);
 
   return (
     /* Graph must have received data successfully to render */
     graph !== null && (
       <div className="graph">
-        <div className="graph-header">{props.title}</div>
-        <div className="rechart">{graph}</div>
+        <div className="graph-header">
+          <Title text={title} map={map} filters={filters}></Title>
+        </div>
+        <div className="rechart">{data}</div>
       </div>
     )
   );
 };
-
-/* The bar graphs appear in the following form: 
-  {
-    (facility|chemical|parent_co)__name: <>
-    air: <>
-    water: <>
-    land: <>
-    on_site: <>
-    off_site: <>
-  }
-
-  This handles forming the data into a format Recharts.js can understand
-
-*/
+GraphContainer.propTypes = {
+  map: PropTypes.shape({
+    city: PropTypes.string,
+    county: PropTypes.string,
+    state: PropTypes.string,
+    stateLong: PropTypes.string,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+    viewport: PropTypes.shape({
+      northeast: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+      southwest: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+    }),
+  }),
+  filters: PropTypes.shape({
+    chemical: PropTypes.string.isRequired,
+    pbt: PropTypes.bool.isRequired,
+    carcinogen: PropTypes.bool.isRequired,
+    releaseType: PropTypes.oneOf([
+      "all",
+      "air",
+      "water",
+      "land",
+      "on_site",
+      "off_site",
+    ]).isRequired,
+    year: PropTypes.number.isRequired,
+  }),
+  title: PropTypes.string,
+};
 
 const processBarGraphData = (data, nameAttribute, isStacked) => {
   const compareIndividualTypes = (a, b) => {
@@ -382,12 +456,12 @@ const processTimelineData = (data, nameAttribute) => {
 };
 
 /* Top ten releasing facilities bar graph */
-async function GraphTopTenFacilities(props) {
-  const { releaseType } = props.filters;
+async function GraphTopTenFacilities({ map, filters }) {
+  const { releaseType } = filters;
   try {
     const res = await vetapi.get(
       `/stats/location/facility_releases`,
-      createParams(props)
+      createParams({ map, filters })
     );
     const data = processBarGraphData(
       res.data,
@@ -397,14 +471,14 @@ async function GraphTopTenFacilities(props) {
     return (
       <div>
         <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart data={data} margin={barChartMargins}>
+          <CustomBarChart data={data}>
             <CartesianGrid vertical={false} />
             <CustomXAxis></CustomXAxis>
             <CustomYAxis></CustomYAxis>
             <CustomTooltip></CustomTooltip>
             <Legend iconType="circle" align="right" verticalAlign="top" />
             {generateBars(releaseType)}
-          </BarChart>
+          </CustomBarChart>
         </ResponsiveContainer>
       </div>
     );
@@ -415,11 +489,278 @@ async function GraphTopTenFacilities(props) {
   }
 }
 
-//Chart 14 - Graph of all facilities and total releases in descending order
-async function GraphAllFacilities(props) {
-  const { releaseType } = props.filters;
+async function GraphTopTenParents({ map, filters }) {
+  const { releaseType } = filters;
   try {
-    const params = createParams(props, { all: true });
+    const res = await vetapi.get(
+      `/stats/location/parent_releases`,
+      createParams({ map, filters })
+    );
+    const data = processBarGraphData(
+      res.data,
+      "facility__parent_co_name",
+      releaseType === "all"
+    );
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
+          <CustomBarChart data={data}>
+            <CartesianGrid vertical={false} />
+            <CustomXAxis></CustomXAxis>
+            <CustomYAxis></CustomYAxis>
+            <CustomTooltip></CustomTooltip>
+            <Legend iconType="circle" align="right" verticalAlign="top" />
+            {generateBars(releaseType)}
+          </CustomBarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+/* Top ten chemicals bar graph */
+async function GraphTopTenChemicals({ map, filters }) {
+  const { releaseType } = filters;
+  try {
+    const res = await vetapi.get(
+      `/stats/location/top_chemicals`,
+      createParams({ map, filters })
+    );
+    const data = processBarGraphData(
+      res.data,
+      "chemical__name",
+      releaseType === "all"
+    );
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
+          <CustomBarChart data={data}>
+            <CartesianGrid vertical={false} />
+            <CustomXAxis></CustomXAxis>
+            <CustomYAxis></CustomYAxis>
+            <CustomTooltip></CustomTooltip>
+            <Legend iconType="circle" align="right" verticalAlign="top" />
+            {generateBars(releaseType)}
+          </CustomBarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+/* Top ten PBT chemicals bar graphs */
+async function GraphTopTenPBTs({ map, filters }) {
+  const { releaseType } = filters;
+
+  try {
+    const res = await vetapi.get(
+      `/stats/location/top_chemicals`,
+      createParams({ map, filters }, { chemical: null, pbt: true })
+    );
+    const data = processBarGraphData(
+      res.data,
+      "chemical__name",
+      releaseType === "all"
+    );
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
+          <CustomBarChart data={data}>
+            <CartesianGrid vertical={false} />
+            <CustomXAxis></CustomXAxis>
+            <CustomYAxis></CustomYAxis>
+            <CustomTooltip></CustomTooltip>
+
+            <Legend iconType="circle" align="right" verticalAlign="top" />
+            {generateBars(releaseType)}
+          </CustomBarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+async function TimelineTotal({ map, filters }) {
+  try {
+    const res = await vetapi.get(
+      `/stats/location/timeline/total`,
+      createParams({ map, filters }, { year: null })
+    );
+    const data = res.data;
+    /* Fill total timeline with zeros, only needed if filtering by chemical and there is missing release data for one or more years */
+    for (let i = years.start; i <= years.end; i++) {
+      if (!data.find((d) => d.year === i)) {
+        data.push({
+          year: i,
+          total: 0,
+        });
+      }
+    }
+    data.sort((a, b) => a.year - b.year);
+    const body = (
+      <div>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart data={data} margin={{ right: 150 }}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="year" />
+            <CustomYAxis></CustomYAxis>
+            <CustomTooltip></CustomTooltip>
+            <CustomLine
+              name="total (lbs)"
+              dataKey="total"
+              stroke="#9c27b0"
+            ></CustomLine>
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+    return body;
+  } catch (err) {
+    handleError(err);
+    return null;
+  }
+}
+
+/* Top ten facilities over time line chart */
+async function TimelineTopFacilities({ map, filters }) {
+  try {
+    const res = await vetapi.get(
+      `/stats/location/timeline/facility_releases`,
+      createParams({ map, filters }, { year: null })
+    );
+    let data = processTimelineData(res.data, "facility__name");
+    const lines = generateLines(data);
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart data={data}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="year" />
+            <CustomYAxis></CustomYAxis>
+            <CustomTooltip></CustomTooltip>
+            <CustomTimelineLegend></CustomTimelineLegend>
+            {lines}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+async function TimelineTopParents({ map, filters }) {
+  try {
+    const res = await vetapi.get(
+      `/stats/location/timeline/parent_releases`,
+      createParams({ map, filters }, { year: null })
+    );
+
+    let data = processTimelineData(res.data, "facility__parent_co_name");
+    const lines = generateLines(data);
+
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart data={data}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="year" />
+            <CustomYAxis></CustomYAxis>
+
+            <CustomTooltip></CustomTooltip>
+            <CustomTimelineLegend></CustomTimelineLegend>
+
+            {lines}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+
+    return null;
+  }
+}
+
+async function TimelineTopChemicals({ map, filters }) {
+  try {
+    const res = await vetapi.get(
+      `/stats/location/timeline/top_chemicals`,
+      createParams({ map, filters }, { chemical: null, year: null })
+    );
+    let data = processTimelineData(res.data, "chemical__name");
+    const lines = generateLines(data);
+
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart data={data}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="year" />
+            <CustomYAxis></CustomYAxis>
+
+            <CustomTooltip></CustomTooltip>
+            <CustomTimelineLegend></CustomTimelineLegend>
+
+            {lines}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+    return null;
+  }
+}
+
+async function TimelineTopPBTs({ map, filters }) {
+  try {
+    const res = await vetapi.get(
+      `/stats/location/timeline/top_chemicals`,
+      createParams({ map, filters }, { chemical: null, year: null, pbt: true })
+    );
+    let data = processTimelineData(res.data, "chemical__name");
+    const lines = generateLines(data);
+
+    return (
+      <div>
+        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
+          <LineChart data={data}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="year" />
+            <CustomYAxis></CustomYAxis>
+            <CustomTooltip></CustomTooltip>
+            <CustomTimelineLegend></CustomTimelineLegend>
+            {lines}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  } catch (err) {
+    handleError(err);
+    return null;
+  }
+}
+
+//Chart 14 - Graph of all facilities and total releases in descending order
+async function GraphAllFacilities({ map, filters }) {
+  const { releaseType } = filters;
+  try {
+    const params = createParams({ map, filters }, { all: true });
 
     const res = await vetapi.get(`/stats/location/facility_releases`, params);
     const data = processBarGraphData(
@@ -478,10 +819,10 @@ async function GraphAllFacilities(props) {
 }
 
 //Chart 14 - Graph of all facilities and total releases in descending order
-async function GraphAllChemicals(props) {
-  const { releaseType } = props.filters;
+async function GraphAllChemicals({ map, filters }) {
+  const { releaseType } = filters;
   try {
-    const params = createParams(props, { all: true });
+    const params = createParams({ map, filters }, { all: true });
 
     const res = await vetapi.get(`/stats/location/top_chemicals`, params);
     const data = processBarGraphData(
@@ -539,50 +880,13 @@ async function GraphAllChemicals(props) {
   }
 }
 
-const generateTable = (data, nameAttribute) => {
-  return (
-    <table className="dynamic-table">
-      <thead>
-        <tr>
-          <th className="sticky-header">Facility Name</th>
-          <th className="sticky-header">Land</th>
-          <th className="sticky-header">Air</th>
-          <th className="sticky-header">Water</th>
-          <th className="sticky-header">Off-Site</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map(function (d, i) {
-          if (i % 2 !== 0) {
-            return (
-              <tr key={d + "-" + i}>
-                <td className="odd-overflow-column">{d[nameAttribute]}</td>
-                <td className="odd-row">{d.land}</td>
-                <td className="odd-row">{d.air}</td>
-                <td className="odd-row">{d.water}</td>
-                <td className="odd-row">{d.off_site}</td>
-              </tr>
-            );
-          } else
-            return (
-              <tr key={d + "-" + i}>
-                <td className="even-overflow-column">{d[nameAttribute]}</td>
-                <td className="even-row">{d.land}</td>
-                <td className="even-row">{d.air}</td>
-                <td className="even-row">{d.water}</td>
-                <td className="even-row">{d.off_site}</td>
-              </tr>
-            );
-        })}
-      </tbody>
-    </table>
-  );
-};
-
 //Chart 12 - Table of all facilities and total releases
-async function TableAllFacilities(props) {
+async function TableAllFacilities({ map, filters }) {
   try {
-    const params = createParams(props, { all: true, release_type: null });
+    const params = createParams(
+      { map, filters },
+      { all: true, release_type: null }
+    );
     const { data } = await vetapi.get(
       `/stats/location/facility_releases`,
       params
@@ -603,9 +907,12 @@ async function TableAllFacilities(props) {
   }
 }
 
-async function TableAllChemicals(props) {
+async function TableAllChemicals({ map, filters }) {
   try {
-    const params = createParams(props, { all: true, release_type: null });
+    const params = createParams(
+      { map, filters },
+      { all: true, release_type: null }
+    );
     const { data } = await vetapi.get(`/stats/location/top_chemicals`, params);
     return (
       <div
@@ -623,294 +930,8 @@ async function TableAllChemicals(props) {
   }
 }
 
-async function GraphTopTenParents(props) {
-  const { releaseType } = props.filters;
-  try {
-    const res = await vetapi.get(
-      `/stats/location/parent_releases`,
-      createParams(props)
-    );
-    const data = processBarGraphData(
-      res.data,
-      "facility__parent_co_name",
-      releaseType === "all"
-    );
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart data={data} margin={barChartMargins}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="name"
-              type="category"
-              interval={0}
-              tick={<CustomXAxisTick />}
-            />
-            <CustomYAxis></CustomYAxis>
-
-            <CustomTooltip></CustomTooltip>
-
-            <Legend iconType="circle" align="right" verticalAlign="top" />
-            {generateBars(releaseType)}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-/* Top ten chemicals bar graph */
-async function GraphTopTenChemicals(props) {
-  const { releaseType } = props.filters;
-  try {
-    const res = await vetapi.get(
-      `/stats/location/top_chemicals`,
-      createParams(props)
-    );
-    const data = processBarGraphData(
-      res.data,
-      "chemical__name",
-      releaseType === "all"
-    );
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart data={data} margin={barChartMargins}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="name"
-              type="category"
-              interval={0}
-              tick={<CustomXAxisTick />}
-            />
-            <CustomYAxis></CustomYAxis>
-            <CustomTooltip></CustomTooltip>
-            <Legend iconType="circle" align="right" verticalAlign="top" />
-            {generateBars(releaseType)}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-/* Top ten PBT chemicals bar graphs */
-async function GraphTopTenPBTs(props) {
-  const { releaseType } = props.filters;
-
-  try {
-    const res = await vetapi.get(
-      `/stats/location/top_chemicals`,
-      createParams(props, { chemical: null, pbt: true })
-    );
-    const data = processBarGraphData(
-      res.data,
-      "chemical__name",
-      releaseType === "all"
-    );
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={barAspectRatio}>
-          <BarChart data={data} margin={barChartMargins}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="name"
-              type="category"
-              interval={0}
-              tick={<CustomXAxisTick />}
-            />
-            <CustomYAxis></CustomYAxis>
-
-            <CustomTooltip></CustomTooltip>
-
-            <Legend iconType="circle" align="right" verticalAlign="top" />
-            {generateBars(releaseType)}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-async function TimelineTotal(props) {
-  try {
-    const res = await vetapi.get(
-      `/stats/location/timeline/total`,
-      createParams(props, { year: null })
-    );
-    const data = res.data;
-    /* Fill total timeline with zeros, only needed if filtering by chemical and there is missing release data for one or more years */
-    for (let i = years.start; i <= years.end; i++) {
-      if (!data.find((d) => d.year === i)) {
-        data.push({
-          year: i,
-          total: 0,
-        });
-      }
-    }
-    data.sort((a, b) => a.year - b.year);
-    const body = (
-      <div>
-        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
-          <LineChart data={data} margin={{ right: 150 }}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="year" />
-            <CustomYAxis></CustomYAxis>
-
-            <CustomTooltip></CustomTooltip>
-            <CustomLine
-              name="total (lbs)"
-              dataKey="total"
-              stroke="#9c27b0"
-            ></CustomLine>
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    );
-    return body;
-  } catch (err) {
-    handleError(err);
-    return null;
-  }
-}
-
-/* Top ten facilities over time line chart */
-async function TimelineTopFacilities(props) {
-  try {
-    const res = await vetapi.get(
-      `/stats/location/timeline/facility_releases`,
-      createParams(props, { year: null })
-    );
-    let data = processTimelineData(res.data, "facility__name");
-    const lines = generateLines(data);
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
-          <LineChart data={data}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="year" />
-            <CustomYAxis></CustomYAxis>
-            <CustomTooltip></CustomTooltip>
-            <CustomTimelineLegend></CustomTimelineLegend>
-            {lines}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-async function TimelineTopParents(props) {
-  try {
-    const res = await vetapi.get(
-      `/stats/location/timeline/parent_releases`,
-      createParams(props, { year: null })
-    );
-
-    let data = processTimelineData(res.data, "facility__parent_co_name");
-    const lines = generateLines(data);
-
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
-          <LineChart data={data}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="year" />
-            <CustomYAxis></CustomYAxis>
-
-            <CustomTooltip></CustomTooltip>
-            <CustomTimelineLegend></CustomTimelineLegend>
-
-            {lines}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-
-    return null;
-  }
-}
-
-async function TimelineTopChemicals(props) {
-  try {
-    const res = await vetapi.get(
-      `/stats/location/timeline/top_chemicals`,
-      createParams(props, { chemical: null, year: null })
-    );
-    let data = processTimelineData(res.data, "chemical__name");
-    const lines = generateLines(data);
-
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
-          <LineChart data={data}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="year" />
-            <CustomYAxis></CustomYAxis>
-
-            <CustomTooltip></CustomTooltip>
-            <CustomTimelineLegend></CustomTimelineLegend>
-
-            {lines}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-    return null;
-  }
-}
-
-async function TimelineTopPBTs(props) {
-  try {
-    const res = await vetapi.get(
-      `/stats/location/timeline/top_chemicals`,
-      createParams(props, { chemical: null, year: null, pbt: true })
-    );
-    let data = processTimelineData(res.data, "chemical__name");
-    const lines = generateLines(data);
-
-    return (
-      <div>
-        <ResponsiveContainer width="100%" aspect={timelineAspectRatio}>
-          <LineChart data={data}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="year" />
-            <CustomYAxis></CustomYAxis>
-            <CustomTooltip></CustomTooltip>
-            <CustomTimelineLegend></CustomTimelineLegend>
-            {lines}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  } catch (err) {
-    handleError(err);
-    return null;
-  }
-}
-
 /* Wrapping component for graphs */
-function GraphView(props) {
+function GraphView({ map, filters, onFilterChange }) {
   const [currentTab, setCurrentTab] = React.useState(
     /* Stores which tab user was last on. Might be worth taking out */
     parseInt(sessionStorage.getItem("currentTab")) || 0
@@ -950,197 +971,109 @@ function GraphView(props) {
         {/* <h1>Location Insights</h1> */}
         <div className="filter-container">
           <Filters
-            map={props.map}
-            filters={props.filters}
-            onFilterChange={props.onFilterChange}
+            map={map}
+            filters={filters}
+            onFilterChange={onFilterChange}
           ></Filters>
         </div>
         <div className="graphs">
-          <div
-            className="top-tens"
-            style={{ display: currentTab === 0 ? "block" : "none" }}
-          >
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={GraphTopTenFacilities}
-              title={
-                <Title
-                  text="for top 10 facilities"
-                  map={props.map}
-                  filters={props.filters}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={GraphTopTenParents}
-              title={
-                <Title
-                  text="for top 10 parent companies"
-                  map={props.map}
-                  filters={props.filters}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={GraphTopTenChemicals}
-              title={
-                <Title
-                  text="for top 10 chemicals"
-                  map={props.map}
-                  filters={props.filters}
-                  showChemicalName={false}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={GraphTopTenPBTs}
-              title={
-                <Title
-                  text="for top 10 PBT chemicals"
-                  map={props.map}
-                  filters={props.filters}
-                  showChemicalName={false}
-                ></Title>
-              }
-            ></GraphContainer>
-          </div>
-          <div
-            className="timelines"
-            style={{ display: currentTab === 1 ? "block" : "none" }}
-          >
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={TimelineTotal}
-              title={
-                <Title
-                  text=""
-                  map={props.map}
-                  filters={props.filters}
-                  showYear={false}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={TimelineTopFacilities}
-              title={
-                <Title
-                  text="for top 10 facilities"
-                  map={props.map}
-                  filters={props.filters}
-                  showYear={false}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              name="timeline_parents"
-              graph={TimelineTopParents}
-              title={
-                <Title
-                  text="for top 10 parent companies"
-                  map={props.map}
-                  filters={props.filters}
-                  showYear={false}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={TimelineTopChemicals}
-              title={
-                <Title
-                  text="for top 10 chemicals"
-                  map={props.map}
-                  filters={props.filters}
-                  showYear={false}
-                  showChemicalName={false}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={TimelineTopPBTs}
-              title={
-                <Title
-                  text="for top 10 PBT chemicals"
-                  map={props.map}
-                  filters={props.filters}
-                  showYear={false}
-                  showChemicalName={false}
-                ></Title>
-              }
-            ></GraphContainer>
-          </div>
-          <div
-            className="indexes"
-            style={{ display: currentTab === 2 ? "block" : "none" }}
-          >
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={GraphAllFacilities}
-              title={
-                <Title
-                  text="for all facilities"
-                  map={props.map}
-                  filters={props.filters}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={TableAllFacilities}
-              title={
-                <Title
-                  text="for all facilities by release type"
-                  map={props.map}
-                  filters={props.filters}
-                  showReleaseType={false}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={GraphAllChemicals}
-              title={
-                <Title
-                  text="for all chemicals"
-                  map={props.map}
-                  filters={props.filters}
-                  showChemicalName={false}
-                ></Title>
-              }
-            ></GraphContainer>
-            <GraphContainer
-              map={props.map}
-              filters={props.filters}
-              graph={TableAllChemicals}
-              title={
-                <Title
-                  text="for all chemicals by release type"
-                  map={props.map}
-                  filters={props.filters}
-                  showReleaseType={false}
-                  showChemicalName={false}
-                ></Title>
-              }
-            ></GraphContainer>
-          </div>
+          {currentTab === 0 && (
+            <div className="top-tens">
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenFacilities}
+                title="for top 10 facilities"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenParents}
+                title="for top 10 parent companies"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenChemicals}
+                title="for top 10 chemicals"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenPBTs}
+                title="for top 10 PBT chemicals"
+              ></GraphContainer>
+            </div>
+          )}
+          {currentTab === 1 && (
+            <div
+              className="timelines"
+              style={{ display: currentTab === 1 ? "block" : "none" }}
+            >
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTotal}
+                title=""
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTopFacilities}
+                title="for top 10 facilities"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                name="timeline_parents"
+                graph={TimelineTopParents}
+                title="for top 10 parent companies"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTopChemicals}
+                title="for top 10 chemicals"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTopPBTs}
+                title="for top 10 PBT chemicals"
+              ></GraphContainer>
+            </div>
+          )}
+          {currentTab === 2 && (
+            <div
+              className="indexes"
+              style={{ display: currentTab === 2 ? "block" : "none" }}
+            >
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphAllFacilities}
+                title="for all facilities"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TableAllFacilities}
+                title="for all facilities by release type"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphAllChemicals}
+                title="for all chemicals"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TableAllChemicals}
+                title="for all chemicals by release type"
+              ></GraphContainer>
+            </div>
+          )}
         </div>
       </div>
     </div>
