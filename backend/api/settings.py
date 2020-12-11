@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, sys
 
 if 'DJANGO_SETTINGS' in os.environ:
     if os.environ['DJANGO_SETTINGS'] == "dev":
@@ -26,7 +26,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = SECRET_KEY
 DEBUG = DEBUG
 ALLOWED_HOSTS = ALLOWED_HOSTS
-
 
 # Application definition
 

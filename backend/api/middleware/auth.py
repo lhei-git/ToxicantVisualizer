@@ -18,3 +18,4 @@ class AuthMiddleware(MiddlewareMixin):
             return HttpResponse('Unauthorized', status=401)
         else:
             return None
+
