@@ -319,6 +319,8 @@ const generateTable = (data, nameAttribute) => {
 };
 
 /* Wrapper component around graphs. This is done to remove some of the boilerplate with handling the async fetch to the vet api.  */
+
+/* TODO: use sessionStorage to store graph data for when filters do not change across tabs */
 const GraphContainer = ({ graph, map, filters, title }) => {
   let [data, setData] = useState(null);
 
@@ -975,100 +977,103 @@ function GraphView({ map, filters, onFilterChange }) {
           ></Filters>
         </div>
         <div className="graphs">
-          <div
-            className="top-tens"
-            style={{ display: currentTab === 0 ? "block" : "none" }}
-          >
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={GraphTopTenFacilities}
-              title="for top 10 facilities"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={GraphTopTenParents}
-              title="for top 10 parent companies"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={GraphTopTenChemicals}
-              title="for top 10 chemicals"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={GraphTopTenPBTs}
-              title="for top 10 PBT chemicals"
-            ></GraphContainer>
-          </div>
-          <div
-            className="timelines"
-            style={{ display: currentTab === 1 ? "block" : "none" }}
-          >
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={TimelineTotal}
-              title=""
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={TimelineTopFacilities}
-              title="for top 10 facilities"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              name="timeline_parents"
-              graph={TimelineTopParents}
-              title="for top 10 parent companies"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={TimelineTopChemicals}
-              title="for top 10 chemicals"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={TimelineTopPBTs}
-              title="for top 10 PBT chemicals"
-            ></GraphContainer>
-          </div>
-          <div
-            className="indexes"
-            style={{ display: currentTab === 2 ? "block" : "none" }}
-          >
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={GraphAllFacilities}
-              title="for all facilities"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={TableAllFacilities}
-              title="for all facilities by release type"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={GraphAllChemicals}
-              title="for all chemicals"
-            ></GraphContainer>
-            <GraphContainer
-              map={map}
-              filters={filters}
-              graph={TableAllChemicals}
-              title="for all chemicals by release type"
-            ></GraphContainer>
-          </div>
+          {currentTab === 0 && (
+            <div className="top-tens">
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenFacilities}
+                title="for top 10 facilities"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenParents}
+                title="for top 10 parent companies"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenChemicals}
+                title="for top 10 chemicals"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphTopTenPBTs}
+                title="for top 10 PBT chemicals"
+              ></GraphContainer>
+            </div>
+          )}
+          {currentTab === 1 && (
+            <div
+              className="timelines"
+              style={{ display: currentTab === 1 ? "block" : "none" }}
+            >
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTotal}
+                title=""
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTopFacilities}
+                title="for top 10 facilities"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                name="timeline_parents"
+                graph={TimelineTopParents}
+                title="for top 10 parent companies"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTopChemicals}
+                title="for top 10 chemicals"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TimelineTopPBTs}
+                title="for top 10 PBT chemicals"
+              ></GraphContainer>
+            </div>
+          )}
+          {currentTab === 2 && (
+            <div
+              className="indexes"
+              style={{ display: currentTab === 2 ? "block" : "none" }}
+            >
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphAllFacilities}
+                title="for all facilities"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TableAllFacilities}
+                title="for all facilities by release type"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={GraphAllChemicals}
+                title="for all chemicals"
+              ></GraphContainer>
+              <GraphContainer
+                map={map}
+                filters={filters}
+                graph={TableAllChemicals}
+                title="for all chemicals by release type"
+              ></GraphContainer>
+            </div>
+          )}
         </div>
       </div>
     </div>

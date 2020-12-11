@@ -36,6 +36,9 @@ function Title(props) {
     </>
   );
 }
+Title.propTypes = {
+  text: PropTypes.string.isRequired,
+};
 
 /* Create formatted subheader based on filter information */
 const getSubHeader = (filters, showChemicalName) => {
