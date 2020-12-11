@@ -7,5 +7,5 @@ module.exports = axios.create({
   headers: {
     Authorization: process.env.REACT_APP_API_KEY,
   },
-  timeout: 20000,
+  timeout: 5000,
 });

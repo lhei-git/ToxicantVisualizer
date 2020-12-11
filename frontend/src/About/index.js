@@ -1,7 +1,7 @@
 import "./index.css";
 const React = require("react");
 
-function About(props) {
+function About() {
   return (
     <div className="about-container">
       <div className="background">
