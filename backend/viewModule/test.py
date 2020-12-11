@@ -67,4 +67,5 @@ class EndpointTestCases(TestCase):
 
         
     def test_validity(self):
+        # mock testing with 'pytest-postgresql' not possible for many to many models currently, refer to postman testing in doc
         pass
