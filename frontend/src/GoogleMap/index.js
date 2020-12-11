@@ -3,6 +3,7 @@ import "../index.css";
 import { silver } from "./mapstyles";
 import MarkerCluster from "./MarkerClusterer";
 import LoadingSpinner from "../LoadingSpinner";
+import PropTypes from "prop-types";
 const React = require("react");
 const vetapi = require("../api/vetapi/index");
 const { shallowEqual } = require("../helpers");
@@ -17,7 +18,7 @@ const containerStyle = {
 };
 
 // Wrapping class around Google Maps react object
-class MapContainer extends Component {
+class GoogleMap extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -28,7 +29,6 @@ class MapContainer extends Component {
       showingInfoWindow: false,
       isLoading: true,
       map: null,
-      chemicalList: [],
       hasMoved: false,
     };
 
@@ -44,8 +44,6 @@ class MapContainer extends Component {
   /* User hits re-center - Sidebar is cleared of any pubchem data and map restores to original searched center */
   onRefresh() {
     const newState = {};
-    const oldPoints = this.state.points;
-    newState.markers = this.createMarkers(oldPoints);
     if (this.map && this.state.latLngbounds) {
       this.resetMapView(this.map, this.state.latLngbounds);
     }
@@ -234,14 +232,9 @@ class MapContainer extends Component {
         },
       };
     });
-    this.setState(
-      {
-        isLoading: false,
-      },
-      () => {
-        this.props.onUpdate(markers.length);
-      }
-    );
+    this.setState({
+      isLoading: false,
+    });
     return markers;
   }
 
@@ -316,9 +309,41 @@ class MapContainer extends Component {
     );
   }
 }
+GoogleMap.propTypes = {
+  filters: PropTypes.shape({
+    chemical: PropTypes.string.isRequired,
+    pbt: PropTypes.bool.isRequired,
+    carcinogen: PropTypes.bool.isRequired,
+    releaseType: PropTypes.oneOf([
+      "all",
+      "air",
+      "water",
+      "land",
+      "on_site",
+      "off_site",
+    ]).isRequired,
+    year: PropTypes.number.isRequired,
+  }),
+  map: PropTypes.shape({
+    city: PropTypes.string,
+    county: PropTypes.string,
+    state: PropTypes.string,
+    stateLong: PropTypes.string,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+    viewport: PropTypes.shape({
+      northeast: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+      southwest: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+    }),
+  }),
+};
 
-// export default GoogleApiWrapper((props) => ({
-//   apiKey: props.apiKey,
-// }))(MapContainer);
-
-export default MapContainer;
+export default GoogleMap;
