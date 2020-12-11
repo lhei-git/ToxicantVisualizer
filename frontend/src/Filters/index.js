@@ -1,7 +1,9 @@
 import "./index.css";
 import "../index.css";
 import vetapi from "../api/vetapi";
+import PropTypes from "prop-types";
 const React = require("react");
+const { years } = require("../contants");
 const { formatChemical, getLocationString } = require("../helpers");
 
 //search button and text box
@@ -50,17 +52,15 @@ function Filters(props) {
 
   /* Create select dropdown of available years */
   function getYears() {
-    const startYear = 2005;
-    const endYear = 2019;
-    let years = [];
-    for (let i = endYear; i >= startYear; i--) {
-      years.push(
-        <option defaultValue={i === endYear} key={i} value={i}>
+    let yearOptions = [];
+    for (let i = years.end; i >= years.start; i--) {
+      yearOptions.push(
+        <option defaultValue={i === years.end} key={i} value={i}>
           {i}
         </option>
       );
     }
-    return years;
+    return yearOptions;
   }
 
   /* Create select dropdown of chemicals released */
@@ -156,5 +156,41 @@ function Filters(props) {
     </div>
   );
 }
+Filters.propTypes = {
+  filters: PropTypes.shape({
+    chemical: PropTypes.string.isRequired,
+    pbt: PropTypes.bool.isRequired,
+    carcinogen: PropTypes.bool.isRequired,
+    releaseType: PropTypes.oneOf([
+      "all",
+      "air",
+      "water",
+      "land",
+      "on_site",
+      "off_site",
+    ]).isRequired,
+    year: PropTypes.number.isRequired,
+  }),
+  map: PropTypes.shape({
+    city: PropTypes.string,
+    county: PropTypes.string,
+    state: PropTypes.string,
+    stateLong: PropTypes.string,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+    viewport: PropTypes.shape({
+      northeast: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+      southwest: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+    }),
+  }),
+};
 
 export default Filters;

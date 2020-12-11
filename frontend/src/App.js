@@ -1,3 +1,8 @@
+//==========================================
+// Author: Evan de Jesus
+// Date:   12/10/2020
+//==========================================
+
 /* eslint-disable import/first */
 require("dotenv").config();
 import {
@@ -18,17 +23,11 @@ import ThematicMapView from "./ThematicMapView/index.js";
 import AboutPage from "./About/index";
 import React, { useReducer } from "react";
 import MapView from "./MapView";
+import PropTypes from "prop-types";
 
 /* Initial state of app */
 const initialState = {
-  location: "",
   map: JSON.parse(sessionStorage.getItem("map")),
-  numFacilities: 0,
-  showPubchemInfo: false,
-  chemicals: [],
-  currentChemical: "",
-  activeTab: 0,
-  errorMessage: "",
   filters: {
     chemical: "all",
     pbt: false,
@@ -36,20 +35,23 @@ const initialState = {
     releaseType: "all",
     year: 2019,
   },
+  errorMessage: "",
 };
 
 /* handler for updating state */
 const reducer = (state, action) => {
   switch (action.type) {
-    case "setFilters":
-      const newFilters = Object.assign({}, action.payload);
-      return { ...state, filters: newFilters };
     case "setMap":
+      /* Store latest searched location in session */
       sessionStorage.setItem("map", JSON.stringify(action.payload));
       return {
         ...state,
         map: action.payload,
       };
+    case "setFilters":
+      const newFilters = Object.assign({}, action.payload);
+      return { ...state, filters: newFilters };
+
     case "setErrorMessage":
       return { ...state, errorMessage: action.payload };
     default:
@@ -58,10 +60,11 @@ const reducer = (state, action) => {
 };
 
 /* individual state setters */
-const setFilters = (payload) => ({ type: "setFilters", payload });
 const setMap = (payload) => ({ type: "setMap", payload });
+const setFilters = (payload) => ({ type: "setFilters", payload });
 const setErrorMessage = (payload) => ({ type: "setErrorMessage", payload });
 
+/* Navbar component */
 const Navbar = (props) => {
   // webpage path
   const location = useLocation();
@@ -100,6 +103,22 @@ const Navbar = (props) => {
     </div>
   );
 };
+Navbar.propTypes = {
+  visible: PropTypes.bool,
+};
+
+/* Footer component */
+function Footer() {
+  return (
+    <div className="footer">
+      <div className="copyright">
+        &#169; VET was developed in 2020 for the Lab for Health and
+        Environmental Information by Evan de Jesus, Adwait Wadekar, Richard
+        Moore, and Calvin Brooks
+      </div>
+    </div>
+  );
+}
 
 const App = (props) => {
   /* Use reducer method to update state */
@@ -115,8 +134,11 @@ const App = (props) => {
 
   /* The geocoder has completed a successful search */
   function handleSuccess(map) {
+    /* Set app-wide location setting */
     dispatch(setMap(map));
+    /* Clear existing facility data */
     sessionStorage.removeItem("facilityData");
+    /* redirect to the /map page */
     history.push("/map");
   }
 
@@ -134,7 +156,11 @@ const App = (props) => {
         <Switch>
           <Route exact path="/map">
             {/* Map, summary, and state thematic map */}
-            <MapView></MapView>
+            <MapView
+              map={state.map}
+              filters={state.filters}
+              onFilterChange={(filters) => dispatch(setFilters(filters))}
+            ></MapView>
           </Route>
           <Route path="/graphs">
             {/* Top ten graphs, timeline graphs, index graphs */}
@@ -165,7 +191,6 @@ const App = (props) => {
             )}
           </Route>
           <Route path="/about" component={AboutPage}></Route>
-          {/* <Route path="/about"></Route> */}
           <Route path="/">
             {/* home page */}
             <Home onSuccess={handleSuccess} />
@@ -176,17 +201,5 @@ const App = (props) => {
     </Router>
   );
 };
-
-function Footer() {
-  return (
-    <div className="footer">
-      <div className="copyright">
-        &#169; VET was developed in 2020 for the Lab for Health and
-        Environmental Information by Evan de Jesus, Adwait Wadekar, Richard
-        Moore, and Calvin Brooks
-      </div>
-    </div>
-  );
-}
 
 export default withRouter(App);

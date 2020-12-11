@@ -1,6 +1,7 @@
 import "../index.css";
 import "./index.css";
 import LoadingSpinner from "../LoadingSpinner";
+import PropTypes from "prop-types";
 const { formatChemical } = require("../helpers");
 const pubchem = require("../api/pubchem/index");
 const React = require("react");
@@ -263,6 +264,7 @@ function Content(props) {
     if (numLoaded === numComponents && !loaded) {
       setLoaded(true);
     }
+    console.log("useEffect");
   }, [loaded, numLoaded]);
 
   return (
@@ -367,5 +369,8 @@ class PubChemFields extends Component {
     );
   }
 }
+PubChemFields.propTypes = {
+  chemName: PropTypes.string.isRequired,
+};
 
 export default PubChemFields;
