@@ -145,6 +145,7 @@
 .summary th,
 .summary td {
   padding: 10px;
+  font-size: 22px;
 }
 .summary tr {
   min-height: 40px;
