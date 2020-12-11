@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import "../index.css";
 import "./index.css";
 import LoadingSpinner from "../LoadingSpinner";
