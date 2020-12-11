@@ -427,7 +427,6 @@ def timeline_total(request):
 
     queryset = release.objects.filter(geo_filter(request) & filter_releases(request)).values(
         'year').annotate(total=Sum('total')).order_by('year')
-    print(queryset.query)
     response = json.dumps(list(queryset), cls=DjangoJSONEncoder)
 
     return HttpResponse(response, content_type='application/json')
