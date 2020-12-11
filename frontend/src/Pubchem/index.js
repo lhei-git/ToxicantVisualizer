@@ -1,6 +1,7 @@
 import "../index.css";
 import "./index.css";
 import LoadingSpinner from "../LoadingSpinner";
+import PropTypes from "prop-types";
 const { formatChemical } = require("../helpers");
 const pubchem = require("../api/pubchem/index");
 const React = require("react");
@@ -46,7 +47,7 @@ function Pharmacology(props) {
     }
 
     if (props.cid) getPubchemData(props.cid);
-  }, [onLoad, props.cid]);
+  }, []);
 
   return pubchemData !== null ? (
     <div className="pharmacology">
@@ -91,7 +92,7 @@ function HazardStatements(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, [onLoad, props.cid, pubchemData]);
+  }, []);
 
   function parseGHSData(response) {
     const info =
@@ -168,7 +169,7 @@ function Toxicity(props) {
     if (!pubchemData && props.cid) {
       getPubchemData();
     }
-  }, [onLoad, props.cid, pubchemData]);
+  }, []);
 
   function parseToxicityData(response) {
     //grab the section heading to be displayed
@@ -263,6 +264,7 @@ function Content(props) {
     if (numLoaded === numComponents && !loaded) {
       setLoaded(true);
     }
+    console.log("useEffect");
   }, [loaded, numLoaded]);
 
   return (
@@ -367,5 +369,8 @@ class PubChemFields extends Component {
     );
   }
 }
+PubChemFields.propTypes = {
+  chemName: PropTypes.string.isRequired,
+};
 
 export default PubChemFields;
