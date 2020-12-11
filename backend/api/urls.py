@@ -5,7 +5,7 @@ from viewModule.views import get_facilities, get_chemicals, state_total_releases
     location_summary, top_facility_releases, timeline_top_facility_releases, \
     timeline_top_pbt_chemicals, all_state_total_releases, \
     all_county_total_releases, \
-    get_chemicals_in_window, country_summary, health_check
+    get_chemicals_in_window, country_summary, health_check, homepoint
 
 
 ''' This list acts as a controller for the API endpoints while path() marks an element for inclusion'''
@@ -13,6 +13,9 @@ from viewModule.views import get_facilities, get_chemicals, state_total_releases
 
 urlpatterns = [
     path('_health', health_check),
+    # root page for API
+    path('', homepoint),
+    # admin page for backend
     path('admin/', admin.site.urls),
     # return distinct facilities for a state and requested specs.
     path('facilities', get_facilities),
