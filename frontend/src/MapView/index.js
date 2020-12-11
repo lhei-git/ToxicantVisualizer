@@ -10,30 +10,17 @@ import { formatChemical, formatAmount } from "../helpers";
 import vetapi from "../api/vetapi";
 import "./index.css";
 import React from "react";
+import PropTypes from "prop-types";
 
 const initialState = {
   location: "",
-  map: JSON.parse(sessionStorage.getItem("map")),
-  numFacilities: 0,
   showPubchemInfo: false,
-  showChemicalList: false,
   chemicals: [],
   currentChemical: "",
-  filters: {
-    chemical: "all",
-    pbt: false,
-    carcinogen: false,
-    releaseType: "all",
-    year: 2019,
-  },
 };
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "setNumFacilities":
-      return { ...state, numFacilities: action.payload };
-    case "setFilters":
-      return { ...state, filters: action.payload };
     case "refresh":
       return {
         ...state,
@@ -55,8 +42,6 @@ const reducer = (state, action) => {
   }
 };
 
-const setNumFacilities = (payload) => ({ type: "setNumFacilities", payload });
-const setFilters = (payload) => ({ type: "setFilters", payload });
 const refresh = () => ({ type: "refresh" });
 const showPubchemInfo = () => ({ type: "showPubchemInfo" });
 const setChemicals = (payload) => ({ type: "setChemicals", payload });
@@ -82,8 +67,7 @@ const getChemicals = async (facilityId, filters) => {
 };
 
 /* Component for a facility's list of chemicals, shows when facility is clicked */
-function ChemicalList(props) {
-  const { chemicals } = props;
+function ChemicalList({ chemicals, onClick }) {
   if (chemicals.length === 0) return <div></div>;
 
   /* Format each chemical into a split row using name and release amount */
@@ -95,7 +79,7 @@ function ChemicalList(props) {
       return (
         <li
           onClick={() => {
-            props.onClick(c.name);
+            onClick(c.name);
           }}
           key={c.name + " " + c.total}
         >
@@ -113,8 +97,17 @@ function ChemicalList(props) {
     </div>
   );
 }
+ChemicalList.propTypes = {
+  chemicals: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      total: PropTypes.number.isRequired,
+    })
+  ),
+  onClick: PropTypes.func.isRequired,
+};
 
-function MapView(props) {
+function MapView({ map, filters, onFilterChange }) {
   const [state, dispatch] = React.useReducer(reducer, initialState);
 
   return (
@@ -122,11 +115,9 @@ function MapView(props) {
       <div className="filters">
         {/* Filter component */}
         <FilterView
-          map={state.map}
-          filters={state.filters}
-          onFilterChange={(filters) => {
-            dispatch(setFilters(Object.assign({}, filters)));
-          }}
+          map={map}
+          filters={filters}
+          onFilterChange={onFilterChange}
         ></FilterView>
       </div>
       <div className="flex-container top">
@@ -171,41 +162,37 @@ function MapView(props) {
         )}
         {/* Google Map (requires api keys and google as a property of the window)*/}
         <div className="flex-item map-wrapper">
-          {state.map && (
+          {map && (
             <div>
               <GoogleMap
-                filters={Object.assign({}, state.filters)}
-                map={state.map}
+                filters={filters}
+                map={map}
                 apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-                onUpdate={(num) => dispatch(setNumFacilities(num))}
                 onRefresh={() => dispatch(refresh())}
                 onMarkerClick={(facilityId) => {
-                  getChemicals(facilityId, state.filters).then((chemicals) =>
+                  getChemicals(facilityId, filters).then((chemicals) =>
                     dispatch(setChemicals(chemicals))
                   );
                 }}
               />
               {/* Legend updates with colors of selected release type */}
-              <MapLegend releaseType={state.filters.releaseType}></MapLegend>
+              <MapLegend releaseType={filters.releaseType}></MapLegend>
             </div>
           )}
         </div>
       </div>
       {/* Summary table and state thematic map. Only show if a search has been completed */}
-      {state.map && (
+      {map && (
         <div className="summary-container">
           <div>
-            <GraphSummary
-              map={state.map}
-              filters={state.filters}
-            ></GraphSummary>
+            <GraphSummary map={map} filters={filters}></GraphSummary>
           </div>
-          {!["US", "DC"].includes(state.map.state) && (
+          {!["US", "DC"].includes(map.state) && (
             <div>
               <ThematicStateMap
-                filters={state.filters}
-                stateName={state.map.state}
-                stateLongName={state.map.stateLong}
+                filters={filters}
+                stateName={map.state}
+                stateLongName={map.stateLong}
               ></ThematicStateMap>
             </div>
           )}
@@ -214,5 +201,42 @@ function MapView(props) {
     </div>
   );
 }
+MapView.propTypes = {
+  filters: PropTypes.shape({
+    chemical: PropTypes.string.isRequired,
+    pbt: PropTypes.bool.isRequired,
+    carcinogen: PropTypes.bool.isRequired,
+    releaseType: PropTypes.oneOf([
+      "all",
+      "air",
+      "water",
+      "land",
+      "on_site",
+      "off_site",
+    ]).isRequired,
+    year: PropTypes.number.isRequired,
+  }),
+  map: PropTypes.shape({
+    city: PropTypes.string,
+    county: PropTypes.string,
+    state: PropTypes.string,
+    stateLong: PropTypes.string,
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+    viewport: PropTypes.shape({
+      northeast: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+      southwest: PropTypes.shape({
+        lat: PropTypes.number.isRequired,
+        lng: PropTypes.number.isRequired,
+      }).isRequired,
+    }),
+  }),
+  onFilterChange: PropTypes.func.isRequired,
+};
 
 export default MapView;

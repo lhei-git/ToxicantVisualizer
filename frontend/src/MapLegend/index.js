@@ -1,6 +1,8 @@
 import React from "react";
 import "./index.css";
 
+import PropTypes from "prop-types";
+
 /* Map legend changes colors of icons depending on release type shown */
 function MapLegend(props) {
   function getColor(type) {
@@ -97,5 +99,15 @@ function MapLegend(props) {
     </div>
   );
 }
+MapLegend.propTypes = {
+  releaseType: PropTypes.oneOf([
+    "all",
+    "air",
+    "water",
+    "land",
+    "on_site",
+    "off_site",
+  ]),
+};
 
 export default MapLegend;
