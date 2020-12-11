@@ -1,6 +1,6 @@
 # VET Frontend
 
-## Development (without docker)
+## Development
 
 1. Create a .env variable with the following:
 ```sh

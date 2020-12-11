@@ -427,7 +427,6 @@ def timeline_total(request):
 
     queryset = release.objects.filter(geo_filter(request) & filter_releases(request)).values(
         'year').annotate(total=Sum('total')).order_by('year')
-    print(queryset.query)
     response = json.dumps(list(queryset), cls=DjangoJSONEncoder)
 
     return HttpResponse(response, content_type='application/json')
@@ -624,4 +623,7 @@ def timeline_top_pbt_chemicals(request):
     return HttpResponse(json.dumps(list(response), cls=DjangoJSONEncoder), content_type='application/json')
 
 
-# - https://docs.djangoproject.com/en/3.1/ref/models/querysets/#field-lookups
+''' Root page for backend'''
+
+def homepoint(request):
+    return HttpResponse('API HOME')
