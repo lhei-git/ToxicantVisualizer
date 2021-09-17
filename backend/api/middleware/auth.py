@@ -11,6 +11,7 @@ class AuthMiddleware(MiddlewareMixin):
         try:
             if os.environ.get('DJANGO_SETTINGS') == 'dev':
                 return None
+            print(request.headers)
             header = request.headers.get('Authorization')
             if header is None or base64.b64decode(header).decode('ascii') != os.environ.get('API_KEY'):
                 return HttpResponse('Unauthorized', status=401)

@@ -11,14 +11,18 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
-import os, sys
+import os
+import sys
+from dotenv import load_dotenv
 
-if 'DJANGO_SETTINGS' in os.environ:
-    if os.environ['DJANGO_SETTINGS'] == "dev":
-        print ("DEV SERVER")
-        from .settings_dev import *
+project_folder = os.path.expanduser('/home/ubuntu/vet/backend')
+load_dotenv(os.path.join(project_folder, '.env'))
+
+if os.environ['DJANGO_SETTINGS'] == "dev":
+    print("DEV SERVER")
+    from .settings_dev import *
 else:
-    print ("PROD SERVER")
+    print("PROD SERVER")
     from .settings_prod import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -84,7 +88,7 @@ DATABASES = {
         'ENGINE': os.environ.get('APP_DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASS', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASS', 'ubuntu'),
         'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
         'PORT': os.environ.get('DB_PORT', 5432)
     }
@@ -128,3 +132,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+DEBUG_PROPAGATE_EXCEPTIONS = True
