@@ -26,6 +26,7 @@ services:
   backend:
     build: ./backend
     command: sh -c 'until pg_isready --username=postgres --host=postgres_local; do sleep 1; done && python manage.py runserver 0.0.0.0:8000'
+    env_file: backend/.env
     environment:
       DB_HOST: postgres_local
       API_KEY: foobar
@@ -42,11 +43,14 @@ services:
     image: postgres:12
     restart: always
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ubuntu
+      POSTGRES_PASSWORD: ubuntu
+      POSTGRES_DB: ubuntu
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ubuntu"]
       interval: 5s
       timeout: 5s
       retries: 5
     volumes:
+      - ./custom_mount:/var/lib/postgresql/data
       - ./backend/pg_dump:/docker-entrypoint-initdb.d
