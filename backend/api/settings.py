@@ -18,6 +18,9 @@ from dotenv import load_dotenv
 project_folder = os.path.expanduser('/home/ubuntu/vet/backend')
 load_dotenv(os.path.join(project_folder, '.env'))
 
+print("** webhook test **")
+
+
 if os.environ['DJANGO_SETTINGS'] == "dev":
     print("DEV SERVER")
     from .settings_dev import *
