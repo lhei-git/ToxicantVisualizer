@@ -21,7 +21,7 @@ class Facility(models.Model):
         return self.name
 
     class Meta:
-        db_table = 'facilities'k
+        db_table = 'facilities'
 
 
 # Model class to reflect 'chemicals' table
