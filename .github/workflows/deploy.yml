@@ -37,9 +37,14 @@ jobs:
       env: 
         REACT_APP_API_KEY: ${{secrets.REACT_APP_API_KEY}}
         REACT_APP_GOOGLE_API_KEY: ${{secrets.REACT_APP_GOOGLE_API_KEY}}
-      run: |
-        echo "REACT_APP_API_KEY=${REACT_APP_API_KEY}" >> .env
-        echo "REACT_APP_GOOGLE_API_KEY=${REACT_APP_GOOGLE_API_KEY}" >> .env
+      run: |-
+        tee ./.env <<EOF            
+        REACT_APP_API_URL=https://api.vet.lhei.org
+        REACT_APP_GEOCODE_URL=https://maps.googleapis.com/maps/api/geocode
+        REACT_APP_API_KEY=${REACT_APP_API_KEY}
+        REACT_APP_GOOGLE_API_KEY=${REACT_APP_GOOGLE_API_KEY}
+        EOF
+
         npm run build
       working-directory: ${{env.working-directory}}
     - name: Deploy to s3
