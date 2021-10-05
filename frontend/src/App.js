@@ -111,11 +111,7 @@ Navbar.propTypes = {
 function Footer() {
   return (
     <div className="footer">
-      <div className="copyright">
-        &#169; VET was developed in 2020 for the Lab for Health and
-        Environmental Information by Evan de Jesus, Adwait Wadekar, Richard
-        Moore, and Calvin Brooks
-      </div>
+      <div className="copyright">&#169; VET 2021</div>
     </div>
   );
 }
