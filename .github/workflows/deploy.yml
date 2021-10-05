@@ -23,18 +23,15 @@ jobs:
     env: 
       working-directory: "./frontend"
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [14.x]
     steps:
     - name: Checkout repository
       uses: actions/checkout@master
     - name: Set up Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 14.x
     - name: Install dependencies
-      run: npm install
+      run: node --version && npm install
       working-directory: ${{env.working-directory}}
     - name: Build
       run: npm run build
