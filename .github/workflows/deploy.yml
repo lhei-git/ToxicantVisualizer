@@ -19,7 +19,7 @@ jobs:
       run: |
         sudo apt install -y curl ca-certificates
         curl -X POST http://34.193.104.186:9000/hooks/vet -H "X-Vet-Secret: 5dV4r7wKMWD2"
-  deploy_frontend:
+  deploy-frontend:
     env: 
       working-directory: "./frontend"
     runs-on: ubuntu-latest
