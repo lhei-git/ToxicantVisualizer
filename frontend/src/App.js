@@ -81,6 +81,9 @@ const Navbar = (props) => {
         <li className={location.pathname === "/" ? "active" : ""}>
           <Link to="/">Search</Link>
         </li>
+        <li className={location.pathname === "/about" ? "active" : ""}>
+          <Link to="/about">About</Link>
+        </li>
         {props.visible && (
           <>
             <li className={location.pathname === "/map" ? "active" : ""}>
@@ -93,9 +96,6 @@ const Navbar = (props) => {
               className={location.pathname === "/thematicmaps" ? "active" : ""}
             >
               <Link to="/thematicmaps">National Insights</Link>
-            </li>
-            <li className={location.pathname === "/about" ? "active" : ""}>
-              <Link to="/about">About</Link>
             </li>
           </>
         )}
