@@ -2,6 +2,18 @@
 
 ## Development (API only)
 
+0. create `.env` file in `backend/` directory with the following:
+```
+DB_HOST=127.0.0.1
+API_KEY=<vet api key>
+DJANGO_SETTINGS=prod
+DJANGO_SECRET_KEY=evan
+DB_USER=ubuntu
+DB_PASS=ubuntu
+DB_NAME=ubuntu
+API_URL=api.vet.lhei.org
+```
+
 1. Downloading and installing respective package to create a local virtual environment (dependencies work best with virtualenv):
 ```sh
 python -m pip install --user virtualenv

@@ -29,7 +29,7 @@ function MapLegend(props) {
             <img
               src={require("../../src/assets/" +
                 getColor(props.releaseType) +
-                "_1-6.png")}
+                "_1-6.png").default}
               alt=""
             ></img>
           </span>
@@ -41,7 +41,7 @@ function MapLegend(props) {
             <img
               src={require("../../src/assets/" +
                 getColor(props.releaseType) +
-                "_2-6.png")}
+                "_2-6.png").default}
               alt=""
             ></img>
           </span>
@@ -53,7 +53,7 @@ function MapLegend(props) {
             <img
               src={require("../../src/assets/" +
                 getColor(props.releaseType) +
-                "_3-6.png")}
+                "_3-6.png").default}
               alt=""
             ></img>
           </span>
@@ -65,7 +65,7 @@ function MapLegend(props) {
             <img
               src={require("../../src/assets/" +
                 getColor(props.releaseType) +
-                "_4-6.png")}
+                "_4-6.png").default}
               alt=""
             ></img>
           </span>
@@ -77,7 +77,7 @@ function MapLegend(props) {
             <img
               src={require("../../src/assets/" +
                 getColor(props.releaseType) +
-                "_5-6.png")}
+                "_5-6.png").default}
               alt=""
             ></img>
           </span>
@@ -89,7 +89,7 @@ function MapLegend(props) {
             <img
               src={require("../../src/assets/" +
                 getColor(props.releaseType) +
-                "_6-6.png")}
+                "_6-6.png").default}
               alt=""
             ></img>
           </span>

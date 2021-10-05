@@ -60,7 +60,7 @@ function MarkerCluster(props) {
           meta: marker.meta,
           name: marker.name,
           icon: {
-            url: require(`./../../../src/assets/${type}_${marker.color}-6.png`),
+            url: require(`./../../../src/assets/${type}_${marker.color}-6.png`).default,
             scaledSize: new google.maps.Size(21, 21),
           },
         });
