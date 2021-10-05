@@ -34,7 +34,13 @@ jobs:
       run: node --version && npm install
       working-directory: ${{env.working-directory}}
     - name: Build
-      run: npm run build
+      env: 
+        REACT_APP_API_KEY: ${{secrets.REACT_APP_API_KEY}}
+        REACT_APP_GOOGLE_API_KEY: ${{secrets.REACT_APP_GOOGLE_API_KEY}}
+      run: |
+        echo "REACT_APP_API_KEY=${REACT_APP_API_KEY}" >> .env
+        echo "REACT_APP_GOOGLE_API_KEY=${REACT_APP_GOOGLE_API_KEY}" >> .env
+        npm run build
       working-directory: ${{env.working-directory}}
     - name: Deploy to s3
       uses: jakejarvis/s3-sync-action@master
