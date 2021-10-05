@@ -27,9 +27,11 @@ function MapLegend(props) {
         <li>
           <span className="marker">
             <img
-              src={require("../../src/assets/" +
-                getColor(props.releaseType) +
-                "_1-6.png").default}
+              src={
+                require("../../src/assets/" +
+                  getColor(props.releaseType) +
+                  "_1-6.png").default
+              }
               alt=""
             ></img>
           </span>
@@ -39,9 +41,11 @@ function MapLegend(props) {
           {" "}
           <span className="marker">
             <img
-              src={require("../../src/assets/" +
-                getColor(props.releaseType) +
-                "_2-6.png").default}
+              src={
+                require("../../src/assets/" +
+                  getColor(props.releaseType) +
+                  "_2-6.png").default
+              }
               alt=""
             ></img>
           </span>
@@ -51,9 +55,11 @@ function MapLegend(props) {
           {" "}
           <span className="marker">
             <img
-              src={require("../../src/assets/" +
-                getColor(props.releaseType) +
-                "_3-6.png").default}
+              src={
+                require("../../src/assets/" +
+                  getColor(props.releaseType) +
+                  "_3-6.png").default
+              }
               alt=""
             ></img>
           </span>
@@ -63,9 +69,11 @@ function MapLegend(props) {
           {" "}
           <span className="marker">
             <img
-              src={require("../../src/assets/" +
-                getColor(props.releaseType) +
-                "_4-6.png").default}
+              src={
+                require("../../src/assets/" +
+                  getColor(props.releaseType) +
+                  "_4-6.png").default
+              }
               alt=""
             ></img>
           </span>
@@ -75,9 +83,11 @@ function MapLegend(props) {
           {" "}
           <span className="marker">
             <img
-              src={require("../../src/assets/" +
-                getColor(props.releaseType) +
-                "_5-6.png").default}
+              src={
+                require("../../src/assets/" +
+                  getColor(props.releaseType) +
+                  "_5-6.png").default
+              }
               alt=""
             ></img>
           </span>
@@ -87,9 +97,11 @@ function MapLegend(props) {
           {" "}
           <span className="marker">
             <img
-              src={require("../../src/assets/" +
-                getColor(props.releaseType) +
-                "_6-6.png").default}
+              src={
+                require("../../src/assets/" +
+                  getColor(props.releaseType) +
+                  "_6-6.png").default
+              }
               alt=""
             ></img>
           </span>
