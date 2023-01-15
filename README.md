@@ -1,5 +1,5 @@
 # ToxicantVisualizer
-[![Build Status](https://travis-ci.com/ejdejesu/ToxicantVisualizer.svg?token=MTaqyrMFvgPVyLmcZyoK&branch=master)](https://travis-ci.com/ejdejesu/ToxicantVisualizer)
+![Build Status](https://github.com/lhei-git/ToxicantVisualizer/actions/workflows/deploy.yml/badge.svg)
 
 Fall 2020 Capstone Project
 
