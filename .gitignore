@@ -3,6 +3,5 @@
 **/node_modules
 **/http-instance.config
 
-*notes*.md
 backup*
 custom_mount
